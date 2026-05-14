@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrices - ESTIMASTRUCT</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            text-align: center;
+            font-size: 2em;
+        }
+
+        .section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .section h2 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+            border-bottom: 2px solid #2980b9;
+            padding-bottom: 10px;
+        }
+
+        .search-bar {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+
+        .search-bar button {
+            padding: 10px 20px;
+            background: #2980b9;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .search-bar button:hover {
+            background: #1e5fa0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        th {
+            background: #ecf0f1;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        tr:hover {
+            background: #f9f9f9;
+        }
+
+        .link {
+            color: #2980b9;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .link:hover {
+            text-decoration: underline;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+
+        .pagination {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .pagination button {
+            padding: 8px 15px;
+            margin: 0 5px;
+            background: #ecf0f1;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .pagination button:hover {
+            background: #bdc3c7;
+        }
+
+        .pagination button.active {
+            background: #2980b9;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Matrices</h1>
+            <p style="text-align: center; font-size: 0.9em; margin-top: 5px;"><a href="/" style="color: white; text-decoration: none;">← Volver al Dashboard</a></p>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="section">
+            <h2>Buscar Matrices</h2>
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Buscar por código o descripción...">
+                <button onclick="buscar()">Buscar</button>
+                <button onclick="limpiar()" style="background: #95a5a6;">Limpiar</button>
+            </div>
+
+            <div id="resultado">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Descripción</th>
+                            <th>Unidad</th>
+                            <th>Mo Unitario</th>
+                            <th>Ma Unitario</th>
+                            <th>Total Unitario</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <tr><td colspan="7" class="loading">Cargando...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function cargarMatrices(search = '') {
+            try {
+                const url = search ? `/api/matrices?search=${encodeURIComponent(search)}` : '/api/matrices';
+                const response = await fetch(url);
+                const matrices = await response.json();
+
+                const tbody = document.getElementById('tableBody');
+                tbody.innerHTML = '';
+
+                if (matrices.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="loading">No hay resultados</td></tr>';
+                    return;
+                }
+
+                matrices.forEach(mat => {
+                    const row = `
+                        <tr>
+                            <td><strong>${mat.codigo_matriz}</strong></td>
+                            <td>${mat.descripcion ? mat.descripcion.substring(0, 50) : ''}</td>
+                            <td>${mat.unidad_matriz ? mat.unidad_matriz.substring(0, 10) : ''}</td>
+                            <td>$${mat.mo_unitario?.toFixed(2) || '0.00'}</td>
+                            <td>$${mat.ma_unitario?.toFixed(2) || '0.00'}</td>
+                            <td><strong>$${mat.total_unitario?.toFixed(2) || '0.00'}</strong></td>
+                            <td><a href="/matriz/${mat.id}" class="link">Ver Recursos</a></td>
+                        </tr>
+                    `;
+                    tbody.innerHTML += row;
+                });
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('tableBody').innerHTML = '<tr><td colspan="7" class="loading">Error al cargar</td></tr>';
+            }
+        }
+
+        function buscar() {
+            const search = document.getElementById('searchInput').value;
+            cargarMatrices(search);
+        }
+
+        function limpiar() {
+            document.getElementById('searchInput').value = '';
+            cargarMatrices();
+        }
+
+        // Cargar al abrir
+        cargarMatrices();
+
+        // Enter para buscar
+        document.getElementById('searchInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') buscar();
+        });
+    </script>
+</body>
+</html>

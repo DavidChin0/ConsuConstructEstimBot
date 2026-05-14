@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Local databases and logs
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+logs/
+**/logs/
+
+# Temporary/backups
+*.bak
+*.bak*.json
+*.backup*
+*.tmp
+
+# IDE / OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+

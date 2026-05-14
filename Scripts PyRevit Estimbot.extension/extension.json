@@ -1,0 +1,13 @@
+{
+  "builtin": "False",
+  "default_enabled": "True",
+  "type": "extension",
+  "rocket_mode_compatible": "True",
+  "name": "Scripts PyRevit Estimbot",
+  "description": "Automatizaciones de Estimbot para Revit, keynotes y quantities",
+  "author": "ConsuConstruct",
+  "author_profile": "https://consuconstruct.com",
+  "website": "https://consuconstruct.com",
+  "image": "",
+  "dependencies": []
+}

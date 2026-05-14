@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>EstimBot Monitoreo</title>
+    <style>
+        body {
+            font-family: monospace;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+        }
+        h1 { color: #4ec9b0; }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .panel {
+            background: #252526;
+            border: 1px solid #3e3e42;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .error {
+            background: #3a1f1f;
+            border-left: 3px solid #f48771;
+            padding: 10px;
+            margin: 5px 0;
+        }
+        .success {
+            background: #1f3a1f;
+            border-left: 3px solid #4ec9b0;
+            padding: 10px;
+        }
+        .code {
+            color: #ce9178;
+            font-size: 12px;
+        }
+        button {
+            background: #0e639c;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        button:hover {
+            background: #1177bb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 EstimBot Monitoring</h1>
+
+        <div class="panel">
+            <h2>Estado del Sistema</h2>
+            <div id="status">Cargando...</div>
+            <button onclick="refreshStatus()">Actualizar</button>
+        </div>
+
+        <div class="panel">
+            <h2>Errores Recientes (últimos 60 min)</h2>
+            <div id="errors">Cargando...</div>
+        </div>
+
+        <div class="panel">
+            <h2>Resumen de Errores</h2>
+            <div id="summary">Cargando...</div>
+        </div>
+    </div>
+
+    <script>
+        async function refreshStatus() {
+            try {
+                const res = await fetch('/api/status');
+                const data = await res.json();
+
+                if (data.error) {
+                    document.getElementById('status').innerHTML =
+                        `<div class="error">Error: ${data.error}</div>`;
+                } else {
+                    document.getElementById('status').innerHTML =
+                        `<div class="success">✓ Sistema OK<br>
+                        Presupuestos: ${data.database.total_presupuestos}<br>
+                        Templates: ${data.database.templates}</div>`;
+                }
+            } catch (e) {
+                document.getElementById('status').innerHTML =
+                    `<div class="error">Error de conexión: ${e.message}</div>`;
+            }
+        }
+
+        async function refreshErrors() {
+            try {
+                const res = await fetch('/api/errors');
+                const data = await res.json();
+
+                if (!data.errors || data.errors.length === 0) {
+                    document.getElementById('errors').innerHTML =
+                        '<div class="success">✓ Sin errores en los últimos 60 minutos</div>';
+                } else {
+                    let html = '';
+                    data.errors.forEach(err => {
+                        html += `<div class="error">
+                            <strong>${err.error_code}</strong> (${err.status_code})<br>
+                            ${err.message}<br>
+                            <span class="code">${new Date(err.timestamp).toLocaleString()}</span>
+                        </div>`;
+                    });
+                    document.getElementById('errors').innerHTML = html;
+                }
+            } catch (e) {
+                document.getElementById('errors').innerHTML =
+                    `<div class="error">Error: ${e.message}</div>`;
+            }
+        }
+
+        async function refreshSummary() {
+            try {
+                const res = await fetch('/api/errors/summary');
+                const data = await res.json();
+
+                if (data.total === 0) {
+                    document.getElementById('summary').innerHTML =
+                        '<div class="success">✓ Sin errores</div>';
+                } else {
+                    let html = `<div>Total últimos 60 min: <strong>${data.total}</strong><br><br>`;
+                    html += 'Por tipo:<br>';
+                    Object.entries(data.by_code).forEach(([code, count]) => {
+                        html += `${code}: ${count}<br>`;
+                    });
+                    html += '</div>';
+                    document.getElementById('summary').innerHTML = html;
+                }
+            } catch (e) {
+                document.getElementById('summary').innerHTML =
+                    `<div class="error">Error: ${e.message}</div>`;
+            }
+        }
+
+        setInterval(() => {
+            refreshStatus();
+            refreshErrors();
+            refreshSummary();
+        }, 5000);
+
+        refreshStatus();
+        refreshErrors();
+        refreshSummary();
+    </script>
+</body>
+</html>

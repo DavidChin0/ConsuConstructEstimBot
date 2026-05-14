@@ -1,0 +1,2156 @@
+[
+  {
+    "codigo": "DIS-00",
+    "descripcion": "DIS-00 Diseño por m2",
+    "unidad": "m2",
+    "precioUnitario": 83.33
+  },
+  {
+    "codigo": "SC-004",
+    "descripcion": "SC-004 Ingeniero Supervisor de la obra",
+    "unidad": "jor",
+    "precioUnitario": 700.0
+  },
+  {
+    "codigo": "SC-006",
+    "descripcion": "SC-006 Arquitecto Dibujante",
+    "unidad": "jor",
+    "precioUnitario": 700.0
+  },
+  {
+    "codigo": "MA-187",
+    "descripcion": "MA-187 Botas. Casco y Chaleco para trabajadores",
+    "unidad": "glb",
+    "precioUnitario": 8500.0
+  },
+  {
+    "codigo": "DIS-01",
+    "descripcion": "DIS-01 Ensayo de Penetración Estandar y Sus resultados a 3m",
+    "unidad": "pza",
+    "precioUnitario": 16000.0
+  },
+  {
+    "codigo": "SC-005",
+    "descripcion": "SC-005 Elaboración y Reventado de Cilindros de Concreto",
+    "unidad": "unidad",
+    "precioUnitario": 9800.0
+  },
+  {
+    "codigo": "SC-03",
+    "descripcion": "SC-03 Instalacion Electrica Provisional",
+    "unidad": "global",
+    "precioUnitario": 3500.0
+  },
+  {
+    "codigo": "SC-04",
+    "descripcion": "SC-04 Instalacion de Agua Provisional",
+    "unidad": "global",
+    "precioUnitario": 322.84
+  },
+  {
+    "codigo": "MA-127",
+    "descripcion": "MA-127 Contador de Agua Regulado SANAA",
+    "unidad": "m2",
+    "precioUnitario": 1000.0
+  },
+  {
+    "codigo": "MA-128",
+    "descripcion": "MA-128 Caja de Registro de Concreto Para Toma",
+    "unidad": "pza",
+    "precioUnitario": 800.0
+  },
+  {
+    "codigo": "SC-02",
+    "descripcion": "SC-02 Alquiler e Instalacion de Andamios",
+    "unidad": "m2",
+    "precioUnitario": 310.0
+  },
+  {
+    "codigo": "FL-001",
+    "descripcion": "FL-001 Flete al Sitio (Aprox)",
+    "unidad": "viaje",
+    "precioUnitario": 1500.0
+  },
+  {
+    "codigo": "MA-274",
+    "descripcion": "MA-274 Malla Naranja",
+    "unidad": "rollo",
+    "precioUnitario": 850.0
+  },
+  {
+    "codigo": "HER-00",
+    "descripcion": "HER-00 Herramienta Manual (Menor)",
+    "unidad": "(%)mo",
+    "precioUnitario": 15.0
+  },
+  {
+    "codigo": "MO-007.1",
+    "descripcion": "MO-007.1 Albañil Especializado",
+    "unidad": "jor",
+    "precioUnitario": 750.0
+  },
+  {
+    "codigo": "MA-022",
+    "descripcion": "MA-022 Varilla de Hierro Corrugado 3/8 G40",
+    "unidad": "lance",
+    "precioUnitario": 190.0
+  },
+  {
+    "codigo": "MA-276",
+    "descripcion": "MA-276 Cuerda para marcar",
+    "unidad": "yd",
+    "precioUnitario": 0.5
+  },
+  {
+    "codigo": "DIS-02",
+    "descripcion": "DIS-02 Levantamiento Topografico del predio",
+    "unidad": "m2",
+    "precioUnitario": 13.0
+  },
+  {
+    "codigo": "MA-201",
+    "descripcion": "MA-201 Lamina Alluzinc Cal 26 106cm x pie",
+    "unidad": "ft",
+    "precioUnitario": 55.0
+  },
+  {
+    "codigo": "MA-182",
+    "descripcion": "MA-182 Electrodo 6013 3-/32",
+    "unidad": "lb",
+    "precioUnitario": 150.0
+  },
+  {
+    "codigo": "MA-176",
+    "descripcion": "MA-176 Tubo Estructural de acero 2\"x2\"x1/12",
+    "unidad": "lance",
+    "precioUnitario": 700.0
+  },
+  {
+    "codigo": "MO-006",
+    "descripcion": "MO-006 Ayudante",
+    "unidad": "jor",
+    "precioUnitario": 500.0
+  },
+  {
+    "codigo": "MO-013",
+    "descripcion": "MO-013 Soldador",
+    "unidad": "jor",
+    "precioUnitario": 700.0
+  },
+  {
+    "codigo": "MA-085",
+    "descripcion": "MA-085 Tornillo Punta de Broca 21/8",
+    "unidad": "pza",
+    "precioUnitario": 1.73
+  },
+  {
+    "codigo": "EQ-001",
+    "descripcion": "EQ-001 Volqueta 5 m3",
+    "unidad": "m3",
+    "precioUnitario": 500.0
+  },
+  {
+    "codigo": "MA-013",
+    "descripcion": "MA-013 Escoba",
+    "unidad": "pza",
+    "precioUnitario": 90.0
+  },
+  {
+    "codigo": "SC-050",
+    "descripcion": "SC-050 Transporte de desperdicio en volqueta",
+    "unidad": "m3",
+    "precioUnitario": 300.0
+  },
+  {
+    "codigo": "MA-017",
+    "descripcion": "MA-017 Paño para Limpieza",
+    "unidad": "pza",
+    "precioUnitario": 30.0
+  },
+  {
+    "codigo": "MA-016",
+    "descripcion": "MA-016 Balde Plástico",
+    "unidad": "pza",
+    "precioUnitario": 75.0
+  },
+  {
+    "codigo": "MA-015",
+    "descripcion": "MA-015 Recogedor de Basura",
+    "unidad": "pza",
+    "precioUnitario": 50.0
+  },
+  {
+    "codigo": "MA-014",
+    "descripcion": "MA-014 Bolsa de Ace",
+    "unidad": "pza",
+    "precioUnitario": 60.0
+  },
+  {
+    "codigo": "MA-005",
+    "descripcion": "MA-005 Madera Rustica de Pino",
+    "unidad": "pt",
+    "precioUnitario": 110.0
+  },
+  {
+    "codigo": "MA-125",
+    "descripcion": "MA-125 Clavos de acero de 2\" para madera",
+    "unidad": "lb",
+    "precioUnitario": 28.01
+  },
+  {
+    "codigo": "MO-007",
+    "descripcion": "MO-007 Albañil",
+    "unidad": "jor",
+    "precioUnitario": 800.0
+  },
+  {
+    "codigo": "MO-006.1",
+    "descripcion": "MO-006.1 Ayudante Especializado",
+    "unidad": "jor",
+    "precioUnitario": 500.0
+  },
+  {
+    "codigo": "EQ-007",
+    "descripcion": "EQ-007 Estación Total y Topográfo",
+    "unidad": "día",
+    "precioUnitario": 300.0
+  },
+  {
+    "codigo": "MO-003",
+    "descripcion": "MO-003 Cadenero",
+    "unidad": "jor",
+    "precioUnitario": 500.0
+  },
+  {
+    "codigo": "MO-002",
+    "descripcion": "MO-002 Topografo",
+    "unidad": "jor",
+    "precioUnitario": 750.0
+  },
+  {
+    "codigo": "MA-021",
+    "descripcion": "MA-021 Madera Rustica de Pino",
+    "unidad": "pt",
+    "precioUnitario": 110.0
+  },
+  {
+    "codigo": "MA-243",
+    "descripcion": "MA-243 Clavos de 2\" con cabeza.",
+    "unidad": "pza",
+    "precioUnitario": 16.0
+  },
+  {
+    "codigo": "MA-277",
+    "descripcion": "MA-277 Crayolas para marcado",
+    "unidad": "pza",
+    "precioUnitario": 17.0
+  },
+  {
+    "codigo": "MA-188",
+    "descripcion": "MA-188 Aislante de Suelo",
+    "unidad": "m2",
+    "precioUnitario": 300.0
+  },
+  {
+    "codigo": "MO-011",
+    "descripcion": "MO-011 Peon",
+    "unidad": "jor",
+    "precioUnitario": 450.0
+  },
+  {
+    "codigo": "MA-150",
+    "descripcion": "MA-150 Sistema de Vigueta y Bovedilla (Compra y Entrega desde Monolit)",
+    "unidad": "m2",
+    "precioUnitario": 1500.0
+  },
+  {
+    "codigo": "MA-004",
+    "descripcion": "MA-004 Clavos de 2\"",
+    "unidad": "lb",
+    "precioUnitario": 20.0
+  },
+  {
+    "codigo": "MA-006",
+    "descripcion": "MA-006 Alambre de Amarre",
+    "unidad": "lb",
+    "precioUnitario": 30.0
+  },
+  {
+    "codigo": "HER-06",
+    "descripcion": "HER-06 Circular para Corte de Madera",
+    "unidad": "pza",
+    "precioUnitario": 3500.0
+  },
+  {
+    "codigo": "MO-008",
+    "descripcion": "MO-008 Carpintero",
+    "unidad": "jor",
+    "precioUnitario": 700.0
+  },
+  {
+    "codigo": "MA-205",
+    "descripcion": "MA-205 J-Bolt ASTM F1554 Gr.36 3/4\"×40cm",
+    "unidad": "pza",
+    "precioUnitario": 200.0
+  },
+  {
+    "codigo": "MA-273",
+    "descripcion": "MA-273 Silicone Transparente 280 ml Toolcraft",
+    "unidad": "unidad",
+    "precioUnitario": 300.0
+  },
+  {
+    "codigo": "MO-005",
+    "descripcion": "MO-005 Armador",
+    "unidad": "jor",
+    "precioUnitario": 750.0
+  },
+  {
+    "codigo": "MA-206",
+    "descripcion": "MA-206 Tuerca hexagonal pesada 3/4\" Grado C",
+    "unidad": "pza",
+    "precioUnitario": 60.0
+  },
+  {
+    "codigo": "MA-210",
+    "descripcion": "MA-210 Arandela endurecida tipo D 3/4\"",
+    "unidad": "pza",
+    "precioUnitario": 180.0
+  },
+  {
+    "codigo": "MA-002",
+    "descripcion": "MA-002 Arena",
+    "unidad": "m3",
+    "precioUnitario": 910.0
+  },
+  {
+    "codigo": "MA-010",
+    "descripcion": "MA-010 Grava 3/4\"",
+    "unidad": "m3",
+    "precioUnitario": 1020.0
+  },
+  {
+    "codigo": "MA-011",
+    "descripcion": "MA-011 Agua",
+    "unidad": "m3",
+    "precioUnitario": 70.0
+  },
+  {
+    "codigo": "MA-238",
+    "descripcion": "MA-238 Varilla de Hierro Corrugado 1/4\" G40",
+    "unidad": "lance",
+    "precioUnitario": 40.0
+  },
+  {
+    "codigo": "MA-207",
+    "descripcion": "MA-207 Admix F5 Aditivo de concreto fluidificante y acelerante.(Baril 200L)",
+    "unidad": "Barril",
+    "precioUnitario": 7600.0
+  },
+  {
+    "codigo": "MA-003",
+    "descripcion": "MA-003 Varilla A.R.C 7.20 mm G 70",
+    "unidad": "lance",
+    "precioUnitario": 160.0
+  },
+  {
+    "codigo": "MA-007",
+    "descripcion": "MA-007 Electromalla 6\"x6\" 4/4",
+    "unidad": "pza",
+    "precioUnitario": 2500.0
+  },
+  {
+    "codigo": "MA-242",
+    "descripcion": "MA-242 Separadores de Concreto 5 cm",
+    "unidad": "pza",
+    "precioUnitario": 10.0
+  },
+  {
+    "codigo": "MA-183",
+    "descripcion": "MA-183 Disco de corte de 4 1/2\"",
+    "unidad": "pza",
+    "precioUnitario": 65.0
+  },
+  {
+    "codigo": "MA-024",
+    "descripcion": "MA-024 Varilla de Acero Galvanizado Lisa 3/8\" G40",
+    "unidad": "lance",
+    "precioUnitario": 185.0
+  },
+  {
+    "codigo": "MA-001",
+    "descripcion": "MA-001 Cemento Portland",
+    "unidad": "saco",
+    "precioUnitario": 230.0
+  },
+  {
+    "codigo": "MA-240",
+    "descripcion": "MA-240 Desmoldante ADMIX",
+    "unidad": "gal",
+    "precioUnitario": 150.0
+  },
+  {
+    "codigo": "MA-057",
+    "descripcion": "MA-057 Alambre de Amarre",
+    "unidad": "lb",
+    "precioUnitario": 30.0
+  },
+  {
+    "codigo": "MA-121",
+    "descripcion": "MA-121 Varilla de Hierro Corrugado 1/2\" G40",
+    "unidad": "lance",
+    "precioUnitario": 330.0
+  },
+  {
+    "codigo": "MA-209",
+    "descripcion": "MA-209 Encofrado de Columna 35x35 con formaleta metalica",
+    "unidad": "mL",
+    "precioUnitario": 180.0
+  },
+  {
+    "codigo": "MA-012",
+    "descripcion": "MA-012 Varilla de Hierro Corrugado 5/8 G40",
+    "unidad": "lance",
+    "precioUnitario": 550.2
+  },
+  {
+    "codigo": "MA-090",
+    "descripcion": "MA-090 Varilla Hierro Aceros Alfa 3/4\"X9mts Deformado Grado 60",
+    "unidad": "lance",
+    "precioUnitario": 710.0
+  },
+  {
+    "codigo": "MO-001",
+    "descripcion": "MO-001 Peon",
+    "unidad": "jor",
+    "precioUnitario": 500.0
+  },
+  {
+    "codigo": "MA-236",
+    "descripcion": "MA-236 Concreto Premezclado 3,000 Psi Agregado 3/4\"",
+    "unidad": "m3",
+    "precioUnitario": 5700.0
+  },
+  {
+    "codigo": "MA-272",
+    "descripcion": "MA-272 Adhesivo para Ceramica (Pegafuer-T)",
+    "unidad": "saco",
+    "precioUnitario": 265.0
+  },
+  {
+    "codigo": "MA-149",
+    "descripcion": "MA-149 Porcelanato de 0.60x0.20 de Tipo \"ROUGH\" de tipo Español, Distribuidor Stone Market",
+    "unidad": "m2",
+    "precioUnitario": 680.0
+  },
+  {
+    "codigo": "MO-010",
+    "descripcion": "MO-010 Concretero",
+    "unidad": "jor",
+    "precioUnitario": 1000.0
+  },
+  {
+    "codigo": "MA-008",
+    "descripcion": "MA-008 Madera Rustica 2\" x 2\"",
+    "unidad": "pt",
+    "precioUnitario": 130.0
+  },
+  {
+    "codigo": "MA-089",
+    "descripcion": "MA-089 Varilla de Hierro de 1/4\" Lisa G40",
+    "unidad": "lance",
+    "precioUnitario": 80.0
+  },
+  {
+    "codigo": "MA-323",
+    "descripcion": "MA-323 Plantilla guía de acero",
+    "unidad": "pza",
+    "precioUnitario": 250.0
+  },
+  {
+    "codigo": "MA-367",
+    "descripcion": "MA-367 J-bolt F1554 G36 3/4\" x 40cm, 2 Tuercas UNC 2H 1 arandela plana 3/4\" Rosca 4\"",
+    "unidad": "pza",
+    "precioUnitario": 1051.42
+  },
+  {
+    "codigo": "MA-355",
+    "descripcion": "MA-355 J-bolt F1554 G36 1\" x 40cm, 2 Tuercas UNC 2H 1 arandela plana 3/4\" Rosca 4\"",
+    "unidad": "pza",
+    "precioUnitario": 1330.0
+  },
+  {
+    "codigo": "MA-241",
+    "descripcion": "MA-241 Fibra Migthy",
+    "unidad": "Bolsa",
+    "precioUnitario": 125.0
+  },
+  {
+    "codigo": "EQ-009",
+    "descripcion": "EQ-009 Mezcladora",
+    "unidad": "jor",
+    "precioUnitario": 3000.0
+  },
+  {
+    "codigo": "MA-157",
+    "descripcion": "MA-157 Moldura de Cornisa de Concreto",
+    "unidad": "mL",
+    "precioUnitario": 115.0
+  },
+  {
+    "codigo": "MA-113",
+    "descripcion": "MA-113 Curacreto a base de Agua",
+    "unidad": "gal",
+    "precioUnitario": 150.0
+  },
+  {
+    "codigo": "MA-130",
+    "descripcion": "MA-130 Repello/Pulido con Cemento Bijao",
+    "unidad": "kg",
+    "precioUnitario": 200.0
+  },
+  {
+    "codigo": "MA-351",
+    "descripcion": "MA-351 Supercapa de 40 kg",
+    "unidad": "Bolsa",
+    "precioUnitario": 224.5
+  },
+  {
+    "codigo": "MA-018",
+    "descripcion": "MA-018 Bloque de Concreto 4\"",
+    "unidad": "pza",
+    "precioUnitario": 21.0
+  },
+  {
+    "codigo": "MA-314",
+    "descripcion": "MA-314 Pigmento Para Mortero (Color)",
+    "unidad": "kg",
+    "precioUnitario": 120.0
+  },
+  {
+    "codigo": "MA-019",
+    "descripcion": "MA-019 Bloque de concreto de 6\"",
+    "unidad": "pza",
+    "precioUnitario": 27.0
+  },
+  {
+    "codigo": "MA-126",
+    "descripcion": "MA-126 Bloque de Concreto de 8\"",
+    "unidad": "pza",
+    "precioUnitario": 33.0
+  },
+  {
+    "codigo": "MA-020",
+    "descripcion": "MA-020 Ladrillo Rafon Rustico",
+    "unidad": "pza",
+    "precioUnitario": 20.0
+  },
+  {
+    "codigo": "MA-162",
+    "descripcion": "MA-162 Cal Hidratada 40lbs",
+    "unidad": "saco",
+    "precioUnitario": 175.0
+  },
+  {
+    "codigo": "MA-163",
+    "descripcion": "MA-163 Arenilla Rosada colada 25lbs",
+    "unidad": "pza",
+    "precioUnitario": 28.0
+  },
+  {
+    "codigo": "MA-104",
+    "descripcion": "MA-104 Fachaleta Exterior de Ladrillo Rekubre",
+    "unidad": "m2",
+    "precioUnitario": 800.0
+  },
+  {
+    "codigo": "MA-164",
+    "descripcion": "MA-164 Piedra de Cantera Blanca Para Muro de Retención (Revisar Flete)",
+    "unidad": "m3",
+    "precioUnitario": 400.0
+  },
+  {
+    "codigo": "MA-217",
+    "descripcion": "MA-217 Angulo Hierro A36l L 3×3×1/4\" (lance 6m)",
+    "unidad": "lance",
+    "precioUnitario": 2000.0
+  },
+  {
+    "codigo": "EQ-004",
+    "descripcion": "EQ-004 Grúa pluma 15-20 ton con Operador y LowBoy de transporte",
+    "unidad": "jor",
+    "precioUnitario": 8000.0
+  },
+  {
+    "codigo": "MO-009",
+    "descripcion": "MO-009 Pintor",
+    "unidad": "jor",
+    "precioUnitario": 500.0
+  },
+  {
+    "codigo": "MA-185",
+    "descripcion": "MA-185 Pintura Anticorrosivo Fast Dry Protecto Galón B0-500 (Base Para Coloreo Tonos Pastel)",
+    "unidad": "gal",
+    "precioUnitario": 1240.0
+  },
+  {
+    "codigo": "MA-220",
+    "descripcion": "MA-220 Imprimación zinc-rich",
+    "unidad": "gal",
+    "precioUnitario": 1456.0
+  },
+  {
+    "codigo": "MA-219",
+    "descripcion": "MA-219 Tuercas/arandelas 5/8\"",
+    "unidad": "pza",
+    "precioUnitario": 230.0
+  },
+  {
+    "codigo": "MA-218",
+    "descripcion": "MA-218 Pernos A325 5/8\"",
+    "unidad": "pza",
+    "precioUnitario": 91.0
+  },
+  {
+    "codigo": "MA-212",
+    "descripcion": "MA-212 Electrodo E7018 bajo hidrógeno",
+    "unidad": "lb",
+    "precioUnitario": 102.33
+  },
+  {
+    "codigo": "HER-01",
+    "descripcion": "HER-01 Herramienta Manual (Menor)",
+    "unidad": "(%)mo",
+    "precioUnitario": 330.0
+  },
+  {
+    "codigo": "MA-214",
+    "descripcion": "MA-214 Consumibles soldadura (cepillo, escoria)",
+    "unidad": "m2",
+    "precioUnitario": 105.0
+  },
+  {
+    "codigo": "MA-213",
+    "descripcion": "MA-213 Gas protección (Ar/CO2)",
+    "unidad": "gal",
+    "precioUnitario": 206.0
+  },
+  {
+    "codigo": "MA-316",
+    "descripcion": "MA-316 Viga IPR 6\" x 6m (W150x18)",
+    "unidad": "lance",
+    "precioUnitario": 3200.0
+  },
+  {
+    "codigo": "MA-319",
+    "descripcion": "MA-319 Placa de asiento A36 1/2\" (15x15cm)",
+    "unidad": "pza",
+    "precioUnitario": 180.0
+  },
+  {
+    "codigo": "MA-320",
+    "descripcion": "MA-320 Placa de anclaje A36 1/2\" (20x20cm)",
+    "unidad": "pza",
+    "precioUnitario": 320.0
+  },
+  {
+    "codigo": "MA-215",
+    "descripcion": "MA-215 Pernos A325 3/4\"×80mm Grado 5",
+    "unidad": "pza",
+    "precioUnitario": 150.0
+  },
+  {
+    "codigo": "MA-322",
+    "descripcion": "MA-322 Viga Metálica W180x22 (7\" x 5\" x 22 kg/m)",
+    "unidad": "lance",
+    "precioUnitario": 4200.0
+  },
+  {
+    "codigo": "MA-318",
+    "descripcion": "MA-318 Viga Metálica W200x27 (8\" x 4\" x 27 kg/m)",
+    "unidad": "lance",
+    "precioUnitario": 4800.0
+  },
+  {
+    "codigo": "MA-321",
+    "descripcion": "MA-321 Viga Metálica W250x33 (10\" x 5.5\" x 33 kg/m)",
+    "unidad": "lance",
+    "precioUnitario": 6500.0
+  },
+  {
+    "codigo": "MA-357",
+    "descripcion": "MA-357 Placa de asiento A36 200x150x3/8\"",
+    "unidad": "pza",
+    "precioUnitario": 210.0
+  },
+  {
+    "codigo": "MA-358",
+    "descripcion": "MA-358 Placa de cortante A36 150x100x1/4\"",
+    "unidad": "pza",
+    "precioUnitario": 170.0
+  },
+  {
+    "codigo": "MA-359",
+    "descripcion": "MA-359 Placa de asiento A36 250x200x1/2\"",
+    "unidad": "pza",
+    "precioUnitario": 380.0
+  },
+  {
+    "codigo": "MA-330",
+    "descripcion": "MA-330 Pernos A325 1\"×100mm",
+    "unidad": "pza",
+    "precioUnitario": 280.0
+  },
+  {
+    "codigo": "MA-331",
+    "descripcion": "MA-331 Tuerca hexagonal 1\"",
+    "unidad": "pza",
+    "precioUnitario": 120.0
+  },
+  {
+    "codigo": "MA-332",
+    "descripcion": "MA-332 Arandela endurecida 1\"",
+    "unidad": "pza",
+    "precioUnitario": 320.0
+  },
+  {
+    "codigo": "MA-369",
+    "descripcion": "MA-369 Placa de cortante A36 200x150x3/8\"",
+    "unidad": "pza",
+    "precioUnitario": 160.0
+  },
+  {
+    "codigo": "MA-370",
+    "descripcion": "MA-370 Placa de asiento A36 300x250x5/8\"",
+    "unidad": "pza",
+    "precioUnitario": 650.0
+  },
+  {
+    "codigo": "MA-336",
+    "descripcion": "MA-336 Pernos A325 1-1/4\"×120mm",
+    "unidad": "pza",
+    "precioUnitario": 450.0
+  },
+  {
+    "codigo": "MA-337",
+    "descripcion": "MA-337 Tuerca hexagonal 1-1/4\"",
+    "unidad": "pza",
+    "precioUnitario": 180.0
+  },
+  {
+    "codigo": "MA-338",
+    "descripcion": "MA-338 Arandela endurecida 1-1/4\"",
+    "unidad": "pza",
+    "precioUnitario": 480.0
+  },
+  {
+    "codigo": "MA-371",
+    "descripcion": "MA-371 Placa de cortante A36 250x200x1/2\"",
+    "unidad": "pza",
+    "precioUnitario": 280.0
+  },
+  {
+    "codigo": "MA-324",
+    "descripcion": "MA-324 Tubo Estructural 6x6 HSS 6x6x3/16\" (150x150x4.5mm)",
+    "unidad": "lance",
+    "precioUnitario": 5928.2
+  },
+  {
+    "codigo": "MA-325",
+    "descripcion": "MA-325 Placa Base A36 30x30cm",
+    "unidad": "pza",
+    "precioUnitario": 1200.0
+  },
+  {
+    "codigo": "MA-327",
+    "descripcion": "MA-327 HSS 8x8x3/8\" (200x200x5.5mm) x 6m",
+    "unidad": "lance",
+    "precioUnitario": 9459.58
+  },
+  {
+    "codigo": "MA-328",
+    "descripcion": "MA-328 Placa base A36 1\" (40x40cm)",
+    "unidad": "pza",
+    "precioUnitario": 1800.0
+  },
+  {
+    "codigo": "MA-333",
+    "descripcion": "MA-333 HSS 10x10x1/2\" (250x250x12.7mm) x 6m",
+    "unidad": "lance",
+    "precioUnitario": 9500.0
+  },
+  {
+    "codigo": "MA-334",
+    "descripcion": "MA-334 Placa base A36 1-1/4\" (45x45cm)",
+    "unidad": "pza",
+    "precioUnitario": 2800.0
+  },
+  {
+    "codigo": "MA-335",
+    "descripcion": "MA-335 Placa superior A36 3/4\" (35x35cm)",
+    "unidad": "pza",
+    "precioUnitario": 950.0
+  },
+  {
+    "codigo": "MA-339",
+    "descripcion": "MA-339 W200x46 (200x200mm) x 6m",
+    "unidad": "lance",
+    "precioUnitario": 7200.0
+  },
+  {
+    "codigo": "MA-329",
+    "descripcion": "MA-329 Placa superior A36 5/8\" (30x30cm)",
+    "unidad": "pza",
+    "precioUnitario": 680.0
+  },
+  {
+    "codigo": "MA-340",
+    "descripcion": "MA-340 W250x73 (250x250mm) x 6m",
+    "unidad": "lance",
+    "precioUnitario": 10500.0
+  },
+  {
+    "codigo": "MA-361",
+    "descripcion": "MA-361 Perfil W6x16 (6\"x4\"x16 lb/ft) x 12.20 m",
+    "unidad": "lance",
+    "precioUnitario": 11187.2
+  },
+  {
+    "codigo": "MA-362",
+    "descripcion": "MA-362 Perfil W8x24 (8\"x6.5\"x24 lb/ft) x 12.20 m (con ISV)",
+    "unidad": "lance",
+    "precioUnitario": 16780.8
+  },
+  {
+    "codigo": "MA-363",
+    "descripcion": "MA-363 Perfil W8x48 (8\"x8\"x48 lb/ft) x 12.20 m (con ISV)",
+    "unidad": "pza",
+    "precioUnitario": 33561.6
+  },
+  {
+    "codigo": "MA-364",
+    "descripcion": "MA-364 Perfil W10x33 (10\"x8\"x33 lb/ft) x 12.20 m (con ISV)",
+    "unidad": "pza",
+    "precioUnitario": 23073.6
+  },
+  {
+    "codigo": "MA-365",
+    "descripcion": "MA-365 Perfil W12x53 (12\"x10\"x53 lb/ft) x 12.20 m (con ISV)",
+    "unidad": "lance",
+    "precioUnitario": 35229.1
+  },
+  {
+    "codigo": "MA-366",
+    "descripcion": "MA-366 Placa Base A36 20x20cmx1/2\"",
+    "unidad": "pza",
+    "precioUnitario": 420.0
+  },
+  {
+    "codigo": "MA-353",
+    "descripcion": "MA-353 Placa base A36 250x250x5/8\"",
+    "unidad": "pza",
+    "precioUnitario": 680.0
+  },
+  {
+    "codigo": "MA-354",
+    "descripcion": "MA-354 Placa base A36 300x300x3/4\"",
+    "unidad": "pza",
+    "precioUnitario": 1200.0
+  },
+  {
+    "codigo": "MA-356",
+    "descripcion": "MA-356 Placa base A36 400x400x1\"",
+    "unidad": "pza",
+    "precioUnitario": 2400.0
+  },
+  {
+    "codigo": "MA-178",
+    "descripcion": "MA-178 Placa de Acero A36 de 35x35cmx1\",",
+    "unidad": "pza",
+    "precioUnitario": 500.0
+  },
+  {
+    "codigo": "MA-216",
+    "descripcion": "MA-216 Separadores calibrados 10mm",
+    "unidad": "pza",
+    "precioUnitario": 72.0
+  },
+  {
+    "codigo": "MA-023",
+    "descripcion": "MA-023 Canaleta Galvanizada de 6\" Cal 1.5",
+    "unidad": "lance",
+    "precioUnitario": 850.0
+  },
+  {
+    "codigo": "MA-304",
+    "descripcion": "MA-304 Canaleta Galvanizada Aluzinc Cal 26 2x4\"",
+    "unidad": "lance",
+    "precioUnitario": 600.0
+  },
+  {
+    "codigo": "MA-230",
+    "descripcion": "MA-230 Broca para Taladro 3/8\"",
+    "unidad": "pza",
+    "precioUnitario": 80.0
+  },
+  {
+    "codigo": "MA-229",
+    "descripcion": "MA-229 Cinta Selladora",
+    "unidad": "mL",
+    "precioUnitario": 28.0
+  },
+  {
+    "codigo": "MA-228",
+    "descripcion": "MA-228 Stel Framing Placas de unión",
+    "unidad": "pza",
+    "precioUnitario": 3.0
+  },
+  {
+    "codigo": "MA-227",
+    "descripcion": "MA-227 Steel Framing Clavos tirafondo 3\"",
+    "unidad": "pza",
+    "precioUnitario": 2.6
+  },
+  {
+    "codigo": "MA-226",
+    "descripcion": "MA-226 Steel Framing Tornillos para placa",
+    "unidad": "pza",
+    "precioUnitario": 6.0
+  },
+  {
+    "codigo": "MA-225",
+    "descripcion": "MA-225 Steel Framing Tornillos autoperforantes",
+    "unidad": "pza",
+    "precioUnitario": 6.0
+  },
+  {
+    "codigo": "MA-224",
+    "descripcion": "MA-224 Steel Framing Refuerzos especiales C 70×40×0.8 mm",
+    "unidad": "lance",
+    "precioUnitario": 273.0
+  },
+  {
+    "codigo": "MA-223",
+    "descripcion": "MA-223 Steel Framing Travesaños C 70×40×0.8 mm",
+    "unidad": "lance",
+    "precioUnitario": 273.0
+  },
+  {
+    "codigo": "MA-222",
+    "descripcion": "MA-222 Steel Framing Soleras superior/inferior U 70×40×0.8 mm",
+    "unidad": "lance",
+    "precioUnitario": 273.0
+  },
+  {
+    "codigo": "MA-221",
+    "descripcion": "MA-221 Steel Framing Montantes C 70×40×0.8 mm",
+    "unidad": "lance",
+    "precioUnitario": 273.0
+  },
+  {
+    "codigo": "MA-310",
+    "descripcion": "MA-310 Ángulo 2\"x2\"x1/4",
+    "unidad": "lance",
+    "precioUnitario": 450.0
+  },
+  {
+    "codigo": "MA-312",
+    "descripcion": "MA-312 Pasamanos tubo 1.5\"",
+    "unidad": "lance",
+    "precioUnitario": 350.0
+  },
+  {
+    "codigo": "MA-311",
+    "descripcion": "MA-311 Placa de acero antideslizante e=3/16\"",
+    "unidad": "m2",
+    "precioUnitario": 1200.0
+  },
+  {
+    "codigo": "MA-313",
+    "descripcion": "MA-313 Tubo estructural 1\" (barrotes)",
+    "unidad": "lance",
+    "precioUnitario": 280.0
+  },
+  {
+    "codigo": "MA-317",
+    "descripcion": "MA-317 Pernos de anclaje 1/2\"x4\"",
+    "unidad": "pza",
+    "precioUnitario": 45.0
+  },
+  {
+    "codigo": "MA-315",
+    "descripcion": "MA-315 Placa de anclaje 4\"x4\"x1/4\"",
+    "unidad": "pza",
+    "precioUnitario": 120.0
+  },
+  {
+    "codigo": "MA-350",
+    "descripcion": "MA-350 Subcontrato suministro de materiales (perfiles, vidrio, herrajes)",
+    "unidad": "mL",
+    "precioUnitario": 3840.0
+  },
+  {
+    "codigo": "SC-010",
+    "descripcion": "SC-010 Subcontrato mano de obra de instalación",
+    "unidad": "mL",
+    "precioUnitario": 1560.0
+  },
+  {
+    "codigo": "MA-341",
+    "descripcion": "MA-341 Tabla maciza 24x160x2900mm, color madera",
+    "unidad": "m2",
+    "precioUnitario": 520.0
+  },
+  {
+    "codigo": "MA-343",
+    "descripcion": "MA-343 Tapa Final Decorativa Para remates y esquinas, color a juego",
+    "unidad": "pza",
+    "precioUnitario": 65.0
+  },
+  {
+    "codigo": "MA-065",
+    "descripcion": "MA-065 0.34 mm x 12' Furring de Metal",
+    "unidad": "lance",
+    "precioUnitario": 100.0
+  },
+  {
+    "codigo": "MA-342",
+    "descripcion": "MA-342 Clip de Fijación Oculto",
+    "unidad": "pza",
+    "precioUnitario": 12.0
+  },
+  {
+    "codigo": "MA-028",
+    "descripcion": "MA-028 Tornillo Autorroscante 1 1/4\" para Tabla Yeso",
+    "unidad": "pza",
+    "precioUnitario": 3.0
+  },
+  {
+    "codigo": "MA-189",
+    "descripcion": "MA-189 Membrana Impermeable Blanca Thermotek 1.15 x 95 m",
+    "unidad": "m2",
+    "precioUnitario": 100.0
+  },
+  {
+    "codigo": "MA-190",
+    "descripcion": "MA-190 Asfalto Premier Líquido Negro Para Cimentación Henry 0.90-Galon",
+    "unidad": "gal",
+    "precioUnitario": 600.0
+  },
+  {
+    "codigo": "MA-344",
+    "descripcion": "MA-344 Tabla maciza 24x160x2900mm, alta resistencia UV",
+    "unidad": "m2",
+    "precioUnitario": 820.0
+  },
+  {
+    "codigo": "MA-346",
+    "descripcion": "MA-346 Perfil de Aluminio Extruido (Alucobond)",
+    "unidad": "mL",
+    "precioUnitario": 160.0
+  },
+  {
+    "codigo": "MA-305",
+    "descripcion": "MA-305 Lamina de Aluzinc Cal 28 Legitimo 0.30mm",
+    "unidad": "pie",
+    "precioUnitario": 40.0
+  },
+  {
+    "codigo": "MA-049",
+    "descripcion": "MA-049 Lamina Aluzinc Con Color, Cal 26 Legitimo",
+    "unidad": "pie",
+    "precioUnitario": 70.0
+  },
+  {
+    "codigo": "MA-158",
+    "descripcion": "MA-158 Lámina Aluzinc cal. 26 lisa de 20cm para flashing",
+    "unidad": "mL",
+    "precioUnitario": 105.0
+  },
+  {
+    "codigo": "MA-245",
+    "descripcion": "MA-245 Tornillo 2\" 1/2\"",
+    "unidad": "pza",
+    "precioUnitario": 5.0
+  },
+  {
+    "codigo": "MA-166",
+    "descripcion": "MA-166 Ailsante Termoacustico 1.20x20m (24.2m2)",
+    "unidad": "m2",
+    "precioUnitario": 2000.0
+  },
+  {
+    "codigo": "MA-192",
+    "descripcion": "MA-192 Espuma Max Fill 12onz Sellador de Poliuretano",
+    "unidad": "pza",
+    "precioUnitario": 300.0
+  },
+  {
+    "codigo": "MA-194",
+    "descripcion": "MA-194 Pintura Impermeabilizante",
+    "unidad": "l",
+    "precioUnitario": 104.0
+  },
+  {
+    "codigo": "MA-285",
+    "descripcion": "MA-285 Pintura Impermeabilizante Color Azul",
+    "unidad": "gal",
+    "precioUnitario": 95.0
+  },
+  {
+    "codigo": "MA-175",
+    "descripcion": "MA-175 Kit de Pintura Rodo + Felpa",
+    "unidad": "pza",
+    "precioUnitario": 150.0
+  },
+  {
+    "codigo": "MA-278",
+    "descripcion": "MA-278 Cinta Adhesiva",
+    "unidad": "rollo",
+    "precioUnitario": 15.0
+  },
+  {
+    "codigo": "MA-279",
+    "descripcion": "MA-279 Lija #80",
+    "unidad": "pliego",
+    "precioUnitario": 12.8
+  },
+  {
+    "codigo": "MA-103",
+    "descripcion": "MA-103 Vidrio Fijo PVC",
+    "unidad": "m2",
+    "precioUnitario": 2120.0
+  },
+  {
+    "codigo": "SC-045",
+    "descripcion": "SC-045 Instalación de Puerta Metalica de 0.90x2.10m",
+    "unidad": "pza",
+    "precioUnitario": 8500.0
+  },
+  {
+    "codigo": "MA-266",
+    "descripcion": "MA-266 Puerta Termoformada 0.80x2.10m",
+    "unidad": "unidad",
+    "precioUnitario": 2600.0
+  },
+  {
+    "codigo": "SC-041",
+    "descripcion": "SC-041 Instalación de Puerta",
+    "unidad": "pza",
+    "precioUnitario": 800.0
+  },
+  {
+    "codigo": "MA-347",
+    "descripcion": "MA-347 Puerta corrediza 0.80x2.10 m Termoformada",
+    "unidad": "pza",
+    "precioUnitario": 4000.0
+  },
+  {
+    "codigo": "MA-348",
+    "descripcion": "MA-348 Puerta plegable 0.80x2.10 m",
+    "unidad": "pza",
+    "precioUnitario": 4500.0
+  },
+  {
+    "codigo": "MA-267",
+    "descripcion": "MA-267 Puerta Principal de Aluminio Con Sidelight de 1.30 x 2.10m",
+    "unidad": "unidad",
+    "precioUnitario": 27000.0
+  },
+  {
+    "codigo": "MA-360",
+    "descripcion": "MA-360 Puerta Principal Acabado Metal/Madera 1.40x2.10m (completa)",
+    "unidad": "pza",
+    "precioUnitario": 20000.0
+  },
+  {
+    "codigo": "MA-154",
+    "descripcion": "MA-154 Puerta Corrediza de 2 Hojas de 1.80 x 2.10",
+    "unidad": "pza",
+    "precioUnitario": 16000.0
+  },
+  {
+    "codigo": "MA-269",
+    "descripcion": "MA-269 Ventana Corrediza de PVC y Vidrio 0.40x0.60m (0.24m2)",
+    "unidad": "unidad",
+    "precioUnitario": 2400.0
+  },
+  {
+    "codigo": "SC-046",
+    "descripcion": "SC-046 Ventana en L 1.20 x 2.12",
+    "unidad": "pza",
+    "precioUnitario": 11707.0
+  },
+  {
+    "codigo": "MA-268",
+    "descripcion": "MA-268 Ventana Corrediza aluminio y vidrio 0.4 x 0.8m",
+    "unidad": "unidad",
+    "precioUnitario": 4000.0
+  },
+  {
+    "codigo": "MA-193",
+    "descripcion": "MA-193 Cerraduras, Visagras y Sellos de Puertas",
+    "unidad": "pza",
+    "precioUnitario": 440.0
+  },
+  {
+    "codigo": "MA-030",
+    "descripcion": "MA-030 Clavo de Acero 1\" Caja de 100 Unidades",
+    "unidad": "Caja",
+    "precioUnitario": 150.0
+  },
+  {
+    "codigo": "MA-099",
+    "descripcion": "MA-099 Alambre Galvanizado # 16",
+    "unidad": "pza",
+    "precioUnitario": 38.0
+  },
+  {
+    "codigo": "MA-088",
+    "descripcion": "MA-088 Angulo 1\"x1\"x10' 0.34 mm",
+    "unidad": "lance",
+    "precioUnitario": 30.0
+  },
+  {
+    "codigo": "MA-096",
+    "descripcion": "MA-096 Canaleta de Carga CRC 38 x 12 mm x 16' 0.70 mm",
+    "unidad": "lance",
+    "precioUnitario": 140.0
+  },
+  {
+    "codigo": "MO-015",
+    "descripcion": "MO-015 Tabla Yesero",
+    "unidad": "jor",
+    "precioUnitario": 750.0
+  },
+  {
+    "codigo": "MA-288",
+    "descripcion": "MA-288 Tablilla Plafon Polaris 4'x8'",
+    "unidad": "pza",
+    "precioUnitario": 60.0
+  },
+  {
+    "codigo": "MA-027",
+    "descripcion": "MA-027 Masilla para Tabla Yeso",
+    "unidad": "kg",
+    "precioUnitario": 499.0
+  },
+  {
+    "codigo": "MA-232",
+    "descripcion": "MA-232 Tablaroca/Tablayeso Esquinero Metalico",
+    "unidad": "lance",
+    "precioUnitario": 60.0
+  },
+  {
+    "codigo": "MA-302",
+    "descripcion": "MA-302 Tablilla PVC",
+    "unidad": "m2",
+    "precioUnitario": 190.0
+  },
+  {
+    "codigo": "MA-025",
+    "descripcion": "MA-025 Lamina de Tabla Yeso 4\" x 8\" x 5/8\"",
+    "unidad": "pza",
+    "precioUnitario": 293.0
+  },
+  {
+    "codigo": "MA-303",
+    "descripcion": "MA-303 Lamina de Tabla Yeso 4\" x 8\" x 5/8\" RH",
+    "unidad": "pza",
+    "precioUnitario": 1200.0
+  },
+  {
+    "codigo": "MA-153",
+    "descripcion": "MA-153 Piso Vinilico PVC Carrubio Coffee",
+    "unidad": "m2",
+    "precioUnitario": 300.0
+  },
+  {
+    "codigo": "MA-306",
+    "descripcion": "MA-306 Adhesivo PVC",
+    "unidad": "kg",
+    "precioUnitario": 180.0
+  },
+  {
+    "codigo": "MA-102",
+    "descripcion": "MA-102 Ceramica Piso 43x43 Tipo Brasiliia 222 gris, Centro de Cerámicas",
+    "unidad": "m2",
+    "precioUnitario": 390.0
+  },
+  {
+    "codigo": "MA-265",
+    "descripcion": "MA-265 Separadores Truper de 5 mm (200) =Unidades)",
+    "unidad": "m2",
+    "precioUnitario": 49.0
+  },
+  {
+    "codigo": "MA-239",
+    "descripcion": "MA-239 Fraguador Sika Arena Clara (5 kg)",
+    "unidad": "saco",
+    "precioUnitario": 320.0
+  },
+  {
+    "codigo": "MA-237",
+    "descripcion": "MA-237 Cerámica Valencia Café 40 cm x 40 cm",
+    "unidad": "m2",
+    "precioUnitario": 400.0
+  },
+  {
+    "codigo": "MA-144",
+    "descripcion": "MA-144 Microcemento en Polvo Blanco 12KG (Capa Adhesiva/Base)",
+    "unidad": "kg",
+    "precioUnitario": 11.0
+  },
+  {
+    "codigo": "MA-145",
+    "descripcion": "MA-145 Resina Líquida en presentación 1 Galón (Componente B)",
+    "unidad": "m2",
+    "precioUnitario": 11.0
+  },
+  {
+    "codigo": "MA-146",
+    "descripcion": "MA-146 Pigmento líquido como colorante universal (1lt)",
+    "unidad": "m2",
+    "precioUnitario": 11.0
+  },
+  {
+    "codigo": "MA-147",
+    "descripcion": "MA-147 Microsellador para terminación (1lt)",
+    "unidad": "m2",
+    "precioUnitario": 15.0
+  },
+  {
+    "codigo": "SC-048",
+    "descripcion": "SC-048 Alquiler de Pulidora de Piso Para Concreto, compuesta por platos giratorios",
+    "unidad": "m2",
+    "precioUnitario": 43.95
+  },
+  {
+    "codigo": "MA-105",
+    "descripcion": "MA-105 Ceramica de Pared 31x60, Tipo Linho Light Gray",
+    "unidad": "m2",
+    "precioUnitario": 586.59
+  },
+  {
+    "codigo": "MA-264",
+    "descripcion": "MA-264 Ceramica de Pared Brazilia 522 Beige 20 cm x 31 cm Samboro",
+    "unidad": "m2",
+    "precioUnitario": 400.0
+  },
+  {
+    "codigo": "MA-152",
+    "descripcion": "MA-152 Cerámica de Fondo de Baño 515 Niebla Gris Oscuro Centro Ceramicas",
+    "unidad": "m2",
+    "precioUnitario": 300.0
+  },
+  {
+    "codigo": "MA-151",
+    "descripcion": "MA-151 Ceramica de Fondo de Baño Tipo Mosaico Calacatta R11 Centro Ceramicas",
+    "unidad": "m2",
+    "precioUnitario": 345.0
+  },
+  {
+    "codigo": "MA-233",
+    "descripcion": "MA-233 Primer Loxon Sherwin Williams",
+    "unidad": "gal",
+    "precioUnitario": 1192.5
+  },
+  {
+    "codigo": "MA-234",
+    "descripcion": "MA-234 Pintura -  Diluyente",
+    "unidad": "l",
+    "precioUnitario": 26.0
+  },
+  {
+    "codigo": "MA-289",
+    "descripcion": "MA-289 Primer Covermore",
+    "unidad": "gal",
+    "precioUnitario": 400.0
+  },
+  {
+    "codigo": "MA-290",
+    "descripcion": "MA-290 Pintura Covermore",
+    "unidad": "gal",
+    "precioUnitario": 400.0
+  },
+  {
+    "codigo": "MA-235",
+    "descripcion": "MA-235 Pintura Sherwin SuperPaint Exterior Flat",
+    "unidad": "gal",
+    "precioUnitario": 1375.0
+  },
+  {
+    "codigo": "MA-292",
+    "descripcion": "MA-292 Melamina Supermuff 18mm",
+    "unidad": "m2",
+    "precioUnitario": 800.0
+  },
+  {
+    "codigo": "MA-293",
+    "descripcion": "MA-293 Tapacanto PVC",
+    "unidad": "mL",
+    "precioUnitario": 40.0
+  },
+  {
+    "codigo": "MA-294",
+    "descripcion": "MA-294 Bisagras cierre suave",
+    "unidad": "pza",
+    "precioUnitario": 120.0
+  },
+  {
+    "codigo": "MA-295",
+    "descripcion": "MA-295 Riel telescópico gaveta",
+    "unidad": "pza",
+    "precioUnitario": 180.0
+  },
+  {
+    "codigo": "MA-296",
+    "descripcion": "MA-296 Tornillos, pegamento para Mueble",
+    "unidad": "glb",
+    "precioUnitario": 150.0
+  },
+  {
+    "codigo": "MA-297",
+    "descripcion": "MA-297 Zócalo PVC/aluminio",
+    "unidad": "mL",
+    "precioUnitario": 300.0
+  },
+  {
+    "codigo": "MA-301",
+    "descripcion": "MA-301 Refuerzos estructurales",
+    "unidad": "glb",
+    "precioUnitario": 400.0
+  },
+  {
+    "codigo": "MA-298",
+    "descripcion": "MA-298 Cuarzo estándar",
+    "unidad": "m2",
+    "precioUnitario": 7000.0
+  },
+  {
+    "codigo": "MA-299",
+    "descripcion": "MA-299 Adhesivos/resinas para Top",
+    "unidad": "global",
+    "precioUnitario": 200.0
+  },
+  {
+    "codigo": "MA-300",
+    "descripcion": "MA-300 Herrajes premium",
+    "unidad": "pza",
+    "precioUnitario": 1500.0
+  },
+  {
+    "codigo": "SC-051",
+    "descripcion": "SC-051 Creación de Top de Concreto Pulido",
+    "unidad": "m2",
+    "precioUnitario": 3500.0
+  },
+  {
+    "codigo": "MA-132",
+    "descripcion": "MA-132 Tuberia de PVC de 3/4“ SDR 17",
+    "unidad": "lance",
+    "precioUnitario": 85.0
+  },
+  {
+    "codigo": "MO-012",
+    "descripcion": "MO-012 Fontanero",
+    "unidad": "jor",
+    "precioUnitario": 500.0
+  },
+  {
+    "codigo": "MA-271",
+    "descripcion": "MA-271 Pegamento Tangit Transparente para PVC",
+    "unidad": "gal",
+    "precioUnitario": 1948.86
+  },
+  {
+    "codigo": "MA-091",
+    "descripcion": "MA-091 Codo 3/4\" x 90º PVC",
+    "unidad": "pza",
+    "precioUnitario": 10.0
+  },
+  {
+    "codigo": "MA-031",
+    "descripcion": "MA-031 Tee de PVC de 3/4\"",
+    "unidad": "pza",
+    "precioUnitario": 10.0
+  },
+  {
+    "codigo": "MA-110",
+    "descripcion": "MA-110 Tuberia 1/2 \" PVC-SDR-13.5",
+    "unidad": "lance",
+    "precioUnitario": 42.0
+  },
+  {
+    "codigo": "MA-092",
+    "descripcion": "MA-092 Codo 1/2“ x 90º PVC",
+    "unidad": "pza",
+    "precioUnitario": 3.0
+  },
+  {
+    "codigo": "MA-093",
+    "descripcion": "MA-093 Tee de PVC de 1/2“",
+    "unidad": "pza",
+    "precioUnitario": 3.0
+  },
+  {
+    "codigo": "MA-032",
+    "descripcion": "MA-032 Reductor de PVC de 3/4\" a 1/2\"",
+    "unidad": "pza",
+    "precioUnitario": 7.0
+  },
+  {
+    "codigo": "MA-033",
+    "descripcion": "MA-033 Tubería de CPVC de 1/2\" SDR 13.5",
+    "unidad": "lance",
+    "precioUnitario": 100.0
+  },
+  {
+    "codigo": "MA-036",
+    "descripcion": "MA-036 Pegamento Tangit Transparente para CPVC",
+    "unidad": "gal",
+    "precioUnitario": 2300.0
+  },
+  {
+    "codigo": "MA-034",
+    "descripcion": "MA-034 Tee de CPVC de 1/2\"",
+    "unidad": "pza",
+    "precioUnitario": 7.0
+  },
+  {
+    "codigo": "MA-035",
+    "descripcion": "MA-035 Codo de CPVC de 1/2\"",
+    "unidad": "pza",
+    "precioUnitario": 10.0
+  },
+  {
+    "codigo": "MA-070",
+    "descripcion": "MA-070 Tinaco Rotoplas Cemix Beige de 2000 litros",
+    "unidad": "pza",
+    "precioUnitario": 20000.0
+  },
+  {
+    "codigo": "SC-031",
+    "descripcion": "SC-031 Instalación de Cisterna Rotoplas de 2000 Lts",
+    "unidad": "global",
+    "precioUnitario": 2500.0
+  },
+  {
+    "codigo": "MA-067",
+    "descripcion": "MA-067 Tinaco Rotoplas 750L",
+    "unidad": "pza",
+    "precioUnitario": 6120.0
+  },
+  {
+    "codigo": "MA-064",
+    "descripcion": "MA-064 Tanque Rotoplas de 1100L",
+    "unidad": "m2",
+    "precioUnitario": 7500.0
+  },
+  {
+    "codigo": "MA-066",
+    "descripcion": "MA-066 Tinaco Rotoplas de 1700L",
+    "unidad": "m2",
+    "precioUnitario": 11630.0
+  },
+  {
+    "codigo": "MA-284",
+    "descripcion": "MA-284 Tinaco de Reserva de 10,000L",
+    "unidad": "pza",
+    "precioUnitario": 40980.0
+  },
+  {
+    "codigo": "MA-111",
+    "descripcion": "MA-111 Tubo de PVC 2\" SDR 21",
+    "unidad": "m2",
+    "precioUnitario": 125.0
+  },
+  {
+    "codigo": "MA-168",
+    "descripcion": "MA-168 Codo de PVC de 2\" x 45º",
+    "unidad": "pza",
+    "precioUnitario": 17.0
+  },
+  {
+    "codigo": "MA-170",
+    "descripcion": "MA-170 Codo de PVC de 2\" x 90°",
+    "unidad": "pza",
+    "precioUnitario": 17.0
+  },
+  {
+    "codigo": "MA-037",
+    "descripcion": "MA-037 Tee de PVC de 2\"",
+    "unidad": "pza",
+    "precioUnitario": 25.0
+  },
+  {
+    "codigo": "MA-169",
+    "descripcion": "MA-169 Trampa de PVC de 2\"",
+    "unidad": "pza",
+    "precioUnitario": 24.0
+  },
+  {
+    "codigo": "MA-038",
+    "descripcion": "MA-038 Tubo de PVC de 3\" SDR 41",
+    "unidad": "lance",
+    "precioUnitario": 195.0
+  },
+  {
+    "codigo": "MA-039",
+    "descripcion": "MA-039 Codo de PVC de 3\" a 45°",
+    "unidad": "pza",
+    "precioUnitario": 25.0
+  },
+  {
+    "codigo": "MA-040",
+    "descripcion": "MA-040 Tee de PVC de 3\"",
+    "unidad": "pza",
+    "precioUnitario": 30.0
+  },
+  {
+    "codigo": "MA-041",
+    "descripcion": "MA-041 Reductor de PVC de 3\" a 2\"",
+    "unidad": "pza",
+    "precioUnitario": 30.0
+  },
+  {
+    "codigo": "MA-059",
+    "descripcion": "MA-059 Tubo de PVC de 4\" SDR 41",
+    "unidad": "lance",
+    "precioUnitario": 500.0
+  },
+  {
+    "codigo": "MA-171",
+    "descripcion": "MA-171 Codo de  PVC de 4”",
+    "unidad": "pza",
+    "precioUnitario": 110.0
+  },
+  {
+    "codigo": "MA-042",
+    "descripcion": "MA-042 Yee de PVC de 4\"",
+    "unidad": "pza",
+    "precioUnitario": 135.0
+  },
+  {
+    "codigo": "MA-043",
+    "descripcion": "MA-043 Reductor de PVC de 4\" a 3\"",
+    "unidad": "pza",
+    "precioUnitario": 20.0
+  },
+  {
+    "codigo": "MA-044",
+    "descripcion": "MA-044 Reductor de PVC de 4\" a 2\"",
+    "unidad": "pza",
+    "precioUnitario": 20.0
+  },
+  {
+    "codigo": "MA-160",
+    "descripcion": "MA-160 Trampa de grasa 38 lts Prefabricada Color Negro",
+    "unidad": "pza",
+    "precioUnitario": 3000.0
+  },
+  {
+    "codigo": "SC-087",
+    "descripcion": "SC-087 Biodigestor 1300 L Rotoplas con Accesorios",
+    "unidad": "global",
+    "precioUnitario": 14800.0
+  },
+  {
+    "codigo": "MA-159",
+    "descripcion": "MA-159 Tanque Septico Biodigestor Rotoplas 600 lts",
+    "unidad": "pza",
+    "precioUnitario": 12400.0
+  },
+  {
+    "codigo": "EQ-003",
+    "descripcion": "EQ-003 Renta de Retroexcavadora de 75HP",
+    "unidad": "hr",
+    "precioUnitario": 1100.0
+  },
+  {
+    "codigo": "MA-287",
+    "descripcion": "MA-287 Malla Geotextil para separación de aridos",
+    "unidad": "m2",
+    "precioUnitario": 78.0
+  },
+  {
+    "codigo": "MA-045",
+    "descripcion": "MA-045 Codo de PVC de 3\" a 90°",
+    "unidad": "pza",
+    "precioUnitario": 25.0
+  },
+  {
+    "codigo": "MA-061",
+    "descripcion": "MA-061 Inodoro American Standard 4.8 lts Elongado con Accesorios Equix",
+    "unidad": "pza",
+    "precioUnitario": 8150.0
+  },
+  {
+    "codigo": "MA-051",
+    "descripcion": "MA-051 Valvula de Control OR17C1 1/2 x 3/8 Plg para Pared KEENEY",
+    "unidad": "pza",
+    "precioUnitario": 114.33
+  },
+  {
+    "codigo": "MA-174",
+    "descripcion": "MA-174 Cinta Teflon 1/2",
+    "unidad": "rollo",
+    "precioUnitario": 30.0
+  },
+  {
+    "codigo": "MA-172",
+    "descripcion": "MA-172 Adaptador Macho PVC de 1/2\"  Potable",
+    "unidad": "pza",
+    "precioUnitario": 5.6
+  },
+  {
+    "codigo": "MA-112",
+    "descripcion": "MA-112 Tubo de abasto EAL-B40 3/8x1/2-40cm flexible para lavabo",
+    "unidad": "pza",
+    "precioUnitario": 50.5
+  },
+  {
+    "codigo": "MA-262",
+    "descripcion": "MA-262 Brida para sanitario",
+    "unidad": "pza",
+    "precioUnitario": 150.0
+  },
+  {
+    "codigo": "MA-108",
+    "descripcion": "MA-108 Inodoro American Standard 6lts Redondo con Accesorios Hydra",
+    "unidad": "pza",
+    "precioUnitario": 3600.0
+  },
+  {
+    "codigo": "MA-257",
+    "descripcion": "MA-257 Caja Octagonal Liviana de 1/2\"",
+    "unidad": "pza",
+    "precioUnitario": 20.0
+  },
+  {
+    "codigo": "MA-173",
+    "descripcion": "MA-173 Sifon cromado lavabo",
+    "unidad": "pza",
+    "precioUnitario": 257.0
+  },
+  {
+    "codigo": "MA-259",
+    "descripcion": "MA-259 Grifo para lavamanos tipo Bowl",
+    "unidad": "pza",
+    "precioUnitario": 2000.0
+  },
+  {
+    "codigo": "MA-107",
+    "descripcion": "MA-107 LAVABO STD. ECOLINE #17L19346B.020/CO141L19.020 BLANCO PIEZA",
+    "unidad": "pza",
+    "precioUnitario": 3800.0
+  },
+  {
+    "codigo": "MA-068",
+    "descripcion": "MA-068 Lavamano de Bowl Corona",
+    "unidad": "pza",
+    "precioUnitario": 2900.0
+  },
+  {
+    "codigo": "MA-062",
+    "descripcion": "MA-062 Lavatrastos Doble Fosa Sin Escudor",
+    "unidad": "pza",
+    "precioUnitario": 2500.0
+  },
+  {
+    "codigo": "MA-244",
+    "descripcion": "MA-244 Taco Fisher S-8",
+    "unidad": "pza",
+    "precioUnitario": 10.0
+  },
+  {
+    "codigo": "MA-046",
+    "descripcion": "MA-046 Trampa Pvc Sani 1/2\" Pd Bl",
+    "unidad": "unidad",
+    "precioUnitario": 60.0
+  },
+  {
+    "codigo": "MA-009",
+    "descripcion": "MA-009 Guia para Lavatrastos",
+    "unidad": "pza",
+    "precioUnitario": 120.0
+  },
+  {
+    "codigo": "MA-258",
+    "descripcion": "MA-258 Llave Sencilla Cocina",
+    "unidad": "pza",
+    "precioUnitario": 2200.0
+  },
+  {
+    "codigo": "MA-056",
+    "descripcion": "MA-056 Lavatrasto Teka 100X50 cm Calibre 24 Cubeta Un Escurridor Izquierdo",
+    "unidad": "pza",
+    "precioUnitario": 1400.0
+  },
+  {
+    "codigo": "MA-260",
+    "descripcion": "MA-260 Kit lave. Cabeza, ducha, mezclador y Manguera (ebay)",
+    "unidad": "pza",
+    "precioUnitario": 3800.0
+  },
+  {
+    "codigo": "MA-069",
+    "descripcion": "MA-069 Maxi Ducha Ultra - Lorenzetti",
+    "unidad": "pza",
+    "precioUnitario": 600.0
+  },
+  {
+    "codigo": "MA-195",
+    "descripcion": "MA-195 Cable Electrico Phelps Dodge Tsj 3X10 Negro",
+    "unidad": "mL",
+    "precioUnitario": 105.0
+  },
+  {
+    "codigo": "MO-014",
+    "descripcion": "MO-014 Electricista",
+    "unidad": "jor",
+    "precioUnitario": 700.0
+  },
+  {
+    "codigo": "MA-280",
+    "descripcion": "MA-280 Ducto flexible Ø8\" R-6",
+    "unidad": "mL",
+    "precioUnitario": 243.0
+  },
+  {
+    "codigo": "MA-281",
+    "descripcion": "MA-281 Cinta aluminio 2\"",
+    "unidad": "mL",
+    "precioUnitario": 20.0
+  },
+  {
+    "codigo": "MA-282",
+    "descripcion": "MA-282 Abrazaderas",
+    "unidad": "pza",
+    "precioUnitario": 15.0
+  },
+  {
+    "codigo": "MA-231",
+    "descripcion": "MA-231 Lamina de Tablaroca de 4'x8'",
+    "unidad": "pza",
+    "precioUnitario": 250.0
+  },
+  {
+    "codigo": "MA-283",
+    "descripcion": "MA-283 Soportes para tuberia HVAC",
+    "unidad": "pza",
+    "precioUnitario": 12.0
+  },
+  {
+    "codigo": "MA-196",
+    "descripcion": "MA-196 Suministro e Instalación de Evaporador Aire ComfortStar",
+    "unidad": "pza",
+    "precioUnitario": 14980.0
+  },
+  {
+    "codigo": "MA-197",
+    "descripcion": "MA-197 Suministro e Instalación de Condensador de Aire ComfortStar",
+    "unidad": "m2",
+    "precioUnitario": 15530.0
+  },
+  {
+    "codigo": "MA-250",
+    "descripcion": "MA-250 Cable THHN 12",
+    "unidad": "mL",
+    "precioUnitario": 20.0
+  },
+  {
+    "codigo": "MA-251",
+    "descripcion": "MA-251 Cable THHN 14",
+    "unidad": "mL",
+    "precioUnitario": 14.0
+  },
+  {
+    "codigo": "MA-252",
+    "descripcion": "MA-252 Cable THHN 8",
+    "unidad": "mL",
+    "precioUnitario": 80.0
+  },
+  {
+    "codigo": "MA-253",
+    "descripcion": "MA-253 Cable Electrico Para Acometida Aluminio Forrado Por Pie 1/0",
+    "unidad": "mL",
+    "precioUnitario": 300.0
+  },
+  {
+    "codigo": "MA-254",
+    "descripcion": "MA-254 Tubo de Conduit de PVC SC Gresp de 3/4\"",
+    "unidad": "rollo",
+    "precioUnitario": 450.0
+  },
+  {
+    "codigo": "MA-255",
+    "descripcion": "MA-255 Curva de Conduit de PVC Gris de 3/4\"",
+    "unidad": "pza",
+    "precioUnitario": 16.0
+  },
+  {
+    "codigo": "MA-048",
+    "descripcion": "MA-048 Curva de Conduit de PVC de 1/2\"",
+    "unidad": "pza",
+    "precioUnitario": 3.0
+  },
+  {
+    "codigo": "MA-047",
+    "descripcion": "MA-047 Tubo de Conduit de PVC SC Gresp de 1/2\"",
+    "unidad": "lance",
+    "precioUnitario": 16.0
+  },
+  {
+    "codigo": "MA-270",
+    "descripcion": "MA-270 Caja Rectangular 2\" x 4\" de 1/2\"",
+    "unidad": "pza",
+    "precioUnitario": 30.0
+  },
+  {
+    "codigo": "MA-309",
+    "descripcion": "MA-309 Grapa para varilla a tierra",
+    "unidad": "pza",
+    "precioUnitario": 50.0
+  },
+  {
+    "codigo": "MA-135",
+    "descripcion": "MA-135 Varilla Polo a Tierra de 5/8 x 6",
+    "unidad": "lance",
+    "precioUnitario": 200.0
+  },
+  {
+    "codigo": "MA-249",
+    "descripcion": "MA-249 Interruptor Sencillo",
+    "unidad": "pza",
+    "precioUnitario": 170.0
+  },
+  {
+    "codigo": "MA-248",
+    "descripcion": "MA-248 Interruptor Doble",
+    "unidad": "pza",
+    "precioUnitario": 280.0
+  },
+  {
+    "codigo": "MA-053",
+    "descripcion": "MA-053 Interruptor Triple",
+    "unidad": "pza",
+    "precioUnitario": 400.0
+  },
+  {
+    "codigo": "MA-143",
+    "descripcion": "MA-143 TP-LINK Smart WiFi Switch Control Iluminación desde cualquier lugar, HS220",
+    "unidad": "pza",
+    "precioUnitario": 625.0
+  },
+  {
+    "codigo": "MA-052",
+    "descripcion": "MA-052 Centro de Carga 16 Espacios",
+    "unidad": "pza",
+    "precioUnitario": 2100.0
+  },
+  {
+    "codigo": "MA-256",
+    "descripcion": "MA-256 Mufa EMT de 1 1/4\n\"",
+    "unidad": "pza",
+    "precioUnitario": 150.0
+  },
+  {
+    "codigo": "MA-060",
+    "descripcion": "MA-060 Tomacorriente ENERLITES 20A 120-277v Listado UL con tapadera",
+    "unidad": "pza",
+    "precioUnitario": 300.0
+  },
+  {
+    "codigo": "MA-352",
+    "descripcion": "MA-352 Tomacoriente Exterior de 20Amp",
+    "unidad": "pza",
+    "precioUnitario": 350.0
+  },
+  {
+    "codigo": "MA-291",
+    "descripcion": "MA-291 Tomacorriente Aguila",
+    "unidad": "pza",
+    "precioUnitario": 100.0
+  },
+  {
+    "codigo": "MA-148",
+    "descripcion": "MA-148 Tomacorriente Especial 220V 50Amp",
+    "unidad": "pza",
+    "precioUnitario": 300.0
+  },
+  {
+    "codigo": "MA-054",
+    "descripcion": "MA-054 Breaker de 30 amperios para 220v",
+    "unidad": "pza",
+    "precioUnitario": 260.0
+  },
+  {
+    "codigo": "MA-247",
+    "descripcion": "MA-247 Breaker 20 Amp sencillos",
+    "unidad": "pza",
+    "precioUnitario": 160.0
+  },
+  {
+    "codigo": "MA-055",
+    "descripcion": "MA-055 Breaker de 40 amp para 220 v",
+    "unidad": "pza",
+    "precioUnitario": 360.0
+  },
+  {
+    "codigo": "MA-076",
+    "descripcion": "MA-076 Bombillos GE 20 Watt",
+    "unidad": "pza",
+    "precioUnitario": 75.0
+  },
+  {
+    "codigo": "MA-246",
+    "descripcion": "MA-246 Tornillo Goloso Rawplug 10x3/4",
+    "unidad": "pza",
+    "precioUnitario": 10.0
+  },
+  {
+    "codigo": "MA-072",
+    "descripcion": "MA-072 Roseta para Lámpara",
+    "unidad": "pza",
+    "precioUnitario": 35.0
+  },
+  {
+    "codigo": "MA-073",
+    "descripcion": "MA-073 Lámpara Empotrable LED regulable",
+    "unidad": "pza",
+    "precioUnitario": 650.0
+  },
+  {
+    "codigo": "MA-071",
+    "descripcion": "MA-071 Lámpara tipo LED Central para Sala",
+    "unidad": "pza",
+    "precioUnitario": 1200.0
+  },
+  {
+    "codigo": "MA-131",
+    "descripcion": "MA-131 Lampara Golgante para Cocina",
+    "unidad": "pza",
+    "precioUnitario": 2500.0
+  },
+  {
+    "codigo": "MA-074",
+    "descripcion": "MA-074 Tristan I Farol exterior acabado blanco de 1 luz",
+    "unidad": "pza",
+    "precioUnitario": 1049.0
+  },
+  {
+    "codigo": "MA-075",
+    "descripcion": "MA-075 Foco Ahorrativo para Roseta 120V 80W",
+    "unidad": "pza",
+    "precioUnitario": 65.0
+  },
+  {
+    "codigo": "MA-083",
+    "descripcion": "MA-083 Raziel Farol de exterior acabado negro de 1 luz",
+    "unidad": "pza",
+    "precioUnitario": 720.0
+  },
+  {
+    "codigo": "MA-167",
+    "descripcion": "MA-167 Lampara de Exterior",
+    "unidad": "m2",
+    "precioUnitario": 500.0
+  },
+  {
+    "codigo": "MA-081",
+    "descripcion": "MA-081 Luces solares para exteriores, [6 unidades/52 LED/3 modos] focos solares 2 en 1, luz de seguridad contra inundaciones alimentada por energía solar, luz de pared impermeable IP65 para pasarela, patio, jardín, entrada (blanco frío)",
+    "unidad": "pza",
+    "precioUnitario": 380.0
+  },
+  {
+    "codigo": "MA-161",
+    "descripcion": "MA-161 Cable Coaxial Para Video Nippon America 100-Pies Rg-6",
+    "unidad": "rollo",
+    "precioUnitario": 1200.0
+  },
+  {
+    "codigo": "MA-198",
+    "descripcion": "MA-198 100mts Cable UTP",
+    "unidad": "rollo",
+    "precioUnitario": 1200.0
+  },
+  {
+    "codigo": "MA-199",
+    "descripcion": "MA-199 Terminación de conectores RJ-45",
+    "unidad": "pza",
+    "precioUnitario": 100.0
+  },
+  {
+    "codigo": "MA-202",
+    "descripcion": "MA-202 Detector de movimiento PIR / Dual (Skytek Honduras)",
+    "unidad": "pza",
+    "precioUnitario": 1282.96
+  },
+  {
+    "codigo": "MA-203",
+    "descripcion": "MA-203 Base o soporte de montaje para Detector",
+    "unidad": "pza",
+    "precioUnitario": 250.0
+  },
+  {
+    "codigo": "MA-307",
+    "descripcion": "MA-307 Conectores Para Cable",
+    "unidad": "pza",
+    "precioUnitario": 15.0
+  },
+  {
+    "codigo": "MA-204",
+    "descripcion": "MA-204 Cámaras CCTV (IP o Analógicas)",
+    "unidad": "pza",
+    "precioUnitario": 2100.0
+  },
+  {
+    "codigo": "MA-058",
+    "descripcion": "MA-058 Material Selecto (con Flete)",
+    "unidad": "m3",
+    "precioUnitario": 800.0
+  },
+  {
+    "codigo": "EQ-008",
+    "descripcion": "EQ-008 Retroexcavadora 75 HP",
+    "unidad": "hr",
+    "precioUnitario": 780.0
+  },
+  {
+    "codigo": "MA-077",
+    "descripcion": "MA-077 Alambre De Pua Deacero #16-400 Vaquero",
+    "unidad": "rollo",
+    "precioUnitario": 575.0
+  },
+  {
+    "codigo": "MA-079",
+    "descripcion": "MA-079 Malla Ciclón de 5' x 100'",
+    "unidad": "rollo",
+    "precioUnitario": 2021.0
+  },
+  {
+    "codigo": "MA-078",
+    "descripcion": "MA-078 Tubo Galvanizado Redondo de 2 1/2\"",
+    "unidad": "lance",
+    "precioUnitario": 400.0
+  },
+  {
+    "codigo": "SC-088",
+    "descripcion": "SC-088 Instalación de portón de 2 Hojas y Portón peatonal",
+    "unidad": "global",
+    "precioUnitario": 50000.0
+  },
+  {
+    "codigo": "MA-275",
+    "descripcion": "MA-275 Grama San Agustin",
+    "unidad": "m2",
+    "precioUnitario": 95.0
+  },
+  {
+    "codigo": "MA-308",
+    "descripcion": "MA-308 Base de Contador de 200Amp",
+    "unidad": "pza",
+    "precioUnitario": 4000.0
+  }
+]

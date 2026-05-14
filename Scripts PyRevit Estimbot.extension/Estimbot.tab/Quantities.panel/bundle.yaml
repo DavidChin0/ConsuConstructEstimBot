@@ -1,0 +1,11 @@
+title:
+  en_us: Quantities
+  es_es: Cantidades
+tooltip:
+  en_us: Schedule export and quantity update tools.
+  es_es: Exportación de schedules y actualización de cantidades.
+author: ConsuConstruct
+engine:
+  clean: true
+  persistent: true
+  full_frame: true

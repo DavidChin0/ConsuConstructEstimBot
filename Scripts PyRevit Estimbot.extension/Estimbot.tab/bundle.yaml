@@ -1,0 +1,11 @@
+title:
+  en_us: Estimbot
+  es_es: Estimbot
+tooltip:
+  en_us: Estimbot automation tools for Revit workflows.
+  es_es: Herramientas de automatización de Estimbot para Revit.
+author: ConsuConstruct
+engine:
+  clean: true
+  persistent: true
+  full_frame: true

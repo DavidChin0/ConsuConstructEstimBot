@@ -1,0 +1,11 @@
+title:
+  en_us: Revit Keynotes
+  es_es: Keynotes Revit
+tooltip:
+  en_us: Convert a 2-column source into a Revit keynotes TXT file.
+  es_es: Convierte una fuente de 2 columnas en un TXT de keynotes para Revit.
+author: ConsuConstruct
+engine:
+  clean: true
+  persistent: false
+  full_frame: true

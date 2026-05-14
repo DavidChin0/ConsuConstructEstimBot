@@ -1,0 +1,11 @@
+title:
+  en_us: Export Schedules
+  es_es: Exportar Schedules
+tooltip:
+  en_us: Export qualifying Revit schedules to a single CSV.
+  es_es: Exporta schedules válidos de Revit a un CSV único.
+author: ConsuConstruct
+engine:
+  clean: true
+  persistent: false
+  full_frame: true

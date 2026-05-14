@@ -1,0 +1,11 @@
+title:
+  en_us: Update Quantities
+  es_es: Actualizar Cantidades
+tooltip:
+  en_us: Update the Excel base from the latest schedules CSV.
+  es_es: Actualiza la base Excel desde el último CSV de schedules.
+author: ConsuConstruct
+engine:
+  clean: true
+  persistent: false
+  full_frame: true

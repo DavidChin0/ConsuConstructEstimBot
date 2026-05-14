@@ -1,0 +1,11 @@
+title:
+  en_us: Keynotes
+  es_es: Keynotes
+tooltip:
+  en_us: Keynote generation and conversion tools.
+  es_es: Herramientas de generación y conversión de keynotes.
+author: ConsuConstruct
+engine:
+  clean: true
+  persistent: true
+  full_frame: true

@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ESTIMASTRUCT — ConsuConstruct</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<!-- HEADER -->
+<div id="header">
+  <div class="brand-block">
+    <h1>EstimaStruct</h1>
+    <a class="brand-link" href="https://consuconstruct.com" target="_blank" rel="noopener noreferrer">by ConsuConstruct.com</a>
+  </div>
+  <span class="obra-titulo" id="obra-titulo-click"></span>
+  <span class="template-version-badge" id="template-version-badge" style="display:none;"></span>
+  <div class="totales"></div>
+  <div id="sobrecosto-pill" class="sobrecosto-pill hidden">
+    <span>SC: </span><span id="sobrecosto-val">20%</span>
+    <div id="sobrecosto-popover" class="sobrecosto-popover hidden">
+      <label>Sobrecosto %</label>
+      <input type="number" id="sobrecosto-input" min="0" max="500" step="0.1" />
+      <div class="sc-actions">
+        <button id="btn-sc-cancel" class="btn-cancel">Cancel</button>
+        <button id="btn-sc-ok" class="btn-primary">Aplicar</button>
+      </div>
+    </div>
+  </div>
+  <button id="btn-actualizar" class="btn-actualizar hidden">⟳ Actualizar</button>
+  <button id="btn-modo" class="btn-modo hidden" title="Cambiar modo Cliente/Desarrollador">👤 Cliente</button>
+  <div id="dev-menu-wrap" class="dev-menu-wrap hidden">
+    <button id="btn-dev-menu" class="btn-dev-menu" title="Menú">⚙ Menú ▾</button>
+    <div id="dev-menu" class="dev-menu hidden">
+      <button class="dev-menu-item" data-step="about">ℹ About</button>
+      <hr style="margin:4px 0;border:none;border-top:1px solid var(--border)"/>
+      <button class="dev-menu-item" data-step="bases">🗄 Bases de Datos</button>
+      <button class="dev-menu-item" data-step="agregar">➕ Agregar Fichas</button>
+      <hr style="margin:4px 0;border:none;border-top:1px solid var(--border)"/>
+      <button class="dev-menu-item" data-step="2">Generar Keynotes para Revit</button>
+      <button class="dev-menu-item" data-step="4">Actualizar Cantidades de Revit</button>
+    </div>
+  </div>
+  <div id="export-menu-wrap" class="export-menu-wrap hidden">
+    <button id="btn-exportar" class="btn-export">⬇ Exportar ▾</button>
+    <div id="export-menu" class="export-menu hidden">
+      <button class="export-menu-item" data-kind="presupuesto">📄 Presupuesto (main + proposal)</button>
+      <button class="export-menu-item" data-kind="db">🗂 Base de datos completa (insumos por renglón)</button>
+    </div>
+  </div>
+  <button id="btn-nueva-obra">+ Nueva Obra</button>
+</div>
+
+<!-- MODAL: ABOUT -->
+<div id="modal-about" class="modal-overlay hidden">
+  <div class="modal" style="max-width:720px">
+    <h2>About EstimaStruct</h2>
+    <div class="about-body">
+      <p class="about-lead">
+        EstimaStruct es una plataforma open source de estimación para ingeniería y arquitectura,
+        diseñada para análisis estructural, detalle técnico y control de costos con trazabilidad.
+      </p>
+      <p>
+        Funciona como puente entre Revit 2027 y el análisis de precios dentro del ecosistema
+        Estimbot, convirtiendo schedules y datos de obra en partidas auditables y listas para
+        presupuesto real.
+      </p>
+      <p>
+        Construida con FastAPI, SQLite y Vanilla JavaScript para priorizar portabilidad,
+        transparencia y despliegue simple en equipos técnicos.
+      </p>
+      <ul class="about-list">
+        <li>Estimación por partidas, capítulos CSI e insumos</li>
+        <li>Importación de cantidades desde Revit schedules</li>
+        <li>Base pensada para compartirse, auditarse y descargarse desde GitHub</li>
+        <li>Parte del módulo de automatización de Estimbot</li>
+      </ul>
+      <p>
+        By ConsuConstruct:
+        <a href="https://consuconstruct.com" target="_blank" rel="noopener noreferrer">consuconstruct.com</a>
+      </p>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn-primary" id="modal-about-close">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- LAYOUT -->
+<div id="layout">
+
+  <!-- SIDEBAR -->
+  <div id="sidebar">
+    <div id="sidebar-header">Obras</div>
+    <div id="obras-list"></div>
+  </div>
+
+  <!-- MAIN -->
+  <div id="main">
+
+    <!-- VIÑETAS DE RECURSOS -->
+    <div id="recursos-bar">
+      <div id="vinetas">
+        <button class="vineta" data-tipo="INSUMOS"     data-label="INSUMOS">
+          <span class="vineta-dot" style="background:#56ccf2"></span>INSUMOS <span class="vineta-count"></span>
+        </button>
+        <button class="vineta" data-tipo="MANO_OBRA"    data-label="MANO DE OBRA">
+          <span class="vineta-dot" style="background:#eb5757"></span>MANO DE OBRA <span class="vineta-count"></span>
+        </button>
+      </div>
+      <button id="btn-toggle-typemark" class="btn-toggle-tm" title="Mostrar/ocultar columna Type Mark">Type Mark</button>
+    </div>
+
+    <!-- DATALIST GLOBAL DE UNIDADES -->
+    <datalist id="unidades-list"></datalist>
+
+    <!-- CONTENT WRAPPER: tabla a la izquierda, panel lateral a la derecha -->
+    <div id="content-wrapper">
+      <!-- TABLE -->
+      <div id="table-area">
+        <div class="empty-state">
+          <p>Crea una nueva obra para comenzar</p>
+          <small>Botón "+ Nueva Obra" arriba a la derecha</small>
+        </div>
+      </div>
+
+      <!-- PANEL LATERAL DERECHO DE RECURSOS -->
+      <div id="recursos-panel-lateral" class="hidden">
+        <div id="panel-lateral-header">
+          <span id="panel-lateral-title">—</span>
+          <button id="panel-lateral-close">✕</button>
+        </div>
+        <input id="recurso-search" class="recurso-search" placeholder="Buscar recurso..." />
+        <div id="recursos-lista"></div>
+      </div>
+    </div>
+
+    <!-- BOTTOM PANEL -->
+    <div id="panel-bottom" class="hidden">
+      <div id="panel-titulo">
+        <span id="panel-edit-csi" class="panel-edit-field" title="Doble-clic para editar CSI">—</span>
+        <span class="panel-edit-sep">·</span>
+        <span id="panel-edit-tm" class="panel-edit-field panel-edit-tm" title="Doble-clic para editar Type Mark">—</span>
+        <span class="panel-edit-sep">—</span>
+        <span id="panel-edit-desc" class="panel-edit-field panel-edit-desc" title="Doble-clic para editar nombre de la actividad">—</span>
+        <button id="panel-close">✕</button>
+      </div>
+
+      <!-- TABS -->
+      <div class="panel-tabs">
+        <button class="tab-btn active" data-tab="detalle">Detalle</button>
+      </div>
+
+      <!-- TAB: Detalle — Matriz de insumos -->
+      <div id="tab-detalle" class="tab-content active">
+
+        <!-- Barra de info rápida: unidad editable + costos + total -->
+        <div id="panel-info-bar">
+          <div class="info-bar-item">
+            <span class="info-lbl">UNIDAD</span>
+            <div class="unidad-wrap">
+              <span id="detail-unidad" class="info-val unidad-display">—</span>
+              <select id="select-unidad" class="unidad-select hidden"></select>
+              <button id="btn-unidad-edit" class="btn-icon" title="Cambiar unidad">✎</button>
+            </div>
+          </div>
+          <div class="info-bar-item">
+            <span class="info-lbl">MANO DE OBRA</span>
+            <span id="detail-mo" class="info-val">0.00</span>
+          </div>
+          <div class="info-bar-item">
+            <span class="info-lbl">INSUMOS</span>
+            <span id="detail-ma" class="info-val">0.00</span>
+          </div>
+          <div class="info-bar-item">
+            <span class="info-lbl">COSTO BASE</span>
+            <span id="detail-base" class="info-val">0.00</span>
+          </div>
+          <div class="info-bar-item">
+            <span class="info-lbl">PRECIO UNITARIO</span>
+            <span id="detail-pu" class="info-val" style="color:var(--accent);font-weight:700">0.00</span>
+          </div>
+          <div class="info-bar-item">
+            <span class="info-lbl">CANTIDAD</span>
+            <span id="detail-cantidad" class="info-val" style="color:var(--accent2);font-weight:700">—</span>
+          </div>
+          <div class="info-bar-item">
+            <span class="info-lbl">TOTAL</span>
+            <span id="detail-total" class="info-val" style="color:var(--accent);font-weight:700">—</span>
+          </div>
+        </div>
+
+        <!-- Barra de totales por tipo (estilo OPUS) -->
+        <div id="matriz-totales-bar">
+          <span class="mt-item mt-todos">Todos: <b id="mt-todos">0.00</b></span>
+          <span class="mt-sep">|</span>
+          <span class="mt-item mt-ma">MA: <b id="mt-ma">0.00</b></span>
+          <span class="mt-sep">|</span>
+          <span class="mt-item mt-mo">MO: <b id="mt-mo">0.00</b></span>
+        </div>
+
+        <!-- Tabla de insumos -->
+        <div id="matriz-table-wrap">
+          <table id="matriz-table">
+            <thead>
+              <tr>
+                <th style="width:28px">#</th>
+                <th style="width:80px">Clave</th>
+                <th>Descripción</th>
+                <th style="width:52px">Ud</th>
+                <th class="num" style="width:88px">Rendimiento</th>
+                <th class="num" style="width:90px">Costo Unit.</th>
+                <th class="num" style="width:96px">Total</th>
+                <th style="width:28px"></th>
+              </tr>
+            </thead>
+            <tbody id="matriz-body"></tbody>
+            <tfoot>
+              <tr id="row-add-insumo">
+                <td colspan="2">
+                  <div class="insumo-search-wrap">
+                    <input id="insumo-search" class="na-input" placeholder="Buscar recurso..." autocomplete="off" />
+                    <div id="insumo-dropdown" class="insumo-dropdown hidden"></div>
+                  </div>
+                </td>
+                <td colspan="4" style="padding-left:6px">
+                  <span id="insumo-selected-label" style="font-size:11px;color:var(--text-dim)">—</span>
+                </td>
+                <td>
+                  <button id="btn-add-insumo" class="btn-icon-add" title="Agregar">+</button>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+      </div>
+
+    </div><!-- /panel-bottom -->
+
+  </div><!-- /main -->
+</div><!-- /layout -->
+
+<!-- MODAL: ELEGIR SCHEDULES S5_schedules -->
+<div id="modal-csv-pick" class="modal-overlay hidden">
+  <div class="modal" style="max-width:560px">
+    <h2>Elegir export de Schedules</h2>
+    <p style="color:var(--text-dim);font-size:12px;margin-bottom:8px">
+      Solo archivos <code>schedules_*.csv</code> generados por PyRevit en <code>D:\OneDrive\Bots\Estimbot\EXPORTS\S5_schedules</code>
+    </p>
+    <div id="csv-pick-list" class="csv-pick-list"></div>
+    <div class="modal-actions">
+      <button type="button" class="btn-cancel" id="modal-csv-cancel">Cancelar</button>
+      <button type="button" class="btn-primary" id="modal-csv-ok" disabled>Importar schedules</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: SCRIPT OUTPUT -->
+<div id="modal-script-out" class="modal-overlay hidden">
+  <div class="modal" style="max-width:640px">
+    <h2 id="modal-script-title">Resultado</h2>
+    <div id="modal-script-body" class="script-out"></div>
+    <div class="modal-actions">
+      <button type="button" class="btn-primary" id="modal-script-close">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: BORRAR OBRA -->
+<div id="modal-delete" class="modal-overlay hidden">
+  <div class="modal">
+    <h2>Borrar Obra</h2>
+    <p id="modal-delete-msg" style="margin-bottom:14px;color:var(--text-dim);font-size:13px;line-height:1.5"></p>
+    <label class="check-confirm">
+      <input type="checkbox" id="del-confirm-check" />
+      <span>Confirmo que entiendo que esta acción es <b>irreversible</b></span>
+    </label>
+    <div class="modal-actions" style="margin-top:14px">
+      <button type="button" class="btn-cancel" id="modal-delete-cancel">Cancelar</button>
+      <button type="button" class="btn-danger" id="modal-delete-ok" disabled>Borrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: RENOMBRAR OBRA -->
+<div id="modal-rename" class="modal-overlay hidden">
+  <div class="modal">
+    <h2>Renombrar Obra</h2>
+    <form id="modal-rename-form">
+      <label>Nombre *</label>
+      <input type="text" id="rename-nombre" required />
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" id="modal-rename-cancel">Cancelar</button>
+        <button type="submit" class="btn-primary">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL: SELECCIONAR VERSION TEMPLATE -->
+<div id="modal-template-version" class="modal-overlay hidden">
+  <div class="modal" style="max-width:500px">
+    <h2>Seleccionar Versión de Template</h2>
+    <p style="color:var(--text-dim);font-size:12px;margin-bottom:16px;">
+      Elige qué versión de Template 2 - Updated usar para nuevas obras:
+    </p>
+    <div style="display:grid;gap:12px;margin-bottom:20px">
+      <label style="display:flex;align-items:center;padding:12px;border:2px solid var(--border);border-radius:6px;cursor:pointer;transition:all 0.2s" id="label-v1-0">
+        <input type="radio" name="template-version" value="v1.0" style="margin-right:12px;cursor:pointer;width:18px;height:18px"/>
+        <div>
+          <div style="font-weight:600;margin-bottom:2px">Template V1.0</div>
+          <div style="font-size:11px;color:var(--text-dim)">Datos originales</div>
+        </div>
+      </label>
+      <label style="display:flex;align-items:center;padding:12px;border:2px solid var(--border);border-radius:6px;cursor:pointer;transition:all 0.2s" id="label-v1-1">
+        <input type="radio" name="template-version" value="v1.1" style="margin-right:12px;cursor:pointer;width:18px;height:18px"/>
+        <div>
+          <div style="font-weight:600;margin-bottom:2px">Template V1.1</div>
+          <div style="font-size:11px;color:var(--text-dim)">Versión actualizada</div>
+        </div>
+      </label>
+    </div>
+    <div style="padding:12px;background:var(--bg-dark);border-radius:6px;margin-bottom:16px;font-size:11px;color:var(--text-dim)">
+      <strong>Versión seleccionada:</strong> <span id="version-selected">V1.0</span>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn-cancel" id="modal-tv-cancel">Cerrar</button>
+      <button type="button" class="btn-primary" id="modal-tv-ok">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: NUEVA OBRA -->
+<div id="modal-obra" class="modal-overlay hidden">
+  <div class="modal">
+    <h2>Nueva Obra</h2>
+    <p style="color:var(--text-dim);font-size:12px;margin-bottom:12px;">Se copiarán las actividades de <strong id="template-desc">Template V1.0</strong>.</p>
+    <form id="modal-obra-form">
+      <label>Nombre de la obra *</label>
+      <input type="text" id="obra-nombre" placeholder="Ej: Residencial Los Pinos" required />
+      <label>Cliente</label>
+      <input type="text" id="obra-cliente" placeholder="Nombre del cliente" />
+      <label>Moneda</label>
+      <select id="obra-moneda">
+        <option value="HNL">HNL — Lempira</option>
+        <option value="USD">USD — Dólar</option>
+      </select>
+      <label>Sobrecosto / Overhead %</label>
+      <input type="number" id="obra-sobrecosto" value="20" min="0" max="100" step="0.1" />
+      <label>Base de Datos *</label>
+      <select id="obra-template-version">
+        <option value="v1.0">V1.0 — Original</option>
+        <option value="v1.1">V1.1 — Revisado</option>
+      </select>
+      <small style="color:var(--text-dim);margin-top:4px;display:block;">Cada proyecto puede usar una base de datos diferente</small>
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" id="modal-obra-cancel">Cancelar</button>
+        <button type="submit" class="btn-primary">Crear Obra</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- COLOR PICKER POPUP (flotante, posicionado con JS) -->
+<div id="color-picker-popup" class="color-picker-popup hidden">
+  <div class="cp-item" data-color="amarillo">
+    <span class="cp-dot" style="background:#f2c94c"></span>
+    <div><b>Amarillo</b> — Fórmula dependiente</div>
+  </div>
+  <div class="cp-item" data-color="verde">
+    <span class="cp-dot" style="background:#27ae60"></span>
+    <div><b>Verde</b> — Asignado en Revit</div>
+  </div>
+  <div class="cp-item" data-color="rosa">
+    <span class="cp-dot" style="background:#e91e8c"></span>
+    <div><b>Rosa</b> — Por asignar</div>
+  </div>
+  <div class="cp-item" data-color="blanco">
+    <span class="cp-dot" style="background:transparent;border:1px solid #777"></span>
+    <div><b>Blanco</b> — Manual</div>
+  </div>
+</div>
+
+<!-- MODAL: AGREGAR / ACTUALIZAR FICHAS -->
+<div id="modal-updater" class="modal-overlay hidden">
+  <div class="modal" style="max-width:560px">
+    <h2>Agregar / Actualizar Fichas</h2>
+    <p style="color:var(--text-dim);font-size:12px;margin-bottom:12px">
+      Carpeta: <code>D:\OneDrive\Bots\Estimbot\MasterFiles\Updater</code>
+    </p>
+    <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Base de datos destino:</label>
+    <select id="updater-version" style="width:100%;margin-bottom:14px;background:var(--surface2);color:var(--text);border:1px solid var(--border);padding:6px 8px;border-radius:4px">
+      <option value="v1.0">V1.0 — Original</option>
+      <option value="v1.1" selected>V1.1 — Revisado</option>
+    </select>
+    <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Archivo Excel:</label>
+    <div id="updater-pick-list" class="csv-pick-list"></div>
+    <div class="modal-actions" style="margin-top:14px">
+      <button type="button" class="btn-cancel" id="modal-updater-cancel">Cancelar</button>
+      <button type="button" class="btn-primary" id="modal-updater-ok" disabled>Importar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: BASES DE DATOS -->
+<div id="modal-bases" class="modal-overlay hidden">
+  <div class="modal modal-bases">
+    <div class="bases-header">
+      <h2 style="margin:0;font-size:15px;white-space:nowrap">Bases de Datos</h2>
+      <div id="bases-version-tabs" class="bases-version-tabs"></div>
+      <button id="modal-bases-close" class="btn-icon" style="margin-left:auto;font-size:16px;padding:4px 8px">✕</button>
+    </div>
+    <div class="bases-body">
+      <div class="bases-left">
+        <input id="bases-search" class="recurso-search" placeholder="Filtrar actividades..." style="margin-bottom:6px"/>
+        <div id="bases-fichas-list" class="bases-fichas-list"></div>
+        <div class="bases-left-actions">
+          <button id="btn-bases-add" class="btn-bases-mini btn-bases-mini-add" title="Agregar matriz">+</button>
+          <button id="btn-bases-delete" class="btn-bases-mini btn-bases-mini-del" title="Eliminar matriz" disabled>−</button>
+        </div>
+      </div>
+      <div class="bases-right">
+        <div id="bases-ficha-empty" class="bases-ficha-empty">
+          <span>Selecciona una actividad de la lista</span>
+        </div>
+        <div id="bases-ficha-detail" class="hidden" style="display:flex;flex-direction:column;height:100%">
+          <div id="bases-ficha-title" class="bases-ficha-title"></div>
+          <div class="bases-table-wrap">
+            <table class="bases-insumos-table">
+              <thead>
+                <tr>
+                  <th style="width:80px">Clave</th>
+                  <th>Descripción</th>
+                  <th style="width:52px">Ud</th>
+                  <th style="width:110px">Rendimiento</th>
+                  <th style="width:110px">P. Unitario</th>
+                  <th class="num" style="width:90px">Total</th>
+                </tr>
+              </thead>
+              <tbody id="bases-insumos-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="bases-footer">
+      <span id="bases-changes-count" style="font-size:12px;color:var(--text-dim)">Sin cambios pendientes</span>
+      <div style="display:flex;gap:8px">
+        <button id="btn-bases-undo" class="btn-cancel" disabled>↩ Deshacer (<span id="bases-undo-levels">0</span>)</button>
+        <button id="btn-bases-cancel" class="btn-cancel">Cancelar</button>
+        <button id="btn-bases-save" class="btn-primary" disabled>Guardar y Sincronizar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: AGREGAR MATRIZ -->
+<div id="modal-bases-add" class="modal-overlay hidden">
+  <div class="modal modal-bases-add">
+    <h2>Agregar matriz</h2>
+    <p style="margin-bottom:12px;color:var(--text-dim);font-size:12px">
+      Completa los campos de la nueva matriz. La ficha se agregará a la base activa y se guardará al sincronizar.
+    </p>
+    <label for="bases-new-color">Color</label>
+    <select id="bases-new-color">
+      <option value="blanco">Blanco</option>
+      <option value="rosa">Rosa</option>
+      <option value="amarillo">Amarillo</option>
+      <option value="verde">Verde</option>
+      <option value="azul">Azul</option>
+    </select>
+    <label for="bases-new-csi">Numero CSI</label>
+    <input type="text" id="bases-new-csi" placeholder="03 31 00.1" />
+    <label for="bases-new-nombre">Nombre</label>
+    <input type="text" id="bases-new-nombre" placeholder="Descripción de la matriz" />
+    <label for="bases-new-typemark">Type Mark</label>
+    <input type="text" id="bases-new-typemark" placeholder="TM-001" />
+    <div class="modal-actions">
+      <button type="button" id="modal-bases-add-cancel" class="btn-cancel">Cancelar</button>
+      <button type="button" id="modal-bases-add-save" class="btn-primary">Agregar</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
