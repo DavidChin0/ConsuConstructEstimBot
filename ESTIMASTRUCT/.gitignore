@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+*.db
+*.db-wal
+*.db-shm
+*.db.bak*
+logs/
+backend/logs/
+ESTIMASTRUCT/logs/
+*.log
+EXPORTS/
+.env*

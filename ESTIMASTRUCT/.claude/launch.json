@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "estimastruct-frontend",
+      "runtimeExecutable": "D:\\LLM\\python\\python.exe",
+      "runtimeArgs": ["app.py"],
+      "port": 5000
+    }
+  ]
+}

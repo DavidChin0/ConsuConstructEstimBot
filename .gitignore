@@ -4,23 +4,31 @@ __pycache__/
 .venv/
 venv/
 
-# Local databases and logs
+# BDs locales (viva en C:\EstimaStruct\data, copias nunca al repo)
 *.db
+*.db-wal
+*.db-shm
 *.db-journal
+*.db.bak*
 *.sqlite
 *.sqlite3
-logs/
-**/logs/
 
-# Temporary/backups
+# Logs
+**/logs/
+*.log
+
+# Exports y temporales
+EXPORTS/
 *.bak
 *.bak*.json
 *.backup*
 *.tmp
 
+# Secretos
+.env*
+
 # IDE / OS
-.DS_Store
-Thumbs.db
 .vscode/
 .idea/
-
+.DS_Store
+Thumbs.db

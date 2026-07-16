@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ESTIMASTRUCT — ConsuConstruct</title>
+  <link rel="stylesheet" href="css/style.css?v={{ asset_version }}" />
+  <link rel="stylesheet" href="vendor/katex/katex.min.css?v={{ asset_version }}" />
+  <script defer src="vendor/katex/katex.min.js?v={{ asset_version }}"></script>
+  <style>
+    /* ---- SUBMENU DESPLEGABLE DE INSUMOS (viñeta) ---- */
+    .vineta-wrap { position: relative; display: inline-flex; }
+    .vineta-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      margin-top: 4px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 4px;
+      gap: 3px;
+      flex-direction: column;
+      z-index: 50;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+      min-width: 120px;
+    }
+    .vineta-wrap:hover .vineta-menu,
+    .vineta-wrap.open .vineta-menu { display: flex; }
+    .vineta-sub {
+      display: flex; align-items: center; gap: 6px;
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-dim);
+      padding: 4px 10px; border-radius: 6px;
+      cursor: pointer; font-size: 11px; font-weight: 600;
+      letter-spacing: 0.3px;
+      white-space: nowrap;
+      text-align: left;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+    .vineta-sub:hover { color: var(--text); background: rgba(255,255,255,0.06); }
+    .vineta-sub.active { color: var(--text); background: rgba(15,61,96,0.7); border-color: #555; }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div id="header">
+  <div class="brand-block">
+    <h1>EstimaStruct</h1>
+    <a class="brand-link" href="https://consuconstruct.com" target="_blank" rel="noopener noreferrer">by ConsuConstruct.com</a>
+  </div>
+  <span class="obra-titulo" id="obra-titulo-click"></span>
+  <span class="template-version-badge" id="template-version-badge" style="display:none;"></span>
+  <div class="totales"></div>
+  <div id="sobrecosto-pill" class="sobrecosto-pill hidden">
+    <span>SC: </span><span id="sobrecosto-val">20%</span>
+    <div id="sobrecosto-popover" class="sobrecosto-popover hidden">
+      <label>Sobrecosto %</label>
+      <input type="number" id="sobrecosto-input" min="0" max="500" step="0.1" />
+      <div class="sc-actions">
+        <button id="btn-sc-cancel" class="btn-cancel">Cancel</button>
+        <button id="btn-sc-ok" class="btn-primary">Aplicar</button>
+      </div>
+    </div>
+  </div>
+  <button id="btn-actualizar" class="btn-actualizar hidden">⟳ Actualizar</button>
+  <button id="btn-modo" class="btn-modo hidden" title="Cambiar modo Cliente/Desarrollador">👤 Cliente</button>
+  <div id="dev-menu-wrap" class="dev-menu-wrap hidden">
+    <button id="btn-dev-menu" class="btn-dev-menu" title="Menú">⚙ Menú ▾</button>
+    <div id="dev-menu" class="dev-menu hidden">
+      <button class="dev-menu-item" data-step="about">ℹ About</button>
+      <button class="dev-menu-item" data-step="session-log">📋 Log de cambios (debug)</button>
+      <hr style="margin:4px 0;border:none;border-top:1px solid var(--border)"/>
+      <button class="dev-menu-item" data-step="table-less">A- Tamaño tabla</button>
+      <button class="dev-menu-item" data-step="table-more">A+ Tamaño tabla</button>
+      <button class="dev-menu-item" data-step="table-reset">↺ Reset tabla</button>
+      <hr style="margin:4px 0;border:none;border-top:1px solid var(--border)"/>
+      <button class="dev-menu-item" data-step="2">Generar Keynotes para Revit</button>
+      <button class="dev-menu-item" data-step="4">Actualizar Cantidades de Revit</button>
+    </div>
+  </div>
+  <button id="btn-cronograma" class="btn-cronograma hidden" title="Ver cronograma (Gantt)">📅 Cronograma</button>
+  <div id="export-menu-wrap" class="export-menu-wrap hidden">
+    <button id="btn-exportar" class="btn-export">⬇ Exportar ▾</button>
+    <div id="export-menu" class="export-menu hidden">
+      <button class="export-menu-item" data-kind="presupuesto">📄 Presupuesto</button>
+      <button class="export-menu-item" data-kind="insumos">🧾 Insumos necesarios de esta obra</button>
+      <button class="export-menu-item" data-kind="audit">📋 Reporte auditoría XLSX</button>
+      <button class="export-menu-item" data-kind="db">🗂 Base de datos completa (insumos por renglón)</button>
+      <button class="export-menu-item" data-kind="cronograma-xlsx">📅 Cronograma (Gantt) XLSX</button>
+      <hr style="margin:4px 0;border:none;border-top:1px solid var(--border)"/>
+      <button class="export-menu-item" data-kind="pdf-membrete">🧾 PDF con membrete ConsuConstruct…</button>
+      <button class="export-menu-item" data-kind="pdf-banco">🏦 PDF con membrete para Banco…</button>
+      <hr style="margin:4px 0;border:none;border-top:1px solid var(--border)"/>
+      <button class="export-menu-item" data-kind="publish-portal">☁ Publicar a Portal (Supabase)</button>
+    </div>
+  </div>
+  <select id="sel-modulo" class="hidden" title="Abrir módulo de cálculo"
+    style="font-size:12px;font-weight:600;padding:3px 8px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:3px;cursor:pointer;height:28px">
+    <option value="">⚙ Módulos ▾</option>
+    <option value="diseno">📐 Diseño (concreto)</option>
+    <option value="acero">🔧 Acero</option>
+    <option value="conexion">🔗 Conexión Acero</option>
+    <option value="etabs">🏗️ ETABS (sismo)</option>
+  </select>
+  <button id="btn-nueva-obra">+ Nueva Obra</button>
+</div>
+
+<!-- PANEL: DISEÑO ESTRUCTURAL -->
+<div id="diseno-view" style="display:none;position:fixed;inset:0;z-index:200;background:var(--bg);flex-direction:column;">
+  <div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--surface)">
+    <h2 style="margin:0;font-size:15px">📐 Diseño Estructural — CSI Div 03</h2>
+    <span id="diseno-status-badge" style="font-size:11px;color:var(--text-dim)"></span>
+    <div style="margin-left:auto;display:flex;gap:8px">
+      <button id="btn-diseno-calcular-todo" class="btn-primary" style="font-size:12px;padding:5px 12px">⚡ Calcular Todo</button>
+      <button id="btn-diseno-generar-todo"  class="btn-primary" style="font-size:12px;padding:5px 12px">📦 Generar Partidas CSI</button>
+      <button id="btn-cerrar-diseno-view"   class="btn-cancel"  style="font-size:12px;padding:5px 12px">✕ Cerrar</button>
+    </div>
+  </div>
+  <div style="display:flex;flex:1;overflow:hidden">
+
+    <!-- Panel izquierdo: lista de elementos -->
+    <div id="diseno-elem-list" style="width:220px;min-width:180px;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden">
+      <div style="padding:8px;border-bottom:1px solid var(--border);display:flex;gap:6px;align-items:center">
+        <b style="font-size:12px">Elementos</b>
+        <button id="btn-diseno-sync-bases" class="btn-primary" style="margin-left:auto;font-size:10px;padding:3px 7px" title="Importar vigas/columnas Div 03 de la base de datos V1.2">⟳ V1.2</button>
+        <button id="btn-diseno-nuevo-elem" class="btn-icon-add" title="Nuevo elemento">+</button>
+      </div>
+      <div style="padding:6px 8px;border-bottom:1px solid var(--border)">
+        <button id="btn-diseno-import-etabs" class="btn-primary" style="width:100%;font-size:11px;padding:5px 8px" title="Importar elementos de concreto desde un export de ETABS (Concrete Frame Design)">⬆ Importar de ETABS (concreto)</button>
+        <!-- Acero LRFD se importa ahora en el módulo Acero (⚙ Módulos → 🔧 Acero). -->
+        <!-- Mini-form de importación (oculto hasta clic) -->
+        <div id="diseno-import-form" style="display:none;margin-top:8px;background:var(--surface2);border:1px solid var(--accent);border-radius:4px;padding:8px">
+          <div style="font-size:10px;color:var(--text-dim);margin-bottom:6px;line-height:1.4">Sube el export <b>.csv/.xlsx</b> de ETABS o pega la tabla. Crea elementos + casos de carga (no genera partidas todavía).</div>
+          <input type="file" id="diseno-import-file" accept=".csv,.tsv,.txt,.xlsx" style="font-size:11px;width:100%;margin-bottom:6px"/>
+          <textarea id="diseno-import-paste" rows="4" placeholder="Story,Label,UniqueName,Section,Combo,As&#10;...o pega aquí la tabla copiada de ETABS" style="width:100%;box-sizing:border-box;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:3px;font-family:monospace;font-size:10px;padding:5px;margin-bottom:6px"></textarea>
+          <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px">
+            <span style="font-size:10px;color:var(--text-dim)">Unidad</span>
+            <select id="diseno-import-unidad" style="flex:1;font-size:11px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:3px;padding:2px 4px">
+              <option value="kgf" selected>kgf</option>
+              <option value="kn">kN</option>
+              <option value="ton">ton</option>
+            </select>
+            <span id="diseno-import-recub-wrap" style="display:flex;gap:6px;align-items:center">
+              <span style="font-size:10px;color:var(--text-dim)">Recub (cm)</span>
+              <input type="number" id="diseno-import-recub" value="4" step="0.5" min="0" style="width:52px;font-size:11px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:3px;padding:2px 4px"/>
+            </span>
+            <span id="diseno-import-grado-wrap" style="display:none;gap:6px;align-items:center">
+              <span style="font-size:10px;color:var(--text-dim)">Acero</span>
+              <select id="diseno-import-acero-grado" style="width:64px;font-size:11px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:3px;padding:2px 4px">
+                <option value="A992" selected>A992</option>
+                <option value="A36">A36</option>
+                <option value="A500">A500</option>
+              </select>
+            </span>
+          </div>
+          <div style="display:flex;gap:6px">
+            <button id="btn-diseno-import-enviar" class="btn-primary" style="flex:1;font-size:11px;padding:4px">Importar</button>
+            <button id="btn-diseno-import-cancelar" class="btn-cancel" style="font-size:11px;padding:4px 8px">✕</button>
+          </div>
+        </div>
+        <div id="diseno-import-result" style="margin-top:8px"></div>
+      </div>
+      <div id="diseno-elem-items" style="overflow-y:auto;flex:1;padding:4px"></div>
+    </div>
+
+    <!-- Panel central: tabs -->
+    <!-- Panel central: SPLIT — izquierda gestión (tabs), derecha Hoja persistente -->
+    <div style="flex:1;display:flex;overflow:hidden">
+
+      <!-- IZQUIERDA: tabs Geometría / Casos / Resultados / Procedimiento / Cómo se usa -->
+      <div style="width:44%;min-width:360px;display:flex;flex-direction:column;border-right:1px solid var(--border);overflow:hidden">
+        <div class="panel-tabs" style="padding:0 12px">
+          <button class="tab-btn active" data-dtab="geometria">Geometría</button>
+          <button class="tab-btn" data-dtab="casos">Casos de Carga</button>
+          <button class="tab-btn" data-dtab="resultados">Resultados</button>
+          <button class="tab-btn" data-dtab="procedimiento">📐 Procedimiento</button>
+          <button class="tab-btn" data-dtab="ayuda">📖 Cómo se usa</button>
+        </div>
+        <div style="flex:1;overflow-y:auto">
+
+      <!-- Tab: Geometría -->
+      <div id="dtab-geometria" class="tab-content active" style="overflow-y:auto;padding:14px">
+        <div id="diseno-geom-empty" style="color:var(--text-dim);font-size:13px">Selecciona o crea un elemento.</div>
+        <div id="diseno-geom-form" style="display:none">
+          <div style="font-size:11px;color:var(--text-dim);margin-bottom:10px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:7px 9px">
+            🏗️ Define la <b>sección propuesta</b> y el material. El <b>CSI</b> es la llave maestra del elemento (auto-asignada). Los campos visibles cambian según el tipo. <b>d</b> es el peralte <i>efectivo</i> (h − recubrimiento), no la altura total.
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 20px;font-size:13px">
+            <div>
+              <label style="font-size:11px;color:var(--text-dim)">CSI (llave maestra)</label>
+              <input id="dg-csi" type="text" placeholder="03 31 00.01" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 6px;border-radius:3px;font-family:monospace;font-weight:600"/>
+            </div>
+            <div>
+              <label style="font-size:11px;color:var(--text-dim)">Mark (opcional)</label>
+              <input id="dg-mark" type="text" placeholder="VA-01" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 6px;border-radius:3px"/>
+            </div>
+            <div>
+              <label style="font-size:11px;color:var(--text-dim)">Tipo de elemento</label>
+              <select id="dg-tipo" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 6px;border-radius:3px">
+                <option value="VIGA_SIMPLE">Viga Simple</option>
+                <option value="VIGA_DOBLE">Viga Doble Armada</option>
+                <option value="VIGA_T">Viga T</option>
+                <option value="COLUMNA">Columna</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:11px;color:var(--text-dim)">f'c (kg/cm²)</label>
+              <input id="dg-fc" type="number" value="210" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 6px;border-radius:3px"/>
+            </div>
+            <div>
+              <label style="font-size:11px;color:var(--text-dim)">fy (kg/cm²)</label>
+              <input id="dg-fy" type="number" value="4200" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 6px;border-radius:3px"/>
+            </div>
+            <div id="dg-b-wrap">
+              <label style="font-size:11px;color:var(--text-dim)">Ancho b (cm)</label>
+              <input id="dg-b" type="number" value="30" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 6px;border-radius:3px"/>
+            </div>
+            <div id="dg-d-wrap" title="Peralte EFECTIVO = altura total h − recubrimiento al centroide del acero (típico h−6 cm). NO es la altura total.">
+              <label style="font-size:11px;color:var(--text-dim)">Peralte efectivo d (cm) ⓘ</label>
+              <input id="dg-d" type="number" value="50" title="d = h − recubrimiento. Distancia de la fibra en compresión al centroide del acero de tensión." style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 6px;border-radius:3px"/>
+            </div>
+            <div id="dg-dprim-wrap" style="display:none">
+              <label style="font-size:11px;color:var(--text-dim)">Recub. compresión d' (cm)</label>
+              <input id="dg-dprim" type="number" value="5" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 6px;border-radius:3px"/>
+            </div>
+            <div id="dg-bp-wrap" style="display:none">
+              <label style="font-size:11px;color:var(--text-dim)">Ancho patín bp (cm)</label>
+              <input id="dg-bp" type="number" value="120" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 6px;border-radius:3px"/>
+            </div>
+            <div id="dg-tf-wrap" style="display:none">
+              <label style="font-size:11px;color:var(--text-dim)">Espesor patín t (cm)</label>
+              <input id="dg-tf" type="number" value="15" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 6px;border-radius:3px"/>
+            </div>
+            <div id="dg-lx-wrap" style="display:none">
+              <label style="font-size:11px;color:var(--text-dim)">Dimensión X / lx (cm)</label>
+              <input id="dg-lx" type="number" value="35" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 6px;border-radius:3px"/>
+            </div>
+            <div id="dg-ly-wrap" style="display:none">
+              <label style="font-size:11px;color:var(--text-dim)">Dimensión Y / ly (cm)</label>
+              <input id="dg-ly" type="number" value="35" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 6px;border-radius:3px"/>
+            </div>
+            <div title="Longitud del elemento. Multiplica sección y perímetro para el takeoff de concreto (m³), encofrado (m²) y acero (kg).">
+              <label style="font-size:11px;color:var(--text-dim)">Longitud (m) — para takeoff ⓘ</label>
+              <input id="dg-long" type="number" value="0" step="0.1" title="Longitud para cuantificar volúmenes. Si es 0, no se genera takeoff." style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 6px;border-radius:3px"/>
+            </div>
+            <div>
+              <label style="font-size:11px;color:var(--text-dim)">Notas</label>
+              <input id="dg-notas" type="text" placeholder="Observaciones..." style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 6px;border-radius:3px"/>
+            </div>
+          </div>
+          <div style="margin-top:12px;display:flex;gap:8px">
+            <button id="btn-diseno-guardar-geom" class="btn-primary" style="font-size:12px">Guardar Geometría</button>
+            <button id="btn-diseno-delete-elem" class="btn-cancel" style="font-size:12px;color:#e74c3c">🗑 Eliminar Elemento</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Casos de Carga -->
+      <div id="dtab-casos" class="tab-content" style="overflow-y:auto;padding:14px;display:none">
+        <div id="diseno-casos-empty" style="color:var(--text-dim);font-size:13px">Selecciona un elemento primero.</div>
+        <div id="diseno-casos-wrap" style="display:none">
+          <table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:10px">
+            <thead><tr style="background:var(--surface2)">
+              <th style="padding:5px 6px;text-align:left">Combinación</th>
+              <th style="padding:5px 6px;text-align:right">Mu t·m</th>
+              <th style="padding:5px 6px;text-align:right">Vu t</th>
+              <th style="padding:5px 6px;text-align:right">Tu t·m</th>
+              <th style="padding:5px 6px;text-align:right">Nu/Pu t</th>
+              <th style="padding:5px 6px;text-align:right">Mu-XX</th>
+              <th style="padding:5px 6px;text-align:right">Mu-YY</th>
+              <th style="padding:5px 6px;text-align:center">★</th>
+              <th style="padding:5px 6px"></th>
+            </tr></thead>
+            <tbody id="diseno-casos-body"></tbody>
+          </table>
+          <!-- Formulario agregar caso -->
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px;font-size:12px">
+            <b style="font-size:12px;display:block;margin-bottom:2px">+ Agregar caso de carga</b>
+            <div style="font-size:10px;color:var(--text-dim);margin-bottom:8px">
+              Una fila = una <b>combinación de carga</b> de tu análisis. <b>Tú lees</b> los valores en ETABS / SAP / cálculo manual y <b>los escribes aquí</b> — el módulo NO se conecta a ETABS (eso es importación futura desde Revit). Los campos cambian según el tipo del elemento. El sistema marca ★ el caso que gobierna (mayor acero).
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+              <div title="Nombre de la combinación de carga. Solo identifica el caso, no entra en fórmulas."><label style="font-size:10px;color:var(--text-dim)">Nombre / combinación</label><input id="dc-nombre" placeholder="D+L" title="Ej: D+L, D+L+E, Sismo X. Solo etiqueta." style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:3px 5px;border-radius:3px"/></div>
+            </div>
+
+            <!-- CARGAS DE VIGA -->
+            <div id="dc-viga-fields" style="margin-top:10px">
+              <div style="font-size:10px;font-weight:700;color:var(--accent);letter-spacing:.5px;margin-bottom:4px">CARGAS DE VIGA — del análisis (ETABS/SAP)</div>
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+                <div title="Momento flector último (factorizado). Alimenta K = Mu/(φ·f'c·b·d²) → As."><label style="font-size:10px;color:var(--text-dim)">Mu (t·m) ⓘ</label><input id="dc-mu" type="number" value="0" step="0.1" title="Momento último de diseño (viga). Demanda de flexión → acero As." style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:3px 5px;border-radius:3px"/></div>
+                <div title="Cortante último en cara de apoyo. Si Vu > φVc se requieren estribos (Av/S)."><label style="font-size:10px;color:var(--text-dim)">Vu (t) ⓘ</label><input id="dc-vu" type="number" value="0" step="0.1" title="Cortante último. Demanda de cortante → estribos." style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:3px 5px;border-radius:3px"/></div>
+                <div title="Momento torsor último. Déjalo en 0 si no hay torsión. Activa At/S y acero longitudinal Al."><label style="font-size:10px;color:var(--text-dim)">Tu (t·m) ⓘ</label><input id="dc-tu" type="number" value="0" step="0.01" title="Torsión última. 0 si no hay torsión. Activa refuerzo por torsión." style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:3px 5px;border-radius:3px"/></div>
+                <div title="Axial en viga (+compresión, −tensión). Modifica la resistencia al cortante del concreto vc."><label style="font-size:10px;color:var(--text-dim)">Nu axial (t) ⓘ</label><input id="dc-nu" type="number" value="0" step="0.1" title="Axial en viga. + compresión, − tensión. Ajusta vc. Déjalo en 0 si no hay axial." style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:3px 5px;border-radius:3px"/></div>
+              </div>
+            </div>
+
+            <!-- CARGAS DE COLUMNA -->
+            <div id="dc-col-fields" style="margin-top:10px;display:none">
+              <div style="font-size:10px;font-weight:700;color:var(--accent);letter-spacing:.5px;margin-bottom:4px">CARGAS DE COLUMNA — del análisis (ETABS/SAP)</div>
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+                <div title="Carga axial última de columna. Entra en δ (esbeltez) y en la interacción P-M."><label style="font-size:10px;color:var(--text-dim)">Pu axial (t) ⓘ</label><input id="dc-pu" type="number" value="0" step="0.1" title="Carga axial última de columna. Demanda de compresión." style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:3px 5px;border-radius:3px"/></div>
+                <div title="Momento de columna en el eje fuerte (XX). Se amplifica por δx."><label style="font-size:10px;color:var(--text-dim)">Mu-XX (t·m) ⓘ</label><input id="dc-mxx" type="number" value="0" step="0.1" title="Momento columna eje fuerte. Amplificado por δx." style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:3px 5px;border-radius:3px"/></div>
+                <div title="Momento de columna en el eje débil (YY). Se amplifica por δy."><label style="font-size:10px;color:var(--text-dim)">Mu-YY (t·m) ⓘ</label><input id="dc-myy" type="number" value="0" step="0.1" title="Momento columna eje débil. Amplificado por δy." style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:3px 5px;border-radius:3px"/></div>
+              </div>
+              <div style="font-size:10px;font-weight:700;color:var(--text-dim);letter-spacing:.5px;margin:9px 0 4px">ESBELTEZ — solo si la columna es esbelta. Déjalo así (lu=0) para columna corta (δ=1).</div>
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+                <div title="Longitud libre de pandeo entre apoyos (de planos). Si λ=k·lu/r > 22 la columna es esbelta y se amplifica el momento (δ)."><label style="font-size:10px;color:var(--text-dim)">lu libre (cm) ⓘ</label><input id="dc-lu" type="number" value="0" step="1" title="Longitud libre. 0 = columna corta, sin amplificación." style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:3px 5px;border-radius:3px"/></div>
+                <div title="Factor de longitud efectiva eje X (tabla ACI según arriostramiento). Típico 1.0; 0.5–2.0."><label style="font-size:10px;color:var(--text-dim)">k-X</label><input id="dc-kx" type="number" value="1" step="0.05" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:3px 5px;border-radius:3px"/></div>
+                <div title="Factor de longitud efectiva eje Y. Típico 1.0."><label style="font-size:10px;color:var(--text-dim)">k-Y</label><input id="dc-ky" type="number" value="1" step="0.05" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:3px 5px;border-radius:3px"/></div>
+                <div title="βd-X: relación carga sostenida (muerta) / carga total. Típico 0.10–0.40. Reduce la rigidez EI."><label style="font-size:10px;color:var(--text-dim)">βd-X</label><input id="dc-bdx" type="number" value="0.15" step="0.05" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:3px 5px;border-radius:3px"/></div>
+                <div title="βd-Y: relación carga sostenida / total, eje Y."><label style="font-size:10px;color:var(--text-dim)">βd-Y</label><input id="dc-bdy" type="number" value="0.15" step="0.05" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:3px 5px;border-radius:3px"/></div>
+                <div title="Cm-X: factor de momento equivalente. 1.0 si hay carga lateral; 0.6+0.4·M1/M2 si arriostrada."><label style="font-size:10px;color:var(--text-dim)">Cm-X</label><input id="dc-cmx" type="number" value="1" step="0.05" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:3px 5px;border-radius:3px"/></div>
+                <div title="Cm-Y: factor de momento equivalente, eje Y."><label style="font-size:10px;color:var(--text-dim)">Cm-Y</label><input id="dc-cmy" type="number" value="1" step="0.05" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:3px 5px;border-radius:3px"/></div>
+              </div>
+            </div>
+            <button id="btn-diseno-agregar-caso" class="btn-primary" style="margin-top:10px;font-size:12px">Agregar Caso</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Resultados -->
+      <div id="dtab-resultados" class="tab-content" style="overflow-y:auto;padding:14px;display:none">
+        <div id="diseno-res-empty" style="color:var(--text-dim);font-size:13px">Selecciona un elemento y calcula sus casos.</div>
+        <div id="diseno-res-wrap" style="display:none">
+          <table style="width:100%;border-collapse:collapse;font-size:11px">
+            <thead><tr style="background:var(--surface2)">
+              <th style="padding:4px 6px;text-align:left">Caso</th>
+              <th style="padding:4px 6px;text-align:right">As cm²</th>
+              <th style="padding:4px 6px;text-align:right">A's cm²</th>
+              <th style="padding:4px 6px;text-align:right">Av/S cm²/cm</th>
+              <th style="padding:4px 6px;text-align:right">Smax cm</th>
+              <th style="padding:4px 6px;text-align:right">Concreto m³</th>
+              <th style="padding:4px 6px;text-align:right">Acero kg</th>
+              <th style="padding:4px 6px;text-align:right">Estribos kg</th>
+              <th style="padding:4px 6px;text-align:right">Encofrado m²</th>
+              <th style="padding:4px 6px;text-align:center">Sísmico</th>
+              <th style="padding:4px 6px;text-align:center">★</th>
+              <th style="padding:4px 6px"></th>
+            </tr></thead>
+            <tbody id="diseno-res-body"></tbody>
+          </table>
+          <div id="diseno-res-advertencias" style="margin-top:8px;font-size:11px;color:#e67e22"></div>
+          <div style="margin-top:10px;display:flex;gap:8px">
+            <button id="btn-diseno-calc-elem" class="btn-primary" style="font-size:12px">⚡ Calcular Casos</button>
+            <button id="btn-diseno-generar-elem" class="btn-primary" style="font-size:12px">📦 Generar Partidas CSI 03</button>
+          </div>
+          <div id="diseno-memoria-hint" style="margin-top:14px;font-size:11px;color:var(--text-dim);border-top:1px dashed var(--border);padding-top:10px">
+            📐 Abre el tab <b>Procedimiento</b> para ver cada fórmula demostrada en notación idéntica al manual (símbolo, ecuación, sustitución numérica, resultado y referencia MD §).
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Procedimiento (memoria con fórmulas KaTeX, estilo MD) -->
+      <div id="dtab-procedimiento" class="tab-content" style="overflow-y:auto;padding:14px;display:none">
+        <div id="diseno-proc-empty" style="color:var(--text-dim);font-size:13px">Selecciona un elemento con casos de carga. El procedimiento se calcula y se muestra automáticamente.</div>
+        <div id="diseno-proc-panel"></div>
+      </div>
+
+      <!-- Tab: Cómo se usa (guía completa del módulo: concreto + acero + ETABS) -->
+      <div id="dtab-ayuda" class="tab-content" style="overflow-y:auto;padding:0;display:none">
+        <div id="diseno-ayuda-panel"></div>
+      </div>
+
+        </div><!-- /left content scroll -->
+      </div><!-- /columna izquierda -->
+
+      <!-- DERECHA: Hoja de Cálculo persistente (SIEMPRE visible) -->
+      <div style="flex:1;min-width:420px;overflow-y:auto;display:flex;flex-direction:column">
+        <div id="hoja-panel"></div>
+      </div>
+
+    </div><!-- /panel central (split) -->
+  </div><!-- /flex:1 -->
+</div>
+
+<!-- PANEL: ETABS — ACCIÓN SÍSMICA CHOC-08 (estilo Mathcad) -->
+<div id="etabs-view" style="display:none;position:fixed;inset:0;z-index:200;background:var(--bg);flex-direction:column;">
+  <div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--surface)">
+    <h2 style="margin:0;font-size:15px">🏗️ ETABS — Acción sísmica CHOC-08 <span style="font-size:11px;color:var(--text-dim);font-weight:400">(estilo Mathcad · concreto ACI)</span></h2>
+    <span id="etabs-status-badge" style="font-size:11px;color:var(--text-dim)"></span>
+    <div style="margin-left:auto;display:flex;gap:8px">
+      <button id="btn-etabs-export-csv" class="btn-primary" style="font-size:12px;padding:5px 12px" title="Descargar pares T,a/g para pegar en ETABS Response Spectrum">⬇ Exportar espectro ETABS</button>
+      <button id="btn-cerrar-etabs-view" class="btn-cancel" style="font-size:12px;padding:5px 12px">✕ Cerrar</button>
+    </div>
+  </div>
+  <div id="etabs-content" style="overflow:auto;flex:1"></div>
+</div>
+
+<!-- PANEL: ACERO ESTRUCTURAL — PUENTE ETABS (Steel Frame Design → Div 05) -->
+<div id="acero-view" style="display:none;position:fixed;inset:0;z-index:200;background:var(--bg);flex-direction:column;">
+  <div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--surface)">
+    <h2 style="margin:0;font-size:15px">🔧 Acero Estructural <span style="font-size:11px;color:var(--text-dim);font-weight:400">— AISC 360-16 LRFD §D-H · Calculadora + Import ETABS · CSI Div 05</span></h2>
+    <span id="acero-status-badge" style="font-size:11px;color:var(--text-dim)"></span>
+    <div style="margin-left:auto;display:flex;gap:8px">
+      <button id="btn-cerrar-acero-view" class="btn-cancel" style="font-size:12px;padding:5px 12px">✕ Cerrar</button>
+    </div>
+  </div>
+  <div id="acero-content" style="overflow:auto;flex:1;padding:14px 16px"></div>
+</div>
+
+<!-- PANEL: CONEXIÓN ACERO — AISC 360-16 §J (LRFD, estilo Mathcad) -->
+<div id="conexion-view" style="display:none;position:fixed;inset:0;z-index:200;background:var(--bg);flex-direction:column;">
+  <div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--surface)">
+    <h2 style="margin:0;font-size:15px">🔗 Conexión Acero <span style="font-size:11px;color:var(--text-dim);font-weight:400">(AISC 360-16 §J · LRFD · estilo Mathcad)</span></h2>
+    <span id="conexion-status-badge" style="font-size:11px;color:var(--text-dim)"></span>
+    <div style="margin-left:auto;display:flex;gap:8px">
+      <button id="btn-cerrar-conexion-view" class="btn-cancel" style="font-size:12px;padding:5px 12px">✕ Cerrar</button>
+    </div>
+  </div>
+  <div id="conexion-content" style="overflow:auto;flex:1"></div>
+</div>
+
+<!-- MODAL: ABOUT -->
+<div id="modal-about" class="modal-overlay hidden">
+  <div class="modal" style="max-width:720px">
+    <h2>About EstimaStruct</h2>
+    <div class="about-body">
+      <p class="about-lead">
+        EstimaStruct es una plataforma open source de estimación para ingeniería y arquitectura,
+        diseñada para análisis estructural, detalle técnico y control de costos con trazabilidad.
+      </p>
+      <p>
+        Funciona como puente entre Revit 2027 y el análisis de precios dentro del ecosistema
+        Estimbot, convirtiendo schedules y datos de obra en partidas auditables y listas para
+        presupuesto real.
+      </p>
+      <p>
+        Construida con FastAPI, SQLite y Vanilla JavaScript para priorizar portabilidad,
+        transparencia y despliegue simple en equipos técnicos.
+      </p>
+      <ul class="about-list">
+        <li>Estimación por partidas, capítulos CSI e insumos</li>
+        <li>Importación de cantidades desde Revit schedules</li>
+        <li>Base pensada para compartirse, auditarse y descargarse desde GitHub</li>
+        <li>Parte del módulo de automatización de Estimbot</li>
+      </ul>
+      <p>
+        By ConsuConstruct:
+        <a href="https://consuconstruct.com" target="_blank" rel="noopener noreferrer">consuconstruct.com</a>
+      </p>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn-primary" id="modal-about-close">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: CRONOGRAMA (GANTT) -->
+<div id="modal-cronograma" class="modal-overlay hidden">
+  <div class="modal modal-gantt">
+    <div class="gantt-head">
+      <h2 id="gantt-titulo">Cronograma</h2>
+      <div class="gantt-head-actions">
+        <span id="gantt-meta" class="gantt-meta"></span>
+        <button id="btn-gantt-export" class="btn-primary">⬇ Exportar XLSX</button>
+        <button id="modal-cronograma-close" class="btn-icon" title="Cerrar">✕</button>
+      </div>
+    </div>
+    <div id="gantt-body" class="gantt-body"></div>
+  </div>
+</div>
+
+<!-- MODAL: EXPORTAR PDF CON MEMBRETE -->
+<div id="modal-export-pdf" class="modal-overlay hidden">
+  <div class="modal" style="max-width:560px">
+    <h2>Exportar PDF — membrete ConsuConstruct</h2>
+    <div class="epdf-grid">
+      <label>Reporte
+        <select id="epdf-report">
+          <option value="presupuesto">Presupuesto (estimación por actividad)</option>
+          <option value="cronograma">Cronograma de ejecución</option>
+          <option value="insumos">Insumos necesarios</option>
+          <option value="db">Base de datos de actividades</option>
+          <option value="audit">Reporte de auditoría</option>
+        </select>
+      </label>
+      <label>Subtítulo<input id="epdf-subtitulo" type="text" /></label>
+      <label>Proyecto (título)<input id="epdf-proyecto" type="text" /></label>
+      <label>Código + nombre<input id="epdf-codnom" type="text" /></label>
+      <label>Cliente<input id="epdf-cliente" type="text" /></label>
+      <label>RTN cliente<input id="epdf-rtncli" type="text" placeholder="opcional" /></label>
+      <label>Ubicación<input id="epdf-ubic" type="text" placeholder="ej. Comayagua" /></label>
+      <label>Fecha<input id="epdf-fecha" type="text" placeholder="dd/mm/aaaa" /></label>
+      <label>Código interno<input id="epdf-codint" type="text" placeholder="CC-2026-XXX" /></label>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn-cancel" id="epdf-cancel">Cancelar</button>
+      <button type="button" class="btn-primary" id="epdf-preview" title="Vista previa HTML editable (ajustar márgenes, Chromium)">🖥 Vista previa</button>
+      <button type="button" class="btn-primary" id="epdf-gen">⬇ Generar PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: EXPORTAR PDF PARA BANCO (presupuesto + Gantt prorrateados a valor_banco) -->
+<div id="modal-export-pdf-banco" class="modal-overlay hidden">
+  <div class="modal" style="max-width:560px">
+    <h2>Exportar PDF — membrete para Banco</h2>
+    <div class="epdf-grid">
+      <label>Valor final para el Banco (L)<input id="epdfb-valor" type="number" min="0" step="0.01" /></label>
+      <label>Proyecto (título)<input id="epdfb-proyecto" type="text" /></label>
+      <label>Código + nombre<input id="epdfb-codnom" type="text" /></label>
+      <label>Cliente<input id="epdfb-cliente" type="text" /></label>
+      <label>RTN cliente<input id="epdfb-rtncli" type="text" placeholder="opcional" /></label>
+      <label>Ubicación<input id="epdfb-ubic" type="text" placeholder="ej. Comayagua" /></label>
+      <label>Fecha<input id="epdfb-fecha" type="text" placeholder="dd/mm/aaaa" /></label>
+      <label>Código interno<input id="epdfb-codint" type="text" placeholder="CC-2026-XXX" /></label>
+    </div>
+    <div id="epdfb-pct" style="margin-top:8px;font-size:12px;color:var(--text-dim)"></div>
+    <div class="modal-actions">
+      <button type="button" class="btn-cancel" id="epdfb-cancel">Cancelar</button>
+      <button type="button" class="btn-primary" id="epdfb-gen">⬇ Generar PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- LAYOUT -->
+<div id="layout">
+
+  <!-- TAB para reabrir la barra de obras cuando está escondida -->
+  <button id="btn-show-sidebar" class="sidebar-show-btn hidden" title="Mostrar barra de obras" type="button">▶</button>
+
+  <!-- SIDEBAR -->
+  <div id="sidebar">
+    <div id="sidebar-header">
+      <div class="sidebar-header-top">
+        <span>Obras</span>
+        <button id="btn-hide-sidebar" class="sidebar-collapse-btn" title="Esconder barra de obras" type="button">◀</button>
+      </div>
+      <select id="obra-dropdown" title="Cambiar obra activa"></select>
+    </div>
+    <div id="obras-list"></div>
+    <div id="bases-sidebar-toggle-wrap" class="hidden">
+      <button id="btn-bases-sidebar" class="bases-sidebar-toggle" type="button">Bases de Datos ▸</button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div id="main">
+    <div id="bases-drawer" class="hidden">
+      <div class="bases-header">
+        <h2 style="margin:0;font-size:15px;white-space:nowrap">Bases de Datos</h2>
+        <div id="bases-version-tabs" class="bases-version-tabs"></div>
+        <button id="modal-bases-close" class="btn-icon" style="margin-left:auto;font-size:16px;padding:4px 8px">✕</button>
+      </div>
+      <div class="bases-body bases-body-audit">
+        <div class="bases-toolbar">
+          <input id="bases-search" class="recurso-search" placeholder="Filtrar actividades por CSI, Type Mark o descripción..." />
+          <div class="bases-left-actions">
+            <button id="btn-bases-add" class="btn-bases-mini btn-bases-mini-add" title="Agregar matriz">+</button>
+            <button id="btn-bases-dup" class="btn-bases-mini btn-bases-mini-dup" title="Duplicar matriz seleccionada" disabled>⧉</button>
+            <button id="btn-bases-delete" class="btn-bases-mini btn-bases-mini-del" title="Eliminar matriz seleccionada" disabled>−</button>
+          </div>
+        </div>
+
+        <!-- Tabla agrupada por división CSI (espejo del presupuesto) -->
+        <div id="bases-table-area"></div>
+
+        <!-- Panel inferior: matriz de insumos de la ficha seleccionada -->
+        <div id="bases-panel-bottom" class="hidden">
+          <div id="bases-panel-titulo">
+            <span id="bases-edit-csi" class="panel-edit-field" title="Doble-clic para editar CSI">—</span>
+            <span class="panel-edit-sep">·</span>
+            <span id="bases-edit-tm" class="panel-edit-field panel-edit-tm" title="Doble-clic para editar Type Mark">—</span>
+            <span class="panel-edit-sep">—</span>
+            <span id="bases-edit-desc" class="panel-edit-field panel-edit-desc" title="Doble-clic para editar nombre de la matriz">—</span>
+            <button id="bases-panel-close" title="Cerrar">✕</button>
+          </div>
+
+          <div class="bases-detail-tab">
+            <div id="bases-panel-info-bar">
+              <div class="info-bar-item">
+                <span class="info-lbl">UNIDAD</span>
+                <span id="bases-detail-unidad" class="info-val">—</span>
+              </div>
+              <div class="info-bar-item">
+                <span class="info-lbl">MANO DE OBRA</span>
+                <span id="bases-detail-mo" class="info-val">0.00</span>
+              </div>
+              <div class="info-bar-item">
+                <span class="info-lbl">INSUMOS</span>
+                <span id="bases-detail-ma" class="info-val">0.00</span>
+              </div>
+              <div class="info-bar-item">
+                <span class="info-lbl">COSTO DIRECTO</span>
+                <span id="bases-detail-base" class="info-val">0.00</span>
+              </div>
+              <div class="info-bar-item">
+                <span class="info-lbl">PRECIO UNITARIO</span>
+                <span id="bases-detail-pu" class="info-val" style="color:var(--accent);font-weight:700">0.00</span>
+              </div>
+            </div>
+
+            <div id="bases-matriz-totales-bar">
+              <span class="mt-item mt-todos">Todos: <b id="bases-mt-todos">0.00</b></span>
+              <span class="mt-sep">|</span>
+              <span class="mt-item mt-ma">MA: <b id="bases-mt-ma">0.00</b></span>
+              <span class="mt-sep">|</span>
+              <span class="mt-item mt-mo">MO: <b id="bases-mt-mo">0.00</b></span>
+              <button id="btn-bases-add-insumo" class="btn-bases-addins" title="Agregar insumo de la lista" style="margin-left:auto">＋ Agregar insumo</button>
+            </div>
+
+            <div id="bases-matriz-table-wrap">
+              <table id="bases-matriz-table">
+                <thead>
+                  <tr>
+                    <th style="width:28px">#</th>
+                    <th style="width:80px">Clave</th>
+                    <th>Descripción</th>
+                    <th style="width:52px">Ud</th>
+                    <th class="num" style="width:96px">Rendimiento</th>
+                    <th class="num" style="width:96px">P. Unitario</th>
+                    <th class="num" style="width:96px">Total</th>
+                    <th style="width:30px"></th>
+                  </tr>
+                </thead>
+                <tbody id="bases-matriz-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="bases-footer">
+        <span id="bases-changes-count" style="font-size:12px;color:var(--text-dim)">Sin cambios pendientes</span>
+        <div style="display:flex;gap:8px">
+          <button id="btn-bases-undo" class="btn-cancel" disabled>↩ Deshacer (<span id="bases-undo-levels">0</span>)</button>
+          <button id="btn-bases-cancel" class="btn-cancel">Cancelar</button>
+          <button id="btn-bases-save" class="btn-primary" disabled>Guardar y Sincronizar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIÑETAS DE RECURSOS -->
+    <div id="recursos-bar">
+      <div class="recursos-bar-left">
+      <div id="vinetas">
+        <div class="vineta-wrap">
+          <button class="vineta" data-tipo="INSUMOS"     data-label="INSUMOS">
+            <span class="vineta-dot" style="background:#56ccf2"></span>INSUMOS <span class="vineta-count"></span>
+          </button>
+          <div class="vineta-menu">
+            <button class="vineta-sub" data-tipo="MATERIAL" title="Materiales"><span class="vineta-dot" style="background:#56ccf2"></span>MA</button>
+            <button class="vineta-sub" data-tipo="EQUIPO" title="Equipo"><span class="vineta-dot" style="background:#27ae60"></span>EQ</button>
+            <button class="vineta-sub" data-tipo="SUBCONTRATO" title="Subcontrato"><span class="vineta-dot" style="background:#bb6bd9"></span>SC</button>
+            <button class="vineta-sub" data-tipo="HERRAMIENTA" title="Herramienta"><span class="vineta-dot" style="background:#f2994a"></span>HER</button>
+            <button class="vineta-sub" data-tipo="FLETE" title="Flete"><span class="vineta-dot" style="background:#f2c94c"></span>FL</button>
+            <button class="vineta-sub" data-tipo="DISEÑO" title="Diseño"><span class="vineta-dot" style="background:#9b9b9b"></span>DIS</button>
+          </div>
+        </div>
+        <button class="vineta" data-tipo="MANO_OBRA"    data-label="MANO DE OBRA">
+          <span class="vineta-dot" style="background:#eb5757"></span>MANO DE OBRA <span class="vineta-count"></span>
+        </button>
+      </div>
+      <div class="recursos-bar-actions">
+        <button id="btn-toggle-typemark" class="btn-toggle-tm" title="Mostrar/ocultar columna Type Mark">Type Mark</button>
+        <button id="btn-toggle-solomo" class="btn-toggle-tm" title="Mano de Obra: muestra solo Cantidad, Mano de Obra y Total Mano de Obra (Cant × Mano de Obra)">Mano de Obra</button>
+        <button id="btn-toggle-auditoria" class="btn-toggle-tm" title="Auditoría: reemplaza Costo Directo y Precio Unitario por Total Mano de Obra (Cant × Mano de Obra) y Total Insumos (Cant × Insumos)">Auditoría</button>
+      </div>
+      </div>
+      <div id="recursos-sums"></div>
+    </div>
+
+    <!-- DATALIST GLOBAL DE UNIDADES -->
+    <datalist id="unidades-list"></datalist>
+
+    <!-- CONTENT WRAPPER: tabla a la izquierda, panel lateral a la derecha -->
+    <div id="content-wrapper">
+      <!-- TABLE -->
+      <div id="table-area">
+        <div class="empty-state">
+          <p>Crea una nueva obra para comenzar</p>
+          <small>Botón "+ Nueva Obra" arriba a la derecha</small>
+        </div>
+      </div>
+
+      <!-- PANEL LATERAL DERECHO DE RECURSOS -->
+      <div id="recursos-panel-lateral" class="hidden">
+        <div id="panel-resizer-v" title="Arrastrar para redimensionar"></div>
+        <div id="panel-lateral-header">
+          <span id="panel-lateral-title">—</span>
+          <button id="panel-lateral-close">✕</button>
+        </div>
+        <input id="recurso-search" class="recurso-search" placeholder="Buscar recurso..." />
+        <div id="recursos-lista"></div>
+      </div>
+    </div>
+
+    <!-- BOTTOM PANEL -->
+    <div id="panel-bottom" class="hidden">
+      <div id="panel-resizer-h" title="Arrastrar para redimensionar"></div>
+      <div id="panel-titulo">
+        <span id="panel-edit-csi" class="panel-edit-field" title="Doble-clic para editar CSI">—</span>
+        <span class="panel-edit-sep">·</span>
+        <span id="panel-edit-tm" class="panel-edit-field panel-edit-tm" title="Doble-clic para editar Type Mark">—</span>
+        <span class="panel-edit-sep">—</span>
+        <span id="panel-edit-desc" class="panel-edit-field panel-edit-desc" title="Doble-clic para editar nombre de la actividad">—</span>
+        <button id="panel-close">✕</button>
+      </div>
+
+      <!-- TABS -->
+      <div class="panel-tabs">
+        <button class="tab-btn active" data-tab="detalle">Detalle</button>
+      </div>
+
+      <!-- TAB: Detalle — Matriz de insumos -->
+      <div id="tab-detalle" class="tab-content active">
+
+        <!-- Barra de info rápida: unidad editable + costos + total -->
+        <div id="panel-info-bar">
+          <div class="info-bar-item">
+            <span class="info-lbl">UNIDAD</span>
+            <div class="unidad-wrap">
+              <span id="detail-unidad" class="info-val unidad-display">—</span>
+              <select id="select-unidad" class="unidad-select hidden"></select>
+              <button id="btn-unidad-edit" class="btn-icon" title="Cambiar unidad">✎</button>
+            </div>
+          </div>
+          <div class="info-bar-item">
+            <span class="info-lbl">MANO DE OBRA</span>
+            <span id="detail-mo" class="info-val">0.00</span>
+          </div>
+          <div class="info-bar-item">
+            <span class="info-lbl">INSUMOS</span>
+            <span id="detail-ma" class="info-val">0.00</span>
+          </div>
+          <div class="info-bar-item">
+            <span class="info-lbl">COSTO BASE</span>
+            <span id="detail-base" class="info-val">0.00</span>
+          </div>
+          <div class="info-bar-item">
+            <span class="info-lbl">PRECIO UNITARIO</span>
+            <span id="detail-pu" class="info-val" style="color:var(--accent);font-weight:700">0.00</span>
+          </div>
+          <div class="info-bar-item">
+            <span class="info-lbl">CANTIDAD</span>
+            <span id="detail-cantidad" class="info-val" style="color:var(--accent2);font-weight:700">—</span>
+          </div>
+          <div class="info-bar-item">
+            <span class="info-lbl">TOTAL</span>
+            <span id="detail-total" class="info-val" style="color:var(--accent);font-weight:700">—</span>
+          </div>
+        </div>
+
+        <!-- Barra de totales por tipo (estilo OPUS) -->
+        <div id="matriz-totales-bar">
+          <span class="mt-item mt-todos">Todos: <b id="mt-todos">0.00</b></span>
+          <span class="mt-sep">|</span>
+          <span class="mt-item mt-ma">MA: <b id="mt-ma">0.00</b></span>
+          <span class="mt-sep">|</span>
+          <span class="mt-item mt-mo">MO: <b id="mt-mo">0.00</b></span>
+        </div>
+
+        <!-- Tabla de insumos -->
+        <div id="matriz-table-wrap">
+          <table id="matriz-table">
+            <thead>
+              <tr>
+                <th style="width:28px">#</th>
+                <th style="width:80px">Clave</th>
+                <th>Descripción</th>
+                <th style="width:52px">Ud</th>
+                <th class="num" style="width:88px">Rendimiento</th>
+                <th class="num" style="width:90px">Costo Unit.</th>
+                <th class="num" style="width:96px">Total</th>
+                <th style="width:28px"></th>
+              </tr>
+            </thead>
+            <tbody id="matriz-body"></tbody>
+            <tfoot>
+              <tr id="row-add-insumo">
+                <td colspan="2">
+                  <div class="insumo-search-wrap">
+                    <input id="insumo-search" class="na-input" placeholder="Buscar recurso..." autocomplete="off" />
+                    <div id="insumo-dropdown" class="insumo-dropdown hidden"></div>
+                  </div>
+                </td>
+                <td colspan="4" style="padding-left:6px">
+                  <span id="insumo-selected-label" style="font-size:11px;color:var(--text-dim)">—</span>
+                </td>
+                <td>
+                  <button id="btn-add-insumo" class="btn-icon-add" title="Agregar">+</button>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+      </div>
+
+    </div><!-- /panel-bottom -->
+
+  </div><!-- /main -->
+</div><!-- /layout -->
+
+<!-- MODAL: ELEGIR SCHEDULES S5_schedules -->
+<div id="modal-csv-pick" class="modal-overlay hidden">
+  <div class="modal" style="max-width:560px">
+    <h2>Elegir export de Schedules</h2>
+    <p style="color:var(--text-dim);font-size:12px;margin-bottom:8px">
+      Solo archivos <code>schedules_*.csv</code> generados por PyRevit en <code>D:\OneDrive\Bots\Estimbot\EXPORTS\S5_schedules</code>
+    </p>
+    <div id="csv-pick-list" class="csv-pick-list"></div>
+    <div class="modal-actions">
+      <button type="button" class="btn-cancel" id="modal-csv-cancel">Cancelar</button>
+      <button type="button" class="btn-primary" id="modal-csv-ok" disabled>Importar schedules</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: SCRIPT OUTPUT -->
+<div id="modal-script-out" class="modal-overlay hidden">
+  <div class="modal" style="max-width:640px">
+    <h2 id="modal-script-title">Resultado</h2>
+    <div id="modal-script-body" class="script-out"></div>
+    <div class="modal-actions">
+      <button type="button" class="btn-primary" id="modal-script-close">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: BORRAR OBRA -->
+<div id="modal-delete" class="modal-overlay hidden">
+  <div class="modal">
+    <h2>Borrar Obra</h2>
+    <p id="modal-delete-msg" style="margin-bottom:14px;color:var(--text-dim);font-size:13px;line-height:1.5"></p>
+    <label class="check-confirm">
+      <input type="checkbox" id="del-confirm-check" />
+      <span>Confirmo que entiendo que esta acción es <b>irreversible</b></span>
+    </label>
+    <div class="modal-actions" style="margin-top:14px">
+      <button type="button" class="btn-cancel" id="modal-delete-cancel">Cancelar</button>
+      <button type="button" class="btn-danger" id="modal-delete-ok" disabled>Borrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: RENOMBRAR OBRA -->
+<div id="modal-rename" class="modal-overlay hidden">
+  <div class="modal">
+    <h2>Renombrar Obra</h2>
+    <form id="modal-rename-form">
+      <label>Nombre *</label>
+      <input type="text" id="rename-nombre" required />
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" id="modal-rename-cancel">Cancelar</button>
+        <button type="submit" class="btn-primary">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL: SELECCIONAR VERSION TEMPLATE -->
+<div id="modal-template-version" class="modal-overlay hidden">
+  <div class="modal" style="max-width:500px">
+    <h2>Seleccionar Versión de Template</h2>
+    <p style="color:var(--text-dim);font-size:12px;margin-bottom:16px;">
+      Elige qué versión de Template 2 - Updated usar para nuevas obras:
+    </p>
+    <div style="display:grid;gap:12px;margin-bottom:20px">
+      <label style="display:flex;align-items:center;padding:12px;border:2px solid var(--border);border-radius:6px;cursor:pointer;transition:all 0.2s" id="label-v1-0">
+        <input type="radio" name="template-version" value="v1.0" style="margin-right:12px;cursor:pointer;width:18px;height:18px"/>
+        <div>
+          <div style="font-weight:600;margin-bottom:2px">Template V1.0</div>
+          <div style="font-size:11px;color:var(--text-dim)">Datos originales</div>
+        </div>
+      </label>
+      <label style="display:flex;align-items:center;padding:12px;border:2px solid var(--border);border-radius:6px;cursor:pointer;transition:all 0.2s" id="label-v1-1">
+        <input type="radio" name="template-version" value="v1.1" style="margin-right:12px;cursor:pointer;width:18px;height:18px"/>
+        <div>
+          <div style="font-weight:600;margin-bottom:2px">Template V1.1</div>
+          <div style="font-size:11px;color:var(--text-dim)">Versión legacy</div>
+        </div>
+      </label>
+      <label style="display:flex;align-items:center;padding:12px;border:2px solid var(--border);border-radius:6px;cursor:pointer;transition:all 0.2s" id="label-v1-2">
+        <input type="radio" name="template-version" value="v1.2" style="margin-right:12px;cursor:pointer;width:18px;height:18px"/>
+        <div>
+          <div style="font-weight:600;margin-bottom:2px">Template V1.2</div>
+          <div style="font-size:11px;color:var(--text-dim)">Versión vigente</div>
+        </div>
+      </label>
+    </div>
+    <div style="padding:12px;background:var(--bg-dark);border-radius:6px;margin-bottom:16px;font-size:11px;color:var(--text-dim)">
+      <strong>Versión seleccionada:</strong> <span id="version-selected">V1.0</span>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn-cancel" id="modal-tv-cancel">Cerrar</button>
+      <button type="button" class="btn-primary" id="modal-tv-ok">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: NUEVA OBRA -->
+<div id="modal-obra" class="modal-overlay hidden">
+  <div class="modal">
+    <h2>Nueva Obra</h2>
+    <p style="color:var(--text-dim);font-size:12px;margin-bottom:12px;">Se copiarán las actividades de <strong id="template-desc">Template V1.2</strong>.</p>
+    <form id="modal-obra-form">
+      <label>Nombre de la obra *</label>
+      <input type="text" id="obra-nombre" placeholder="Ej: Residencial Los Pinos" required />
+      <label>Cliente</label>
+      <input type="text" id="obra-cliente" placeholder="Nombre del cliente" />
+      <label>Moneda</label>
+      <select id="obra-moneda">
+        <option value="HNL">HNL — Lempira</option>
+        <option value="USD">USD — Dólar</option>
+      </select>
+      <label>Sobrecosto / Overhead %</label>
+      <input type="number" id="obra-sobrecosto" value="20" min="0" max="100" step="0.1" />
+      <label>Base de Datos *</label>
+      <select id="obra-template-version">
+        <option value="v1.0">V1.0 — Original</option>
+        <option value="v1.1">V1.1 — Legacy</option>
+        <option value="v1.2">V1.2 — Vigente</option>
+      </select>
+      <small style="color:var(--text-dim);margin-top:4px;display:block;">Cada proyecto puede usar una base de datos diferente</small>
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" id="modal-obra-cancel">Cancelar</button>
+        <button type="submit" class="btn-primary">Crear Obra</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- COLOR PICKER POPUP (flotante, posicionado con JS) -->
+<div id="color-picker-popup" class="color-picker-popup hidden">
+  <div class="cp-item" data-color="amarillo">
+    <span class="cp-dot" style="background:#f2c94c"></span>
+    <div><b>Amarillo</b> — Fórmula dependiente</div>
+  </div>
+  <div class="cp-item" data-color="verde">
+    <span class="cp-dot" style="background:#27ae60"></span>
+    <div><b>Verde</b> — Asignado en Revit</div>
+  </div>
+  <div class="cp-item" data-color="rosa">
+    <span class="cp-dot" style="background:#e91e8c"></span>
+    <div><b>Rosa</b> — Por asignar</div>
+  </div>
+  <div class="cp-item" data-color="blanco">
+    <span class="cp-dot" style="background:transparent;border:1px solid #777"></span>
+    <div><b>Blanco</b> — Manual</div>
+  </div>
+</div>
+
+<!-- MODAL: AGREGAR / ACTUALIZAR FICHAS -->
+<div id="modal-updater" class="modal-overlay hidden">
+  <div class="modal" style="max-width:560px">
+    <h2>Agregar / Actualizar Fichas</h2>
+    <p style="color:var(--text-dim);font-size:12px;margin-bottom:12px">
+      Carpeta: <code>D:\OneDrive\Bots\Estimbot\MasterFiles\Updater</code>
+    </p>
+    <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Base de datos destino:</label>
+    <select id="updater-version" style="width:100%;margin-bottom:14px;background:var(--surface2);color:var(--text);border:1px solid var(--border);padding:6px 8px;border-radius:4px">
+      <option value="v1.0">V1.0 — Original</option>
+      <option value="v1.1">V1.1 — Legacy</option>
+      <option value="v1.2" selected>V1.2 — Vigente</option>
+    </select>
+    <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Archivo Excel:</label>
+    <div id="updater-pick-list" class="csv-pick-list"></div>
+    <div class="modal-actions" style="margin-top:14px">
+      <button type="button" class="btn-cancel" id="modal-updater-cancel">Cancelar</button>
+      <button type="button" class="btn-primary" id="modal-updater-ok" disabled>Importar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: AGREGAR MATRIZ -->
+<div id="modal-bases-add" class="modal-overlay hidden">
+  <div class="modal modal-bases-add">
+    <h2>Agregar matriz</h2>
+    <p style="margin-bottom:12px;color:var(--text-dim);font-size:12px">
+      Completa los campos de la nueva matriz. La ficha se agregará a la base activa y se guardará al sincronizar.
+    </p>
+    <label for="bases-new-color">Color</label>
+    <select id="bases-new-color">
+      <option value="blanco">Blanco</option>
+      <option value="rosa">Rosa</option>
+      <option value="amarillo">Amarillo</option>
+      <option value="verde">Verde</option>
+      <option value="azul">Azul</option>
+    </select>
+    <label for="bases-new-csi">Numero CSI</label>
+    <input type="text" id="bases-new-csi" placeholder="03 31 00.1" />
+    <label for="bases-new-nombre">Nombre</label>
+    <input type="text" id="bases-new-nombre" placeholder="Descripción de la matriz" />
+    <label for="bases-new-typemark">Type Mark</label>
+    <input type="text" id="bases-new-typemark" placeholder="TM-001" />
+    <div class="modal-actions">
+      <button type="button" id="modal-bases-add-cancel" class="btn-cancel">Cancelar</button>
+      <button type="button" id="modal-bases-add-save" class="btn-primary">Agregar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: AGREGAR INSUMO A LA MATRIZ (catálogo de recursos) -->
+<div id="modal-bases-insumo" class="modal-overlay hidden">
+  <div class="modal" style="max-width:720px;display:flex;flex-direction:column;max-height:82vh">
+    <h2>Agregar insumo a la matriz</h2>
+    <p style="margin:-6px 0 10px;color:var(--text-dim);font-size:12px">
+      Recursos de la base de datos, separados por tipo. Clic para agregarlo (entra con rendimiento 1; ajústalo en la matriz).
+    </p>
+    <input id="bases-insumo-search" class="recurso-search" placeholder="Buscar por código o descripción..." style="margin-bottom:10px"/>
+    <div id="bases-insumo-list" class="bases-insumo-list"></div>
+
+    <!-- Form: crear recurso nuevo (aparece al buscar un código inexistente) -->
+    <div id="bases-insumo-create" class="bases-insumo-create hidden">
+      <div class="bic-title">➕ Crear recurso nuevo</div>
+      <div class="bic-grid">
+        <label>Código (clave)<input id="bic-clave" type="text" placeholder="MA-373" /></label>
+        <label>Tipo
+          <select id="bic-tipo">
+            <option value="MATERIAL">Material</option>
+            <option value="MANO_OBRA">Mano de obra</option>
+            <option value="EQUIPO">Equipo</option>
+            <option value="SUBCONTRATO">Subcontrato</option>
+            <option value="HERRAMIENTA">Herramienta</option>
+            <option value="DISEÑO">Diseño</option>
+            <option value="FLETE">Flete</option>
+          </select>
+        </label>
+        <label class="bic-wide">Descripción / nombre<input id="bic-desc" type="text" placeholder="Nombre del insumo" /></label>
+        <label>Unidad<input id="bic-ud" type="text" list="unidades-list" placeholder="pza, m2, kg..." /></label>
+        <label>Precio unitario<input id="bic-precio" type="number" step="any" min="0" placeholder="0.00" /></label>
+      </div>
+      <div class="bic-actions">
+        <button type="button" class="btn-cancel" id="bic-cancel">Cancelar</button>
+        <button type="button" class="btn-primary" id="bic-save">Crear y agregar</button>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button type="button" class="btn-primary" id="modal-bases-insumo-close">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: LOG DE CAMBIOS (debug) -->
+<div id="modal-session-log" class="modal-overlay hidden">
+  <div class="modal" style="max-width:860px;display:flex;flex-direction:column;max-height:86vh">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+      <h2 style="margin:0">📋 Log de cambios — sesión</h2>
+      <span id="session-log-count" style="font-size:12px;color:var(--text-dim)">0 evento(s)</span>
+      <div style="margin-left:auto;display:flex;gap:8px">
+        <button type="button" class="btn-cancel" id="btn-session-log-copy">Copiar</button>
+        <button type="button" class="btn-cancel" id="btn-session-log-download">Descargar .txt</button>
+        <button type="button" class="btn-cancel" id="btn-session-log-clear">Limpiar</button>
+      </div>
+    </div>
+    <p style="margin:0 0 10px;color:var(--text-dim);font-size:11px">
+      Registro detallado de cambios manuales (persiste en este navegador). Útil para depurar: reproduce el orden exacto de ediciones antes de un error.
+    </p>
+    <div id="session-log-body" class="session-log-body"></div>
+    <div class="modal-actions">
+      <button type="button" class="btn-primary" id="modal-session-log-close">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.__ESTIMASTRUCT_API__ = "{{ api_base }}";
+</script>
+<script src="js/core.js?v={{ asset_version }}"></script>
+<script src="js/app.js?v={{ asset_version }}"></script>
+<script src="js/calculo-estructural.js?v={{ asset_version }}"></script>
+<script src="js/bases-drawer.js?v={{ asset_version }}"></script>
+<script src="js/tabla-render.js?v={{ asset_version }}"></script>
+<script>
+// ── Panel resizers ───────────────────────────────────────────────────────────
+(function () {
+  const rH = document.getElementById('panel-resizer-h');
+  const panelBottom = document.getElementById('panel-bottom');
+  let draggingH = false, startY = 0, startH = 0;
+
+  rH.addEventListener('mousedown', function (e) {
+    draggingH = true;
+    startY = e.clientY;
+    startH = panelBottom.offsetHeight;
+    document.body.style.userSelect = 'none';
+    document.body.style.cursor = 'ns-resize';
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', function (e) {
+    if (!draggingH) return;
+    const delta = startY - e.clientY;
+    const newH = Math.max(120, Math.min(window.innerHeight * 0.85, startH + delta));
+    panelBottom.style.height = newH + 'px';
+    panelBottom.style.maxHeight = newH + 'px';
+  });
+
+  document.addEventListener('mouseup', function () {
+    if (draggingH) { draggingH = false; document.body.style.userSelect = ''; document.body.style.cursor = ''; }
+  });
+
+  const rV = document.getElementById('panel-resizer-v');
+  const panelLateral = document.getElementById('recursos-panel-lateral');
+  let draggingV = false, startX = 0, startW = 0;
+
+  rV.addEventListener('mousedown', function (e) {
+    draggingV = true;
+    startX = e.clientX;
+    startW = panelLateral.offsetWidth;
+    document.body.style.userSelect = 'none';
+    document.body.style.cursor = 'ew-resize';
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', function (e) {
+    if (!draggingV) return;
+    const delta = startX - e.clientX;
+    const newW = Math.max(200, Math.min(700, startW + delta));
+    panelLateral.style.width = newW + 'px';
+  });
+
+  document.addEventListener('mouseup', function () {
+    if (draggingV) { draggingV = false; document.body.style.userSelect = ''; document.body.style.cursor = ''; }
+  });
+})();
+</script>
+</body>
+</html>
