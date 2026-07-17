@@ -26,7 +26,7 @@ function Kill-Port([int]$p) {
   $owners = Get-NetTCPConnection -LocalPort $p -ErrorAction SilentlyContinue |
             Where-Object { $_.State -eq 'Listen' } |
             Select-Object -ExpandProperty OwningProcess -Unique
-  foreach ($pid in $owners) { if ($pid -gt 0) { Kill-Tree $pid } }
+  foreach ($ownPid in $owners) { if ($ownPid -gt 0) { Kill-Tree $ownPid } }
 
   # Round 2: kill via netstat fallback (catches stale entries Get-NetTCPConnection misses)
   $hits = netstat -ano | Select-String (":{0}\s" -f $p) | Select-String 'LISTENING'
