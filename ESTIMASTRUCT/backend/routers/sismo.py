@@ -19,6 +19,35 @@ from backend.etabs_procedimiento import (
 from backend.calculo_estructural import RECUB_DEFAULT
 import uuid, os, re, json
 
+# Defaults CC-135 (Comayagua) usados cuando no hay ContextoSismico persistido
+_SISMO_DEFAULTS = {
+    "zona": "3b", "suelo": "S1", "importancia_i": 1.0,
+    "rw": 8.0, "hn_m": 3.0, "w_t": 1206.0,
+}
+
+# Municipios Honduras → zona sísmica CHOC-08 (nombre normalizado sin tildes/espacios)
+_MUNICIPIOS_ZONA = {
+    # Zona 1
+    "puerto cortes": "1", "cortes": "1", "omoa": "1", "choloma": "1",
+    "la ceiba": "1", "ceiba": "1", "tela": "1", "trujillo": "1",
+    "tocoa": "1", "sonaguera": "1", "olanchito": "1",
+    # Zona 2
+    "san pedro sula": "2", "villanueva": "2", "la lima": "2",
+    "el progreso": "2", "yoro": "2", "juticalpa": "2", "catacamas": "2",
+    # Zona 3a
+    "tegucigalpa": "3a", "distrito central": "3a", "talanga": "3a",
+    "danli": "3a", "choluteca": "3a", "nacaome": "3a", "langue": "3a",
+    "santa rosa de copan": "3a", "copan": "3a",
+    # Zona 3b
+    "comayagua": "3b", "siguatepeque": "3b", "la paz": "3b",
+    "marcala": "3b", "intibuca": "3b", "la esperanza": "3b",
+    "gracias": "3b", "nueva ocotepeque": "3b", "ocotepeque": "3b",
+    # Zona 4a
+    "san marcos de colon": "4a", "langue": "4a", "nacaome": "4a",
+    # Zona 4b
+    "amatillo": "4b",
+}
+
 router = APIRouter(prefix="/diseno", tags=["diseno-sismo"])
 
 class SismoChoc08(BaseModel):
