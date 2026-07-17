@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.db import engine
 from backend.models import Base
-from backend.routers import presupuestos, partidas, recursos, calculos, export, insumos, scripts as scripts_router, bases, updater, diagnostics, memory, diseno_estructural, sismo, conexion_acero, miembro_acero, acero_diseno, portal_publish, cronograma as cronograma_router, export_pdf, preview_pdf
+from backend.routers import presupuestos, partidas, recursos, calculos, export, insumos, scripts as scripts_router, bases, updater, diagnostics, memory, diseno_estructural, sismo, conexion_acero, miembro_acero, acero_diseno, portal_publish, cronograma as cronograma_router, export_pdf, preview_pdf, db_backup
 from backend.error_handler import register_exception_handlers
 from backend.silent_notifier import notifier, notify_file
 
@@ -23,7 +23,7 @@ app = FastAPI(title="Estimacion API", version="1.1.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5000", "http://127.0.0.1:5000"],
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -50,6 +50,7 @@ app.include_router(portal_publish.router)   # POST /presupuestos/{id}/publish-su
 app.include_router(cronograma_router.router)   # GET cronograma + export-cronograma (Gantt)
 app.include_router(export_pdf.router)   # GET export-pdf (membrete ConsuConstruct)
 app.include_router(preview_pdf.router)   # GET preview-pdf (HTML) + export-pdf-html (Chromium)
+app.include_router(db_backup.router)   # GET db/export-zip + POST db/import-zip (copia de seguridad BD)
 
 
 @app.get("/")

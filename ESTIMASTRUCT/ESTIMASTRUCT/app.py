@@ -5,11 +5,12 @@ Interfaz para gestionar matrices y recursos
 http://localhost:5000
 """
 
-from flask import Flask, render_template, render_template_string, request, jsonify, send_from_directory
+from flask import Flask, render_template, render_template_string, request, jsonify, send_from_directory, Response
 import sqlite3
 import os
 import json
 import glob
+import requests
 
 # Rutas relativas al repo (portable; sobrevive moves del arbol)
 ESTIMASTRUCT_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -102,7 +103,7 @@ def _render_front():
         total_recursos=total_recursos,
         tipos=tipos,
         top_matrices=top_matrices,
-        api_base=API_BASE,
+        api_base="/__api__",
         asset_version=_current_asset_version(),
     )
 
@@ -248,6 +249,35 @@ def matrices_page():
 def matriz_page(matriz_id):
     """Página - Detalle matriz"""
     return render_template('matriz_detail.html', matriz_id=matriz_id)
+
+
+@app.route('/__api__', defaults={'path': ''}, methods=['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'])
+@app.route('/__api__/<path:path>', methods=['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'])
+def api_proxy(path):
+    """Proxy same-origin hacia FastAPI para matar el problema de CORS/IP/LAN."""
+    target = API_BASE.rstrip("/")
+    if path:
+        target += "/" + path.lstrip("/")
+
+    headers = {
+        k: v for k, v in request.headers.items()
+        if k.lower() not in {"host", "content-length"}
+    }
+
+    upstream = requests.request(
+        method=request.method,
+        url=target,
+        params=request.args,
+        data=request.get_data(),
+        headers=headers,
+        cookies=request.cookies,
+        allow_redirects=False,
+        timeout=180,
+    )
+
+    excluded = {"content-encoding", "content-length", "transfer-encoding", "connection"}
+    resp_headers = [(k, v) for k, v in upstream.headers.items() if k.lower() not in excluded]
+    return Response(upstream.content, upstream.status_code, resp_headers)
 
 @app.route('/health')
 def health():

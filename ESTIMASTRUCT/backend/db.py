@@ -46,3 +46,21 @@ def get_db():
         raise
     finally:
         db.close()
+
+
+def dispose_engine():
+    """Descarta el pool de conexiones del engine — fuerza reconexion fresca
+    al archivo canonico (CONFIG.DB_PATH) en el siguiente checkout.
+
+    Uso: tras reemplazar estimacion.db por un import ZIP (backend/routers/
+    db_backup.py), tanto SQLAlchemy como el driver sqlite3 subyacente pueden
+    tener conexiones abiertas contra el archivo VIEJO. dispose() cierra esas
+    conexiones pooleadas sin recrear el objeto `engine` — mantiene su
+    identidad de objeto, asi que los modulos que ya hicieron
+    `from backend.db import engine` (main.py) o que usan `SessionLocal`
+    (la mayoria de los routers, via get_db(), y scripts_runner) NO necesitan
+    reimportar nada: el siguiente `SessionLocal()` abre una conexion nueva
+    que ve el archivo reemplazado. El hook `_set_sqlite_pragmas` (evento
+    "connect") se re-aplica automaticamente en esa conexion nueva.
+    """
+    engine.dispose()
