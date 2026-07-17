@@ -52,6 +52,7 @@ FICHAS_ACERO = {
     "W250X73":  "C-5",
     # Perfiles duales (col / viga) — desambiguar con rol
     "W150X24":  {"col": "C-6",  "viga": "VA-7"},
+    "W6X16":    {"col": "C-6",  "viga": "VA-7"},  # alias imperial de W150X24
     "W200X36":  {"col": "C-7",  "viga": "VA-8"},
     "W200X71":  {"col": "C-8",  "viga": "VA-9"},
     "W250X49":  {"col": "C-9",  "viga": "VA-10"},
@@ -233,7 +234,7 @@ def _parse_miembros(rows) -> list:
         requeridas=[],
         opcionales=["frame", "member", "uniquename",
                     "section", "profile", "analsect", "designsect",
-                    "analysissection",
+                    "designsection", "analysissection",
                     "designtype", "type", "frametype",
                     "length", "longitud", "length1",
                     "pmmratio", "dcratio", "ratio", "total", "totalratio", "dc",
@@ -242,7 +243,7 @@ def _parse_miembros(rows) -> list:
     )
     col_frame = _buscar_col(hit or {}, "frame", "member", "uniquename")
     col_perfil = _buscar_col(hit or {}, "section", "profile", "analsect",
-                             "designsect", "analysissection")
+                             "designsect", "designsection", "analysissection")
     col_rol = _buscar_col(hit or {}, "designtype", "type", "frametype")
     col_len = _buscar_col(hit or {}, "length", "longitud", "length1")
     col_dc = _buscar_col(hit or {}, "pmmratio", "dcratio", "ratio",
@@ -313,6 +314,7 @@ def parse_acero_bytes(raw: bytes) -> dict:
         out["avisos"].append(f"No se pudo abrir el .xlsx: {e}")
         return out
 
+    all_members = []
     for ws in wb.worksheets:
         buf = io.StringIO()
         w = csv.writer(buf)
@@ -326,11 +328,38 @@ def parse_acero_bytes(raw: bytes) -> dict:
         rows = _split_rows(texto)
         mb = _parse_miembros(rows)
         if mb:
-            out["miembros"].extend(mb)
+            all_members.extend(mb)
     try:
         wb.close()
     except Exception:  # noqa: BLE001
         pass
+
+    # Merge: join by frame ID to combine dc (from design summary) + length (from assigns)
+    # Build index: frame -> best record (prefer record with dc; fill missing length from assigns)
+    by_frame = {}
+    for m in all_members:
+        fid = m.get("frame", "").strip()
+        if not fid or fid.lower() in ("", "program determined"):
+            out["miembros"].append(m)
+            continue
+        if fid not in by_frame:
+            by_frame[fid] = m.copy()
+        else:
+            existing = by_frame[fid]
+            # Fill missing dc from new record
+            if existing.get("dc") is None and m.get("dc") is not None:
+                existing["dc"] = m["dc"]
+                existing["combo"] = m.get("combo") or existing.get("combo", "")
+            # Fill missing length from new record
+            if existing.get("longitud_mL") is None and m.get("longitud_mL") is not None:
+                existing["longitud_mL"] = m["longitud_mL"]
+            # Fill missing perfil/rol
+            if not existing.get("perfil") and m.get("perfil"):
+                existing["perfil"] = m["perfil"]
+            if not existing.get("rol") and m.get("rol"):
+                existing["rol"] = m["rol"]
+
+    out["miembros"].extend(by_frame.values())
 
     if not out["miembros"]:
         out["avisos"].append("No se reconocio la tabla de miembros en el .xlsx.")

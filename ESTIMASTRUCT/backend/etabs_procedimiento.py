@@ -510,6 +510,43 @@ EXPORT_ETABS_DOC = {
                      "(File > Export Current Table > To CSV).",
 }
 
+# ─────────────────────────────────────────────────────────────────────────────
+# DOCUMENTACION: Export XLSX para Import Acero (Steel Frame Summary)
+# ─────────────────────────────────────────────────────────────────────────────
+EXPORT_ETABS_ACERO_DOC = {
+    "que_es": "Archivo XLSX con el Steel Frame Design Summary de ETABS. "
+              "Contiene perfil, longitud y razon D/C por elemento. "
+              "El importador genera partidas Div 05 en EstimaStruct automaticamente.",
+    "paso_a_paso": [
+        "1. Corre el diseno de acero: Design > Steel Frame Design > Start Design/Check.",
+        "2. Abre tablas: Display > Show Tables (Ctrl+T).",
+        "3. En el arbol de tablas, marca SOLO estas dos hojas:",
+        "   - Design Data > Steel Frame Design > Steel Frame Design Summary",
+        "   - Assignments > Frame Assigns - Summary",
+        "4. Unidades recomendadas: kN, m (File > Change Tables Units antes de exportar).",
+        "5. Exporta: File > Export Tables to Excel (o boton Export en la barra de tablas).",
+        "6. Guarda el .xlsx — no renombrar hojas.",
+    ],
+    "hojas_requeridas": {
+        "Steel Frame Design Summary": [
+            "Frame (o Member / UniqueName)",
+            "DesignSect (o Section / Profile / AnalSect)",
+            "PRatio (o DCRatio / Ratio / TotalRatio)",
+            "ComboName (o Combo)",
+        ],
+        "Frame Assigns - Summary": [
+            "Frame (o UniqueName)",
+            "Length (longitud en metros si unidades = m)",
+        ],
+    },
+    "notas": [
+        "El parser hace JOIN entre ambas hojas por ID de frame para combinar D/C + longitud.",
+        "Perfil W6X16 (imperial) y W150X24 (metrico) son equivalentes — ambos mapeados.",
+        "Elementos sin perfil mapeado en FICHAS_ACERO aparecen como 'no mapeados' (aviso).",
+        "El endpoint POST /diseno/{pid}/import-etabs-acero?generar=true importa Y genera partidas en un solo llamado.",
+    ],
+}
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 4) PARSER TOLERANTE DEL EXPORT DE ETABS

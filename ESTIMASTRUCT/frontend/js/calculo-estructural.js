@@ -2173,19 +2173,13 @@ async function recalcMiembro() {
   }).join("");
 }
 
-// ── Form de Import (sidebar) — import-etabs-acero-fuerzas (§D-H, persistente) ──
+// ── Form de Import (sidebar) — import-etabs-acero (Steel Frame Summary XLSX) ──
 function aceroImportFormHTML() {
-  const inp = "background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:3px;padding:2px 4px;font-size:11px";
   return `
     <div style="border:1px solid var(--accent);border-radius:4px;padding:8px;background:var(--surface)">
-      <div style="font-size:10px;color:var(--text-dim);margin-bottom:6px;line-height:1.4">Fuerzas ETABS (Frame/Section/Combo/P/V2/M2/M3) → crea elementos + corre §D-H. Columna asume compresión.</div>
-      <input type="file" id="acero-imp-file" accept=".csv,.tsv,.txt,.xlsx" style="font-size:10px;width:100%;margin-bottom:6px"/>
-      <textarea id="acero-imp-paste" rows="4" placeholder="Pega la tabla de fuerzas…" style="width:100%;box-sizing:border-box;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:3px;font-family:monospace;font-size:9px;padding:5px;margin-bottom:6px"></textarea>
-      <div style="display:flex;gap:5px;align-items:center;margin-bottom:6px">
-        <select id="acero-imp-unidad" style="${inp};flex:1"><option value="kgf">kgf</option><option value="kn">kN</option><option value="ton">ton</option></select>
-        <select id="acero-imp-grado" style="${inp};flex:1"><option value="A992">A992</option><option value="A36">A36</option><option value="A500">A500</option></select>
-      </div>
-      <button id="acero-imp-btn" class="btn-primary" style="width:100%;font-size:11px;padding:4px">Importar y verificar</button>
+      <div style="font-size:10px;color:var(--text-dim);margin-bottom:6px;line-height:1.4">Steel Frame Design Summary XLSX (ETABS: Display → Show Tables → Steel Frame Design → Export to Excel). Genera partidas Div 05 automáticamente.</div>
+      <input type="file" id="acero-imp-file" accept=".xlsx,.csv,.tsv,.txt" style="font-size:10px;width:100%;margin-bottom:6px"/>
+      <button id="acero-imp-btn" class="btn-primary" style="width:100%;font-size:11px;padding:4px">Importar y generar partidas</button>
       <div id="acero-import-result" style="margin-top:6px"></div>
     </div>`;
 }
@@ -2226,33 +2220,42 @@ async function aceroImportSubmit() {
   if (!pid) { alert("Abre un presupuesto primero."); return; }
   const out = document.getElementById("acero-import-result");
   const fileEl = document.getElementById("acero-imp-file");
-  const pasteEl = document.getElementById("acero-imp-paste");
-  const unidad = document.getElementById("acero-imp-unidad")?.value || "kgf";
-  const acero = document.getElementById("acero-imp-grado")?.value || "A992";
   const file = fileEl && fileEl.files && fileEl.files[0];
-  const texto = pasteEl ? pasteEl.value.trim() : "";
-  if (!file && !texto) { alert("Sube un archivo .csv/.xlsx o pega la tabla de ETABS."); return; }
+  if (!file) { alert("Sube un archivo .xlsx exportado de ETABS (Steel Frame Design Summary)."); return; }
   if (out) out.innerHTML = `<div style="font-size:11px;color:var(--text-dim)">Procesando…</div>`;
-  const ep = `/diseno/${pid}/import-etabs-acero-fuerzas`;
+  const ep = `/diseno/${pid}/import-etabs-acero?generar=true`;
   let res;
   try {
-    if (file) {
-      const fd = new FormData();
-      fd.append("archivo", file, file.name);
-      fd.append("unidad", unidad); fd.append("acero", acero);
-      const r = await fetch(API + ep, { method: "POST", body: fd });
-      if (!r.ok) { const e = await r.json().catch(() => null); throw new Error(e?.detail || ("HTTP " + r.status)); }
-      res = await r.json();
-    } else {
-      res = await api("POST", ep, { texto, unidad, acero });
-    }
+    const fd = new FormData();
+    fd.append("archivo", file, file.name);
+    const r = await fetch(API + ep, { method: "POST", body: fd });
+    if (!r.ok) { const e = await r.json().catch(() => null); throw new Error(e?.detail || ("HTTP " + r.status)); }
+    res = await r.json();
   } catch (err) {
     if (out) out.innerHTML = `<div style="color:#e74c3c;font-size:11px;padding:6px">Error: ${esc(err.message || String(err))}</div>`;
     return;
   }
-  if (out) out.innerHTML = renderAceroLrfdResult(res);
+  if (out) out.innerHTML = renderAceroImportResult(res);
   loadAceroElementos();
 }
+
+function renderAceroImportResult(res) {
+  if (!res) return `<div style="color:#e74c3c;font-size:11px">Sin respuesta del servidor.</div>`;
+  const parts = res.partidas_generadas || [];
+  const noMap = res.perfiles_no_mapeados || [];
+  const miembros = res.miembros || [];
+  const dcMax = miembros.length ? Math.max(...miembros.map(m => m.dc ?? 0)).toFixed(3) : "—";
+  const sobre = miembros.filter(m => (m.dc ?? 0) > 1.0).length;
+  const filas = parts.map(p => `<li><b>${esc(p.clave)}</b> · ${esc(p.ficha)} · ${esc(p.perfil)} (${esc(p.rol)}) · ${fmt(p.cantidad, 2)} mL</li>`).join("");
+  const noMapHtml = noMap.length ? `<div style="font-size:10px;color:#e67e22;margin-top:5px">⚠ No mapeados: ${noMap.map(m => esc(m.perfil || m.section || "?")).join(", ")}</div>` : "";
+  const overHtml = sobre ? `<div style="color:#e74c3c;font-size:10px;margin-top:4px">⚠ ${sobre} elemento(s) con D/C > 1.0</div>` : "";
+  return `
+    <div style="border:1px solid #27ae60;border-radius:5px;padding:8px 11px;background:var(--surface)">
+      <div style="font-size:11px;font-weight:700;color:#27ae60;margin-bottom:4px">✅ ${miembros.length} elementos importados · D/C máx ${dcMax}</div>
+      ${overHtml}
+      <ul style="margin:4px 0;padding-left:18px;font-size:11px;line-height:1.5">${filas}</ul>
+      ${noMapHtml}
+    </div>`;
 
 async function loadAceroElementos() {
   const cont = document.getElementById("acero-elementos-list");
