@@ -12,6 +12,10 @@ from backend.calculo_sismico_choc08 import (
     C_RW_MIN,
 )
 from backend.services.etabs_parse import _decode_bytes, _es_xlsx
+from backend.etabs_procedimiento import (
+    ORIGEN_INPUTS, PROCEDIMIENTO, EXPORT_ETABS_DOC,
+    parse_export_etabs, parse_export_etabs_bytes,
+)
 from backend.calculo_estructural import RECUB_DEFAULT
 import uuid, os, re, json
 
