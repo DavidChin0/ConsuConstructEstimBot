@@ -21,6 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initModalCsvPick();
   initModalTemplateVersion();
   initModalBases();
+  initDbBackup();
   initSessionLogModal();
   initModalUpdater();
   initColorPicker();
@@ -1953,6 +1954,20 @@ function initModuloDropdown() {
   if (!sel) return;
   sel.addEventListener("change", () => setModuloActivo(sel.value));
 
+  const applyHash = () => {
+    const h = (location.hash || "").replace(/^#/, "");
+    if (!h) return;
+    const parts = Object.fromEntries(h.split("&").map(p => p.split("=")));
+    if (parts.modulo) {
+      setModuloActivo(parts.modulo);
+      if (parts.modulo === "etabs" && parts.tab && window.etabsState) {
+        setTimeout(() => { etabsState.tab = parts.tab; renderEtabs(); }, 500);
+      }
+    }
+  };
+  window.addEventListener("hashchange", applyHash);
+  setTimeout(applyHash, 800);
+
   // Patch close buttons para resetear el select
   const patchClose = (btnId) => {
     document.getElementById(btnId)?.addEventListener("click", () => {
@@ -1963,11 +1978,11 @@ function initModuloDropdown() {
   patchClose("btn-cerrar-etabs-view");
   patchClose("btn-cerrar-acero-view");
   patchClose("btn-cerrar-conexion-view");
+  patchClose("btn-cerrar-revit-mcp-view");
 }
 
 function setModuloActivo(m) {
-  // Cierra todos los paneles de módulo, abre el solicitado.
-  ["diseno", "etabs", "acero", "conexion"].forEach(v => {
+  ["diseno", "etabs", "acero", "conexion", "revit-mcp"].forEach(v => {
     const el = document.getElementById(`${v}-view`);
     if (el) el.style.display = (v === m) ? "flex" : "none";
   });
@@ -1978,6 +1993,189 @@ function setModuloActivo(m) {
   if (m === "etabs") etabsPrecargarContexto().then(() => renderEtabs()).catch(() => {});
   if (m === "acero") renderAcero();
   if (m === "conexion") renderConexion();
+  if (m === "revit-mcp") initRevitMcp();
+}
+
+
+// ─── REVIT MCP CONTROLS ──────────────────────────────────────────────────────
+
+const _RMCP = { interval: null, initialized: false };
+
+function rmcpLog(msg, cls = 'rmcp-ok') {
+  const el = document.getElementById('rmcp-output');
+  if (!el) return;
+  const d = new Date();
+  const ts = `[${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}]`;
+  el.innerHTML += `<span class="rmcp-ts">${ts} </span><span class="${cls}">${String(msg).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}\n</span>`;
+  el.scrollTop = el.scrollHeight;
+}
+function rmcpClearLog() { const el = document.getElementById('rmcp-output'); if (el) el.innerHTML = ''; }
+
+async function rmcpRefreshStatus() {
+  try {
+    const r = await fetch('/__api__/revit-mcp/status').then(x => x.json());
+    const dot   = document.getElementById('rmcp-mcp-dot');
+    const label = document.getElementById('rmcp-mcp-label');
+    const sMcp  = document.getElementById('rmcp-s-mcp');
+    const sDoc  = document.getElementById('rmcp-s-doc');
+    const sPipe = document.getElementById('rmcp-s-pipe');
+    const info  = document.getElementById('rmcp-revit-info');
+    if (!dot) return;
+    if (r.mcp_running) {
+      dot.style.background = '#4caf50';
+      label.textContent = 'MCP activo :8001';
+      sMcp.textContent = '● Online'; sMcp.className = 'rmcp-val ok';
+    } else {
+      dot.style.background = '#f44336';
+      label.textContent = 'MCP inactivo';
+      sMcp.textContent = '○ Offline'; sMcp.className = 'rmcp-val err';
+    }
+    if (r.revit_status) {
+      const txt = typeof r.revit_status === 'string' ? r.revit_status : JSON.stringify(r.revit_status, null, 2);
+      const docM  = txt.match(/Document:\s*(.+)/i) || txt.match(/"title"\s*:\s*"([^"]+)"/);
+      const pipeM = txt.match(/Pipe\s*Status:\s*(.+)/i) || txt.match(/"pipe_status"\s*:\s*"([^"]+)"/);
+      sDoc.textContent  = docM  ? docM[1].trim()  : 'Conectado';  sDoc.className  = 'rmcp-val ok';
+      sPipe.textContent = pipeM ? pipeM[1].trim() : 'Disponible'; sPipe.className = 'rmcp-val ok';
+      info.textContent  = txt; info.style.display = 'block';
+    } else {
+      sDoc.textContent  = '—'; sDoc.className  = 'rmcp-val';
+      sPipe.textContent = '—'; sPipe.className = 'rmcp-val';
+      info.style.display = 'none';
+    }
+  } catch (e) { rmcpLog('Error status: ' + e.message, 'rmcp-err'); }
+}
+
+async function rmcpStart() {
+  rmcpLog('Levantando MCP…', 'rmcp-info');
+  try {
+    const r = await fetch('/__api__/revit-mcp/start', {method:'POST'}).then(x => x.json());
+    if (r.ok) { rmcpLog(`MCP iniciado${r.pid?' PID='+r.pid:''} — ${r.status}`, 'rmcp-ok'); setTimeout(rmcpRefreshStatus, 600); }
+    else        rmcpLog('Error: ' + (r.error || JSON.stringify(r)), 'rmcp-err');
+  } catch (e) { rmcpLog('Error: ' + e.message, 'rmcp-err'); }
+}
+
+async function rmcpStop() {
+  rmcpLog('Deteniendo MCP…', 'rmcp-info');
+  try {
+    const r = await fetch('/__api__/revit-mcp/stop', {method:'POST'}).then(x => x.json());
+    rmcpLog(`MCP detenido${r.stopped_pid?' PID='+r.stopped_pid:''}`, 'rmcp-ok');
+    setTimeout(rmcpRefreshStatus, 600);
+  } catch (e) { rmcpLog('Error: ' + e.message, 'rmcp-err'); }
+}
+
+async function rmcpLoadObras() {
+  try {
+    const obras = await fetch('/__api__/presupuestos').then(x => x.json());
+    const sel = document.getElementById('rmcp-obra-select');
+    if (!sel) return;
+    sel.innerHTML = '<option value="">— Sin obra —</option>' +
+      obras.map(o => `<option value="${o.id}">${o.nombre}</option>`).join('');
+  } catch (e) { /* silencioso */ }
+}
+
+async function rmcpLoadCsvs() {
+  try {
+    const csvs = await fetch('/__api__/revit-mcp/schedules').then(x => x.json());
+    const sel = document.getElementById('rmcp-csv-select');
+    if (!sel) return;
+    sel.innerHTML = csvs.length
+      ? csvs.map(c => `<option value="${c.path}">${c.name}</option>`).join('')
+      : '<option value="">Sin CSVs en S5_schedules</option>';
+  } catch (e) { /* silencioso */ }
+}
+
+function rmcpGetObra() { return document.getElementById('rmcp-obra-select')?.value || ''; }
+function rmcpGetCsv()  { return document.getElementById('rmcp-csv-select')?.value || ''; }
+
+async function rmcpRunScript(key, type, btnEl) {
+  const obra = rmcpGetObra();
+  const csv  = rmcpGetCsv();
+  btnEl.disabled = true; btnEl.className = 'rmcp-run running'; btnEl.textContent = '⏳ Ejecutando…';
+  rmcpLog(`Ejecutando ${key} (${type})…`, 'rmcp-info');
+
+  const API = '/__api__/revit-mcp';
+  let url, opts = {method:'POST'};
+
+  if (type === 'python') {
+    if (key === 'import-quantities') {
+      if (!obra) { rmcpLog('Selecciona una obra.', 'rmcp-err'); _rmcpReset(btnEl); return; }
+      if (!csv)  { rmcpLog('Selecciona un CSV.', 'rmcp-err'); _rmcpReset(btnEl); return; }
+      url = `${API}/obras/${obra}/import-quantities`;
+      opts.headers = {'Content-Type':'application/json'};
+      opts.body = JSON.stringify({csv_path: csv});
+    } else if (key === 'validate-units') {
+      if (!csv) { rmcpLog('Selecciona un CSV.', 'rmcp-err'); _rmcpReset(btnEl); return; }
+      url = obra ? `${API}/obras/${obra}/validate-units` : `${API}/python/validate-units`;
+      opts.headers = {'Content-Type':'application/json'};
+      opts.body = JSON.stringify({csv_path: csv});
+    } else if (key === 'generate-keynotes') {
+      if (!obra) { rmcpLog('Selecciona una obra.', 'rmcp-err'); _rmcpReset(btnEl); return; }
+      url = `${API}/obras/${obra}/generate-keynotes`;
+    } else {
+      url = `${API}/python/${key}`;
+    }
+  } else {
+    url = `${API}/inject/${key}`;
+  }
+
+  try {
+    const r = await fetch(url, opts).then(x => x.json());
+    if (r.ok || r.output) {
+      rmcpLog((r.output || JSON.stringify(r, null, 2)).trim(), 'rmcp-ok');
+      btnEl.className = 'rmcp-run done-ok';
+    } else {
+      rmcpLog('ERROR: ' + (r.error || r.detail || JSON.stringify(r)), 'rmcp-err');
+      btnEl.className = 'rmcp-run done-err';
+    }
+  } catch (e) {
+    rmcpLog('Fetch error: ' + e.message, 'rmcp-err');
+    btnEl.className = 'rmcp-run done-err';
+  }
+  btnEl.disabled = false; btnEl.textContent = '▶ Ejecutar';
+  setTimeout(() => { btnEl.className = 'rmcp-run'; }, 3000);
+}
+
+function _rmcpReset(btn) { btn.disabled = false; btn.className = 'rmcp-run'; btn.textContent = '▶ Ejecutar'; }
+
+async function rmcpBuildCards() {
+  const data = await fetch('/__api__/revit-mcp/scripts').then(x => x.json());
+  const pyExtra = [
+    { key:'import-quantities', type:'python', label:'Importar Cantidades', desc:'Lee schedules CSV → actualiza revit_q + cantidad en la obra activa. Recalcula totales.' },
+    { key:'validate-units',    type:'python', label:'Validar Unidades',    desc:'Cruza unidades del schedule CSV vs PG catálogo v1.3. WARN "m"≈"ml" no es error real.' },
+    { key:'generate-keynotes', type:'python', label:'Keynotes Obra',       desc:'Genera RevitKeynotes_<Obra>_<Fecha>.txt desde partidas de la obra activa.' },
+  ];
+  const allPy = [...data.python, ...pyExtra];
+
+  const mkRun = (key, t) => `<button class="rmcp-run" onclick="rmcpRunScript('${key}','${t}',this)">▶ Ejecutar</button>`;
+
+  document.getElementById('rmcp-py-cards').innerHTML = allPy.map(s => `
+    <div class="rmcp-card">
+      <div class="rmcp-card-top"><span class="rmcp-badge badge-py">PY</span><span class="rmcp-name">${s.label || s.key}</span></div>
+      <div class="rmcp-desc">${s.desc || ''}</div>
+      <div class="rmcp-actions">${mkRun(s.key,'python')}</div>
+    </div>`).join('');
+
+  document.getElementById('rmcp-iron-cards').innerHTML = data.ironpython.map(s => `
+    <div class="rmcp-card${s.deprecated?' deprecated':''}">
+      <div class="rmcp-card-top">
+        <span class="rmcp-badge ${s.deprecated?'badge-warn':'badge-iron'}">${s.deprecated?'⚠️':'IP'}</span>
+        <span class="rmcp-name">${s.label || s.key}</span>
+      </div>
+      <div class="rmcp-desc">${s.desc || ''}</div>
+      <div class="rmcp-actions">
+        ${s.deprecated
+          ? '<span style="font-size:10px;color:#ffc107">No inyectar — usa DB.Transaction</span>'
+          : mkRun(s.key,'iron')}
+      </div>
+    </div>`).join('');
+}
+
+async function initRevitMcp() {
+  if (_RMCP.initialized) return;
+  _RMCP.initialized = true;
+  await Promise.all([rmcpRefreshStatus(), rmcpLoadObras(), rmcpLoadCsvs(), rmcpBuildCards()]);
+  if (_RMCP.interval) clearInterval(_RMCP.interval);
+  _RMCP.interval = setInterval(rmcpRefreshStatus, 30000);
 }
 
 

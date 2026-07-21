@@ -19,7 +19,7 @@ FRONTEND_PATH = os.path.join(os.path.dirname(ESTIMASTRUCT_PATH), "frontend")
 app = Flask(__name__,
             template_folder=ESTIMASTRUCT_PATH + "/templates",
             static_folder=FRONTEND_PATH)
-DB_PATH = os.environ.get("ESTIMASTRUCT_UI_DB", r"C:\EstimaStruct\data\estimastruct.db")  # BD UI fuera de OneDrive (FASE 0 patrón; original quedó como copia stale en ESTIMASTRUCT/)
+DB_PATH = os.environ.get("ESTIMASTRUCT_UI_DB", r"C:\EstimaStruct\data\estimastruct.db")  # Compat legacy: SQLite solo para dashboard UI viejo.
 API_BASE = os.environ.get("ESTIMASTRUCT_API_BASE", "http://localhost:8002")
 INDEX_TEMPLATE_PATH = os.path.join(ESTIMASTRUCT_PATH, "templates", "index.html")
 
@@ -60,49 +60,83 @@ def serve_vendor(filename):
     return send_from_directory(os.path.join(FRONTEND_PATH, 'vendor'), filename)
 
 def get_db():
-    """Conectar a DB"""
+    """Conectar a la SQLite de compatibilidad de la UI legacy."""
+    if not os.path.exists(DB_PATH):
+        return None
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
 
+
+def _legacy_dashboard_context():
+    """Lee métricas de la SQLite legacy si sigue existiendo.
+
+    La UI ya no depende de esta BD para operar. Si no existe, el dashboard
+    sigue cargando con métricas vacías y el core vive en FastAPI.
+    """
+    conn = get_db()
+    if conn is None:
+        return {
+            "total_matrices": 0,
+            "total_recursos": 0,
+            "tipos": [],
+            "top_matrices": [],
+        }
+
+    try:
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT COUNT(*) FROM actividades")
+        total_matrices = cursor.fetchone()[0]
+
+        cursor.execute("SELECT COUNT(*) FROM recursos")
+        total_recursos = cursor.fetchone()[0]
+
+        cursor.execute("""
+            SELECT tipo_recurso, COUNT(*) as qty
+            FROM recursos
+            GROUP BY tipo_recurso
+            ORDER BY qty DESC
+        """)
+        tipos = cursor.fetchall()
+
+        cursor.execute("""
+            SELECT codigo_matriz, descripcion, unidad_matriz, total_unitario
+            FROM actividades
+            ORDER BY total_unitario DESC
+            LIMIT 10
+        """)
+        top_matrices = cursor.fetchall()
+
+        return {
+            "total_matrices": total_matrices,
+            "total_recursos": total_recursos,
+            "tipos": tipos,
+            "top_matrices": top_matrices,
+        }
+    except sqlite3.Error:
+        return {
+            "total_matrices": 0,
+            "total_recursos": 0,
+            "tipos": [],
+            "top_matrices": [],
+        }
+    finally:
+        conn.close()
+
 def _render_front():
     """Renderiza el dashboard de produccion (templates/index.html) con el contexto de la BD."""
-    conn = get_db()
-    cursor = conn.cursor()
-
-    cursor.execute("SELECT COUNT(*) FROM actividades")
-    total_matrices = cursor.fetchone()[0]
-
-    cursor.execute("SELECT COUNT(*) FROM recursos")
-    total_recursos = cursor.fetchone()[0]
-
-    cursor.execute("""
-        SELECT tipo_recurso, COUNT(*) as qty
-        FROM recursos
-        GROUP BY tipo_recurso
-        ORDER BY qty DESC
-    """)
-    tipos = cursor.fetchall()
-
-    cursor.execute("""
-        SELECT codigo_matriz, descripcion, unidad_matriz, total_unitario
-        FROM actividades
-        ORDER BY total_unitario DESC
-        LIMIT 10
-    """)
-    top_matrices = cursor.fetchall()
-
-    conn.close()
+    dashboard = _legacy_dashboard_context()
 
     with open(INDEX_TEMPLATE_PATH, "r", encoding="utf-8") as f:
         template = f.read()
 
     return render_template_string(
         template,
-        total_matrices=total_matrices,
-        total_recursos=total_recursos,
-        tipos=tipos,
-        top_matrices=top_matrices,
+        total_matrices=dashboard["total_matrices"],
+        total_recursos=dashboard["total_recursos"],
+        tipos=dashboard["tipos"],
+        top_matrices=dashboard["top_matrices"],
         api_base="/__api__",
         asset_version=_current_asset_version(),
     )
@@ -118,6 +152,8 @@ def index():
 def api_matrices():
     """API - Listar matrices con filtro"""
     conn = get_db()
+    if conn is None:
+        return jsonify([])
     cursor = conn.cursor()
 
     search = request.args.get('search', '')
@@ -146,6 +182,8 @@ def api_matrices():
 def api_matriz_detail(matriz_id):
     """API - Detalles de una matriz"""
     conn = get_db()
+    if conn is None:
+        return jsonify({})
     cursor = conn.cursor()
 
     cursor.execute("""
@@ -174,6 +212,8 @@ def api_matriz_detail(matriz_id):
 def api_recursos():
     """API - Listar o crear recursos"""
     conn = get_db()
+    if conn is None:
+        return jsonify([] if request.method == 'GET' else {'status': 'ERROR', 'message': 'UI DB no disponible'}), 503
     cursor = conn.cursor()
 
     if request.method == 'GET':
@@ -226,6 +266,8 @@ def api_recursos():
 def api_unidades():
     """API - Unidades dropdown"""
     conn = get_db()
+    if conn is None:
+        return jsonify([])
     cursor = conn.cursor()
 
     cursor.execute("""
@@ -239,6 +281,12 @@ def api_unidades():
     conn.close()
 
     return jsonify(unidades)
+
+@app.route('/revit-mcp')
+def revit_mcp_page():
+    """Revit MCP Controls — panel de scripts Python e IronPython."""
+    return render_template('revit_mcp.html', asset_version=_current_asset_version())
+
 
 @app.route('/matrices')
 def matrices_page():
@@ -282,7 +330,11 @@ def api_proxy(path):
 @app.route('/health')
 def health():
     """Health check"""
-    return jsonify({'status': 'OK', 'db': os.path.exists(DB_PATH)})
+    return jsonify({
+        'status': 'OK',
+        'ui_compat_db': os.path.exists(DB_PATH),
+        'api_base': API_BASE,
+    })
 
 if __name__ == '__main__':
     app.run(debug=False, host='0.0.0.0', port=5000)

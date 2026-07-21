@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Revit MCP Controls — EstimaStruct</title>
+<style>
+:root {
+  --bg:       #2d2d2d;
+  --surface:  #3a3a3a;
+  --surface2: #444;
+  --border:   #555;
+  --accent:   #f5c518;
+  --accent2:  #d4a800;
+  --text:     #e0e0e0;
+  --text2:    #aaa;
+  --green:    #4caf50;
+  --red:      #f44336;
+  --yellow:   #ffc107;
+  --blue:     #0288d1;
+  --radius:   6px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+
+/* ── Header ── */
+#header {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--surface); border-bottom: 2px solid var(--accent);
+  padding: 0 16px; height: 52px;
+  display: flex; align-items: center; gap: 12px;
+}
+#header a.back { color: var(--accent); text-decoration: none; font-size: 18px; }
+#header h1 { font-size: 16px; font-weight: 600; color: var(--accent); flex: 1; }
+#mcp-badge {
+  display: flex; align-items: center; gap: 6px;
+  padding: 4px 10px; border-radius: 12px;
+  background: var(--surface2); font-size: 12px;
+}
+#mcp-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--red); flex-shrink: 0; }
+#mcp-badge.up #mcp-dot { background: var(--green); }
+#mcp-badge span { color: var(--text2); }
+
+/* ── Layout ── */
+#content {
+  display: grid;
+  grid-template-columns: 240px 1fr 1fr;
+  grid-template-rows: auto;
+  gap: 12px;
+  padding: 12px;
+  flex: 1;
+}
+
+/* ── Panel cards ── */
+.panel {
+  background: var(--surface); border-radius: var(--radius);
+  border: 1px solid var(--border); overflow: hidden;
+}
+.panel-header {
+  padding: 10px 14px; background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  font-size: 12px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.05em; color: var(--text2);
+  display: flex; align-items: center; gap: 8px;
+}
+.panel-header .icon { font-size: 14px; }
+.panel-body { padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+
+/* ── MCP Status panel ── */
+#panel-mcp { grid-column: 1; }
+.status-row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; padding: 4px 0; }
+.status-key { color: var(--text2); }
+.status-val { font-weight: 600; font-size: 11px; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.status-val.ok { color: var(--green); }
+.status-val.err { color: var(--red); }
+
+.btn-mcp-start {
+  width: 100%; padding: 9px 14px; border: none; border-radius: var(--radius);
+  background: var(--accent); color: #1a1a1a; font-size: 13px; font-weight: 700;
+  cursor: pointer; transition: background 0.15s;
+}
+.btn-mcp-start:hover { background: var(--accent2); }
+.btn-mcp-stop {
+  width: 100%; padding: 7px 14px; border: 1px solid var(--red); border-radius: var(--radius);
+  background: transparent; color: var(--red); font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all 0.15s; margin-top: 4px;
+}
+.btn-mcp-stop:hover { background: var(--red); color: #fff; }
+.btn-refresh-status {
+  width: 100%; padding: 6px 14px; border: 1px solid var(--border); border-radius: var(--radius);
+  background: transparent; color: var(--text2); font-size: 11px;
+  cursor: pointer; transition: all 0.15s; margin-top: 4px;
+}
+.btn-refresh-status:hover { border-color: var(--accent); color: var(--accent); }
+
+.revit-info { font-size: 11px; color: var(--text2); line-height: 1.6; background: var(--bg); padding: 8px; border-radius: var(--radius); margin-top: 4px; white-space: pre-wrap; word-break: break-all; max-height: 120px; overflow-y: auto; }
+
+/* ── Script card ── */
+.script-card {
+  background: var(--bg); border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 10px 12px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.script-card.deprecated { opacity: 0.5; }
+.script-card-top { display: flex; align-items: flex-start; gap: 8px; }
+.script-badge {
+  font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 10px;
+  flex-shrink: 0; margin-top: 1px;
+}
+.badge-py   { background: #1565c0; color: #90caf9; }
+.badge-iron { background: #6a1b9a; color: #ce93d8; }
+.badge-warn { background: #e65100; color: #ffcc80; }
+.script-name { font-size: 13px; font-weight: 600; flex: 1; }
+.script-desc { font-size: 11px; color: var(--text2); line-height: 1.4; }
+
+.script-actions { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.btn-run {
+  padding: 5px 12px; border: none; border-radius: var(--radius);
+  background: var(--blue); color: #fff; font-size: 11px; font-weight: 600;
+  cursor: pointer; transition: background 0.15s; flex-shrink: 0;
+}
+.btn-run:hover { background: #0277bd; }
+.btn-run:disabled { background: var(--border); color: var(--text2); cursor: not-allowed; }
+.btn-run.running { background: var(--yellow); color: #1a1a1a; }
+.btn-run.done-ok  { background: var(--green); }
+.btn-run.done-err { background: var(--red); }
+
+.script-status { font-size: 10px; color: var(--text2); }
+
+/* ── Selector for import-quantities / validate-units ── */
+.script-select {
+  padding: 4px 8px; border-radius: var(--radius); border: 1px solid var(--border);
+  background: var(--surface2); color: var(--text); font-size: 11px; max-width: 200px;
+}
+
+/* ── Console ── */
+#console-panel {
+  grid-column: 1 / -1;
+  background: var(--surface); border-radius: var(--radius);
+  border: 1px solid var(--border); overflow: hidden;
+  max-height: 240px; display: flex; flex-direction: column;
+}
+#console-panel .panel-header { justify-content: space-between; }
+#console-output {
+  font-family: 'Cascadia Code', 'Consolas', monospace;
+  font-size: 11px; color: #a5d6a7;
+  background: #1a1a1a; padding: 10px 14px;
+  overflow-y: auto; flex: 1;
+  white-space: pre-wrap; word-break: break-all;
+  line-height: 1.5;
+}
+.console-ts { color: #546e7a; }
+.console-ok  { color: #a5d6a7; }
+.console-err { color: #ef9a9a; }
+.console-info { color: #80cbc4; }
+.btn-console-clear {
+  padding: 3px 10px; border: 1px solid var(--border); border-radius: var(--radius);
+  background: transparent; color: var(--text2); font-size: 10px; cursor: pointer;
+}
+.btn-console-clear:hover { color: var(--text); border-color: var(--text2); }
+
+/* ── Keynote path display ── */
+#keynote-path-display {
+  font-size: 11px; color: var(--accent); background: var(--bg);
+  padding: 6px 8px; border-radius: var(--radius);
+  border: 1px solid var(--accent); display: none; word-break: break-all;
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div id="header">
+  <a class="back" href="/" title="Volver a EstimaStruct">←</a>
+  <h1>🔧 Revit MCP Controls</h1>
+  <div id="mcp-badge">
+    <div id="mcp-dot"></div>
+    <span id="mcp-label">Verificando…</span>
+  </div>
+</div>
+
+<!-- Main content -->
+<div id="content">
+
+  <!-- Col 1: MCP Status -->
+  <div class="panel" id="panel-mcp">
+    <div class="panel-header"><span class="icon">⚡</span>Estado MCP</div>
+    <div class="panel-body">
+      <div class="status-row"><span class="status-key">HTTP :8001</span><span id="s-mcp" class="status-val">—</span></div>
+      <div class="status-row"><span class="status-key">Revit Doc</span><span id="s-doc" class="status-val">—</span></div>
+      <div class="status-row"><span class="status-key">Pipe Status</span><span id="s-pipe" class="status-val">—</span></div>
+      <div id="revit-info" class="revit-info" style="display:none"></div>
+
+      <button class="btn-mcp-start" onclick="startMcp()">⚡ Levantar MCP</button>
+      <button class="btn-mcp-stop" onclick="stopMcp()">■ Detener MCP</button>
+      <button class="btn-refresh-status" onclick="refreshStatus()">↺ Refrescar estado</button>
+
+      <hr style="border-color:var(--border);margin:4px 0">
+
+      <!-- Selección de obra para scripts por obra -->
+      <div style="font-size:11px;color:var(--text2);margin-bottom:2px">Obra activa (import/keynotes):</div>
+      <select id="obra-select" class="script-select" style="max-width:100%;width:100%">
+        <option value="">Cargando obras…</option>
+      </select>
+
+      <!-- Selección de schedule CSV -->
+      <div style="font-size:11px;color:var(--text2);margin-top:6px;margin-bottom:2px">Schedule CSV:</div>
+      <select id="csv-select" class="script-select" style="max-width:100%;width:100%">
+        <option value="">Cargando CSVs…</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Col 2: Python Scripts -->
+  <div class="panel">
+    <div class="panel-header"><span class="icon">🐍</span>Python — Scripts Offline</div>
+    <div class="panel-body" id="python-scripts-container">
+      <!-- Injected by JS -->
+    </div>
+  </div>
+
+  <!-- Col 3: IronPython via MCP -->
+  <div class="panel">
+    <div class="panel-header"><span class="icon">🧪</span>IronPython — Inyectar via MCP</div>
+    <div class="panel-body" id="iron-scripts-container">
+      <!-- Injected by JS -->
+    </div>
+  </div>
+
+  <!-- Console -->
+  <div class="panel" id="console-panel">
+    <div class="panel-header">
+      <span><span class="icon">▶</span> Consola</span>
+      <button class="btn-console-clear" onclick="clearConsole()">Limpiar</button>
+    </div>
+    <div id="console-output">Listo. Esperando comandos…
+</div>
+  </div>
+
+</div><!-- /content -->
+
+<script>
+const API = '/__api__/revit-mcp';
+
+// ── Utils ──
+function ts() {
+  const d = new Date();
+  return `[${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}:${d.getSeconds().toString().padStart(2,'0')}]`;
+}
+function log(msg, cls='console-ok') {
+  const el = document.getElementById('console-output');
+  el.innerHTML += `<span class="console-ts">${ts()} </span><span class="${cls}">${escHtml(msg)}\n</span>`;
+  el.scrollTop = el.scrollHeight;
+}
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function clearConsole() { document.getElementById('console-output').innerHTML = ''; }
+
+// ── Status ──
+async function refreshStatus() {
+  try {
+    const r = await fetch(`${API}/status`).then(x=>x.json());
+    const badge = document.getElementById('mcp-badge');
+    const dot   = document.getElementById('mcp-dot');
+    const label = document.getElementById('mcp-label');
+    const sMcp  = document.getElementById('s-mcp');
+    const sDoc  = document.getElementById('s-doc');
+    const sPipe = document.getElementById('s-pipe');
+    const info  = document.getElementById('revit-info');
+
+    if (r.mcp_running) {
+      badge.className = 'up';
+      dot.style.background = 'var(--green)';
+      label.textContent = 'MCP activo :8001';
+      sMcp.textContent = '● Online'; sMcp.className = 'status-val ok';
+    } else {
+      badge.className = '';
+      dot.style.background = 'var(--red)';
+      label.textContent = 'MCP inactivo';
+      sMcp.textContent = '○ Offline'; sMcp.className = 'status-val err';
+    }
+
+    if (r.revit_status) {
+      const txt = typeof r.revit_status === 'string' ? r.revit_status : JSON.stringify(r.revit_status, null, 2);
+      // Parse basic info
+      const docMatch = txt.match(/Document:\s*(.+)/i) || txt.match(/"title"\s*:\s*"([^"]+)"/);
+      const statusMatch = txt.match(/Status:\s*(\w+)/i);
+      const pipeMatch = txt.match(/Pipe\s*Status:\s*(.+)/i) || txt.match(/"pipe_status"\s*:\s*"([^"]+)"/);
+
+      sDoc.textContent  = docMatch  ? docMatch[1].trim()  : 'Conectado';  sDoc.className  = 'status-val ok';
+      sPipe.textContent = pipeMatch ? pipeMatch[1].trim() : 'Disponible'; sPipe.className = 'status-val ok';
+      info.textContent  = txt;
+      info.style.display = 'block';
+    } else {
+      sDoc.textContent  = '—';  sDoc.className  = 'status-val';
+      sPipe.textContent = '—';  sPipe.className = 'status-val';
+      info.style.display = 'none';
+    }
+  } catch(e) {
+    log('Error al obtener estado: ' + e.message, 'console-err');
+  }
+}
+
+// ── MCP lifecycle ──
+async function startMcp() {
+  log('Levantando MCP (main_pipe.py --http)…', 'console-info');
+  try {
+    const r = await fetch(`${API}/start`, {method:'POST'}).then(x=>x.json());
+    if (r.ok) {
+      log(`MCP iniciado${r.pid ? ' PID='+r.pid : ''} — status: ${r.status}`, 'console-ok');
+      setTimeout(refreshStatus, 500);
+    } else {
+      log('Error al iniciar MCP: ' + (r.error||JSON.stringify(r)), 'console-err');
+    }
+  } catch(e) { log('Error: ' + e.message, 'console-err'); }
+}
+
+async function stopMcp() {
+  log('Deteniendo MCP…', 'console-info');
+  try {
+    const r = await fetch(`${API}/stop`, {method:'POST'}).then(x=>x.json());
+    log(`MCP detenido${r.stopped_pid ? ' (PID='+r.stopped_pid+')' : ''}`, 'console-ok');
+    setTimeout(refreshStatus, 500);
+  } catch(e) { log('Error: ' + e.message, 'console-err'); }
+}
+
+// ── Obras / CSVs ──
+async function loadObras() {
+  try {
+    const obras = await fetch('/__api__/presupuestos').then(x=>x.json());
+    const sel = document.getElementById('obra-select');
+    sel.innerHTML = obras.map(o=>`<option value="${o.id}">${o.nombre}</option>`).join('');
+  } catch(e) { console.warn('No se pudieron cargar obras:', e); }
+}
+
+async function loadCsvs() {
+  try {
+    const csvs = await fetch(`${API}/schedules`).then(x=>x.json());
+    const sel = document.getElementById('csv-select');
+    if (!csvs.length) { sel.innerHTML = '<option value="">Sin CSVs en S5_schedules</option>'; return; }
+    sel.innerHTML = csvs.map(c=>`<option value="${c.path}">${c.name}</option>`).join('');
+  } catch(e) { console.warn('No se pudieron cargar CSVs:', e); }
+}
+
+function getObra()  { return document.getElementById('obra-select').value; }
+function getCsv()   { return document.getElementById('csv-select').value; }
+
+// ── Generic run ──
+async function runScript(key, type, btnEl) {
+  const obra = getObra();
+  const csv  = getCsv();
+
+  btnEl.disabled = true;
+  btnEl.className = 'btn-run running';
+  btnEl.textContent = '⏳ Ejecutando…';
+
+  log(`Ejecutando ${key} (${type})…`, 'console-info');
+
+  let url, opts = {method: 'POST'};
+
+  if (type === 'python') {
+    // Obra-specific scripts
+    if (key === 'import-quantities') {
+      if (!obra) { log('Selecciona una obra primero.', 'console-err'); reset(btnEl, key); return; }
+      if (!csv)  { log('Selecciona un schedule CSV primero.', 'console-err'); reset(btnEl, key); return; }
+      url = `${API}/obras/${obra}/import-quantities`;
+      opts.headers = {'Content-Type':'application/json'};
+      opts.body = JSON.stringify({csv_path: csv});
+    } else if (key === 'validate-units') {
+      if (!csv) { log('Selecciona un schedule CSV primero.', 'console-err'); reset(btnEl, key); return; }
+      url = obra
+        ? `${API}/obras/${obra}/validate-units`
+        : `${API}/python/validate-units`;
+      opts.headers = {'Content-Type':'application/json'};
+      opts.body = JSON.stringify({csv_path: csv});
+    } else if (key === 'generate-keynotes') {
+      if (!obra) { log('Selecciona una obra primero.', 'console-err'); reset(btnEl, key); return; }
+      url = `${API}/obras/${obra}/generate-keynotes`;
+    } else {
+      url = `${API}/python/${key}`;
+    }
+  } else {
+    url = `${API}/inject/${key}`;
+  }
+
+  try {
+    const r = await fetch(url, opts).then(x=>x.json());
+    if (r.ok || r.output) {
+      const out = r.output || JSON.stringify(r, null, 2);
+      log(out.trim(), 'console-ok');
+      btnEl.className = 'btn-run done-ok';
+    } else {
+      log('ERROR: ' + (r.error || JSON.stringify(r)), 'console-err');
+      btnEl.className = 'btn-run done-err';
+    }
+  } catch(e) {
+    log('Fetch error: ' + e.message, 'console-err');
+    btnEl.className = 'btn-run done-err';
+  }
+
+  btnEl.disabled = false;
+  btnEl.textContent = '▶ Ejecutar';
+  setTimeout(() => { btnEl.className = 'btn-run'; }, 3000);
+}
+
+function reset(btn, key) {
+  btn.disabled = false;
+  btn.className = 'btn-run';
+  btn.textContent = '▶ Ejecutar';
+}
+
+// ── Build script cards ──
+async function buildScriptCards() {
+  const data = await fetch(`${API}/scripts`).then(x=>x.json());
+
+  const pyContainer   = document.getElementById('python-scripts-container');
+  const ironContainer = document.getElementById('iron-scripts-container');
+
+  const pyExtra = [
+    {
+      key: 'import-quantities', type: 'python', label: 'Importar Cantidades',
+      desc: 'Lee schedules CSV → actualiza revit_q + cantidad en la obra activa. Recalcula totales.',
+    },
+    {
+      key: 'validate-units', type: 'python', label: 'Validar Unidades',
+      desc: 'Cruza unidades del schedule CSV vs PG catálogo v1.3. WARN "m"≈"ml" no es error real.',
+    },
+    {
+      key: 'generate-keynotes', type: 'python', label: 'Keynotes Obra',
+      desc: 'Genera RevitKeynotes_<Obra>_<Fecha>.txt desde partidas de la obra activa.',
+    },
+  ];
+
+  const allPy = [...data.python, ...pyExtra];
+
+  pyContainer.innerHTML = allPy.map(s => `
+    <div class="script-card${s.deprecated ? ' deprecated' : ''}">
+      <div class="script-card-top">
+        <span class="script-badge badge-py">PY</span>
+        <span class="script-name">${escHtml(s.label || s.key)}</span>
+      </div>
+      <div class="script-desc">${escHtml(s.desc || '')}</div>
+      <div class="script-actions">
+        <button class="btn-run" onclick="runScript('${s.key}','python',this)">▶ Ejecutar</button>
+      </div>
+    </div>
+  `).join('');
+
+  ironContainer.innerHTML = data.ironpython.map(s => `
+    <div class="script-card${s.deprecated ? ' deprecated' : ''}">
+      <div class="script-card-top">
+        <span class="script-badge ${s.deprecated ? 'badge-warn' : 'badge-iron'}">
+          ${s.deprecated ? '⚠️' : 'IP'}
+        </span>
+        <span class="script-name">${escHtml(s.label || s.key)}</span>
+      </div>
+      <div class="script-desc">${escHtml(s.desc || '')}</div>
+      <div class="script-actions">
+        ${s.deprecated
+          ? '<span style="font-size:10px;color:var(--yellow)">No inyectar — usa DB.Transaction</span>'
+          : `<button class="btn-run" onclick="runScript('${s.key}','iron',this)">▶ Inyectar</button>`
+        }
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── Init ──
+(async () => {
+  await Promise.all([refreshStatus(), loadObras(), loadCsvs(), buildScriptCards()]);
+  // Auto-refresh status every 30s
+  setInterval(refreshStatus, 30000);
+})();
+</script>
+</body>
+</html>

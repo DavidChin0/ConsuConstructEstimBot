@@ -105,6 +105,7 @@
     <option value="acero">🔧 Acero</option>
     <option value="conexion">🔗 Conexión Acero</option>
     <option value="etabs">🏗️ ETABS (sismo)</option>
+    <option value="revit-mcp">🔧 Revit MCP</option>
   </select>
   <button id="btn-nueva-obra">+ Nueva Obra</button>
 </div>
@@ -414,6 +415,74 @@
   <div id="conexion-content" style="overflow:auto;flex:1"></div>
 </div>
 
+<!-- PANEL: REVIT MCP CONTROLS -->
+<div id="revit-mcp-view" style="display:none;position:fixed;inset:0;z-index:200;background:var(--bg);flex-direction:column;">
+  <div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--surface)">
+    <h2 style="margin:0;font-size:15px">🔧 Revit MCP Controls</h2>
+    <span id="revit-mcp-status-badge" style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-dim)">
+      <span id="rmcp-mcp-dot" style="width:8px;height:8px;border-radius:50%;background:#f44336;display:inline-block"></span>
+      <span id="rmcp-mcp-label">Verificando…</span>
+    </span>
+    <div style="margin-left:auto;display:flex;gap:8px">
+      <button class="btn-primary" onclick="rmcpStart()" style="font-size:12px;padding:5px 12px">⚡ Levantar MCP</button>
+      <button class="btn-cancel"  onclick="rmcpStop()"  style="font-size:12px;padding:5px 12px">■ Detener MCP</button>
+      <button class="btn-cancel"  onclick="rmcpRefreshStatus()" style="font-size:12px;padding:5px 12px">↺ Refrescar</button>
+      <button id="btn-cerrar-revit-mcp-view" class="btn-cancel" style="font-size:12px;padding:5px 12px">✕ Cerrar</button>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:240px 1fr 1fr;gap:12px;padding:12px;flex:1;overflow:auto">
+
+    <!-- Col 1: Estado MCP -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;display:flex;flex-direction:column">
+      <div style="padding:10px 14px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-dim)">⚡ Estado MCP</div>
+      <div style="padding:12px;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;padding:4px 0">
+          <span style="color:var(--text-dim)">HTTP :8001</span>
+          <span id="rmcp-s-mcp" class="rmcp-val" style="font-weight:600;font-size:11px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;padding:4px 0">
+          <span style="color:var(--text-dim)">Revit Doc</span>
+          <span id="rmcp-s-doc" class="rmcp-val" style="font-weight:600;font-size:11px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;padding:4px 0">
+          <span style="color:var(--text-dim)">Pipe Status</span>
+          <span id="rmcp-s-pipe" class="rmcp-val" style="font-weight:600;font-size:11px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">—</span>
+        </div>
+        <div id="rmcp-revit-info" style="display:none;font-size:11px;color:var(--text-dim);line-height:1.6;background:var(--bg);border:1px solid var(--border);padding:8px;border-radius:4px;margin-top:4px;white-space:pre-wrap;word-break:break-all;max-height:120px;overflow-y:auto"></div>
+        <hr style="border:none;border-top:1px solid var(--border);margin:4px 0">
+        <div style="font-size:11px;color:var(--text-dim)">Obra activa (import/keynotes):</div>
+        <select id="rmcp-obra-select" style="width:100%;padding:4px 8px;border-radius:4px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:11px"><option value="">Cargando obras…</option></select>
+        <div style="font-size:11px;color:var(--text-dim);margin-top:6px">Schedule CSV:</div>
+        <select id="rmcp-csv-select" style="width:100%;padding:4px 8px;border-radius:4px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:11px"><option value="">Cargando CSVs…</option></select>
+      </div>
+    </div>
+
+    <!-- Col 2: Python Scripts -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;display:flex;flex-direction:column">
+      <div style="padding:10px 14px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-dim)">🐍 Python — Scripts Offline</div>
+      <div id="rmcp-py-cards" style="padding:12px;display:flex;flex-direction:column;gap:8px;overflow-y:auto"></div>
+    </div>
+
+    <!-- Col 3: IronPython via MCP -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;display:flex;flex-direction:column">
+      <div style="padding:10px 14px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-dim)">🧪 IronPython — Inyectar via MCP</div>
+      <div id="rmcp-iron-cards" style="padding:12px;display:flex;flex-direction:column;gap:8px;overflow-y:auto"></div>
+    </div>
+
+    <!-- Consola -->
+    <div id="rmcp-console-panel" style="grid-column:1/-1;background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;max-height:240px;display:flex;flex-direction:column">
+      <div style="padding:10px 14px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-dim);display:flex;align-items:center;justify-content:space-between">
+        <span>▶ Consola</span>
+        <button onclick="rmcpClearLog()" class="btn-cancel" style="font-size:10px;padding:3px 10px">Limpiar</button>
+      </div>
+      <div id="rmcp-output" style="font-family:'Cascadia Code','Consolas',monospace;font-size:11px;color:#a5d6a7;background:#111;padding:10px 14px;overflow-y:auto;flex:1;white-space:pre-wrap;word-break:break-all;line-height:1.5">Listo. Esperando comandos…
+</div>
+    </div>
+
+  </div>
+</div>
+
 <!-- MODAL: ABOUT -->
 <div id="modal-about" class="modal-overlay hidden">
   <div class="modal" style="max-width:720px">
@@ -544,7 +613,12 @@
       <div class="bases-header">
         <h2 style="margin:0;font-size:15px;white-space:nowrap">Bases de Datos</h2>
         <div id="bases-version-tabs" class="bases-version-tabs"></div>
-        <button id="modal-bases-close" class="btn-icon" style="margin-left:auto;font-size:16px;padding:4px 8px">✕</button>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:8px">
+          <button id="btn-db-export-zip" class="btn-primary" style="font-size:12px;padding:5px 10px;white-space:nowrap" title="Descarga una copia completa de la BD viva (estimacion.db + manifest.json) en un ZIP">📦 Exportar copia BD (ZIP)</button>
+          <button id="btn-db-import-zip" class="btn-cancel" style="font-size:12px;padding:5px 10px;white-space:nowrap;color:#e74c3c;border-color:#e74c3c" title="Reemplaza la BD viva desde un ZIP de backup (con confirmación doble)">📥 Importar BD (ZIP)</button>
+          <input type="file" id="db-import-zip-input" accept=".zip" class="hidden" />
+          <button id="modal-bases-close" class="btn-icon" style="font-size:16px;padding:4px 8px">✕</button>
+        </div>
       </div>
       <div class="bases-body bases-body-audit">
         <div class="bases-toolbar">
@@ -994,6 +1068,26 @@
   </div>
 </div>
 
+<!-- MODAL: IMPORTAR BD (ZIP) — reemplazo de la BD viva, doble confirmación -->
+<div id="modal-db-import" class="modal-overlay hidden">
+  <div class="modal">
+    <h2>Importar BD (ZIP)</h2>
+    <p id="modal-db-import-file" style="margin-bottom:10px;color:var(--text-dim);font-size:12px"></p>
+    <p style="margin-bottom:14px;color:var(--text-dim);font-size:13px;line-height:1.5">
+      Reemplaza la BD actual. Se guarda backup en <code>C:\EstimaStruct\backups</code>. ¿Continuar?
+    </p>
+    <label class="check-confirm">
+      <input type="checkbox" id="db-import-confirm-check" />
+      <span>Confirmo que entiendo que esta acción <b>reemplaza la BD viva</b> (con backup previo automático)</span>
+    </label>
+    <div id="modal-db-import-result" class="hidden" style="margin-top:12px;font-size:12px;line-height:1.6;white-space:pre-wrap;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px"></div>
+    <div class="modal-actions" style="margin-top:14px">
+      <button type="button" class="btn-cancel" id="modal-db-import-cancel">Cancelar</button>
+      <button type="button" class="btn-danger" id="modal-db-import-ok" disabled>Importar y reemplazar</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: AGREGAR INSUMO A LA MATRIZ (catálogo de recursos) -->
 <div id="modal-bases-insumo" class="modal-overlay hidden">
   <div class="modal" style="max-width:720px;display:flex;flex-direction:column;max-height:82vh">
@@ -1066,6 +1160,7 @@
 <script src="js/calculo-estructural.js?v={{ asset_version }}"></script>
 <script src="js/bases-drawer.js?v={{ asset_version }}"></script>
 <script src="js/tabla-render.js?v={{ asset_version }}"></script>
+<script src="js/db-backup.js?v={{ asset_version }}"></script>
 <script>
 // ── Panel resizers ───────────────────────────────────────────────────────────
 (function () {

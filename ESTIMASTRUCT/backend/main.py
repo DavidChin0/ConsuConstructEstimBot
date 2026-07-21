@@ -4,15 +4,17 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.db import engine
+from backend.config import CONFIG
 from backend.models import Base
-from backend.routers import presupuestos, partidas, recursos, calculos, export, insumos, scripts as scripts_router, bases, updater, diagnostics, memory, diseno_estructural, sismo, conexion_acero, miembro_acero, acero_diseno, portal_publish, cronograma as cronograma_router, export_pdf, preview_pdf, db_backup
+from backend.routers import presupuestos, partidas, recursos, calculos, export, insumos, scripts as scripts_router, bases, updater, diagnostics, memory, diseno_estructural, sismo, conexion_acero, miembro_acero, acero_diseno, portal_publish, cronograma as cronograma_router, export_pdf, preview_pdf, db_backup, revit_mcp as revit_mcp_router
 from backend.error_handler import register_exception_handlers
 from backend.silent_notifier import notifier, notify_file
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    Base.metadata.create_all(bind=engine)
+    if CONFIG.AUTO_CREATE_SCHEMA:
+        Base.metadata.create_all(bind=engine)
     notifier.subscribe(notify_file(os.path.join(os.path.dirname(__file__), "notifications.log")))
     notifier.start_monitoring()
     yield
@@ -51,6 +53,7 @@ app.include_router(cronograma_router.router)   # GET cronograma + export-cronogr
 app.include_router(export_pdf.router)   # GET export-pdf (membrete ConsuConstruct)
 app.include_router(preview_pdf.router)   # GET preview-pdf (HTML) + export-pdf-html (Chromium)
 app.include_router(db_backup.router)   # GET db/export-zip + POST db/import-zip (copia de seguridad BD)
+app.include_router(revit_mcp_router.router)   # GET/POST /revit-mcp/* (Revit MCP Controls web UI)
 
 
 @app.get("/")

@@ -1492,3 +1492,31 @@ tfoot td { padding: 5px 6px; }
 .g-faserow { height: 24px; }
 .g-faserow .g-track { background: #262626; }
 .g-fase-lbl { background: #262626; color: var(--accent); font-weight: 700; font-size: 11px; line-height: 24px; }
+
+/* ─── REVIT MCP: clases usadas por el JS que inyecta cards y logs ─── */
+.rmcp-val.ok  { color: #4caf50; }
+.rmcp-val.err { color: #f44336; }
+
+.rmcp-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
+.rmcp-card.deprecated { opacity: .5; }
+.rmcp-card-top { display: flex; align-items: flex-start; gap: 8px; }
+.rmcp-badge { font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 10px; flex-shrink: 0; margin-top: 1px; }
+.rmcp-badge.badge-py   { background: #1565c0; color: #90caf9; }
+.rmcp-badge.badge-iron { background: #6a1b9a; color: #ce93d8; }
+.rmcp-badge.badge-warn { background: #e65100; color: #ffcc80; }
+.rmcp-name { font-size: 13px; font-weight: 600; flex: 1; color: var(--text); }
+.rmcp-desc { font-size: 11px; color: var(--text-dim); line-height: 1.4; }
+.rmcp-actions { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+.rmcp-run { padding: 5px 12px; border: none; border-radius: 4px; background: var(--accent); color: #1a1a1a; font-size: 11px; font-weight: 600; cursor: pointer; }
+.rmcp-run:hover { background: var(--accent2); }
+.rmcp-run:disabled { background: var(--border); color: var(--text-dim); cursor: not-allowed; }
+.rmcp-run.running  { background: #ffc107; color: #1a1a1a; }
+.rmcp-run.done-ok  { background: #4caf50; color: #fff; }
+.rmcp-run.done-err { background: #f44336; color: #fff; }
+
+/* Consola: colores de spans generados por rmcpLog() */
+.rmcp-ts   { color: #546e7a; }
+.rmcp-ok   { color: #a5d6a7; }
+.rmcp-err  { color: #ef9a9a; }
+.rmcp-info { color: #80cbc4; }
