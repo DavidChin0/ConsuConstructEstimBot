@@ -58,69 +58,70 @@
   <div id="sobrecosto-pill" class="sobrecosto-pill hidden">
     <span>SC: </span><span id="sobrecosto-val">20%</span>
     <div id="sobrecosto-popover" class="sobrecosto-popover hidden">
-      <label>Sobrecosto %</label>
+      <label data-es="Sobrecosto %" data-en="Overhead %">Sobrecosto %</label>
       <input type="number" id="sobrecosto-input" min="0" max="500" step="0.1" />
       <div class="sc-actions">
-        <button id="btn-sc-cancel" class="btn-cancel">Cancel</button>
-        <button id="btn-sc-ok" class="btn-primary">Aplicar</button>
+        <button id="btn-sc-cancel" class="btn-cancel" data-es="Cancelar" data-en="Cancel">Cancelar</button>
+        <button id="btn-sc-ok" class="btn-primary" data-es="Aplicar" data-en="Apply">Aplicar</button>
       </div>
     </div>
   </div>
-  <button id="btn-actualizar" class="btn-actualizar hidden">⟳ Actualizar</button>
-  <button id="btn-modo" class="btn-modo hidden" title="Cambiar modo Cliente/Desarrollador">👤 Cliente</button>
+  <button id="btn-actualizar" class="btn-actualizar hidden" data-es="⟳ Actualizar" data-en="⟳ Update">⟳ Actualizar</button>
+  <button id="btn-modo" class="btn-modo hidden" title="Cambiar modo Cliente/Desarrollador" data-es="👤 Cliente" data-en="👤 Client">👤 Cliente</button>
   <div id="dev-menu-wrap" class="dev-menu-wrap hidden">
-    <button id="btn-dev-menu" class="btn-dev-menu" title="Menú">⚙ Menú ▾</button>
+    <button id="btn-dev-menu" class="btn-dev-menu" title="Menú" data-es="⚙ Menú ▾" data-en="⚙ Menu ▾">⚙ Menú ▾</button>
     <div id="dev-menu" class="dev-menu hidden">
       <button class="dev-menu-item" data-step="about">ℹ About</button>
-      <button class="dev-menu-item" data-step="session-log">📋 Log de cambios (debug)</button>
+      <button class="dev-menu-item" data-step="session-log" data-es="📋 Log de cambios (debug)" data-en="📋 Change log (debug)">📋 Log de cambios (debug)</button>
       <hr style="margin:4px 0;border:none;border-top:1px solid var(--border)"/>
-      <button class="dev-menu-item" data-step="table-less">A- Tamaño tabla</button>
-      <button class="dev-menu-item" data-step="table-more">A+ Tamaño tabla</button>
-      <button class="dev-menu-item" data-step="table-reset">↺ Reset tabla</button>
+      <button class="dev-menu-item" data-step="table-less" data-es="A- Tamaño tabla" data-en="A- Table size">A- Tamaño tabla</button>
+      <button class="dev-menu-item" data-step="table-more" data-es="A+ Tamaño tabla" data-en="A+ Table size">A+ Tamaño tabla</button>
+      <button class="dev-menu-item" data-step="table-reset" data-es="↺ Reset tabla" data-en="↺ Reset table">↺ Reset tabla</button>
       <hr style="margin:4px 0;border:none;border-top:1px solid var(--border)"/>
-      <button class="dev-menu-item" data-step="2">Generar Keynotes para Revit</button>
-      <button class="dev-menu-item" data-step="4">Actualizar Cantidades de Revit</button>
+      <button class="dev-menu-item" data-step="2" data-es="Generar Keynotes para Revit" data-en="Generate Keynotes for Revit">Generar Keynotes para Revit</button>
+      <button class="dev-menu-item" data-step="4" data-es="Actualizar Cantidades de Revit" data-en="Update Quantities from Revit">Actualizar Cantidades de Revit</button>
     </div>
   </div>
   <a id="btn-viewer3d" href="/viewer" target="_blank" class="btn-cronograma hidden" title="Viewer 3D — mapa completo del modelo Revit" style="text-decoration:none;display:inline-flex;align-items:center">🗺 Viewer 3D</a>
-  <button id="btn-cronograma" class="btn-cronograma hidden" title="Ver cronograma (Gantt)">📅 Cronograma</button>
+  <button id="btn-cronograma" class="btn-cronograma hidden" title="Ver cronograma (Gantt)" data-es="📅 Cronograma" data-en="📅 Schedule">📅 Cronograma</button>
   <button id="btn-mcp-quick" class="btn-cronograma hidden" title="Revit MCP — abrir panel y levantar servidor si está apagado"><span id="mcp-quick-dot" style="width:7px;height:7px;border-radius:50%;background:#f44336;display:inline-block;margin-right:5px;vertical-align:middle"></span>🔧 MCP</button>
   <div id="export-menu-wrap" class="export-menu-wrap hidden">
-    <button id="btn-exportar" class="btn-export">⬇ Exportar ▾</button>
+    <button id="btn-exportar" class="btn-export" data-es="⬇ Exportar ▾" data-en="⬇ Export ▾">⬇ Exportar ▾</button>
     <div id="export-menu" class="export-menu hidden">
-      <button class="export-menu-item" data-kind="presupuesto">📄 Presupuesto</button>
-      <button class="export-menu-item" data-kind="insumos">🧾 Insumos necesarios de esta obra</button>
-      <button class="export-menu-item" data-kind="audit">📋 Reporte auditoría XLSX</button>
-      <button class="export-menu-item" data-kind="db">🗂 Base de datos completa (insumos por renglón)</button>
-      <button class="export-menu-item" data-kind="cronograma-xlsx">📅 Cronograma (Gantt) XLSX</button>
+      <button class="export-menu-item" data-kind="presupuesto" data-es="📄 Presupuesto" data-en="📄 Budget">📄 Presupuesto</button>
+      <button class="export-menu-item" data-kind="insumos" data-es="🧾 Insumos necesarios de esta obra" data-en="🧾 Required resources for this project">🧾 Insumos necesarios de esta obra</button>
+      <button class="export-menu-item" data-kind="audit" data-es="📋 Reporte auditoría XLSX" data-en="📋 Audit report XLSX">📋 Reporte auditoría XLSX</button>
+      <button class="export-menu-item" data-kind="db" data-es="🗂 Base de datos completa (insumos por renglón)" data-en="🗂 Full database (resources per line item)">🗂 Base de datos completa (insumos por renglón)</button>
+      <button class="export-menu-item" data-kind="cronograma-xlsx" data-es="📅 Cronograma (Gantt) XLSX" data-en="📅 Schedule (Gantt) XLSX">📅 Cronograma (Gantt) XLSX</button>
       <hr style="margin:4px 0;border:none;border-top:1px solid var(--border)"/>
-      <button class="export-menu-item" data-kind="pdf-membrete">🧾 PDF con membrete ConsuConstruct…</button>
-      <button class="export-menu-item" data-kind="pdf-banco">🏦 PDF con membrete para Banco…</button>
+      <button class="export-menu-item" data-kind="pdf-membrete" data-es="🧾 PDF con membrete ConsuConstruct…" data-en="🧾 PDF with ConsuConstruct header…">🧾 PDF con membrete ConsuConstruct…</button>
+      <button class="export-menu-item" data-kind="pdf-banco" data-es="🏦 PDF con membrete para Banco…" data-en="🏦 PDF with Bank header…">🏦 PDF con membrete para Banco…</button>
       <hr style="margin:4px 0;border:none;border-top:1px solid var(--border)"/>
-      <button class="export-menu-item" data-kind="publish-portal">☁ Publicar a Portal (Supabase)</button>
+      <button class="export-menu-item" data-kind="publish-portal" data-es="☁ Publicar a Portal (Supabase)" data-en="☁ Publish to Portal (Supabase)">☁ Publicar a Portal (Supabase)</button>
     </div>
   </div>
   <select id="sel-modulo" class="hidden" title="Abrir módulo de cálculo"
     style="font-size:12px;font-weight:600;padding:3px 8px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:3px;cursor:pointer;height:28px">
-    <option value="">⚙ Módulos ▾</option>
-    <option value="diseno">📐 Diseño (concreto)</option>
+    <option value="" data-es="⚙ Módulos ▾" data-en="⚙ Modules ▾">⚙ Módulos ▾</option>
+    <option value="diseno" data-es="📐 Diseño (concreto)" data-en="📐 Design (concrete)">📐 Diseño (concreto)</option>
     <option value="acero">🔧 Acero</option>
-    <option value="conexion">🔗 Conexión Acero</option>
-    <option value="etabs">🏗️ ETABS (sismo)</option>
+    <option value="conexion" data-es="🔗 Conexión Acero" data-en="🔗 Steel Connection">🔗 Conexión Acero</option>
+    <option value="etabs" data-es="🏗️ ETABS (sismo)" data-en="🏗️ ETABS (seismic)">🏗️ ETABS (sismo)</option>
     <option value="revit-mcp">🔧 Revit MCP</option>
   </select>
-  <button id="btn-nueva-obra">+ Nueva Obra</button>
+  <button id="btn-nueva-obra" data-es="+ Nueva Obra" data-en="+ New Project">+ Nueva Obra</button>
+  <button id="lang-toggle" onclick="toggleLang()" style="font-size:11px;font-weight:600;padding:4px 10px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:3px;cursor:pointer;height:28px">🌐 EN</button>
 </div>
 
 <!-- PANEL: DISEÑO ESTRUCTURAL -->
 <div id="diseno-view" style="display:none;position:fixed;inset:0;z-index:200;background:var(--bg);flex-direction:column;">
   <div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--surface)">
-    <h2 style="margin:0;font-size:15px">📐 Diseño Estructural — CSI Div 03</h2>
+    <h2 style="margin:0;font-size:15px" data-es="📐 Diseño Estructural — CSI Div 03" data-en="📐 Structural Design — CSI Div 03">📐 Diseño Estructural — CSI Div 03</h2>
     <span id="diseno-status-badge" style="font-size:11px;color:var(--text-dim)"></span>
     <div style="margin-left:auto;display:flex;gap:8px">
-      <button id="btn-diseno-calcular-todo" class="btn-primary" style="font-size:12px;padding:5px 12px">⚡ Calcular Todo</button>
-      <button id="btn-diseno-generar-todo"  class="btn-primary" style="font-size:12px;padding:5px 12px">📦 Generar Partidas CSI</button>
-      <button id="btn-cerrar-diseno-view"   class="btn-cancel"  style="font-size:12px;padding:5px 12px">✕ Cerrar</button>
+      <button id="btn-diseno-calcular-todo" class="btn-primary" style="font-size:12px;padding:5px 12px" data-es="⚡ Calcular Todo" data-en="⚡ Calculate All">⚡ Calcular Todo</button>
+      <button id="btn-diseno-generar-todo"  class="btn-primary" style="font-size:12px;padding:5px 12px" data-es="📦 Generar Partidas CSI" data-en="📦 Generate CSI Items">📦 Generar Partidas CSI</button>
+      <button id="btn-cerrar-diseno-view"   class="btn-cancel"  style="font-size:12px;padding:5px 12px" data-es="✕ Cerrar" data-en="✕ Close">✕ Cerrar</button>
     </div>
   </div>
   <div style="display:flex;flex:1;overflow:hidden">
@@ -128,12 +129,12 @@
     <!-- Panel izquierdo: lista de elementos -->
     <div id="diseno-elem-list" style="width:220px;min-width:180px;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden">
       <div style="padding:8px;border-bottom:1px solid var(--border);display:flex;gap:6px;align-items:center">
-        <b style="font-size:12px">Elementos</b>
+        <b style="font-size:12px" data-es="Elementos" data-en="Elements">Elementos</b>
         <button id="btn-diseno-sync-bases" class="btn-primary" style="margin-left:auto;font-size:10px;padding:3px 7px" title="Importar vigas/columnas Div 03 de la base de datos V1.2">⟳ V1.2</button>
         <button id="btn-diseno-nuevo-elem" class="btn-icon-add" title="Nuevo elemento">+</button>
       </div>
       <div style="padding:6px 8px;border-bottom:1px solid var(--border)">
-        <button id="btn-diseno-import-etabs" class="btn-primary" style="width:100%;font-size:11px;padding:5px 8px" title="Importar elementos de concreto desde un export de ETABS (Concrete Frame Design)">⬆ Importar de ETABS (concreto)</button>
+        <button id="btn-diseno-import-etabs" class="btn-primary" style="width:100%;font-size:11px;padding:5px 8px" title="Importar elementos de concreto desde un export de ETABS (Concrete Frame Design)" data-es="⬆ Importar de ETABS (concreto)" data-en="⬆ Import from ETABS (concrete)">⬆ Importar de ETABS (concreto)</button>
         <!-- Acero LRFD se importa ahora en el módulo Acero (⚙ Módulos → 🔧 Acero). -->
         <!-- Mini-form de importación (oculto hasta clic) -->
         <div id="diseno-import-form" style="display:none;margin-top:8px;background:var(--surface2);border:1px solid var(--accent);border-radius:4px;padding:8px">
@@ -141,18 +142,18 @@
           <input type="file" id="diseno-import-file" accept=".csv,.tsv,.txt,.xlsx" style="font-size:11px;width:100%;margin-bottom:6px"/>
           <textarea id="diseno-import-paste" rows="4" placeholder="Story,Label,UniqueName,Section,Combo,As&#10;...o pega aquí la tabla copiada de ETABS" style="width:100%;box-sizing:border-box;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:3px;font-family:monospace;font-size:10px;padding:5px;margin-bottom:6px"></textarea>
           <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px">
-            <span style="font-size:10px;color:var(--text-dim)">Unidad</span>
+            <span style="font-size:10px;color:var(--text-dim)" data-es="Unidad" data-en="Unit">Unidad</span>
             <select id="diseno-import-unidad" style="flex:1;font-size:11px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:3px;padding:2px 4px">
               <option value="kgf" selected>kgf</option>
               <option value="kn">kN</option>
               <option value="ton">ton</option>
             </select>
             <span id="diseno-import-recub-wrap" style="display:flex;gap:6px;align-items:center">
-              <span style="font-size:10px;color:var(--text-dim)">Recub (cm)</span>
+              <span style="font-size:10px;color:var(--text-dim)" data-es="Recub (cm)" data-en="Cover (cm)">Recub (cm)</span>
               <input type="number" id="diseno-import-recub" value="4" step="0.5" min="0" style="width:52px;font-size:11px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:3px;padding:2px 4px"/>
             </span>
             <span id="diseno-import-grado-wrap" style="display:none;gap:6px;align-items:center">
-              <span style="font-size:10px;color:var(--text-dim)">Acero</span>
+              <span style="font-size:10px;color:var(--text-dim)" data-es="Acero" data-en="Steel">Acero</span>
               <select id="diseno-import-acero-grado" style="width:64px;font-size:11px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:3px;padding:2px 4px">
                 <option value="A992" selected>A992</option>
                 <option value="A36">A36</option>
@@ -161,7 +162,7 @@
             </span>
           </div>
           <div style="display:flex;gap:6px">
-            <button id="btn-diseno-import-enviar" class="btn-primary" style="flex:1;font-size:11px;padding:4px">Importar</button>
+            <button id="btn-diseno-import-enviar" class="btn-primary" style="flex:1;font-size:11px;padding:4px" data-es="Importar" data-en="Import">Importar</button>
             <button id="btn-diseno-import-cancelar" class="btn-cancel" style="font-size:11px;padding:4px 8px">✕</button>
           </div>
         </div>
@@ -177,37 +178,37 @@
       <!-- IZQUIERDA: tabs Geometría / Casos / Resultados / Procedimiento / Cómo se usa -->
       <div style="width:44%;min-width:360px;display:flex;flex-direction:column;border-right:1px solid var(--border);overflow:hidden">
         <div class="panel-tabs" style="padding:0 12px">
-          <button class="tab-btn active" data-dtab="geometria">Geometría</button>
-          <button class="tab-btn" data-dtab="casos">Casos de Carga</button>
-          <button class="tab-btn" data-dtab="resultados">Resultados</button>
-          <button class="tab-btn" data-dtab="procedimiento">📐 Procedimiento</button>
-          <button class="tab-btn" data-dtab="ayuda">📖 Cómo se usa</button>
+          <button class="tab-btn active" data-dtab="geometria" data-es="Geometría" data-en="Geometry">Geometría</button>
+          <button class="tab-btn" data-dtab="casos" data-es="Casos de Carga" data-en="Load Cases">Casos de Carga</button>
+          <button class="tab-btn" data-dtab="resultados" data-es="Resultados" data-en="Results">Resultados</button>
+          <button class="tab-btn" data-dtab="procedimiento" data-es="📐 Procedimiento" data-en="📐 Procedure">📐 Procedimiento</button>
+          <button class="tab-btn" data-dtab="ayuda" data-es="📖 Cómo se usa" data-en="📖 How to use">📖 Cómo se usa</button>
         </div>
         <div style="flex:1;overflow-y:auto">
 
       <!-- Tab: Geometría -->
       <div id="dtab-geometria" class="tab-content active" style="overflow-y:auto;padding:14px">
-        <div id="diseno-geom-empty" style="color:var(--text-dim);font-size:13px">Selecciona o crea un elemento.</div>
+        <div id="diseno-geom-empty" style="color:var(--text-dim);font-size:13px" data-es="Selecciona o crea un elemento." data-en="Select or create an element.">Selecciona o crea un elemento.</div>
         <div id="diseno-geom-form" style="display:none">
           <div style="font-size:11px;color:var(--text-dim);margin-bottom:10px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:7px 9px">
             🏗️ Define la <b>sección propuesta</b> y el material. El <b>CSI</b> es la llave maestra del elemento (auto-asignada). Los campos visibles cambian según el tipo. <b>d</b> es el peralte <i>efectivo</i> (h − recubrimiento), no la altura total.
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 20px;font-size:13px">
             <div>
-              <label style="font-size:11px;color:var(--text-dim)">CSI (llave maestra)</label>
+              <label style="font-size:11px;color:var(--text-dim)" data-es="CSI (llave maestra)" data-en="CSI (master key)">CSI (llave maestra)</label>
               <input id="dg-csi" type="text" placeholder="03 31 00.01" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 6px;border-radius:3px;font-family:monospace;font-weight:600"/>
             </div>
             <div>
-              <label style="font-size:11px;color:var(--text-dim)">Mark (opcional)</label>
+              <label style="font-size:11px;color:var(--text-dim)" data-es="Mark (opcional)" data-en="Mark (optional)">Mark (opcional)</label>
               <input id="dg-mark" type="text" placeholder="VA-01" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 6px;border-radius:3px"/>
             </div>
             <div>
-              <label style="font-size:11px;color:var(--text-dim)">Tipo de elemento</label>
+              <label style="font-size:11px;color:var(--text-dim)" data-es="Tipo de elemento" data-en="Element type">Tipo de elemento</label>
               <select id="dg-tipo" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 6px;border-radius:3px">
-                <option value="VIGA_SIMPLE">Viga Simple</option>
-                <option value="VIGA_DOBLE">Viga Doble Armada</option>
-                <option value="VIGA_T">Viga T</option>
-                <option value="COLUMNA">Columna</option>
+                <option value="VIGA_SIMPLE" data-es="Viga Simple" data-en="Simple Beam">Viga Simple</option>
+                <option value="VIGA_DOBLE" data-es="Viga Doble Armada" data-en="Double Composite Beam">Viga Doble Armada</option>
+                <option value="VIGA_T" data-es="Viga T" data-en="T-Beam">Viga T</option>
+                <option value="COLUMNA" data-es="Columna" data-en="Column">Columna</option>
               </select>
             </div>
             <div>
@@ -219,52 +220,52 @@
               <input id="dg-fy" type="number" value="4200" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 6px;border-radius:3px"/>
             </div>
             <div id="dg-b-wrap">
-              <label style="font-size:11px;color:var(--text-dim)">Ancho b (cm)</label>
+              <label style="font-size:11px;color:var(--text-dim)" data-es="Ancho b (cm)" data-en="Width b (cm)">Ancho b (cm)</label>
               <input id="dg-b" type="number" value="30" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 6px;border-radius:3px"/>
             </div>
             <div id="dg-d-wrap" title="Peralte EFECTIVO = altura total h − recubrimiento al centroide del acero (típico h−6 cm). NO es la altura total.">
-              <label style="font-size:11px;color:var(--text-dim)">Peralte efectivo d (cm) ⓘ</label>
+              <label style="font-size:11px;color:var(--text-dim)" data-es="Peralte efectivo d (cm) ⓘ" data-en="Effective depth d (cm) ⓘ">Peralte efectivo d (cm) ⓘ</label>
               <input id="dg-d" type="number" value="50" title="d = h − recubrimiento. Distancia de la fibra en compresión al centroide del acero de tensión." style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 6px;border-radius:3px"/>
             </div>
             <div id="dg-dprim-wrap" style="display:none">
-              <label style="font-size:11px;color:var(--text-dim)">Recub. compresión d' (cm)</label>
+              <label style="font-size:11px;color:var(--text-dim)" data-es="Recub. compresión d' (cm)" data-en="Compression cover d' (cm)">Recub. compresión d' (cm)</label>
               <input id="dg-dprim" type="number" value="5" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 6px;border-radius:3px"/>
             </div>
             <div id="dg-bp-wrap" style="display:none">
-              <label style="font-size:11px;color:var(--text-dim)">Ancho patín bp (cm)</label>
+              <label style="font-size:11px;color:var(--text-dim)" data-es="Ancho patín bp (cm)" data-en="Flange width bp (cm)">Ancho patín bp (cm)</label>
               <input id="dg-bp" type="number" value="120" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 6px;border-radius:3px"/>
             </div>
             <div id="dg-tf-wrap" style="display:none">
-              <label style="font-size:11px;color:var(--text-dim)">Espesor patín t (cm)</label>
+              <label style="font-size:11px;color:var(--text-dim)" data-es="Espesor patín t (cm)" data-en="Flange thickness t (cm)">Espesor patín t (cm)</label>
               <input id="dg-tf" type="number" value="15" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 6px;border-radius:3px"/>
             </div>
             <div id="dg-lx-wrap" style="display:none">
-              <label style="font-size:11px;color:var(--text-dim)">Dimensión X / lx (cm)</label>
+              <label style="font-size:11px;color:var(--text-dim)" data-es="Dimensión X / lx (cm)" data-en="Dimension X / lx (cm)">Dimensión X / lx (cm)</label>
               <input id="dg-lx" type="number" value="35" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 6px;border-radius:3px"/>
             </div>
             <div id="dg-ly-wrap" style="display:none">
-              <label style="font-size:11px;color:var(--text-dim)">Dimensión Y / ly (cm)</label>
+              <label style="font-size:11px;color:var(--text-dim)" data-es="Dimensión Y / ly (cm)" data-en="Dimension Y / ly (cm)">Dimensión Y / ly (cm)</label>
               <input id="dg-ly" type="number" value="35" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 6px;border-radius:3px"/>
             </div>
             <div title="Longitud del elemento. Multiplica sección y perímetro para el takeoff de concreto (m³), encofrado (m²) y acero (kg).">
-              <label style="font-size:11px;color:var(--text-dim)">Longitud (m) — para takeoff ⓘ</label>
+              <label style="font-size:11px;color:var(--text-dim)" data-es="Longitud (m) — para takeoff ⓘ" data-en="Length (m) — for takeoff ⓘ">Longitud (m) — para takeoff ⓘ</label>
               <input id="dg-long" type="number" value="0" step="0.1" title="Longitud para cuantificar volúmenes. Si es 0, no se genera takeoff." style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 6px;border-radius:3px"/>
             </div>
             <div>
-              <label style="font-size:11px;color:var(--text-dim)">Notas</label>
+              <label style="font-size:11px;color:var(--text-dim)" data-es="Notas" data-en="Notes">Notas</label>
               <input id="dg-notas" type="text" placeholder="Observaciones..." style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 6px;border-radius:3px"/>
             </div>
           </div>
           <div style="margin-top:12px;display:flex;gap:8px">
-            <button id="btn-diseno-guardar-geom" class="btn-primary" style="font-size:12px">Guardar Geometría</button>
-            <button id="btn-diseno-delete-elem" class="btn-cancel" style="font-size:12px;color:#e74c3c">🗑 Eliminar Elemento</button>
+            <button id="btn-diseno-guardar-geom" class="btn-primary" style="font-size:12px" data-es="Guardar Geometría" data-en="Save Geometry">Guardar Geometría</button>
+            <button id="btn-diseno-delete-elem" class="btn-cancel" style="font-size:12px;color:#e74c3c" data-es="🗑 Eliminar Elemento" data-en="🗑 Delete Element">🗑 Eliminar Elemento</button>
           </div>
         </div>
       </div>
 
       <!-- Tab: Casos de Carga -->
       <div id="dtab-casos" class="tab-content" style="overflow-y:auto;padding:14px;display:none">
-        <div id="diseno-casos-empty" style="color:var(--text-dim);font-size:13px">Selecciona un elemento primero.</div>
+        <div id="diseno-casos-empty" style="color:var(--text-dim);font-size:13px" data-es="Selecciona un elemento primero." data-en="Select an element first.">Selecciona un elemento primero.</div>
         <div id="diseno-casos-wrap" style="display:none">
           <table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:10px">
             <thead><tr style="background:var(--surface2)">
@@ -275,6 +276,7 @@
               <th style="padding:5px 6px;text-align:right">Nu/Pu t</th>
               <th style="padding:5px 6px;text-align:right">Mu-XX</th>
               <th style="padding:5px 6px;text-align:right">Mu-YY</th>
+              <th style="padding:5px 6px;text-align:center" data-es="Sísmico" data-en="Seismic">Sísmico</th>
               <th style="padding:5px 6px;text-align:center">★</th>
               <th style="padding:5px 6px"></th>
             </tr></thead>
@@ -282,17 +284,17 @@
           </table>
           <!-- Formulario agregar caso -->
           <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px;font-size:12px">
-            <b style="font-size:12px;display:block;margin-bottom:2px">+ Agregar caso de carga</b>
+            <b style="font-size:12px;display:block;margin-bottom:2px" data-es="+ Agregar caso de carga" data-en="+ Add load case">+ Agregar caso de carga</b>
             <div style="font-size:10px;color:var(--text-dim);margin-bottom:8px">
               Una fila = una <b>combinación de carga</b> de tu análisis. <b>Tú lees</b> los valores en ETABS / SAP / cálculo manual y <b>los escribes aquí</b> — el módulo NO se conecta a ETABS (eso es importación futura desde Revit). Los campos cambian según el tipo del elemento. El sistema marca ★ el caso que gobierna (mayor acero).
             </div>
             <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
-              <div title="Nombre de la combinación de carga. Solo identifica el caso, no entra en fórmulas."><label style="font-size:10px;color:var(--text-dim)">Nombre / combinación</label><input id="dc-nombre" placeholder="D+L" title="Ej: D+L, D+L+E, Sismo X. Solo etiqueta." style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:3px 5px;border-radius:3px"/></div>
+              <div title="Nombre de la combinación de carga. Solo identifica el caso, no entra en fórmulas."><label style="font-size:10px;color:var(--text-dim)" data-es="Nombre / combinación" data-en="Name / combination">Nombre / combinación</label><input id="dc-nombre" placeholder="D+L" title="Ej: D+L, D+L+E, Sismo X. Solo etiqueta." style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:3px 5px;border-radius:3px"/></div>
             </div>
 
             <!-- CARGAS DE VIGA -->
             <div id="dc-viga-fields" style="margin-top:10px">
-              <div style="font-size:10px;font-weight:700;color:var(--accent);letter-spacing:.5px;margin-bottom:4px">CARGAS DE VIGA — del análisis (ETABS/SAP)</div>
+              <div style="font-size:10px;font-weight:700;color:var(--accent);letter-spacing:.5px;margin-bottom:4px" data-es="CARGAS DE VIGA — del análisis (ETABS/SAP)" data-en="BEAM LOADS — from analysis (ETABS/SAP)">CARGAS DE VIGA — del análisis (ETABS/SAP)</div>
               <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
                 <div title="Momento flector último (factorizado). Alimenta K = Mu/(φ·f'c·b·d²) → As."><label style="font-size:10px;color:var(--text-dim)">Mu (t·m) ⓘ</label><input id="dc-mu" type="number" value="0" step="0.1" title="Momento último de diseño (viga). Demanda de flexión → acero As." style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:3px 5px;border-radius:3px"/></div>
                 <div title="Cortante último en cara de apoyo. Si Vu > φVc se requieren estribos (Av/S)."><label style="font-size:10px;color:var(--text-dim)">Vu (t) ⓘ</label><input id="dc-vu" type="number" value="0" step="0.1" title="Cortante último. Demanda de cortante → estribos." style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:3px 5px;border-radius:3px"/></div>
@@ -303,13 +305,13 @@
 
             <!-- CARGAS DE COLUMNA -->
             <div id="dc-col-fields" style="margin-top:10px;display:none">
-              <div style="font-size:10px;font-weight:700;color:var(--accent);letter-spacing:.5px;margin-bottom:4px">CARGAS DE COLUMNA — del análisis (ETABS/SAP)</div>
+              <div style="font-size:10px;font-weight:700;color:var(--accent);letter-spacing:.5px;margin-bottom:4px" data-es="CARGAS DE COLUMNA — del análisis (ETABS/SAP)" data-en="COLUMN LOADS — from analysis (ETABS/SAP)">CARGAS DE COLUMNA — del análisis (ETABS/SAP)</div>
               <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
                 <div title="Carga axial última de columna. Entra en δ (esbeltez) y en la interacción P-M."><label style="font-size:10px;color:var(--text-dim)">Pu axial (t) ⓘ</label><input id="dc-pu" type="number" value="0" step="0.1" title="Carga axial última de columna. Demanda de compresión." style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:3px 5px;border-radius:3px"/></div>
                 <div title="Momento de columna en el eje fuerte (XX). Se amplifica por δx."><label style="font-size:10px;color:var(--text-dim)">Mu-XX (t·m) ⓘ</label><input id="dc-mxx" type="number" value="0" step="0.1" title="Momento columna eje fuerte. Amplificado por δx." style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:3px 5px;border-radius:3px"/></div>
                 <div title="Momento de columna en el eje débil (YY). Se amplifica por δy."><label style="font-size:10px;color:var(--text-dim)">Mu-YY (t·m) ⓘ</label><input id="dc-myy" type="number" value="0" step="0.1" title="Momento columna eje débil. Amplificado por δy." style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:3px 5px;border-radius:3px"/></div>
               </div>
-              <div style="font-size:10px;font-weight:700;color:var(--text-dim);letter-spacing:.5px;margin:9px 0 4px">ESBELTEZ — solo si la columna es esbelta. Déjalo así (lu=0) para columna corta (δ=1).</div>
+              <div style="font-size:10px;font-weight:700;color:var(--text-dim);letter-spacing:.5px;margin:9px 0 4px" data-es="ESBELTEZ — solo si la columna es esbelta. Déjalo así (lu=0) para columna corta (δ=1)." data-en="SLENDERNESS — only if column is slender. Leave at (lu=0) for short column (δ=1).">ESBELTEZ — solo si la columna es esbelta. Déjalo así (lu=0) para columna corta (δ=1).</div>
               <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
                 <div title="Longitud libre de pandeo entre apoyos (de planos). Si λ=k·lu/r > 22 la columna es esbelta y se amplifica el momento (δ)."><label style="font-size:10px;color:var(--text-dim)">lu libre (cm) ⓘ</label><input id="dc-lu" type="number" value="0" step="1" title="Longitud libre. 0 = columna corta, sin amplificación." style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:3px 5px;border-radius:3px"/></div>
                 <div title="Factor de longitud efectiva eje X (tabla ACI según arriostramiento). Típico 1.0; 0.5–2.0."><label style="font-size:10px;color:var(--text-dim)">k-X</label><input id="dc-kx" type="number" value="1" step="0.05" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:3px 5px;border-radius:3px"/></div>
@@ -320,18 +322,18 @@
                 <div title="Cm-Y: factor de momento equivalente, eje Y."><label style="font-size:10px;color:var(--text-dim)">Cm-Y</label><input id="dc-cmy" type="number" value="1" step="0.05" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:3px 5px;border-radius:3px"/></div>
               </div>
             </div>
-            <button id="btn-diseno-agregar-caso" class="btn-primary" style="margin-top:10px;font-size:12px">Agregar Caso</button>
+            <button id="btn-diseno-agregar-caso" class="btn-primary" style="margin-top:10px;font-size:12px" data-es="Agregar Caso" data-en="Add Case">Agregar Caso</button>
           </div>
         </div>
       </div>
 
       <!-- Tab: Resultados -->
       <div id="dtab-resultados" class="tab-content" style="overflow-y:auto;padding:14px;display:none">
-        <div id="diseno-res-empty" style="color:var(--text-dim);font-size:13px">Selecciona un elemento y calcula sus casos.</div>
+        <div id="diseno-res-empty" style="color:var(--text-dim);font-size:13px" data-es="Selecciona un elemento y calcula sus casos." data-en="Select an element and calculate its cases.">Selecciona un elemento y calcula sus casos.</div>
         <div id="diseno-res-wrap" style="display:none">
           <table style="width:100%;border-collapse:collapse;font-size:11px">
             <thead><tr style="background:var(--surface2)">
-              <th style="padding:4px 6px;text-align:left">Caso</th>
+              <th style="padding:4px 6px;text-align:left" data-es="Caso" data-en="Case">Caso</th>
               <th style="padding:4px 6px;text-align:right">As cm²</th>
               <th style="padding:4px 6px;text-align:right">A's cm²</th>
               <th style="padding:4px 6px;text-align:right">Av/S cm²/cm</th>
@@ -340,7 +342,7 @@
               <th style="padding:4px 6px;text-align:right">Acero kg</th>
               <th style="padding:4px 6px;text-align:right">Estribos kg</th>
               <th style="padding:4px 6px;text-align:right">Encofrado m²</th>
-              <th style="padding:4px 6px;text-align:center">Sísmico</th>
+              <th style="padding:4px 6px;text-align:center" data-es="Sísmico" data-en="Seismic">Sísmico</th>
               <th style="padding:4px 6px;text-align:center">★</th>
               <th style="padding:4px 6px"></th>
             </tr></thead>
@@ -348,8 +350,8 @@
           </table>
           <div id="diseno-res-advertencias" style="margin-top:8px;font-size:11px;color:#e67e22"></div>
           <div style="margin-top:10px;display:flex;gap:8px">
-            <button id="btn-diseno-calc-elem" class="btn-primary" style="font-size:12px">⚡ Calcular Casos</button>
-            <button id="btn-diseno-generar-elem" class="btn-primary" style="font-size:12px">📦 Generar Partidas CSI 03</button>
+            <button id="btn-diseno-calc-elem" class="btn-primary" style="font-size:12px" data-es="⚡ Calcular Casos" data-en="⚡ Calculate Cases">⚡ Calcular Casos</button>
+            <button id="btn-diseno-generar-elem" class="btn-primary" style="font-size:12px" data-es="📦 Generar Partidas CSI 03" data-en="📦 Generate CSI 03 Items">📦 Generar Partidas CSI 03</button>
           </div>
           <div id="diseno-memoria-hint" style="margin-top:14px;font-size:11px;color:var(--text-dim);border-top:1px dashed var(--border);padding-top:10px">
             📐 Abre el tab <b>Procedimiento</b> para ver cada fórmula demostrada en notación idéntica al manual (símbolo, ecuación, sustitución numérica, resultado y referencia MD §).
@@ -359,7 +361,7 @@
 
       <!-- Tab: Procedimiento (memoria con fórmulas KaTeX, estilo MD) -->
       <div id="dtab-procedimiento" class="tab-content" style="overflow-y:auto;padding:14px;display:none">
-        <div id="diseno-proc-empty" style="color:var(--text-dim);font-size:13px">Selecciona un elemento con casos de carga. El procedimiento se calcula y se muestra automáticamente.</div>
+        <div id="diseno-proc-empty" style="color:var(--text-dim);font-size:13px" data-es="Selecciona un elemento con casos de carga. El procedimiento se calcula y se muestra automáticamente." data-en="Select an element with load cases. The procedure is calculated and shown automatically.">Selecciona un elemento con casos de carga. El procedimiento se calcula y se muestra automáticamente.</div>
         <div id="diseno-proc-panel"></div>
       </div>
 
@@ -383,10 +385,10 @@
 <!-- PANEL: ETABS — ACCIÓN SÍSMICA CHOC-08 (estilo Mathcad) -->
 <div id="etabs-view" style="display:none;position:fixed;inset:0;z-index:200;background:var(--bg);flex-direction:column;">
   <div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--surface)">
-    <h2 style="margin:0;font-size:15px">🏗️ ETABS — Acción sísmica CHOC-08 <span style="font-size:11px;color:var(--text-dim);font-weight:400">(estilo Mathcad · concreto ACI)</span></h2>
+    <h2 style="margin:0;font-size:15px" data-es="🏗️ ETABS — Acción sísmica CHOC-08" data-en="🏗️ ETABS — Seismic Action CHOC-08">🏗️ ETABS — Acción sísmica CHOC-08 <span style="font-size:11px;color:var(--text-dim);font-weight:400">(estilo Mathcad · concreto ACI)</span></h2>
     <span id="etabs-status-badge" style="font-size:11px;color:var(--text-dim)"></span>
     <div style="margin-left:auto;display:flex;gap:8px">
-      <button id="btn-etabs-export-csv" class="btn-primary" style="font-size:12px;padding:5px 12px" title="Descargar pares T,a/g para pegar en ETABS Response Spectrum">⬇ Exportar espectro ETABS</button>
+      <button id="btn-etabs-export-csv" class="btn-primary" style="font-size:12px;padding:5px 12px" title="Descargar pares T,a/g para pegar en ETABS Response Spectrum" data-es="⬇ Exportar espectro ETABS" data-en="⬇ Export ETABS spectrum">⬇ Exportar espectro ETABS</button>
       <button id="btn-cerrar-etabs-view" class="btn-cancel" style="font-size:12px;padding:5px 12px">✕ Cerrar</button>
     </div>
   </div>
@@ -396,7 +398,7 @@
 <!-- PANEL: ACERO ESTRUCTURAL — PUENTE ETABS (Steel Frame Design → Div 05) -->
 <div id="acero-view" style="display:none;position:fixed;inset:0;z-index:200;background:var(--bg);flex-direction:column;">
   <div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--surface)">
-    <h2 style="margin:0;font-size:15px">🔧 Acero Estructural <span style="font-size:11px;color:var(--text-dim);font-weight:400">— AISC 360-16 LRFD §D-H · Calculadora + Import ETABS · CSI Div 05</span></h2>
+    <h2 style="margin:0;font-size:15px" data-es="🔧 Acero Estructural" data-en="🔧 Structural Steel">🔧 Acero Estructural <span style="font-size:11px;color:var(--text-dim);font-weight:400">— AISC 360-16 LRFD §D-H · Calculadora + Import ETABS · CSI Div 05</span></h2>
     <span id="acero-status-badge" style="font-size:11px;color:var(--text-dim)"></span>
     <div style="margin-left:auto;display:flex;gap:8px">
       <button id="btn-cerrar-acero-view" class="btn-cancel" style="font-size:12px;padding:5px 12px">✕ Cerrar</button>
@@ -408,7 +410,7 @@
 <!-- PANEL: CONEXIÓN ACERO — AISC 360-16 §J (LRFD, estilo Mathcad) -->
 <div id="conexion-view" style="display:none;position:fixed;inset:0;z-index:200;background:var(--bg);flex-direction:column;">
   <div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--surface)">
-    <h2 style="margin:0;font-size:15px">🔗 Conexión Acero <span style="font-size:11px;color:var(--text-dim);font-weight:400">(AISC 360-16 §J · LRFD · estilo Mathcad)</span></h2>
+    <h2 style="margin:0;font-size:15px" data-es="🔗 Conexión Acero" data-en="🔗 Steel Connection">🔗 Conexión Acero <span style="font-size:11px;color:var(--text-dim);font-weight:400">(AISC 360-16 §J · LRFD · estilo Mathcad)</span></h2>
     <span id="conexion-status-badge" style="font-size:11px;color:var(--text-dim)"></span>
     <div style="margin-left:auto;display:flex;gap:8px">
       <button id="btn-cerrar-conexion-view" class="btn-cancel" style="font-size:12px;padding:5px 12px">✕ Cerrar</button>
@@ -426,9 +428,9 @@
       <span id="rmcp-mcp-label">Verificando…</span>
     </span>
     <div style="margin-left:auto;display:flex;gap:8px">
-      <button class="btn-primary" onclick="rmcpStart()" style="font-size:12px;padding:5px 12px">⚡ Levantar MCP</button>
-      <button class="btn-cancel"  onclick="rmcpStop()"  style="font-size:12px;padding:5px 12px">■ Detener MCP</button>
-      <button class="btn-cancel"  onclick="rmcpRefreshStatus()" style="font-size:12px;padding:5px 12px">↺ Refrescar</button>
+      <button class="btn-primary" onclick="rmcpStart()" style="font-size:12px;padding:5px 12px" data-es="⚡ Levantar MCP" data-en="⚡ Start MCP">⚡ Levantar MCP</button>
+      <button class="btn-cancel"  onclick="rmcpStop()"  style="font-size:12px;padding:5px 12px" data-es="■ Detener MCP" data-en="■ Stop MCP">■ Detener MCP</button>
+      <button class="btn-cancel"  onclick="rmcpRefreshStatus()" style="font-size:12px;padding:5px 12px" data-es="↺ Refrescar" data-en="↺ Refresh">↺ Refrescar</button>
       <button id="btn-cerrar-revit-mcp-view" class="btn-cancel" style="font-size:12px;padding:5px 12px">✕ Cerrar</button>
     </div>
   </div>
@@ -441,8 +443,8 @@
       <span style="font-size:11px;color:var(--text-dim);font-style:italic">← control y ejecución de scripts Revit</span>
       <label style="font-size:11px;color:var(--text-dim);margin-left:8px">Vista:</label>
       <select id="revit-mcp-vista-select" style="background:var(--surface2);border:1px solid var(--accent);color:var(--text);padding:4px 8px;border-radius:3px;font-weight:600;font-size:13px">
-        <option value="panel">🖥️ Panel de Control</option>
-        <option value="guia">📖 Cómo usar</option>
+        <option value="panel" data-es="🖥️ Panel de Control" data-en="🖥️ Control Panel">🖥️ Panel de Control</option>
+        <option value="guia" data-es="📖 Cómo usar" data-en="📖 How to use">📖 Cómo usar</option>
       </select>
     </div>
 
@@ -454,14 +456,14 @@
 
         <div style="flex:1;min-width:260px;border:1px solid var(--border);border-radius:5px;padding:10px 13px;margin-bottom:10px;background:var(--surface)">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
-            <span style="font-size:12px;font-weight:700;color:var(--accent)">Estado del sistema</span>
+            <span style="font-size:12px;font-weight:700;color:var(--accent)" data-es="Estado del sistema" data-en="System status">Estado del sistema</span>
             <button id="rmcp-btn-health" class="btn-cancel" onclick="rmcpHealthCheck(this)" title="Ping profundo al pipe de Revit: uptime + latencia" style="font-size:10px;padding:2px 8px">🩺 Health Check</button>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px dashed var(--border);font-size:12px">
             <span style="color:var(--text-dim)">Proceso MCP :8001</span><span id="rmcp-s-mcp" class="rmcp-val">—</span>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px dashed var(--border);font-size:12px">
-            <span style="color:var(--text-dim)">Documento Revit</span><span id="rmcp-s-doc" class="rmcp-val">—</span>
+            <span style="color:var(--text-dim)" data-es="Documento Revit" data-en="Revit document">Documento Revit</span><span id="rmcp-s-doc" class="rmcp-val">—</span>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:12px">
             <span style="color:var(--text-dim)">Bridge pyRevit</span><span id="rmcp-s-pipe" class="rmcp-val">—</span>
@@ -473,9 +475,9 @@
         </div>
 
         <div style="flex:2;min-width:300px;border:1px solid var(--border);border-radius:5px;padding:10px 13px;margin-bottom:10px;background:var(--surface)">
-          <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:5px">Contexto de trabajo</div>
+          <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:5px" data-es="Contexto de trabajo" data-en="Work context">Contexto de trabajo</div>
           <div style="display:flex;gap:14px;flex-wrap:wrap">
-            <label style="flex:1;min-width:180px;font-size:11px;color:var(--text-dim);display:flex;flex-direction:column;gap:4px">Obra activa
+            <label style="flex:1;min-width:180px;font-size:11px;color:var(--text-dim);display:flex;flex-direction:column;gap:4px" data-es="Obra activa" data-en="Active project">Obra activa
               <select id="rmcp-obra-select" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px"><option value="">Cargando obras…</option></select>
             </label>
             <label style="flex:1;min-width:180px;font-size:11px;color:var(--text-dim);display:flex;flex-direction:column;gap:4px">Schedule CSV
@@ -492,15 +494,15 @@
         <div style="flex:1;min-width:320px;border:1px solid var(--border);border-radius:5px;padding:10px 13px;margin-bottom:10px;background:var(--surface)">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
             <div style="font-size:12px;font-weight:700;color:var(--accent)">Scripts Python (offline)</div>
-            <span style="font-size:9px;font-weight:700;color:var(--accent);border:1px solid var(--accent);border-radius:8px;padding:1px 7px">SIN REVIT</span>
+            <span style="font-size:9px;font-weight:700;color:var(--accent);border:1px solid var(--accent);border-radius:8px;padding:1px 7px" data-es="SIN REVIT" data-en="NO REVIT">SIN REVIT</span>
           </div>
           <div id="rmcp-py-cards" style="display:flex;flex-direction:column;gap:8px"></div>
         </div>
 
         <div style="flex:1;min-width:320px;border:1px solid var(--border);border-radius:5px;padding:10px 13px;margin-bottom:10px;background:var(--surface)">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-            <div style="font-size:12px;font-weight:700;color:var(--accent)">Snippets IronPython (vía MCP)</div>
-            <span style="font-size:9px;font-weight:700;color:var(--text-dim);border:1px solid var(--text-dim);border-radius:8px;padding:1px 7px">REQUIERE MCP ●</span>
+            <div style="font-size:12px;font-weight:700;color:var(--accent)" data-es="Snippets IronPython (vía MCP)" data-en="IronPython Snippets (via MCP)">Snippets IronPython (vía MCP)</div>
+            <span style="font-size:9px;font-weight:700;color:var(--text-dim);border:1px solid var(--text-dim);border-radius:8px;padding:1px 7px" data-es="REQUIERE MCP ●" data-en="REQUIRES MCP ●">REQUIERE MCP ●</span>
           </div>
           <div id="rmcp-iron-cards" style="display:flex;flex-direction:column;gap:8px"></div>
         </div>
@@ -509,8 +511,8 @@
       <!-- Fila 3: Consola -->
       <div id="rmcp-console-panel" style="border:1px solid var(--border);border-radius:5px;padding:10px 13px;margin-bottom:10px;background:var(--surface)">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-          <div style="font-size:12px;font-weight:700;color:var(--accent)">Consola</div>
-          <button class="btn-cancel" onclick="rmcpClearLog()" style="margin-left:auto;font-size:11px;padding:3px 10px">⌫ Limpiar</button>
+          <div style="font-size:12px;font-weight:700;color:var(--accent)" data-es="Consola" data-en="Console">Consola</div>
+          <button class="btn-cancel" onclick="rmcpClearLog()" style="margin-left:auto;font-size:11px;padding:3px 10px" data-es="⌫ Limpiar" data-en="⌫ Clear">⌫ Limpiar</button>
         </div>
         <div id="rmcp-output" style="background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:9px 11px;min-height:120px;max-height:260px;overflow:auto;font-family:'Cascadia Code',Consolas,monospace;font-size:11px;line-height:1.6;white-space:pre-wrap;word-break:break-all;color:var(--text-dim)">Listo. Esperando comandos…
 </div>
@@ -563,24 +565,24 @@
   <div class="modal" style="max-width:720px">
     <h2>About EstimaStruct</h2>
     <div class="about-body">
-      <p class="about-lead">
+      <p class="about-lead" data-es="EstimaStruct es una plataforma open source de estimación para ingeniería y arquitectura, diseñada para análisis estructural, detalle técnico y control de costos con trazabilidad." data-en="EstimaStruct is an open source estimation platform for engineering and architecture, designed for structural analysis, technical detail, and cost control with full traceability.">
         EstimaStruct es una plataforma open source de estimación para ingeniería y arquitectura,
         diseñada para análisis estructural, detalle técnico y control de costos con trazabilidad.
       </p>
-      <p>
+      <p data-es="Funciona como puente entre Revit 2027 y el análisis de precios dentro del ecosistema Estimbot, convirtiendo schedules y datos de obra en partidas auditables y listas para presupuesto real." data-en="It acts as a bridge between Revit 2027 and price analysis within the Estimbot ecosystem, converting schedules and project data into auditable line items ready for real budgeting.">
         Funciona como puente entre Revit 2027 y el análisis de precios dentro del ecosistema
         Estimbot, convirtiendo schedules y datos de obra en partidas auditables y listas para
         presupuesto real.
       </p>
-      <p>
+      <p data-es="Construida con FastAPI, SQLite y Vanilla JavaScript para priorizar portabilidad, transparencia y despliegue simple en equipos técnicos." data-en="Built with FastAPI, SQLite and Vanilla JavaScript to prioritize portability, transparency and simple deployment for technical teams.">
         Construida con FastAPI, SQLite y Vanilla JavaScript para priorizar portabilidad,
         transparencia y despliegue simple en equipos técnicos.
       </p>
       <ul class="about-list">
-        <li>Estimación por partidas, capítulos CSI e insumos</li>
-        <li>Importación de cantidades desde Revit schedules</li>
-        <li>Base pensada para compartirse, auditarse y descargarse desde GitHub</li>
-        <li>Parte del módulo de automatización de Estimbot</li>
+        <li data-es="Estimación por partidas, capítulos CSI e insumos" data-en="Estimation by line items, CSI chapters and resources">Estimación por partidas, capítulos CSI e insumos</li>
+        <li data-es="Importación de cantidades desde Revit schedules" data-en="Quantity import from Revit schedules">Importación de cantidades desde Revit schedules</li>
+        <li data-es="Base pensada para compartirse, auditarse y descargarse desde GitHub" data-en="Designed to be shared, audited and downloaded from GitHub">Base pensada para compartirse, auditarse y descargarse desde GitHub</li>
+        <li data-es="Parte del módulo de automatización de Estimbot" data-en="Part of the Estimbot automation module">Parte del módulo de automatización de Estimbot</li>
       </ul>
       <p>
         By ConsuConstruct:
@@ -588,7 +590,7 @@
       </p>
     </div>
     <div class="modal-actions">
-      <button type="button" class="btn-primary" id="modal-about-close">Cerrar</button>
+      <button type="button" class="btn-primary" id="modal-about-close" data-es="Cerrar" data-en="Close">Cerrar</button>
     </div>
   </div>
 </div>
@@ -597,10 +599,10 @@
 <div id="modal-cronograma" class="modal-overlay hidden">
   <div class="modal modal-gantt">
     <div class="gantt-head">
-      <h2 id="gantt-titulo">Cronograma</h2>
+      <h2 id="gantt-titulo" data-es="Cronograma" data-en="Schedule">Cronograma</h2>
       <div class="gantt-head-actions">
         <span id="gantt-meta" class="gantt-meta"></span>
-        <button id="btn-gantt-export" class="btn-primary">⬇ Exportar XLSX</button>
+        <button id="btn-gantt-export" class="btn-primary" data-es="⬇ Exportar XLSX" data-en="⬇ Export XLSX">⬇ Exportar XLSX</button>
         <button id="modal-cronograma-close" class="btn-icon" title="Cerrar">✕</button>
       </div>
     </div>
@@ -611,30 +613,30 @@
 <!-- MODAL: EXPORTAR PDF CON MEMBRETE -->
 <div id="modal-export-pdf" class="modal-overlay hidden">
   <div class="modal" style="max-width:560px">
-    <h2>Exportar PDF — membrete ConsuConstruct</h2>
+    <h2 data-es="Exportar PDF — membrete ConsuConstruct" data-en="Export PDF — ConsuConstruct header">Exportar PDF — membrete ConsuConstruct</h2>
     <div class="epdf-grid">
-      <label>Reporte
+      <label data-es="Reporte" data-en="Report">Reporte
         <select id="epdf-report">
-          <option value="presupuesto">Presupuesto (estimación por actividad)</option>
-          <option value="cronograma">Cronograma de ejecución</option>
-          <option value="insumos">Insumos necesarios</option>
-          <option value="db">Base de datos de actividades</option>
-          <option value="audit">Reporte de auditoría</option>
+          <option value="presupuesto" data-es="Presupuesto (estimación por actividad)" data-en="Budget (activity estimate)">Presupuesto (estimación por actividad)</option>
+          <option value="cronograma" data-es="Cronograma de ejecución" data-en="Execution schedule">Cronograma de ejecución</option>
+          <option value="insumos" data-es="Insumos necesarios" data-en="Required resources">Insumos necesarios</option>
+          <option value="db" data-es="Base de datos de actividades" data-en="Activity database">Base de datos de actividades</option>
+          <option value="audit" data-es="Reporte de auditoría" data-en="Audit report">Reporte de auditoría</option>
         </select>
       </label>
-      <label>Subtítulo<input id="epdf-subtitulo" type="text" /></label>
-      <label>Proyecto (título)<input id="epdf-proyecto" type="text" /></label>
-      <label>Código + nombre<input id="epdf-codnom" type="text" /></label>
-      <label>Cliente<input id="epdf-cliente" type="text" /></label>
-      <label>RTN cliente<input id="epdf-rtncli" type="text" placeholder="opcional" /></label>
-      <label>Ubicación<input id="epdf-ubic" type="text" placeholder="ej. Comayagua" /></label>
-      <label>Fecha<input id="epdf-fecha" type="text" placeholder="dd/mm/aaaa" /></label>
-      <label>Código interno<input id="epdf-codint" type="text" placeholder="CC-2026-XXX" /></label>
+      <label data-es="Subtítulo" data-en="Subtitle">Subtítulo<input id="epdf-subtitulo" type="text" /></label>
+      <label data-es="Proyecto (título)" data-en="Project (title)">Proyecto (título)<input id="epdf-proyecto" type="text" /></label>
+      <label data-es="Código + nombre" data-en="Code + name">Código + nombre<input id="epdf-codnom" type="text" /></label>
+      <label data-es="Cliente" data-en="Client">Cliente<input id="epdf-cliente" type="text" /></label>
+      <label data-es="RTN cliente" data-en="Client RTN">RTN cliente<input id="epdf-rtncli" type="text" placeholder="opcional" /></label>
+      <label data-es="Ubicación" data-en="Location">Ubicación<input id="epdf-ubic" type="text" placeholder="ej. Comayagua" /></label>
+      <label data-es="Fecha" data-en="Date">Fecha<input id="epdf-fecha" type="text" placeholder="dd/mm/aaaa" /></label>
+      <label data-es="Código interno" data-en="Internal code">Código interno<input id="epdf-codint" type="text" placeholder="CC-2026-XXX" /></label>
     </div>
     <div class="modal-actions">
-      <button type="button" class="btn-cancel" id="epdf-cancel">Cancelar</button>
-      <button type="button" class="btn-primary" id="epdf-preview" title="Vista previa HTML editable (ajustar márgenes, Chromium)">🖥 Vista previa</button>
-      <button type="button" class="btn-primary" id="epdf-gen">⬇ Generar PDF</button>
+      <button type="button" class="btn-cancel" id="epdf-cancel" data-es="Cancelar" data-en="Cancel">Cancelar</button>
+      <button type="button" class="btn-primary" id="epdf-preview" title="Vista previa HTML editable (ajustar márgenes, Chromium)" data-es="🖥 Vista previa" data-en="🖥 Preview">🖥 Vista previa</button>
+      <button type="button" class="btn-primary" id="epdf-gen" data-es="⬇ Generar PDF" data-en="⬇ Generate PDF">⬇ Generar PDF</button>
     </div>
   </div>
 </div>
@@ -642,21 +644,21 @@
 <!-- MODAL: EXPORTAR PDF PARA BANCO (presupuesto + Gantt prorrateados a valor_banco) -->
 <div id="modal-export-pdf-banco" class="modal-overlay hidden">
   <div class="modal" style="max-width:560px">
-    <h2>Exportar PDF — membrete para Banco</h2>
+    <h2 data-es="Exportar PDF — membrete para Banco" data-en="Export PDF — Bank header">Exportar PDF — membrete para Banco</h2>
     <div class="epdf-grid">
-      <label>Valor final para el Banco (L)<input id="epdfb-valor" type="number" min="0" step="0.01" /></label>
-      <label>Proyecto (título)<input id="epdfb-proyecto" type="text" /></label>
-      <label>Código + nombre<input id="epdfb-codnom" type="text" /></label>
-      <label>Cliente<input id="epdfb-cliente" type="text" /></label>
-      <label>RTN cliente<input id="epdfb-rtncli" type="text" placeholder="opcional" /></label>
-      <label>Ubicación<input id="epdfb-ubic" type="text" placeholder="ej. Comayagua" /></label>
-      <label>Fecha<input id="epdfb-fecha" type="text" placeholder="dd/mm/aaaa" /></label>
-      <label>Código interno<input id="epdfb-codint" type="text" placeholder="CC-2026-XXX" /></label>
+      <label data-es="Valor final para el Banco (L)" data-en="Final bank value (L)">Valor final para el Banco (L)<input id="epdfb-valor" type="number" min="0" step="0.01" /></label>
+      <label data-es="Proyecto (título)" data-en="Project (title)">Proyecto (título)<input id="epdfb-proyecto" type="text" /></label>
+      <label data-es="Código + nombre" data-en="Code + name">Código + nombre<input id="epdfb-codnom" type="text" /></label>
+      <label data-es="Cliente" data-en="Client">Cliente<input id="epdfb-cliente" type="text" /></label>
+      <label data-es="RTN cliente" data-en="Client RTN">RTN cliente<input id="epdfb-rtncli" type="text" placeholder="opcional" /></label>
+      <label data-es="Ubicación" data-en="Location">Ubicación<input id="epdfb-ubic" type="text" placeholder="ej. Comayagua" /></label>
+      <label data-es="Fecha" data-en="Date">Fecha<input id="epdfb-fecha" type="text" placeholder="dd/mm/aaaa" /></label>
+      <label data-es="Código interno" data-en="Internal code">Código interno<input id="epdfb-codint" type="text" placeholder="CC-2026-XXX" /></label>
     </div>
     <div id="epdfb-pct" style="margin-top:8px;font-size:12px;color:var(--text-dim)"></div>
     <div class="modal-actions">
-      <button type="button" class="btn-cancel" id="epdfb-cancel">Cancelar</button>
-      <button type="button" class="btn-primary" id="epdfb-gen">⬇ Generar PDF</button>
+      <button type="button" class="btn-cancel" id="epdfb-cancel" data-es="Cancelar" data-en="Cancel">Cancelar</button>
+      <button type="button" class="btn-primary" id="epdfb-gen" data-es="⬇ Generar PDF" data-en="⬇ Generate PDF">⬇ Generar PDF</button>
     </div>
   </div>
 </div>
@@ -665,20 +667,20 @@
 <div id="layout">
 
   <!-- TAB para reabrir la barra de obras cuando está escondida -->
-  <button id="btn-show-sidebar" class="sidebar-show-btn hidden" title="Mostrar barra de obras" type="button">▶</button>
+  <button id="btn-show-sidebar" class="sidebar-show-btn hidden" title="Mostrar barra de obras" data-es-title="Mostrar barra de obras" data-en-title="Show projects sidebar" type="button">▶</button>
 
   <!-- SIDEBAR -->
   <div id="sidebar">
     <div id="sidebar-header">
       <div class="sidebar-header-top">
-        <span>Obras</span>
-        <button id="btn-hide-sidebar" class="sidebar-collapse-btn" title="Esconder barra de obras" type="button">◀</button>
+        <span data-es="Obras" data-en="Projects">Obras</span>
+        <button id="btn-hide-sidebar" class="sidebar-collapse-btn" title="Esconder barra de obras" data-es-title="Esconder barra de obras" data-en-title="Hide projects sidebar" type="button">◀</button>
       </div>
       <select id="obra-dropdown" title="Cambiar obra activa"></select>
     </div>
     <div id="obras-list"></div>
     <div id="bases-sidebar-toggle-wrap" class="hidden">
-      <button id="btn-bases-sidebar" class="bases-sidebar-toggle" type="button">Bases de Datos ▸</button>
+      <button id="btn-bases-sidebar" class="bases-sidebar-toggle" type="button" data-es="Bases de Datos ▸" data-en="Databases ▸">Bases de Datos ▸</button>
     </div>
   </div>
 
@@ -686,18 +688,18 @@
   <div id="main">
     <div id="bases-drawer" class="hidden">
       <div class="bases-header">
-        <h2 style="margin:0;font-size:15px;white-space:nowrap">Bases de Datos</h2>
+        <h2 style="margin:0;font-size:15px;white-space:nowrap" data-es="Bases de Datos" data-en="Databases">Bases de Datos</h2>
         <div id="bases-version-tabs" class="bases-version-tabs"></div>
         <div style="margin-left:auto;display:flex;align-items:center;gap:8px">
-          <button id="btn-db-export-zip" class="btn-primary" style="font-size:12px;padding:5px 10px;white-space:nowrap" title="Descarga una copia completa de la BD viva (estimacion.db + manifest.json) en un ZIP">📦 Exportar copia BD (ZIP)</button>
-          <button id="btn-db-import-zip" class="btn-cancel" style="font-size:12px;padding:5px 10px;white-space:nowrap;color:#e74c3c;border-color:#e74c3c" title="Reemplaza la BD viva desde un ZIP de backup (con confirmación doble)">📥 Importar BD (ZIP)</button>
+          <button id="btn-db-export-zip" class="btn-primary" style="font-size:12px;padding:5px 10px;white-space:nowrap" title="Descarga una copia completa de la BD viva (estimacion.db + manifest.json) en un ZIP" data-es="📦 Exportar copia BD (ZIP)" data-en="📦 Export DB copy (ZIP)">📦 Exportar copia BD (ZIP)</button>
+          <button id="btn-db-import-zip" class="btn-cancel" style="font-size:12px;padding:5px 10px;white-space:nowrap;color:#e74c3c;border-color:#e74c3c" title="Reemplaza la BD viva desde un ZIP de backup (con confirmación doble)" data-es="📥 Importar BD (ZIP)" data-en="📥 Import DB (ZIP)">📥 Importar BD (ZIP)</button>
           <input type="file" id="db-import-zip-input" accept=".zip" class="hidden" />
           <button id="modal-bases-close" class="btn-icon" style="font-size:16px;padding:4px 8px">✕</button>
         </div>
       </div>
       <div class="bases-body bases-body-audit">
         <div class="bases-toolbar">
-          <input id="bases-search" class="recurso-search" placeholder="Filtrar actividades por CSI, Type Mark o descripción..." />
+          <input id="bases-search" class="recurso-search" placeholder="Filtrar actividades por CSI, Type Mark o descripción..." data-es-placeholder="Filtrar actividades por CSI, Type Mark o descripción..." data-en-placeholder="Filter activities by CSI, Type Mark or description..." />
           <div class="bases-left-actions">
             <button id="btn-bases-add" class="btn-bases-mini btn-bases-mini-add" title="Agregar matriz">+</button>
             <button id="btn-bases-dup" class="btn-bases-mini btn-bases-mini-dup" title="Duplicar matriz seleccionada" disabled>⧉</button>
@@ -722,34 +724,34 @@
           <div class="bases-detail-tab">
             <div id="bases-panel-info-bar">
               <div class="info-bar-item">
-                <span class="info-lbl">UNIDAD</span>
+                <span class="info-lbl" data-es="UNIDAD" data-en="UNIT">UNIDAD</span>
                 <span id="bases-detail-unidad" class="info-val">—</span>
               </div>
               <div class="info-bar-item">
-                <span class="info-lbl">MANO DE OBRA</span>
+                <span class="info-lbl" data-es="MANO DE OBRA" data-en="LABOR">MANO DE OBRA</span>
                 <span id="bases-detail-mo" class="info-val">0.00</span>
               </div>
               <div class="info-bar-item">
-                <span class="info-lbl">INSUMOS</span>
+                <span class="info-lbl" data-es="INSUMOS" data-en="RESOURCES">INSUMOS</span>
                 <span id="bases-detail-ma" class="info-val">0.00</span>
               </div>
               <div class="info-bar-item">
-                <span class="info-lbl">COSTO DIRECTO</span>
+                <span class="info-lbl" data-es="COSTO DIRECTO" data-en="DIRECT COST">COSTO DIRECTO</span>
                 <span id="bases-detail-base" class="info-val">0.00</span>
               </div>
               <div class="info-bar-item">
-                <span class="info-lbl">PRECIO UNITARIO</span>
+                <span class="info-lbl" data-es="PRECIO UNITARIO" data-en="UNIT PRICE">PRECIO UNITARIO</span>
                 <span id="bases-detail-pu" class="info-val" style="color:var(--accent);font-weight:700">0.00</span>
               </div>
             </div>
 
             <div id="bases-matriz-totales-bar">
-              <span class="mt-item mt-todos">Todos: <b id="bases-mt-todos">0.00</b></span>
+              <span class="mt-item mt-todos"><span data-es="Todos:" data-en="All:">Todos:</span> <b id="bases-mt-todos">0.00</b></span>
               <span class="mt-sep">|</span>
               <span class="mt-item mt-ma">MA: <b id="bases-mt-ma">0.00</b></span>
               <span class="mt-sep">|</span>
               <span class="mt-item mt-mo">MO: <b id="bases-mt-mo">0.00</b></span>
-              <button id="btn-bases-add-insumo" class="btn-bases-addins" title="Agregar insumo de la lista" style="margin-left:auto">＋ Agregar insumo</button>
+              <button id="btn-bases-add-insumo" class="btn-bases-addins" title="Agregar insumo de la lista" style="margin-left:auto" data-es="＋ Agregar insumo" data-en="＋ Add resource">＋ Agregar insumo</button>
             </div>
 
             <div id="bases-matriz-table-wrap">
@@ -757,12 +759,12 @@
                 <thead>
                   <tr>
                     <th style="width:28px">#</th>
-                    <th style="width:80px">Clave</th>
-                    <th>Descripción</th>
-                    <th style="width:52px">Ud</th>
-                    <th class="num" style="width:96px">Rendimiento</th>
-                    <th class="num" style="width:96px">P. Unitario</th>
-                    <th class="num" style="width:96px">Total</th>
+                    <th style="width:80px" data-es="Clave" data-en="Code">Clave</th>
+                    <th data-es="Descripción" data-en="Description">Descripción</th>
+                    <th style="width:52px" data-es="Ud" data-en="Unit">Ud</th>
+                    <th class="num" style="width:96px" data-es="Rendimiento" data-en="Yield">Rendimiento</th>
+                    <th class="num" style="width:96px" data-es="P. Unitario" data-en="Unit Price">P. Unitario</th>
+                    <th class="num" style="width:96px" data-es="Total" data-en="Total">Total</th>
                     <th style="width:30px"></th>
                   </tr>
                 </thead>
@@ -773,11 +775,11 @@
         </div>
       </div>
       <div class="bases-footer">
-        <span id="bases-changes-count" style="font-size:12px;color:var(--text-dim)">Sin cambios pendientes</span>
+        <span id="bases-changes-count" style="font-size:12px;color:var(--text-dim)" data-es="Sin cambios pendientes" data-en="No pending changes">Sin cambios pendientes</span>
         <div style="display:flex;gap:8px">
-          <button id="btn-bases-undo" class="btn-cancel" disabled>↩ Deshacer (<span id="bases-undo-levels">0</span>)</button>
-          <button id="btn-bases-cancel" class="btn-cancel">Cancelar</button>
-          <button id="btn-bases-save" class="btn-primary" disabled>Guardar y Sincronizar</button>
+          <button id="btn-bases-undo" class="btn-cancel" disabled data-es="↩ Deshacer" data-en="↩ Undo">↩ Deshacer (<span id="bases-undo-levels">0</span>)</button>
+          <button id="btn-bases-cancel" class="btn-cancel" data-es="Cancelar" data-en="Cancel">Cancelar</button>
+          <button id="btn-bases-save" class="btn-primary" disabled data-es="Guardar y Sincronizar" data-en="Save &amp; Sync">Guardar y Sincronizar</button>
         </div>
       </div>
     </div>
@@ -805,8 +807,8 @@
       </div>
       <div class="recursos-bar-actions">
         <button id="btn-toggle-typemark" class="btn-toggle-tm" title="Mostrar/ocultar columna Type Mark">Type Mark</button>
-        <button id="btn-toggle-solomo" class="btn-toggle-tm" title="Mano de Obra: muestra solo Cantidad, Mano de Obra y Total Mano de Obra (Cant × Mano de Obra)">Mano de Obra</button>
-        <button id="btn-toggle-auditoria" class="btn-toggle-tm" title="Auditoría: reemplaza Costo Directo y Precio Unitario por Total Mano de Obra (Cant × Mano de Obra) y Total Insumos (Cant × Insumos)">Auditoría</button>
+        <button id="btn-toggle-solomo" class="btn-toggle-tm" title="Mano de Obra: muestra solo Cantidad, Mano de Obra y Total Mano de Obra (Cant × Mano de Obra)" data-es="Mano de Obra" data-en="Labor">Mano de Obra</button>
+        <button id="btn-toggle-auditoria" class="btn-toggle-tm" title="Auditoría: reemplaza Costo Directo y Precio Unitario por Total Mano de Obra (Cant × Mano de Obra) y Total Insumos (Cant × Insumos)" data-es="Auditoría" data-en="Audit">Auditoría</button>
       </div>
       </div>
       <div id="recursos-sums"></div>
@@ -820,8 +822,8 @@
       <!-- TABLE -->
       <div id="table-area">
         <div class="empty-state">
-          <p>Crea una nueva obra para comenzar</p>
-          <small>Botón "+ Nueva Obra" arriba a la derecha</small>
+          <p data-es="Crea una nueva obra para comenzar" data-en="Create a new project to get started">Crea una nueva obra para comenzar</p>
+          <small data-es='Botón "+ Nueva Obra" arriba a la derecha' data-en='Click "+ New Project" in the top right'>Botón "+ Nueva Obra" arriba a la derecha</small>
         </div>
       </div>
 
@@ -832,7 +834,7 @@
           <span id="panel-lateral-title">—</span>
           <button id="panel-lateral-close">✕</button>
         </div>
-        <input id="recurso-search" class="recurso-search" placeholder="Buscar recurso..." />
+        <input id="recurso-search" class="recurso-search" placeholder="Buscar recurso..." data-es-placeholder="Buscar recurso..." data-en-placeholder="Search resource..." />
         <div id="recursos-lista"></div>
       </div>
     </div>
@@ -851,7 +853,7 @@
 
       <!-- TABS -->
       <div class="panel-tabs">
-        <button class="tab-btn active" data-tab="detalle">Detalle</button>
+        <button class="tab-btn active" data-tab="detalle" data-es="Detalle" data-en="Detail">Detalle</button>
       </div>
 
       <!-- TAB: Detalle — Matriz de insumos -->
@@ -860,7 +862,7 @@
         <!-- Barra de info rápida: unidad editable + costos + total -->
         <div id="panel-info-bar">
           <div class="info-bar-item">
-            <span class="info-lbl">UNIDAD</span>
+            <span class="info-lbl" data-es="UNIDAD" data-en="UNIT">UNIDAD</span>
             <div class="unidad-wrap">
               <span id="detail-unidad" class="info-val unidad-display">—</span>
               <select id="select-unidad" class="unidad-select hidden"></select>
@@ -868,34 +870,34 @@
             </div>
           </div>
           <div class="info-bar-item">
-            <span class="info-lbl">MANO DE OBRA</span>
+            <span class="info-lbl" data-es="MANO DE OBRA" data-en="LABOR">MANO DE OBRA</span>
             <span id="detail-mo" class="info-val">0.00</span>
           </div>
           <div class="info-bar-item">
-            <span class="info-lbl">INSUMOS</span>
+            <span class="info-lbl" data-es="INSUMOS" data-en="RESOURCES">INSUMOS</span>
             <span id="detail-ma" class="info-val">0.00</span>
           </div>
           <div class="info-bar-item">
-            <span class="info-lbl">COSTO BASE</span>
+            <span class="info-lbl" data-es="COSTO BASE" data-en="BASE COST">COSTO BASE</span>
             <span id="detail-base" class="info-val">0.00</span>
           </div>
           <div class="info-bar-item">
-            <span class="info-lbl">PRECIO UNITARIO</span>
+            <span class="info-lbl" data-es="PRECIO UNITARIO" data-en="UNIT PRICE">PRECIO UNITARIO</span>
             <span id="detail-pu" class="info-val" style="color:var(--accent);font-weight:700">0.00</span>
           </div>
           <div class="info-bar-item">
-            <span class="info-lbl">CANTIDAD</span>
+            <span class="info-lbl" data-es="CANTIDAD" data-en="QUANTITY">CANTIDAD</span>
             <span id="detail-cantidad" class="info-val" style="color:var(--accent2);font-weight:700">—</span>
           </div>
           <div class="info-bar-item">
-            <span class="info-lbl">TOTAL</span>
+            <span class="info-lbl" data-es="TOTAL" data-en="TOTAL">TOTAL</span>
             <span id="detail-total" class="info-val" style="color:var(--accent);font-weight:700">—</span>
           </div>
         </div>
 
         <!-- Barra de totales por tipo (estilo OPUS) -->
         <div id="matriz-totales-bar">
-          <span class="mt-item mt-todos">Todos: <b id="mt-todos">0.00</b></span>
+          <span class="mt-item mt-todos"><span data-es="Todos:" data-en="All:">Todos:</span> <b id="mt-todos">0.00</b></span>
           <span class="mt-sep">|</span>
           <span class="mt-item mt-ma">MA: <b id="mt-ma">0.00</b></span>
           <span class="mt-sep">|</span>
@@ -908,12 +910,12 @@
             <thead>
               <tr>
                 <th style="width:28px">#</th>
-                <th style="width:80px">Clave</th>
-                <th>Descripción</th>
-                <th style="width:52px">Ud</th>
-                <th class="num" style="width:88px">Rendimiento</th>
-                <th class="num" style="width:90px">Costo Unit.</th>
-                <th class="num" style="width:96px">Total</th>
+                <th style="width:80px" data-es="Clave" data-en="Code">Clave</th>
+                <th data-es="Descripción" data-en="Description">Descripción</th>
+                <th style="width:52px" data-es="Ud" data-en="Unit">Ud</th>
+                <th class="num" style="width:88px" data-es="Rendimiento" data-en="Yield">Rendimiento</th>
+                <th class="num" style="width:90px" data-es="Costo Unit." data-en="Unit Cost">Costo Unit.</th>
+                <th class="num" style="width:96px" data-es="Total" data-en="Total">Total</th>
                 <th style="width:28px"></th>
               </tr>
             </thead>
@@ -922,7 +924,7 @@
               <tr id="row-add-insumo">
                 <td colspan="2">
                   <div class="insumo-search-wrap">
-                    <input id="insumo-search" class="na-input" placeholder="Buscar recurso..." autocomplete="off" />
+                    <input id="insumo-search" class="na-input" placeholder="Buscar recurso..." autocomplete="off" data-es-placeholder="Buscar recurso..." data-en-placeholder="Search resource..." />
                     <div id="insumo-dropdown" class="insumo-dropdown hidden"></div>
                   </div>
                 </td>
@@ -947,14 +949,14 @@
 <!-- MODAL: ELEGIR SCHEDULES S5_schedules -->
 <div id="modal-csv-pick" class="modal-overlay hidden">
   <div class="modal" style="max-width:560px">
-    <h2>Elegir export de Schedules</h2>
-    <p style="color:var(--text-dim);font-size:12px;margin-bottom:8px">
+    <h2 data-es="Elegir export de Schedules" data-en="Choose Schedules export">Elegir export de Schedules</h2>
+    <p style="color:var(--text-dim);font-size:12px;margin-bottom:8px" data-es="Solo archivos schedules_*.csv generados por PyRevit en D:\OneDrive\Bots\Estimbot\EXPORTS\S5_schedules" data-en="Only schedules_*.csv files generated by PyRevit in D:\OneDrive\Bots\Estimbot\EXPORTS\S5_schedules">
       Solo archivos <code>schedules_*.csv</code> generados por PyRevit en <code>D:\OneDrive\Bots\Estimbot\EXPORTS\S5_schedules</code>
     </p>
     <div id="csv-pick-list" class="csv-pick-list"></div>
     <div class="modal-actions">
-      <button type="button" class="btn-cancel" id="modal-csv-cancel">Cancelar</button>
-      <button type="button" class="btn-primary" id="modal-csv-ok" disabled>Importar schedules</button>
+      <button type="button" class="btn-cancel" id="modal-csv-cancel" data-es="Cancelar" data-en="Cancel">Cancelar</button>
+      <button type="button" class="btn-primary" id="modal-csv-ok" disabled data-es="Importar schedules" data-en="Import schedules">Importar schedules</button>
     </div>
   </div>
 </div>
@@ -962,10 +964,10 @@
 <!-- MODAL: SCRIPT OUTPUT -->
 <div id="modal-script-out" class="modal-overlay hidden">
   <div class="modal" style="max-width:640px">
-    <h2 id="modal-script-title">Resultado</h2>
+    <h2 id="modal-script-title" data-es="Resultado" data-en="Result">Resultado</h2>
     <div id="modal-script-body" class="script-out"></div>
     <div class="modal-actions">
-      <button type="button" class="btn-primary" id="modal-script-close">Cerrar</button>
+      <button type="button" class="btn-primary" id="modal-script-close" data-es="Cerrar" data-en="Close">Cerrar</button>
     </div>
   </div>
 </div>
@@ -973,15 +975,15 @@
 <!-- MODAL: BORRAR OBRA -->
 <div id="modal-delete" class="modal-overlay hidden">
   <div class="modal">
-    <h2>Borrar Obra</h2>
+    <h2 data-es="Borrar Obra" data-en="Delete Project">Borrar Obra</h2>
     <p id="modal-delete-msg" style="margin-bottom:14px;color:var(--text-dim);font-size:13px;line-height:1.5"></p>
     <label class="check-confirm">
       <input type="checkbox" id="del-confirm-check" />
-      <span>Confirmo que entiendo que esta acción es <b>irreversible</b></span>
+      <span data-es="Confirmo que entiendo que esta acción es irreversible" data-en="I confirm I understand this action is irreversible">Confirmo que entiendo que esta acción es <b>irreversible</b></span>
     </label>
     <div class="modal-actions" style="margin-top:14px">
-      <button type="button" class="btn-cancel" id="modal-delete-cancel">Cancelar</button>
-      <button type="button" class="btn-danger" id="modal-delete-ok" disabled>Borrar</button>
+      <button type="button" class="btn-cancel" id="modal-delete-cancel" data-es="Cancelar" data-en="Cancel">Cancelar</button>
+      <button type="button" class="btn-danger" id="modal-delete-ok" disabled data-es="Borrar" data-en="Delete">Borrar</button>
     </div>
   </div>
 </div>
@@ -989,13 +991,13 @@
 <!-- MODAL: RENOMBRAR OBRA -->
 <div id="modal-rename" class="modal-overlay hidden">
   <div class="modal">
-    <h2>Renombrar Obra</h2>
+    <h2 data-es="Renombrar Obra" data-en="Rename Project">Renombrar Obra</h2>
     <form id="modal-rename-form">
-      <label>Nombre *</label>
+      <label data-es="Nombre *" data-en="Name *">Nombre *</label>
       <input type="text" id="rename-nombre" required />
       <div class="modal-actions">
-        <button type="button" class="btn-cancel" id="modal-rename-cancel">Cancelar</button>
-        <button type="submit" class="btn-primary">Guardar</button>
+        <button type="button" class="btn-cancel" id="modal-rename-cancel" data-es="Cancelar" data-en="Cancel">Cancelar</button>
+        <button type="submit" class="btn-primary" data-es="Guardar" data-en="Save">Guardar</button>
       </div>
     </form>
   </div>
@@ -1004,8 +1006,8 @@
 <!-- MODAL: SELECCIONAR VERSION TEMPLATE -->
 <div id="modal-template-version" class="modal-overlay hidden">
   <div class="modal" style="max-width:500px">
-    <h2>Seleccionar Versión de Template</h2>
-    <p style="color:var(--text-dim);font-size:12px;margin-bottom:16px;">
+    <h2 data-es="Seleccionar Versión de Template" data-en="Select Template Version">Seleccionar Versión de Template</h2>
+    <p style="color:var(--text-dim);font-size:12px;margin-bottom:16px;" data-es="Elige qué versión de Template 2 - Updated usar para nuevas obras:" data-en="Choose which Template 2 - Updated version to use for new projects:">
       Elige qué versión de Template 2 - Updated usar para nuevas obras:
     </p>
     <div style="display:grid;gap:12px;margin-bottom:20px">
@@ -1013,30 +1015,30 @@
         <input type="radio" name="template-version" value="v1.0" style="margin-right:12px;cursor:pointer;width:18px;height:18px"/>
         <div>
           <div style="font-weight:600;margin-bottom:2px">Template V1.0</div>
-          <div style="font-size:11px;color:var(--text-dim)">Datos originales</div>
+          <div style="font-size:11px;color:var(--text-dim)" data-es="Datos originales" data-en="Original data">Datos originales</div>
         </div>
       </label>
       <label style="display:flex;align-items:center;padding:12px;border:2px solid var(--border);border-radius:6px;cursor:pointer;transition:all 0.2s" id="label-v1-1">
         <input type="radio" name="template-version" value="v1.1" style="margin-right:12px;cursor:pointer;width:18px;height:18px"/>
         <div>
           <div style="font-weight:600;margin-bottom:2px">Template V1.1</div>
-          <div style="font-size:11px;color:var(--text-dim)">Versión legacy</div>
+          <div style="font-size:11px;color:var(--text-dim)" data-es="Versión legacy" data-en="Legacy version">Versión legacy</div>
         </div>
       </label>
       <label style="display:flex;align-items:center;padding:12px;border:2px solid var(--border);border-radius:6px;cursor:pointer;transition:all 0.2s" id="label-v1-2">
         <input type="radio" name="template-version" value="v1.2" style="margin-right:12px;cursor:pointer;width:18px;height:18px"/>
         <div>
           <div style="font-weight:600;margin-bottom:2px">Template V1.2</div>
-          <div style="font-size:11px;color:var(--text-dim)">Versión vigente</div>
+          <div style="font-size:11px;color:var(--text-dim)" data-es="Versión vigente" data-en="Current version">Versión vigente</div>
         </div>
       </label>
     </div>
     <div style="padding:12px;background:var(--bg-dark);border-radius:6px;margin-bottom:16px;font-size:11px;color:var(--text-dim)">
-      <strong>Versión seleccionada:</strong> <span id="version-selected">V1.0</span>
+      <strong data-es="Versión seleccionada:" data-en="Selected version:">Versión seleccionada:</strong> <span id="version-selected">V1.0</span>
     </div>
     <div class="modal-actions">
-      <button type="button" class="btn-cancel" id="modal-tv-cancel">Cerrar</button>
-      <button type="button" class="btn-primary" id="modal-tv-ok">Guardar</button>
+      <button type="button" class="btn-cancel" id="modal-tv-cancel" data-es="Cerrar" data-en="Close">Cerrar</button>
+      <button type="button" class="btn-primary" id="modal-tv-ok" data-es="Guardar" data-en="Save">Guardar</button>
     </div>
   </div>
 </div>
@@ -1044,30 +1046,30 @@
 <!-- MODAL: NUEVA OBRA -->
 <div id="modal-obra" class="modal-overlay hidden">
   <div class="modal">
-    <h2>Nueva Obra</h2>
-    <p style="color:var(--text-dim);font-size:12px;margin-bottom:12px;">Se copiarán las actividades de <strong id="template-desc">Template V1.2</strong>.</p>
+    <h2 data-es="Nueva Obra" data-en="New Project">Nueva Obra</h2>
+    <p style="color:var(--text-dim);font-size:12px;margin-bottom:12px;" data-es="Se copiarán las actividades de" data-en="Activities will be copied from">Se copiarán las actividades de <strong id="template-desc">Template V1.2</strong>.</p>
     <form id="modal-obra-form">
-      <label>Nombre de la obra *</label>
-      <input type="text" id="obra-nombre" placeholder="Ej: Residencial Los Pinos" required />
-      <label>Cliente</label>
-      <input type="text" id="obra-cliente" placeholder="Nombre del cliente" />
-      <label>Moneda</label>
+      <label data-es="Nombre de la obra *" data-en="Project name *">Nombre de la obra *</label>
+      <input type="text" id="obra-nombre" placeholder="Ej: Residencial Los Pinos" required data-es-placeholder="Ej: Residencial Los Pinos" data-en-placeholder="E.g.: Residencial Los Pinos" />
+      <label data-es="Cliente" data-en="Client">Cliente</label>
+      <input type="text" id="obra-cliente" placeholder="Nombre del cliente" data-es-placeholder="Nombre del cliente" data-en-placeholder="Client name" />
+      <label data-es="Moneda" data-en="Currency">Moneda</label>
       <select id="obra-moneda">
         <option value="HNL">HNL — Lempira</option>
         <option value="USD">USD — Dólar</option>
       </select>
-      <label>Sobrecosto / Overhead %</label>
+      <label data-es="Sobrecosto / Overhead %" data-en="Overhead %">Sobrecosto / Overhead %</label>
       <input type="number" id="obra-sobrecosto" value="20" min="0" max="100" step="0.1" />
-      <label>Base de Datos *</label>
+      <label data-es="Base de Datos *" data-en="Database *">Base de Datos *</label>
       <select id="obra-template-version">
-        <option value="v1.0">V1.0 — Original</option>
-        <option value="v1.1">V1.1 — Legacy</option>
-        <option value="v1.2">V1.2 — Vigente</option>
+        <option value="v1.0" data-es="V1.0 — Original" data-en="V1.0 — Original">V1.0 — Original</option>
+        <option value="v1.1" data-es="V1.1 — Legacy" data-en="V1.1 — Legacy">V1.1 — Legacy</option>
+        <option value="v1.2" data-es="V1.2 — Vigente" data-en="V1.2 — Current">V1.2 — Vigente</option>
       </select>
-      <small style="color:var(--text-dim);margin-top:4px;display:block;">Cada proyecto puede usar una base de datos diferente</small>
+      <small style="color:var(--text-dim);margin-top:4px;display:block;" data-es="Cada proyecto puede usar una base de datos diferente" data-en="Each project can use a different database">Cada proyecto puede usar una base de datos diferente</small>
       <div class="modal-actions">
-        <button type="button" class="btn-cancel" id="modal-obra-cancel">Cancelar</button>
-        <button type="submit" class="btn-primary">Crear Obra</button>
+        <button type="button" class="btn-cancel" id="modal-obra-cancel" data-es="Cancelar" data-en="Cancel">Cancelar</button>
+        <button type="submit" class="btn-primary" data-es="Crear Obra" data-en="Create Project">Crear Obra</button>
       </div>
     </form>
   </div>
@@ -1077,40 +1079,40 @@
 <div id="color-picker-popup" class="color-picker-popup hidden">
   <div class="cp-item" data-color="amarillo">
     <span class="cp-dot" style="background:#f2c94c"></span>
-    <div><b>Amarillo</b> — Fórmula dependiente</div>
+    <div data-es="Amarillo — Fórmula dependiente" data-en="Yellow — Dependent formula"><b>Amarillo</b> — Fórmula dependiente</div>
   </div>
   <div class="cp-item" data-color="verde">
     <span class="cp-dot" style="background:#27ae60"></span>
-    <div><b>Verde</b> — Asignado en Revit</div>
+    <div data-es="Verde — Asignado en Revit" data-en="Green — Assigned in Revit"><b>Verde</b> — Asignado en Revit</div>
   </div>
   <div class="cp-item" data-color="rosa">
     <span class="cp-dot" style="background:#e91e8c"></span>
-    <div><b>Rosa</b> — Por asignar</div>
+    <div data-es="Rosa — Por asignar" data-en="Pink — To be assigned"><b>Rosa</b> — Por asignar</div>
   </div>
   <div class="cp-item" data-color="blanco">
     <span class="cp-dot" style="background:transparent;border:1px solid #777"></span>
-    <div><b>Blanco</b> — Manual</div>
+    <div data-es="Blanco — Manual" data-en="White — Manual"><b>Blanco</b> — Manual</div>
   </div>
 </div>
 
 <!-- MODAL: AGREGAR / ACTUALIZAR FICHAS -->
 <div id="modal-updater" class="modal-overlay hidden">
   <div class="modal" style="max-width:560px">
-    <h2>Agregar / Actualizar Fichas</h2>
+    <h2 data-es="Agregar / Actualizar Fichas" data-en="Add / Update Templates">Agregar / Actualizar Fichas</h2>
     <p style="color:var(--text-dim);font-size:12px;margin-bottom:12px">
       Carpeta: <code>D:\OneDrive\Bots\Estimbot\MasterFiles\Updater</code>
     </p>
-    <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Base de datos destino:</label>
+    <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px" data-es="Base de datos destino:" data-en="Target database:">Base de datos destino:</label>
     <select id="updater-version" style="width:100%;margin-bottom:14px;background:var(--surface2);color:var(--text);border:1px solid var(--border);padding:6px 8px;border-radius:4px">
       <option value="v1.0">V1.0 — Original</option>
       <option value="v1.1">V1.1 — Legacy</option>
       <option value="v1.2" selected>V1.2 — Vigente</option>
     </select>
-    <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Archivo Excel:</label>
+    <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px" data-es="Archivo Excel:" data-en="Excel file:">Archivo Excel:</label>
     <div id="updater-pick-list" class="csv-pick-list"></div>
     <div class="modal-actions" style="margin-top:14px">
-      <button type="button" class="btn-cancel" id="modal-updater-cancel">Cancelar</button>
-      <button type="button" class="btn-primary" id="modal-updater-ok" disabled>Importar</button>
+      <button type="button" class="btn-cancel" id="modal-updater-cancel" data-es="Cancelar" data-en="Cancel">Cancelar</button>
+      <button type="button" class="btn-primary" id="modal-updater-ok" disabled data-es="Importar" data-en="Import">Importar</button>
     </div>
   </div>
 </div>
@@ -1118,27 +1120,27 @@
 <!-- MODAL: AGREGAR MATRIZ -->
 <div id="modal-bases-add" class="modal-overlay hidden">
   <div class="modal modal-bases-add">
-    <h2>Agregar matriz</h2>
-    <p style="margin-bottom:12px;color:var(--text-dim);font-size:12px">
+    <h2 data-es="Agregar matriz" data-en="Add matrix">Agregar matriz</h2>
+    <p style="margin-bottom:12px;color:var(--text-dim);font-size:12px" data-es="Completa los campos de la nueva matriz. La ficha se agregará a la base activa y se guardará al sincronizar." data-en="Fill in the fields for the new matrix. The template will be added to the active database and saved on sync.">
       Completa los campos de la nueva matriz. La ficha se agregará a la base activa y se guardará al sincronizar.
     </p>
     <label for="bases-new-color">Color</label>
     <select id="bases-new-color">
-      <option value="blanco">Blanco</option>
-      <option value="rosa">Rosa</option>
-      <option value="amarillo">Amarillo</option>
-      <option value="verde">Verde</option>
-      <option value="azul">Azul</option>
+      <option value="blanco" data-es="Blanco" data-en="White">Blanco</option>
+      <option value="rosa" data-es="Rosa" data-en="Pink">Rosa</option>
+      <option value="amarillo" data-es="Amarillo" data-en="Yellow">Amarillo</option>
+      <option value="verde" data-es="Verde" data-en="Green">Verde</option>
+      <option value="azul" data-es="Azul" data-en="Blue">Azul</option>
     </select>
-    <label for="bases-new-csi">Numero CSI</label>
+    <label for="bases-new-csi" data-es="Numero CSI" data-en="CSI Number">Numero CSI</label>
     <input type="text" id="bases-new-csi" placeholder="03 31 00.1" />
-    <label for="bases-new-nombre">Nombre</label>
+    <label for="bases-new-nombre" data-es="Nombre" data-en="Name">Nombre</label>
     <input type="text" id="bases-new-nombre" placeholder="Descripción de la matriz" />
     <label for="bases-new-typemark">Type Mark</label>
     <input type="text" id="bases-new-typemark" placeholder="TM-001" />
     <div class="modal-actions">
-      <button type="button" id="modal-bases-add-cancel" class="btn-cancel">Cancelar</button>
-      <button type="button" id="modal-bases-add-save" class="btn-primary">Agregar</button>
+      <button type="button" id="modal-bases-add-cancel" class="btn-cancel" data-es="Cancelar" data-en="Cancel">Cancelar</button>
+      <button type="button" id="modal-bases-add-save" class="btn-primary" data-es="Agregar" data-en="Add">Agregar</button>
     </div>
   </div>
 </div>
@@ -1146,19 +1148,19 @@
 <!-- MODAL: IMPORTAR BD (ZIP) — reemplazo de la BD viva, doble confirmación -->
 <div id="modal-db-import" class="modal-overlay hidden">
   <div class="modal">
-    <h2>Importar BD (ZIP)</h2>
+    <h2 data-es="Importar BD (ZIP)" data-en="Import DB (ZIP)">Importar BD (ZIP)</h2>
     <p id="modal-db-import-file" style="margin-bottom:10px;color:var(--text-dim);font-size:12px"></p>
-    <p style="margin-bottom:14px;color:var(--text-dim);font-size:13px;line-height:1.5">
+    <p style="margin-bottom:14px;color:var(--text-dim);font-size:13px;line-height:1.5" data-es="Reemplaza la BD actual. Se guarda backup en C:\EstimaStruct\backups. ¿Continuar?" data-en="Replaces the current DB. Backup saved at C:\EstimaStruct\backups. Continue?">
       Reemplaza la BD actual. Se guarda backup en <code>C:\EstimaStruct\backups</code>. ¿Continuar?
     </p>
     <label class="check-confirm">
       <input type="checkbox" id="db-import-confirm-check" />
-      <span>Confirmo que entiendo que esta acción <b>reemplaza la BD viva</b> (con backup previo automático)</span>
+      <span data-es="Confirmo que entiendo que esta acción reemplaza la BD viva (con backup previo automático)" data-en="I confirm this action replaces the live DB (automatic prior backup)">Confirmo que entiendo que esta acción <b>reemplaza la BD viva</b> (con backup previo automático)</span>
     </label>
     <div id="modal-db-import-result" class="hidden" style="margin-top:12px;font-size:12px;line-height:1.6;white-space:pre-wrap;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px"></div>
     <div class="modal-actions" style="margin-top:14px">
-      <button type="button" class="btn-cancel" id="modal-db-import-cancel">Cancelar</button>
-      <button type="button" class="btn-danger" id="modal-db-import-ok" disabled>Importar y reemplazar</button>
+      <button type="button" class="btn-cancel" id="modal-db-import-cancel" data-es="Cancelar" data-en="Cancel">Cancelar</button>
+      <button type="button" class="btn-danger" id="modal-db-import-ok" disabled data-es="Importar y reemplazar" data-en="Import and replace">Importar y reemplazar</button>
     </div>
   </div>
 </div>
@@ -1166,41 +1168,41 @@
 <!-- MODAL: AGREGAR INSUMO A LA MATRIZ (catálogo de recursos) -->
 <div id="modal-bases-insumo" class="modal-overlay hidden">
   <div class="modal" style="max-width:720px;display:flex;flex-direction:column;max-height:82vh">
-    <h2>Agregar insumo a la matriz</h2>
-    <p style="margin:-6px 0 10px;color:var(--text-dim);font-size:12px">
+    <h2 data-es="Agregar insumo a la matriz" data-en="Add resource to matrix">Agregar insumo a la matriz</h2>
+    <p style="margin:-6px 0 10px;color:var(--text-dim);font-size:12px" data-es="Recursos de la base de datos, separados por tipo. Clic para agregarlo (entra con rendimiento 1; ajústalo en la matriz)." data-en="Database resources, separated by type. Click to add (enters with yield 1; adjust in matrix).">
       Recursos de la base de datos, separados por tipo. Clic para agregarlo (entra con rendimiento 1; ajústalo en la matriz).
     </p>
-    <input id="bases-insumo-search" class="recurso-search" placeholder="Buscar por código o descripción..." style="margin-bottom:10px"/>
+    <input id="bases-insumo-search" class="recurso-search" placeholder="Buscar por código o descripción..." style="margin-bottom:10px" data-es-placeholder="Buscar por código o descripción..." data-en-placeholder="Search by code or description..."/>
     <div id="bases-insumo-list" class="bases-insumo-list"></div>
 
     <!-- Form: crear recurso nuevo (aparece al buscar un código inexistente) -->
     <div id="bases-insumo-create" class="bases-insumo-create hidden">
-      <div class="bic-title">➕ Crear recurso nuevo</div>
+      <div class="bic-title" data-es="➕ Crear recurso nuevo" data-en="➕ Create new resource">➕ Crear recurso nuevo</div>
       <div class="bic-grid">
-        <label>Código (clave)<input id="bic-clave" type="text" placeholder="MA-373" /></label>
-        <label>Tipo
+        <label data-es="Código (clave)" data-en="Code (key)">Código (clave)<input id="bic-clave" type="text" placeholder="MA-373" /></label>
+        <label data-es="Tipo" data-en="Type">Tipo
           <select id="bic-tipo">
             <option value="MATERIAL">Material</option>
-            <option value="MANO_OBRA">Mano de obra</option>
-            <option value="EQUIPO">Equipo</option>
-            <option value="SUBCONTRATO">Subcontrato</option>
-            <option value="HERRAMIENTA">Herramienta</option>
-            <option value="DISEÑO">Diseño</option>
-            <option value="FLETE">Flete</option>
+            <option value="MANO_OBRA" data-es="Mano de obra" data-en="Labor">Mano de obra</option>
+            <option value="EQUIPO" data-es="Equipo" data-en="Equipment">Equipo</option>
+            <option value="SUBCONTRATO" data-es="Subcontrato" data-en="Subcontract">Subcontrato</option>
+            <option value="HERRAMIENTA" data-es="Herramienta" data-en="Tool">Herramienta</option>
+            <option value="DISEÑO" data-es="Diseño" data-en="Design">Diseño</option>
+            <option value="FLETE" data-es="Flete" data-en="Freight">Flete</option>
           </select>
         </label>
-        <label class="bic-wide">Descripción / nombre<input id="bic-desc" type="text" placeholder="Nombre del insumo" /></label>
-        <label>Unidad<input id="bic-ud" type="text" list="unidades-list" placeholder="pza, m2, kg..." /></label>
-        <label>Precio unitario<input id="bic-precio" type="number" step="any" min="0" placeholder="0.00" /></label>
+        <label class="bic-wide" data-es="Descripción / nombre" data-en="Description / name">Descripción / nombre<input id="bic-desc" type="text" placeholder="Nombre del insumo" /></label>
+        <label data-es="Unidad" data-en="Unit">Unidad<input id="bic-ud" type="text" list="unidades-list" placeholder="pza, m2, kg..." /></label>
+        <label data-es="Precio unitario" data-en="Unit price">Precio unitario<input id="bic-precio" type="number" step="any" min="0" placeholder="0.00" /></label>
       </div>
       <div class="bic-actions">
-        <button type="button" class="btn-cancel" id="bic-cancel">Cancelar</button>
-        <button type="button" class="btn-primary" id="bic-save">Crear y agregar</button>
+        <button type="button" class="btn-cancel" id="bic-cancel" data-es="Cancelar" data-en="Cancel">Cancelar</button>
+        <button type="button" class="btn-primary" id="bic-save" data-es="Crear y agregar" data-en="Create and add">Crear y agregar</button>
       </div>
     </div>
 
     <div class="modal-actions">
-      <button type="button" class="btn-primary" id="modal-bases-insumo-close">Cerrar</button>
+      <button type="button" class="btn-primary" id="modal-bases-insumo-close" data-es="Cerrar" data-en="Close">Cerrar</button>
     </div>
   </div>
 </div>
@@ -1209,20 +1211,20 @@
 <div id="modal-session-log" class="modal-overlay hidden">
   <div class="modal" style="max-width:860px;display:flex;flex-direction:column;max-height:86vh">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
-      <h2 style="margin:0">📋 Log de cambios — sesión</h2>
-      <span id="session-log-count" style="font-size:12px;color:var(--text-dim)">0 evento(s)</span>
+      <h2 style="margin:0" data-es="📋 Log de cambios — sesión" data-en="📋 Change log — session">📋 Log de cambios — sesión</h2>
+      <span id="session-log-count" style="font-size:12px;color:var(--text-dim)">0 <span data-es="evento(s)" data-en="event(s)">evento(s)</span></span>
       <div style="margin-left:auto;display:flex;gap:8px">
-        <button type="button" class="btn-cancel" id="btn-session-log-copy">Copiar</button>
-        <button type="button" class="btn-cancel" id="btn-session-log-download">Descargar .txt</button>
-        <button type="button" class="btn-cancel" id="btn-session-log-clear">Limpiar</button>
+        <button type="button" class="btn-cancel" id="btn-session-log-copy" data-es="Copiar" data-en="Copy">Copiar</button>
+        <button type="button" class="btn-cancel" id="btn-session-log-download" data-es="Descargar .txt" data-en="Download .txt">Descargar .txt</button>
+        <button type="button" class="btn-cancel" id="btn-session-log-clear" data-es="Limpiar" data-en="Clear">Limpiar</button>
       </div>
     </div>
-    <p style="margin:0 0 10px;color:var(--text-dim);font-size:11px">
+    <p style="margin:0 0 10px;color:var(--text-dim);font-size:11px" data-es="Registro detallado de cambios manuales (persiste en este navegador). Útil para depurar: reproduce el orden exacto de ediciones antes de un error." data-en="Detailed log of manual changes (persists in this browser). Useful for debugging: reproduces the exact order of edits before an error.">
       Registro detallado de cambios manuales (persiste en este navegador). Útil para depurar: reproduce el orden exacto de ediciones antes de un error.
     </p>
     <div id="session-log-body" class="session-log-body"></div>
     <div class="modal-actions">
-      <button type="button" class="btn-primary" id="modal-session-log-close">Cerrar</button>
+      <button type="button" class="btn-primary" id="modal-session-log-close" data-es="Cerrar" data-en="Close">Cerrar</button>
     </div>
   </div>
 </div>
@@ -1286,6 +1288,32 @@
 
   document.addEventListener('mouseup', function () {
     if (draggingV) { draggingV = false; document.body.style.userSelect = ''; document.body.style.cursor = ''; }
+  });
+})();
+</script>
+<script>
+(function(){
+  function applyLang(lang) {
+    document.documentElement.setAttribute('data-lang', lang);
+    document.querySelectorAll('[data-es]').forEach(function(el) {
+      el.textContent = lang === 'en' ? (el.dataset.en || el.textContent) : el.dataset.es;
+    });
+    document.querySelectorAll('[data-es-placeholder]').forEach(function(el) {
+      el.placeholder = lang === 'en' ? (el.dataset.enPlaceholder || el.placeholder) : el.dataset.esPlaceholder;
+    });
+    document.querySelectorAll('[data-es-title]').forEach(function(el) {
+      el.title = lang === 'en' ? (el.dataset.enTitle || el.title) : el.dataset.esTitle;
+    });
+    localStorage.setItem('es_lang', lang);
+    var btn = document.getElementById('lang-toggle');
+    if (btn) btn.textContent = lang === 'en' ? '🌐 ES' : '🌐 EN';
+  }
+  window.toggleLang = function() {
+    var cur = localStorage.getItem('es_lang') || 'es';
+    applyLang(cur === 'es' ? 'en' : 'es');
+  };
+  document.addEventListener('DOMContentLoaded', function(){
+    applyLang(localStorage.getItem('es_lang') || 'es');
   });
 })();
 </script>
