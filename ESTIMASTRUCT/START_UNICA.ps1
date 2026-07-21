@@ -99,17 +99,16 @@ Write-Host '  LAN UI    : http://192.168.x.x:5000/' -ForegroundColor DarkCyan
 Write-Host '  (cerrar esta ventana detiene los servidores)' -ForegroundColor DarkGray
 Write-Host ''
 
-function Drain($job, $tag, $color) {
+function Drain($job, $tag) {
   Receive-Job $job 2>$null | ForEach-Object {
     $line = ($_ | Out-String).Trim()
     if ($line) {
-      Write-Host ("[{0}] {1} | " -f (Get-Date).ToString('HH:mm:ss'), $tag) -ForegroundColor $color -NoNewline
+      Write-Host ("[{0}][{1}] " -f (Get-Date).ToString('HH:mm:ss'), $tag) -ForegroundColor DarkGray -NoNewline
       Write-Host $line
     }
   }
 }
 
-# Register-EngineEvent fires on window-close (X button) — finally only fires on Ctrl+C
 Register-EngineEvent -SourceIdentifier PowerShell.Exiting -Action {
   Stop-Job   $event.MessageData[0], $event.MessageData[1] -ErrorAction SilentlyContinue
   Remove-Job $event.MessageData[0], $event.MessageData[1] -Force -ErrorAction SilentlyContinue
@@ -118,14 +117,14 @@ Register-EngineEvent -SourceIdentifier PowerShell.Exiting -Action {
 
 try {
   while ($true) {
-    Drain $back  'BACK ' Magenta
-    Drain $front 'FRONT' Cyan
+    Drain $back  'B'
+    Drain $front 'F'
     if (($back.State -ne 'Running') -and ($front.State -ne 'Running')) { break }
-    Start-Sleep -Milliseconds 350
+    Start-Sleep -Milliseconds 200
   }
 } finally {
-  Drain $back  'BACK ' Magenta
-  Drain $front 'FRONT' Cyan
+  Drain $back  'B'
+  Drain $front 'F'
   Stop-Job   $back, $front -ErrorAction SilentlyContinue
   Remove-Job $back, $front -Force -ErrorAction SilentlyContinue
   Kill-Port 5000; Kill-Port 8002
