@@ -20,9 +20,10 @@ Dumps to model_audit_raw.json:
     "Plycem" layer of a wall carry its own finish keynote?), separate from the
     assembly's own Type keynote.
 
-GOTCHAS learned building this (2026-07-04 to 2026-07-07):
+GOTCHAS learned building this (2026-07-04 to 2026-07-19):
 - ElementId has no .IntegerValue in Revit 2024+ API — use getattr(id, "Value", None)
-  with fallback to .IntegerValue for older API compat.
+  with fallback to .IntegerValue for older API compat. When constructing ElementId
+  from a number, use DB.ElementId(long(n)) to avoid "Multiple targets" TypeError.
 - elem.LookupParameter("Keynote") returns None on non-English Revit — LookupParameter
   matches the parameter's DISPLAYED name, which is localized (Spanish Revit shows
   "Nota de clave"). Use elem.get_Parameter(DB.BuiltInParameter.KEYNOTE_PARAM) instead —
@@ -36,6 +37,18 @@ GOTCHAS learned building this (2026-07-04 to 2026-07-07):
 - Output is large (2000+ elements) — writing to disk and post-processing with a
   separate script avoids blowing the MCP tool result token limit. Never print the
   full dump back in execute_revit_code's response.
+- Marca vs Type Mark distinction (2026-07-19):
+    DB.Material elements: Marca = ALL_MODEL_MARK (NOT ALL_MODEL_TYPE_MARK).
+    Non-compound ElementType (doors/windows/MEP/structural): Marca de tipo = ALL_MODEL_TYPE_MARK.
+    Compound system families (WallType/FloorType/RoofType/CeilingType): Type Mark = empty by design.
+- get_marca() tries ALL_MODEL_MARK first, then ALL_MODEL_TYPE_MARK — covers both cases.
+- "Marca" should equal the EstimaStruct `codigo` (e.g. WS-04, SF-01), NOT the CSI code.
+  CSI goes in KEYNOTE_PARAM. Build csi_to_codigo.json via generate_csi_to_codigo.py,
+  then set marks via revit_set_marks_snippet.py.
+- CC-none material = intentional void/placeholder — no keynote, no marca, leave untouched.
+- Air/Membrane compound layers with no material = not auditable, stays RED, skip in set_marks.
+- Open Material Browser or Type Properties dialogs block ExternalEvent → MCP timeouts.
+  Close all dialogs before running any execute_revit_code script.
 
 Paste this into execute_revit_code as-is.
 """
@@ -67,6 +80,15 @@ def get_type_mark(elem):
         v = p.AsString()
         if v:
             return v
+    return None
+
+def get_marca(elem):
+    for bip in (DB.BuiltInParameter.ALL_MODEL_MARK, DB.BuiltInParameter.ALL_MODEL_TYPE_MARK):
+        p = elem.get_Parameter(bip)
+        if p:
+            v = p.AsString()
+            if v:
+                return v
     return None
 
 def elem_name(e):
@@ -107,6 +129,7 @@ for t in all_types:
             "type": elem_name(t),
             "keynote": kn,
             "type_mark": get_type_mark(t),
+            "marca": get_marca(t),
             "placed": eid(t.Id) in placed_type_ids,
         })
     except Exception:
@@ -127,6 +150,7 @@ for m in materials:
             "type": elem_name(m),
             "keynote": kn,
             "type_mark": get_type_mark(m),
+            "marca": get_marca(m),
             "placed": True,
         })
     except Exception:
@@ -150,6 +174,7 @@ for e in instances:
             "type": elem_name(e),
             "keynote": kn,
             "type_mark": get_type_mark(e),
+            "marca": get_marca(e),
             "placed": True,
         })
     except Exception:
@@ -208,6 +233,7 @@ for cls, label in COMPOUND_CATEGORIES:
                 "type_name": elem_name(t),
                 "type_keynote": get_keynote(t),
                 "type_type_mark": get_type_mark(t),
+                "type_marca": get_marca(t),
                 "placed": eid(t.Id) in placed_type_ids,
                 "layers": layers_out,
             })
@@ -228,6 +254,7 @@ for t in sfs_types:
             "type_name": elem_name(t),
             "type_keynote": get_keynote(t),
             "type_type_mark": get_type_mark(t),
+            "type_marca": get_marca(t),
             "placed": eid(t.Id) in placed_type_ids,
             "layers": [],
         })
@@ -255,17 +282,89 @@ for t in all_types:
     except Exception:
         continue
 
+# --- schedule_quantities: read material takeoff schedules to get actual m² per
+#     CSI code. This is the quantity source for compound elements (walls/floors/
+#     ceilings) — more reliable than layer widths since Revit calculates the area.
+#
+#     Target schedules:
+#       T04Wall Material Takeoff  → walls (col: Material:Keynote, Material:Area)
+#       T02Pisos                  → floors
+#       T01Material Cielo Falso   → ceilings
+#
+#     The schedule rows are read via ViewSchedule.GetCellText(SectionType.Body, r, c).
+#     Column 0 = Material:Keynote, Column 2 = Material:Area (with " m²" suffix).
+
+QUANTITY_SCHEDULES = [
+    "T04Wall Material Takeoff",
+    "T02Pisos",
+    "T01Material Cielo Falso",
+]
+
+schedule_quantities = []
+
+try:
+    all_schedules = DB.FilteredElementCollector(doc).OfClass(DB.ViewSchedule).ToElements()
+    sched_map = {}
+    for vs in all_schedules:
+        try:
+            sched_map[DB.Element.Name.__get__(vs)] = vs
+        except Exception:
+            pass
+
+    for sname in QUANTITY_SCHEDULES:
+        vs = sched_map.get(sname)
+        if not vs:
+            continue
+        try:
+            td  = vs.GetTableData()
+            ssd = td.GetSectionData(DB.SectionType.Body)
+            n_rows = ssd.NumberOfRows
+            n_cols = ssd.NumberOfColumns
+
+            # Detect columns: keynote=col0, area=col2 by default, type_mark last col
+            for r in range(n_rows):
+                try:
+                    csi_raw  = vs.GetCellText(DB.SectionType.Body, r, 0).strip()
+                    if not csi_raw:
+                        continue
+                    area_str = vs.GetCellText(DB.SectionType.Body, r, 2).strip() if n_cols > 2 else ""
+                    mat_name = vs.GetCellText(DB.SectionType.Body, r, 1).strip() if n_cols > 1 else ""
+                    type_mark = vs.GetCellText(DB.SectionType.Body, r, n_cols - 1).strip() if n_cols > 0 else ""
+
+                    # Parse area: "15 m²" → 15.0, "15.3 m²" → 15.3
+                    area_m2 = 0.0
+                    clean_area = area_str.replace("m²", "").replace("m2", "").strip()
+                    try:
+                        area_m2 = float(clean_area.replace(",", ".")) if clean_area else 0.0
+                    except ValueError:
+                        area_m2 = 0.0
+
+                    schedule_quantities.append({
+                        "schedule":   sname,
+                        "csi":        csi_raw,
+                        "mat_name":   mat_name,
+                        "area_m2":    area_m2,
+                        "type_mark":  type_mark,
+                    })
+                except Exception:
+                    continue
+        except Exception:
+            continue
+except Exception:
+    pass
+
 result = {
     "objects": objects,
     "keynote_table": keynote_table,
     "compound_elements": compound_elements,
     "unplaced_types": unplaced_types,
+    "schedule_quantities": schedule_quantities,
 }
 
 out_path = r"D:\OneDrive\Bots\Estimbot\EXPORTS\model_audit_raw.json"
 with io.open(out_path, "w", encoding="utf-8") as f:
     f.write(json.dumps(result, ensure_ascii=False))
 
-print("WRITTEN: {} objects, {} keynote_table entries, {} compound elements".format(
-    len(objects), len(keynote_table), len(compound_elements)))
+print("WRITTEN: {} objects, {} keynote_table entries, {} compound elements, {} schedule_qty rows".format(
+    len(objects), len(keynote_table), len(compound_elements), len(schedule_quantities)))
 '''

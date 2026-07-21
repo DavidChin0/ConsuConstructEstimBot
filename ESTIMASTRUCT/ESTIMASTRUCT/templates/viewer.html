@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>EstimaStruct Viewer 3D</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0d0d0d;--bg2:#111;--bg3:#1a1a1a;--border:#2a2a2a;
+  --accent:#5b63d3;--accent2:#7c8cf8;
+  --text:#ddd;--text2:#888;--text3:#555;
+  --green:#2ecc71;--red:#e74c3c;--yellow:#f1c40f;--orange:#e67e22;
+}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:'Segoe UI',sans-serif;color:var(--text);font-size:13px}
+a{color:var(--accent2);text-decoration:none}
+
+/* ── LAYOUT ── */
+#app{display:flex;height:100vh;width:100vw}
+
+/* LEFT PANEL */
+#sidebar{
+  width:260px;min-width:200px;max-width:340px;
+  background:var(--bg2);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;overflow:hidden;resize:horizontal;
+}
+#sidebar-header{
+  padding:10px 12px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:8px;
+}
+#sidebar-header .logo{font-size:16px;font-weight:700;color:var(--accent2);letter-spacing:.5px}
+#sidebar-header .back{font-size:11px;color:var(--text2)}
+#sidebar-header .back a{color:var(--text2)}
+#sidebar-header .back a:hover{color:var(--accent2)}
+
+#tabs{display:flex;border-bottom:1px solid var(--border)}
+.tab{
+  flex:1;padding:7px 4px;text-align:center;cursor:pointer;
+  font-size:11px;color:var(--text2);border-bottom:2px solid transparent;
+  transition:all .15s;
+}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--accent2);border-bottom-color:var(--accent2)}
+
+#panel-body{flex:1;overflow-y:auto;padding:8px 0}
+
+/* panel sections */
+.section{padding:6px 12px}
+.section-title{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);margin-bottom:6px}
+.item{
+  padding:5px 8px;border-radius:5px;cursor:pointer;
+  display:flex;align-items:center;gap:8px;
+  color:var(--text);transition:background .12s;
+}
+.item:hover{background:var(--bg3)}
+.item.active{background:rgba(91,99,211,.18);color:var(--accent2)}
+.item .dot{
+  width:10px;height:10px;border-radius:50%;flex-shrink:0;border:1px solid #333;
+}
+.item .name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item .badge{font-size:10px;color:var(--text3);flex-shrink:0}
+.item .elev{font-size:10px;color:var(--text3);flex-shrink:0}
+
+/* layer stripe */
+.layer-row{
+  display:flex;align-items:center;gap:6px;
+  padding:4px 8px;border-radius:4px;margin:2px 0;
+  font-size:11px;
+}
+.layer-row .lw{
+  width:28px;text-align:right;font-weight:600;color:var(--accent2);flex-shrink:0
+}
+.layer-row .lname{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.layer-row .lfn{font-size:10px;color:var(--text3);flex-shrink:0}
+
+/* search */
+.search-box{
+  margin:6px 12px;padding:5px 10px;border-radius:6px;
+  background:var(--bg3);border:1px solid var(--border);
+  color:var(--text);font-size:12px;width:calc(100% - 24px);outline:none;
+}
+.search-box:focus{border-color:var(--accent)}
+
+/* MAIN CANVAS AREA */
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+
+#topbar{
+  padding:8px 12px;border-bottom:1px solid var(--border);
+  background:var(--bg2);display:flex;align-items:center;gap:10px;
+}
+#topbar .title{font-weight:600;color:var(--accent2)}
+#topbar .meta{color:var(--text2);font-size:11px}
+#topbar .spacer{flex:1}
+#dump-btn{
+  padding:5px 14px;border-radius:6px;border:none;cursor:pointer;
+  background:var(--accent);color:#fff;font-size:12px;font-weight:600;
+}
+#dump-btn:hover{background:var(--accent2)}
+#dump-btn:disabled{background:#333;color:#666;cursor:default}
+
+#canvas-wrap{flex:1;position:relative;overflow:hidden}
+#renderCanvas{width:100%;height:100%;display:block;touch-action:none}
+
+/* overlay panels on canvas */
+#loading{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;background:var(--bg);
+  font-size:14px;color:var(--text2);z-index:10;
+}
+.spinner{
+  width:32px;height:32px;border:3px solid #222;
+  border-top-color:var(--accent);border-radius:50%;
+  animation:spin .8s linear infinite;margin-bottom:12px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+#no-glb{
+  position:absolute;inset:0;display:none;flex-direction:column;
+  align-items:center;justify-content:center;gap:12px;
+  background:var(--bg);z-index:9;color:var(--text2);text-align:center;padding:24px;
+}
+#no-glb .big{font-size:36px;margin-bottom:8px}
+#no-glb code{
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:4px;padding:4px 10px;font-size:12px;color:var(--text);
+}
+
+/* info panel */
+#info-panel{
+  position:absolute;top:12px;right:12px;width:240px;
+  background:rgba(15,15,15,.92);border:1px solid var(--border);
+  border-radius:8px;padding:12px;backdrop-filter:blur(8px);
+  display:none;z-index:20;font-size:12px;line-height:1.7;
+}
+#info-panel h4{color:var(--accent2);margin-bottom:8px;font-size:13px}
+.info-row{display:flex;justify-content:space-between;border-bottom:1px solid #1a1a1a;padding:2px 0}
+.info-row:last-child{border:none}
+.info-label{color:var(--text2)}
+.info-val{color:var(--text);text-align:right;max-width:130px;word-break:break-word}
+#close-info{float:right;cursor:pointer;color:var(--text3);background:none;border:none;font-size:14px}
+#close-info:hover{color:#fff}
+
+/* cmd feedback */
+#feedback{
+  position:absolute;bottom:50px;left:50%;transform:translateX(-50%);
+  background:rgba(15,15,15,.85);border:1px solid var(--border);
+  border-radius:6px;padding:7px 14px;font-size:12px;color:var(--text2);
+  display:none;pointer-events:none;backdrop-filter:blur(8px);
+  max-width:420px;text-align:center;z-index:20;
+}
+
+/* bottom bar */
+#bottombar{
+  padding:6px 12px;border-top:1px solid var(--border);
+  background:var(--bg2);display:flex;align-items:center;gap:12px;
+  font-size:11px;color:var(--text3);
+}
+#bottombar .stat{color:var(--text2)}
+#bottombar .spacer{flex:1}
+
+/* env toggle */
+#env-toggle{
+  padding:4px 10px;border-radius:5px;border:1px solid var(--border);
+  background:var(--bg3);color:var(--text2);cursor:pointer;font-size:11px;
+}
+#env-toggle:hover{border-color:var(--accent);color:var(--accent2)}
+
+/* scrollbar */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#333;border-radius:2px}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ── SIDEBAR ── -->
+  <div id="sidebar">
+    <div id="sidebar-header">
+      <span class="logo">EstimaStruct</span>
+      <span style="flex:1"></span>
+      <span class="back"><a href="/">← Dashboard</a></span>
+    </div>
+    <div id="tabs">
+      <div class="tab active" data-tab="levels">Niveles</div>
+      <div class="tab" data-tab="materials">Materiales</div>
+      <div class="tab" data-tab="rooms">Ambientes</div>
+      <div class="tab" data-tab="layers">Capas</div>
+    </div>
+    <input class="search-box" id="search" placeholder="Buscar…"/>
+    <div id="panel-body">
+      <div id="tab-levels" class="section"></div>
+      <div id="tab-materials" class="section" style="display:none"></div>
+      <div id="tab-rooms" class="section" style="display:none"></div>
+      <div id="tab-layers" class="section" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- ── MAIN ── -->
+  <div id="main">
+    <div id="topbar">
+      <span class="title" id="proj-title">EstimaStruct Viewer 3D</span>
+      <span class="meta" id="proj-meta"></span>
+      <span class="spacer"></span>
+      <button id="dump-btn" title="Cómo generar el Full Dump">⚡ Full Dump</button>
+      <button id="reload-btn" title="Recargar datos del dump">🔄 Recargar datos</button>
+    </div>
+
+    <div id="canvas-wrap">
+      <canvas id="renderCanvas"></canvas>
+
+      <div id="loading">
+        <div class="spinner"></div>
+        <span id="loading-msg">Cargando datos…</span>
+      </div>
+
+      <div id="no-glb">
+        <div class="big">📦</div>
+        <div>Datos del proyecto cargados.</div>
+        <div style="color:var(--text);font-size:13px;margin-top:4px">No se encontró modelo GLB.</div>
+        <div style="margin-top:8px;font-size:12px">Para generar el modelo 3D, desde Revit:</div>
+        <code>pyRevit → ExportTools → Export Viewer GLB</code>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px">Luego ejecutar viewer_postprocess.py --process</div>
+      </div>
+
+      <div id="info-panel">
+        <button id="close-info">✕</button>
+        <h4 id="info-title">Elemento</h4>
+        <div id="info-rows"></div>
+      </div>
+
+      <div id="feedback"></div>
+    </div>
+
+    <div id="bottombar">
+      <span>WASD — mover &nbsp;|&nbsp; Drag — orbitar &nbsp;|&nbsp; Scroll — zoom &nbsp;|&nbsp; Click — inspeccionar</span>
+      <span class="spacer"></span>
+      <span class="stat" id="stat-instances"></span>
+      <button id="env-toggle">🌤 Exterior</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Babylon.js via CDN -->
+<script src="https://cdn.babylonjs.com/babylon.js"></script>
+<script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+
+<script>
+"use strict";
+
+// ── CONFIG ──
+const API = window.location.origin + "/__api__";
+const FULL_DUMP_URL  = API + "/revit-mcp/full-dump";
+const DUMP_TRIGGER   = API + "/revit-mcp/inject/dump-full";
+const PROJECTS_URL   = API + "/revit-mcp/viewer-projects";
+const GLB_BASE       = API + "/revit-mcp/viewer-glb";
+
+// ── STATE ──
+let dump = null;
+let scene = null;
+let engine = null;
+let glbLoaded = false;
+let allMeshes = [];
+let activeLevelFilter = null;
+let activeTab = "levels";
+
+// ── DOM refs ──
+const $loading   = document.getElementById("loading");
+const $loadMsg   = document.getElementById("loading-msg");
+const $noGlb     = document.getElementById("no-glb");
+const $infoPanel = document.getElementById("info-panel");
+const $infoTitle = document.getElementById("info-title");
+const $infoRows  = document.getElementById("info-rows");
+const $feedback  = document.getElementById("feedback");
+const $projTitle = document.getElementById("proj-title");
+const $projMeta  = document.getElementById("proj-meta");
+const $statInst  = document.getElementById("stat-instances");
+const $dumpBtn   = document.getElementById("dump-btn");
+const $canvas    = document.getElementById("renderCanvas");
+
+// ── UTILITY ──
+function rgb(arr){ return arr ? `rgb(${arr[0]},${arr[1]},${arr[2]})` : "#888"; }
+function esc(s){ return String(s||"").replace(/</g,"&lt;"); }
+function show(el){ el.style.display="flex"; }
+function hide(el){ el.style.display="none"; }
+
+function feedback(msg, ms=2500){
+  $feedback.textContent = msg;
+  show($feedback);
+  clearTimeout($feedback._t);
+  $feedback._t = setTimeout(()=>hide($feedback), ms);
+}
+
+// ── TABS ──
+document.querySelectorAll(".tab").forEach(t=>{
+  t.addEventListener("click",()=>{
+    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+    t.classList.add("active");
+    activeTab = t.dataset.tab;
+    ["levels","materials","rooms","layers"].forEach(id=>{
+      document.getElementById("tab-"+id).style.display = id===activeTab?"block":"none";
+    });
+    applySearch();
+  });
+});
+
+// ── SEARCH ──
+document.getElementById("search").addEventListener("input", applySearch);
+function applySearch(){
+  const q = document.getElementById("search").value.trim().toLowerCase();
+  const panel = document.getElementById("tab-"+activeTab);
+  panel.querySelectorAll(".item,.layer-row").forEach(el=>{
+    const txt = el.textContent.toLowerCase();
+    el.style.display = (!q || txt.includes(q)) ? "" : "none";
+  });
+}
+
+// ── DUMP BUTTON ──
+// El MCP HTTP bridge es inestable — el Full Dump se dispara desde el
+// dashboard EstimaStruct (panel Revit MCP → "Full Dump (viewer)"), que
+// habla con Revit via Named Pipe. Aquí solo guiamos al usuario.
+$dumpBtn.addEventListener("click", ()=>{
+  feedback(
+    "Ejecuta 'Full Dump (viewer)' desde el panel Revit MCP del dashboard EstimaStruct, luego pulsa 🔄 Recargar datos.",
+    7000
+  );
+});
+
+// ── RELOAD BUTTON ──
+document.getElementById("reload-btn").addEventListener("click", ()=>{
+  location.reload();
+});
+
+// ── LEVELS PANEL ──
+function renderLevels(){
+  const el = document.getElementById("tab-levels");
+  const levels = (dump.levels||[]).slice().sort((a,b)=>a.elevation_m-b.elevation_m);
+  if(!levels.length){ el.innerHTML='<div class="item" style="color:var(--text2)">Sin niveles</div>'; return; }
+  el.innerHTML = "<div class='section-title'>"+levels.length+" niveles</div>" +
+    levels.map(lv=>`
+      <div class="item" data-level="${esc(lv.name)}" onclick="filterLevel('${esc(lv.name)}')">
+        <span class="dot" style="background:${lv.is_structural?'var(--accent)':'#444'}"></span>
+        <span class="name">${esc(lv.name)}</span>
+        <span class="elev">${lv.elevation_m.toFixed(2)}m</span>
+      </div>`).join("");
+  // "All" item
+  el.innerHTML = `<div class="item active" id="level-all" onclick="filterLevel(null)">
+      <span class="dot" style="background:#666"></span>
+      <span class="name">Todos los niveles</span>
+    </div>` + el.innerHTML;
+}
+
+window.filterLevel = function(levelName){
+  activeLevelFilter = levelName;
+  document.querySelectorAll("#tab-levels .item").forEach(el=>{
+    el.classList.remove("active");
+    if(!levelName && el.id==="level-all") el.classList.add("active");
+    if(levelName && el.dataset.level===levelName) el.classList.add("active");
+  });
+  applyLevelFilter();
+  if(levelName) feedback("Nivel: "+levelName);
+};
+
+function applyLevelFilter(){
+  if(!glbLoaded) return;
+  allMeshes.forEach(m=>{
+    if(!activeLevelFilter){ m.isVisible=true; return; }
+    const lvl = m._revitLevel || "";
+    m.isVisible = !lvl || lvl===activeLevelFilter;
+  });
+}
+
+// ── MATERIALS PANEL ──
+function renderMaterials(){
+  const el = document.getElementById("tab-materials");
+  const mats = (dump.materials_full||[]).filter(m=>m.name);
+  const withKn = mats.filter(m=>m.keynote);
+  const withTex = mats.filter(m=>m.texture_paths&&Object.keys(m.texture_paths).length);
+  el.innerHTML = `<div class="section-title">${mats.length} materiales · ${withKn.length} CSI · ${withTex.length} texturas</div>` +
+    mats.sort((a,b)=>(a.name||"").localeCompare(b.name||"")).map(m=>{
+      const texKeys = m.texture_paths ? Object.keys(m.texture_paths) : [];
+      const texBadge = texKeys.length
+        ? `<span style="font-size:9px;color:var(--accent2);margin-left:2px" title="${esc(texKeys.map(k=>k+': '+m.texture_paths[k]).join('\n'))}">🖼${texKeys.length}</span>`
+        : "";
+      const optProps = [];
+      if(m.transparency) optProps.push(`T:${m.transparency}%`);
+      if(m.shininess!=null) optProps.push(`S:${m.shininess}`);
+      const optBadge = optProps.length
+        ? `<span style="font-size:9px;color:var(--text3)">${optProps.join(" ")}</span>` : "";
+      const surfPat = m.surface_pattern
+        ? `<div style="font-size:9px;color:var(--text3);padding-left:18px;margin-top:-2px">▤ ${esc(m.surface_pattern)}</div>` : "";
+      return `
+      <div class="item" style="flex-wrap:wrap;gap:2px" title="Clase: ${esc(m.material_class||'')}${m.appearance_asset?' | Asset: '+esc(m.appearance_asset):''}">
+        <span class="dot" style="background:${rgb(m.color_rgb)};${m.transparency?'opacity:'+((100-m.transparency)/100).toFixed(2):''}" ></span>
+        <span class="name">${esc(m.name)}</span>
+        <span class="badge">${esc(m.keynote||"")}</span>
+        ${texBadge}${optBadge}
+      </div>${surfPat}`;
+    }).join("");
+}
+
+// ── ROOMS PANEL ──
+function renderRooms(){
+  const el = document.getElementById("tab-rooms");
+  const rooms = (dump.rooms||[]).filter(r=>r.name);
+  if(!rooms.length){ el.innerHTML='<div class="item" style="color:var(--text2)">Sin ambientes</div>'; return; }
+  // group by level
+  const byLevel = {};
+  rooms.forEach(r=>{ const k=r.level||"Sin nivel"; (byLevel[k]=byLevel[k]||[]).push(r); });
+  el.innerHTML = Object.entries(byLevel).sort(([a],[b])=>a.localeCompare(b)).map(([lvl,rs])=>`
+    <div class="section-title">${esc(lvl)}</div>` +
+    rs.sort((a,b)=>(a.number||"").localeCompare(b.number||"")).map(r=>`
+      <div class="item" onclick="flyToRoom(${JSON.stringify(r.location)})">
+        <span class="badge" style="color:var(--accent2);min-width:28px">${esc(r.number||"")}</span>
+        <span class="name">${esc(r.name)}</span>
+        <span class="badge">${r.area_m2?r.area_m2.toFixed(1)+"m²":""}</span>
+      </div>`).join("")
+  ).join("");
+}
+
+window.flyToRoom = function(loc){
+  if(!loc||!scene) return;
+  const cam = scene.activeCamera;
+  if(!cam) return;
+  const target = new BABYLON.Vector3(loc[0], loc[2], loc[1]);
+  cam.setTarget(target);
+  feedback("Volando a ambiente…");
+};
+
+// ── LAYERS (compound elements) ──
+function renderLayers(){
+  const el = document.getElementById("tab-layers");
+  const comps = (dump.compound_elements||[]).filter(c=>c.layers&&c.layers.length);
+  if(!comps.length){ el.innerHTML='<div class="item" style="color:var(--text2)">Sin elementos compuestos</div>'; return; }
+  const placed = comps.filter(c=>c.placed);
+  el.innerHTML = `<div class="section-title">${comps.length} tipos compuestos (${placed.length} colocados)</div>` +
+    comps.sort((a,b)=>Number(!a.placed)-Number(!b.placed)||(a.type_name||"").localeCompare(b.type_name||"")).map(c=>`
+      <div class="item" style="flex-direction:column;align-items:flex-start;padding:6px 8px;gap:2px;${c.placed?'':'opacity:.5'}">
+        <div style="display:flex;gap:6px;width:100%">
+          <span class="dot" style="background:${c.placed?'var(--green)':'#444'};margin-top:3px"></span>
+          <span class="name" style="font-weight:600">${esc(c.type_name||"")}</span>
+          <span class="badge" style="margin-left:auto">${esc(c.category_label||"")}</span>
+        </div>
+        ${c.layers.map(ly=>{
+          const layColor = ly.material_color_rgb ||
+            (dump.materials_full||[]).find(m=>m.name===ly.material_name)?.color_rgb || null;
+          const transp = ly.material_transparency||0;
+          const dotStyle = `display:inline-block;width:8px;height:8px;border-radius:50%;` +
+            `background:${rgb(layColor)};margin-right:4px;vertical-align:middle;` +
+            `opacity:${transp?((100-transp)/100).toFixed(2):1}`;
+          return `
+          <div class="layer-row" style="width:100%;padding-left:16px">
+            <span class="lw">${ly.width_mm?ly.width_mm+"mm":""}</span>
+            <span class="lname" title="${esc(ly.material_name||"")}">
+              ${ly.material_name?`<span style="${dotStyle}"></span>`:""}
+              ${esc(ly.material_name||"(air/membrane)")}
+              ${transp?`<span style="font-size:9px;color:var(--text3);margin-left:2px">${transp}%T</span>`:""}
+            </span>
+            <span class="lfn">${esc(ly.material_keynote||"")}</span>
+          </div>`;}).join("")}
+      </div>`).join("");
+}
+
+// ── INFO PANEL ──
+document.getElementById("close-info").addEventListener("click",()=>hide($infoPanel));
+
+function showInfo(mesh){
+  if(!mesh) return;
+  const props = mesh._revitProps||{};
+  $infoTitle.textContent = props.category || mesh.name || "Elemento";
+  const baseRows = [
+    ["Categoría", props.category],
+    ["Familia",   props.family],
+    ["Tipo",      props.type],
+    ["Keynote",   props.keynote],
+    ["Tipo Mark", props.type_mark],
+    ["Marca",     props.marca],
+    ["Nivel",     props.level],
+  ].filter(([,v])=>v);
+
+  // extra params from dump
+  const extraRows = [];
+  const skipKeys = new Set(["id","category","family","type","type_id","level","keynote","type_mark","marca","location","bb","params"]);
+  const params = props.params||{};
+  // show top shared parameters alphabetically, capped at 12 to keep panel compact
+  const paramEntries = Object.entries(params).filter(([k,v])=>v!=null&&v!=="").slice(0,12);
+  paramEntries.forEach(([k,v])=>extraRows.push([k, String(v)]));
+
+  const allRows = [...baseRows, ...extraRows];
+  $infoRows.innerHTML = allRows.map(([l,v])=>`
+    <div class="info-row">
+      <span class="info-label" style="max-width:90px;overflow:hidden;text-overflow:ellipsis">${esc(l)}</span>
+      <span class="info-val">${esc(String(v).substring(0,60))}</span>
+    </div>`).join("");
+
+  // show material swatch if keynote matches a material
+  if(props.keynote && dump && dump.materials_full){
+    const mat = dump.materials_full.find(m=>m.keynote===props.keynote);
+    if(mat){
+      const swatchStyle = `display:inline-block;width:12px;height:12px;border-radius:3px;background:${rgb(mat.color_rgb)};vertical-align:middle;margin-right:4px`;
+      const texCount = mat.texture_paths ? Object.keys(mat.texture_paths).length : 0;
+      $infoRows.innerHTML += `<div class="info-row" style="border-top:1px solid #222;margin-top:4px;padding-top:4px">
+        <span class="info-label">Material</span>
+        <span class="info-val"><span style="${swatchStyle}"></span>${esc(mat.name||"")}${texCount?` 🖼${texCount}`:""}</span>
+      </div>`;
+      if(mat.transparency) $infoRows.innerHTML += `<div class="info-row"><span class="info-label">Transparencia</span><span class="info-val">${mat.transparency}%</span></div>`;
+      if(mat.surface_pattern) $infoRows.innerHTML += `<div class="info-row"><span class="info-label">Patrón superficie</span><span class="info-val">${esc(mat.surface_pattern)}</span></div>`;
+    }
+  }
+  show($infoPanel);
+}
+
+// ── BABYLON SCENE ──
+async function initScene(){
+  engine = new BABYLON.Engine($canvas, true, {preserveDrawingBuffer:true,stencil:true});
+  scene  = new BABYLON.Scene(engine);
+  scene.clearColor = new BABYLON.Color4(0.05,0.05,0.05,1);
+
+  const cam = new BABYLON.ArcRotateCamera("cam", -Math.PI/2, Math.PI/4, 20, BABYLON.Vector3.Zero(), scene);
+  cam.lowerRadiusLimit = 1;
+  cam.upperRadiusLimit = 500;
+  cam.wheelDeltaPercentage = 0.01;
+  cam.attachControl($canvas, true);
+
+  new BABYLON.HemisphericLight("hem", new BABYLON.Vector3(0,1,0), scene).intensity = 0.7;
+  const sun = new BABYLON.DirectionalLight("sun", new BABYLON.Vector3(-1,-2,-1), scene);
+  sun.intensity = 1.2;
+
+  // pick on click
+  scene.onPointerObservable.add(info=>{
+    if(info.type !== BABYLON.PointerEventTypes.POINTERPICK) return;
+    if(info.pickInfo.hit && info.pickInfo.pickedMesh){
+      showInfo(info.pickInfo.pickedMesh);
+    }
+  });
+
+  engine.runRenderLoop(()=>scene.render());
+  window.addEventListener("resize",()=>engine.resize());
+}
+
+async function loadGlb(project){
+  const url = GLB_BASE + "/" + encodeURIComponent(project.name) + "/" + encodeURIComponent(project.glb_name);
+  $loadMsg.textContent = "Cargando modelo 3D…";
+  try{
+    const result = await BABYLON.SceneLoader.ImportMeshAsync("", url, "", scene);
+    allMeshes = result.meshes;
+
+    // tag each mesh with revit data from dump.all_instances keyed by match on type name
+    // (best effort — no direct element_id in GLB)
+    const instByType = {};
+    (dump.all_instances||[]).forEach(inst=>{
+      const k = (inst.type||"").toLowerCase();
+      if(!instByType[k]) instByType[k] = inst;
+    });
+
+    allMeshes.forEach(m=>{
+      if(!m.name) return;
+      const norm = m.name.replace(/_/g," ").toLowerCase();
+      const inst = instByType[norm] || null;
+      m._revitProps = inst || {type: m.name};
+      m._revitLevel = inst?.level || null;
+      m.isPickable = true;
+    });
+
+    glbLoaded = true;
+    applyLevelFilter();
+    hide($loading);
+    $statInst.textContent = allMeshes.length + " meshes";
+  }catch(e){
+    console.error("GLB load error:", e);
+    showNoGlb();
+  }
+}
+
+function showNoGlb(){
+  hide($loading);
+  show($noGlb);
+  $statInst.textContent = "Sin modelo GLB";
+}
+
+// ── ENV TOGGLE ──
+let envMode = "exterior";
+document.getElementById("env-toggle").addEventListener("click",()=>{
+  if(!scene) return;
+  envMode = envMode==="exterior" ? "interior" : "exterior";
+  const hem = scene.getLightByName("hem");
+  const sun = scene.getLightByName("sun");
+  if(envMode==="interior"){
+    if(hem) hem.intensity=0.5;
+    if(sun) sun.intensity=0.6;
+    document.getElementById("env-toggle").textContent="🏠 Interior";
+  } else {
+    if(hem) hem.intensity=0.7;
+    if(sun) sun.intensity=1.2;
+    document.getElementById("env-toggle").textContent="🌤 Exterior";
+  }
+});
+
+// ── MAIN BOOT ──
+async function boot(){
+  show($loading); $loadMsg.textContent="Conectando a EstimaStruct…";
+
+  // 1. Load full dump
+  try{
+    const r = await fetch(FULL_DUMP_URL);
+    if(!r.ok) throw new Error(r.statusText);
+    dump = await r.json();
+  }catch(e){
+    hide($loading);
+    $projTitle.textContent = "Sin datos — ejecuta Full Dump";
+    $projMeta.textContent = e.message;
+    return;
+  }
+
+  // 2. Populate header
+  const pi = dump.project_info||{};
+  $projTitle.textContent = pi.name || pi.file_name || "Proyecto Revit";
+  $projMeta.textContent = [
+    pi.number&&("N°"+pi.number),
+    pi.client_name,
+    (dump.levels||[]).length + " niveles",
+    (dump.rooms||[]).length + " ambientes",
+    (dump.all_instances||[]).length + " elem.",
+  ].filter(Boolean).join(" · ");
+
+  // 3. Render panels
+  renderLevels();
+  renderMaterials();
+  renderRooms();
+  renderLayers();
+
+  // 4. Init Babylon + try GLB
+  await initScene();
+
+  $loadMsg.textContent="Buscando modelo GLB…";
+  try{
+    const pr = await fetch(PROJECTS_URL);
+    const projects = await pr.json();
+    const withGlb = projects.filter(p=>p.has_glb);
+    if(withGlb.length){
+      // pick most recently modified (first in list = sorted by mtime in API)
+      await loadGlb(withGlb[0]);
+    } else {
+      showNoGlb();
+    }
+  }catch(e){
+    showNoGlb();
+  }
+}
+
+boot();
+</script>
+</body>
+</html>

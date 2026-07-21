@@ -168,6 +168,8 @@ async function loadObra(id) {
   document.getElementById("panel-bottom").classList.add("hidden");
   document.getElementById("export-menu-wrap").classList.remove("hidden");
   document.getElementById("btn-cronograma")?.classList.remove("hidden");
+  document.getElementById("btn-viewer3d")?.classList.remove("hidden");
+  document.getElementById("btn-mcp-quick")?.classList.remove("hidden");
   document.getElementById("btn-actualizar").classList.remove("hidden");
   document.getElementById("btn-modo").classList.remove("hidden");
 
@@ -264,6 +266,8 @@ function clearMain() {
   document.querySelector(".totales").innerHTML = "";
   document.getElementById("export-menu-wrap").classList.add("hidden");
   document.getElementById("btn-cronograma")?.classList.add("hidden");
+  document.getElementById("btn-viewer3d")?.classList.add("hidden");
+  document.getElementById("btn-mcp-quick")?.classList.add("hidden");
   document.getElementById("btn-actualizar").classList.add("hidden");
   document.getElementById("btn-modo").classList.add("hidden");
   document.getElementById("recursos-bar").classList.add("hidden");
@@ -1979,6 +1983,9 @@ function initModuloDropdown() {
   patchClose("btn-cerrar-acero-view");
   patchClose("btn-cerrar-conexion-view");
   patchClose("btn-cerrar-revit-mcp-view");
+
+  // Botón rápido MCP en la toolbar (abre panel + auto-start si está apagado)
+  document.getElementById("btn-mcp-quick")?.addEventListener("click", mcpQuickOpen);
 }
 
 function setModuloActivo(m) {
@@ -2020,6 +2027,8 @@ async function rmcpRefreshStatus() {
     const sDoc  = document.getElementById('rmcp-s-doc');
     const sPipe = document.getElementById('rmcp-s-pipe');
     const info  = document.getElementById('rmcp-revit-info');
+    const qdot  = document.getElementById('mcp-quick-dot');
+    if (qdot) qdot.style.background = r.mcp_running ? '#4caf50' : '#f44336';
     if (!dot) return;
     if (r.mcp_running) {
       dot.style.background = '#4caf50';
@@ -2170,12 +2179,79 @@ async function rmcpBuildCards() {
     </div>`).join('');
 }
 
+function rmcpInitVistaToggle() {
+  const sel = document.getElementById('revit-mcp-vista-select');
+  if (!sel || sel.dataset.wired) return;
+  sel.dataset.wired = '1';
+  sel.addEventListener('change', () => {
+    const v = sel.value;
+    document.getElementById('rmcp-vista-panel').style.display = (v === 'panel') ? '' : 'none';
+    document.getElementById('rmcp-vista-guia').style.display  = (v === 'guia')  ? '' : 'none';
+  });
+}
+
 async function initRevitMcp() {
+  rmcpInitVistaToggle();
   if (_RMCP.initialized) return;
   _RMCP.initialized = true;
   await Promise.all([rmcpRefreshStatus(), rmcpLoadObras(), rmcpLoadCsvs(), rmcpBuildCards()]);
   if (_RMCP.interval) clearInterval(_RMCP.interval);
   _RMCP.interval = setInterval(rmcpRefreshStatus, 30000);
+}
+
+// Botón rápido 🔧 MCP (toolbar): abre el panel y levanta el MCP si está apagado.
+async function mcpQuickOpen() {
+  setModuloActivo('revit-mcp');   // abre #revit-mcp-view + dispara initRevitMcp()
+  try {
+    const r = await fetch('/__api__/revit-mcp/status').then(x => x.json());
+    if (!r.mcp_running) {
+      rmcpLog('MCP apagado — levantando automáticamente…', 'rmcp-info');
+      await rmcpStart();          // rmcpStart ya loguea resultado y refresca status
+    }
+  } catch (e) { rmcpLog('Error verificando MCP: ' + e.message, 'rmcp-err'); }
+}
+
+// ── Health check profundo (uptime + latencia del pipe Revit) ────────────────
+function rmcpFmtUptime(s) {
+  if (s == null) return '—';
+  s = Math.floor(s);
+  if (s < 60) return s + ' s';
+  const m = Math.floor(s / 60);
+  if (m < 60) return m + ' min';
+  return Math.floor(m / 60) + ' h ' + (m % 60) + ' min';
+}
+
+async function rmcpHealthCheck(btnEl) {
+  if (btnEl) { btnEl.disabled = true; btnEl.textContent = '⏳ Health…'; }
+  const row = document.getElementById('rmcp-health-row');
+  const val = document.getElementById('rmcp-health-val');
+  try {
+    const r   = await fetch('/__api__/revit-mcp/health').then(x => x.json());
+    const lat = (r.latency_ms != null) ? Math.round(r.latency_ms) + ' ms' : '—';
+    const up  = rmcpFmtUptime(r.uptime_seconds);
+    if (row) row.style.display = 'flex';
+    if (val) {
+      if (!r.mcp_running) {
+        val.textContent = '✗ MCP apagado';
+        val.className = 'rmcp-val err';
+      } else {
+        val.textContent = (r.pipe_ok ? '✓' : '✗') + ' pipe · ' + lat + ' · up ' + up;
+        val.className = 'rmcp-val ' + (r.pipe_ok ? 'ok' : 'err');
+      }
+    }
+    rmcpLog(
+      'Health: MCP ' + (r.mcp_running ? 'ON' : 'OFF') +
+      ' · pipe ' + (r.pipe_ok ? 'OK' : 'FAIL') +
+      ' · latencia ' + lat + ' · uptime ' + up,
+      (r.mcp_running && r.pipe_ok) ? 'rmcp-ok' : 'rmcp-err'
+    );
+  } catch (e) {
+    if (row) row.style.display = 'flex';
+    if (val) { val.textContent = '✗ error'; val.className = 'rmcp-val err'; }
+    rmcpLog('Health check error: ' + e.message, 'rmcp-err');
+  } finally {
+    if (btnEl) { btnEl.disabled = false; btnEl.textContent = '🩺 Health Check'; }
+  }
 }
 
 

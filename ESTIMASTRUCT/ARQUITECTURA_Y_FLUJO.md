@@ -1,4 +1,9 @@
+> [!CONTEXT]
+> **[HISTORICO 2026-07-19]** Documento maestro previo a la source of truth nueva. Varias afirmaciones aquí quedaron superadas por el runtime PostgreSQL primario, el proxy Flask `__api__`, la expansión de módulos y la consolidación documental nueva. Se conserva como antecedente de razonamiento. Ver `docs/source_of_truth_estimastruct_20260719.md` y `docs/manual_mega_operativo_estimastruct_20260719.md`.
+
 # EstimaStruct — Arquitectura, Flujo de Trabajo y Plan de Consolidación
+
+> **ESTADO:** histórico de consolidación. No usar como contrato principal vigente.
 
 > **Documento maestro / contrato.** Define una sola vez cómo funciona EstimaStruct hoy,
 > el flujo end-to-end intencionado, y el plan de cambios aprobado.

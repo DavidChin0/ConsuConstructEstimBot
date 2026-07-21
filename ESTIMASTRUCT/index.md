@@ -6,6 +6,10 @@
 ## Documentos
 - [[README.md]]
 - [[CHANGELOG.md]]
+- [[docs/source_of_truth_estimastruct_20260719.md]]
+- [[docs/manual_mega_operativo_estimastruct_20260719.md]]
+- [[docs/sop_revit_mcp_estimastruct_20260719.md]]
+- [[docs/postgres_runtime_estimastruct_20260719.md]]
 - [[MANUAL_ESTIMASTRUCT.md]]
 - [[GUIA_INICIO_RAPIDO.md]]
 - [[SETUP_PYTHON_PATH.md]]
@@ -33,4 +37,6 @@
 - [[development/Template2_Updated/index.md]]
 
 ## Regla
-- `estimacion.db` es la verdad operativa activa.
+- PostgreSQL puede ser la verdad operativa activa de EstimaStruct.
+- `estimacion.db` queda como snapshot SQLite compatible para export/import/backups locales.
+- La source of truth documental viva ahora manda desde `docs/source_of_truth_estimastruct_20260719.md`.

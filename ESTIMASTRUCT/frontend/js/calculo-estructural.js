@@ -1041,7 +1041,7 @@ const etabsState = {
   municipio: "", notas: "",
   tablas: null, ultima: null, timer: null,
   doc: null,            // {origen_inputs, procedimiento, export_doc} cacheado
-  tab: "hoja",          // hoja | proc | carga
+  tab: "hoja",          // hoja | proc | carga | log
   // valores leidos del export de ETABS (informativos en la hoja)
   T_etabs: null, Vdin_etabs: null, deriva_etabs: null,
   // contexto sísmico persistente por presupuesto
@@ -1156,7 +1156,100 @@ async function etabsCargarDoc() {
   return etabsState.doc;
 }
 
-// Estructura: pestañas (Hoja / Procedimiento / Cargar ETABS) + cabecera de inputs.
+// Checklist AISC 360-16: cómo evitar que el diseño en ETABS quede sobre-conservador
+// (Lb, Cb, P-Delta, LL reduction, composite). Estático, sin backend.
+function etabsAntiConservadorHTML() {
+  const rows = [
+    { fuente:"Lb (Unbraced length LTB)",
+      def:"Span completo",
+      real:"Losa arriostra ala superior → Lb ≈ 0",
+      gain:"+30–100%",
+      how:"Design → Steel Frame Design → View/Revise Overwrites → Unbraced Length Ratio (LTB) = 0.001",
+      ref:"AISC 360-16 §F2/F3" },
+    { fuente:"Cb (Lateral-Torsional Buckling factor)",
+      def:"1.0",
+      real:"1.14 – 2.38 según diagrama de momento",
+      gain:"+14–138%",
+      how:"Overwrites → Cb Factor = Program Calculated",
+      ref:"AISC 360-16 §F1(3)" },
+    { fuente:"B1 / B2 (U1 / U2 amplificación P-Δ)",
+      def:"Amplificado auto sin P-Δ",
+      real:"Corre P-Delta iterativo → B2 real ≈ 1",
+      gain:"+5–20%",
+      how:"Define → P-Delta Options → Iterative Based on Load Cases",
+      ref:"AISC 360-16 §C2 / App.8" },
+    { fuente:"Live Load Reduction",
+      def:"Off",
+      real:"ASCE 7 §4.7 según área tributaria",
+      gain:"−20 a −40% LL",
+      how:"Define → Load Cases → Live → Reducible = Yes",
+      ref:"ASCE 7-16 §4.7" },
+    { fuente:"Composite action (viga + losa)",
+      def:"Ignorado",
+      real:"Con shear connectors → sección compuesta",
+      gain:"+100% φMn",
+      how:"Assign → Frame → Frame Sections → tipo Composite Beam + Studs",
+      ref:"AISC 360-16 §I3" },
+    { fuente:"Combo sísmico gobernante",
+      def:"1.2D+1.0L±SH típico gobierna",
+      real:"Si drift < 0.1% → 1.2D+1.6L manda en vigas de piso",
+      gain:"Revisar combo real",
+      how:"Design → Steel Frame Design → Display Design Info → Governing Combo",
+      ref:"ASCE 7-16 §2.3.2 / §2.3.6" }
+  ];
+  const rowsHTML = rows.map((r,i) => `
+    <tr style="background:${i%2?'var(--surface)':'var(--surface2)'}">
+      <td style="padding:8px 10px;border:1px solid var(--border);font-weight:700;color:var(--accent);vertical-align:top">${esc(r.fuente)}</td>
+      <td style="padding:8px 10px;border:1px solid var(--border);vertical-align:top">${esc(r.def)}</td>
+      <td style="padding:8px 10px;border:1px solid var(--border);vertical-align:top">${esc(r.real)}</td>
+      <td style="padding:8px 10px;border:1px solid var(--border);vertical-align:top;font-weight:700;color:#2a9d3f;white-space:nowrap">${esc(r.gain)}</td>
+      <td style="padding:8px 10px;border:1px solid var(--border);vertical-align:top;font-family:monospace;font-size:11px">${esc(r.how)}</td>
+      <td style="padding:8px 10px;border:1px solid var(--border);vertical-align:top;font-size:11px;color:var(--text-dim);white-space:nowrap">${esc(r.ref)}</td>
+    </tr>`).join("");
+
+  return `
+    <div style="max-width:1040px">
+      <div style="font-size:12px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:10px 13px;margin-bottom:14px;line-height:1.55">
+        🛡️ <b>Checklist Anti-Conservador AISC 360-16.</b>
+        ETABS por default aplica factores conservadores. Antes de subir sección, aplica los ajustes de abajo — casi siempre bajan D/C de rojo a verde sin cambiar acero.
+        Orden por impacto (mayor → menor).
+      </div>
+
+      <div style="overflow:auto;border:1px solid var(--border);border-radius:5px">
+        <table style="width:100%;border-collapse:collapse;font-size:12.5px">
+          <thead>
+            <tr style="background:var(--accent);color:#fff">
+              <th style="padding:8px 10px;text-align:left;border:1px solid var(--border)">Fuente</th>
+              <th style="padding:8px 10px;text-align:left;border:1px solid var(--border)">Default</th>
+              <th style="padding:8px 10px;text-align:left;border:1px solid var(--border)">Real</th>
+              <th style="padding:8px 10px;text-align:left;border:1px solid var(--border)">Ganancia</th>
+              <th style="padding:8px 10px;text-align:left;border:1px solid var(--border)">Cómo aplicar en ETABS</th>
+              <th style="padding:8px 10px;text-align:left;border:1px solid var(--border)">Ref.</th>
+            </tr>
+          </thead>
+          <tbody>${rowsHTML}</tbody>
+        </table>
+      </div>
+
+      <div style="margin-top:16px;border:1px solid var(--accent);border-radius:5px;padding:11px 14px;background:var(--surface);font-size:12.5px;line-height:1.6">
+        <div style="font-weight:700;color:var(--accent);margin-bottom:6px">🎯 Secuencia recomendada</div>
+        <ol style="margin:0;padding-left:20px">
+          <li>Aplicar <b>Lb = 0</b> a todas las vigas de piso (losa arriostra).</li>
+          <li>Poner <b>Cb = Program Calculated</b>.</li>
+          <li>Correr <b>Analyze → Run</b> + <b>Design → Steel Frame Design → Start Design/Check</b>.</li>
+          <li>Verificar D/C: <b>Display Design Info → Design Output → P-M Ratio Colors and Values</b>.</li>
+          <li>Si sigue rojo → activar P-Delta iterativo + LL reduction.</li>
+          <li>Como último recurso: subir sección o agregar viga secundaria intermedia (span/2 → M/4).</li>
+        </ol>
+      </div>
+
+      <div style="margin-top:12px;font-size:10.5px;color:var(--text-dim);text-align:center;line-height:1.5">
+        Referencias: AISC 360-16 (§C2, §F1-F3, §I3, App.8) · ASCE 7-16 (§2.3, §4.7) · CSI ETABS 22 Steel Frame Design Manual.
+      </div>
+    </div>`;
+}
+
+// Estructura: pestañas (Hoja / Procedimiento / Cargar ETABS / Anti-conservador) + cabecera de inputs.
 async function renderEtabs() {
   const cont = document.getElementById("etabs-content");
   if (!cont) return;
@@ -1202,6 +1295,7 @@ async function renderEtabs() {
        ${tab("hoja", "📐 Hoja de cálculo")}
        ${tab("proc", "📖 Procedimiento")}
        ${tab("carga", "⬆ Cargar datos de ETABS")}
+       ${tab("log", "🛡️ Anti-conservador AISC")}
      </div>
 
      <!-- PESTAÑA HOJA -->
@@ -1265,6 +1359,11 @@ async function renderEtabs() {
      <!-- PESTAÑA CARGAR ETABS -->
      <div id="et-pane-carga" style="display:${s.tab === "carga" ? "block" : "none"}">
        ${etabsCargaHTML(doc && doc.export_doc)}
+     </div>
+
+     <!-- PESTAÑA ANTI-CONSERVADOR AISC -->
+     <div id="et-pane-log" style="display:${s.tab === "log" ? "block" : "none"}">
+       ${etabsAntiConservadorHTML()}
      </div>
    </div>`;
 
@@ -2242,20 +2341,22 @@ async function aceroImportSubmit() {
 function renderAceroImportResult(res) {
   if (!res) return `<div style="color:#e74c3c;font-size:11px">Sin respuesta del servidor.</div>`;
   const parts = res.partidas_generadas || [];
-  const noMap = res.perfiles_no_mapeados || [];
-  const miembros = res.miembros || [];
-  const dcMax = miembros.length ? Math.max(...miembros.map(m => m.dc ?? 0)).toFixed(3) : "—";
-  const sobre = miembros.filter(m => (m.dc ?? 0) > 1.0).length;
-  const filas = parts.map(p => `<li><b>${esc(p.clave)}</b> · ${esc(p.ficha)} · ${esc(p.perfil)} (${esc(p.rol)}) · ${fmt(p.cantidad, 2)} mL</li>`).join("");
+  const noMap = (res.perfiles_no_mapeados || []).filter(m => (m.perfil || "").toLowerCase() !== "program determined");
+  const porFicha = res.por_ficha || [];
+  const nMiembros = res.n_miembros || 0;
+  const dcMax = porFicha.length ? Math.max(...porFicha.map(f => f.dc_max ?? 0)).toFixed(3) : "—";
+  const sobre = (res.sobre_esforzados || []).length;
+  const filas = parts.map(p => `<li><b>${esc(p.clave)}</b> · ${esc(p.ficha)} · ${esc(p.perfil || "")} (${esc(p.rol || "")}) · ${fmt(p.cantidad, 2)} mL</li>`).join("");
   const noMapHtml = noMap.length ? `<div style="font-size:10px;color:#e67e22;margin-top:5px">⚠ No mapeados: ${noMap.map(m => esc(m.perfil || m.section || "?")).join(", ")}</div>` : "";
   const overHtml = sobre ? `<div style="color:#e74c3c;font-size:10px;margin-top:4px">⚠ ${sobre} elemento(s) con D/C > 1.0</div>` : "";
   return `
     <div style="border:1px solid #27ae60;border-radius:5px;padding:8px 11px;background:var(--surface)">
-      <div style="font-size:11px;font-weight:700;color:#27ae60;margin-bottom:4px">✅ ${miembros.length} elementos importados · D/C máx ${dcMax}</div>
+      <div style="font-size:11px;font-weight:700;color:#27ae60;margin-bottom:4px">✅ ${nMiembros} frames · D/C máx ${dcMax}</div>
       ${overHtml}
       <ul style="margin:4px 0;padding-left:18px;font-size:11px;line-height:1.5">${filas}</ul>
       ${noMapHtml}
     </div>`;
+}
 
 async function loadAceroElementos() {
   const cont = document.getElementById("acero-elementos-list");

@@ -282,10 +282,10 @@ def api_unidades():
 
     return jsonify(unidades)
 
-@app.route('/revit-mcp')
-def revit_mcp_page():
-    """Revit MCP Controls — panel de scripts Python e IronPython."""
-    return render_template('revit_mcp.html', asset_version=_current_asset_version())
+@app.route('/viewer')
+def viewer_page():
+    """Viewer 3D — EstimaStruct Babylon.js viewer integrado con project_full_dump.json."""
+    return render_template('viewer.html')
 
 
 @app.route('/matrices')
@@ -297,6 +297,40 @@ def matrices_page():
 def matriz_page(matriz_id):
     """Página - Detalle matriz"""
     return render_template('matriz_detail.html', matriz_id=matriz_id)
+
+
+# ──────────────────────────────────────────────
+# FALLBACK: sirve full-dump JSON directo desde Flask cuando FastAPI :8002
+# no tiene el endpoint cargado (autoreload no lo tomó). Estas rutas
+# ESPECÍFICAS ganan sobre el catch-all `/__api__/<path:path>` de abajo.
+# Path canónico del dump generado por el snippet IronPython dump-full.
+# ──────────────────────────────────────────────
+_FULL_DUMP_LOCAL = r"D:\OneDrive\Bots\Estimbot\EXPORTS\project_full_dump.json"
+
+
+@app.route('/__api__/revit-mcp/full-dump', methods=['GET'])
+def serve_full_dump_direct():
+    """Fallback local: sirve project_full_dump.json sin pasar por FastAPI."""
+    if not os.path.exists(_FULL_DUMP_LOCAL):
+        return jsonify({
+            "error": "project_full_dump.json not found — ejecuta 'Full Dump (viewer)' desde el panel Revit MCP del dashboard."
+        }), 404
+    with open(_FULL_DUMP_LOCAL, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    return jsonify(data)
+
+
+@app.route('/__api__/revit-mcp/full-dump/meta', methods=['GET'])
+def serve_full_dump_meta_direct():
+    """Metadatos ligeros del dump (existencia, tamaño, mtime)."""
+    if not os.path.exists(_FULL_DUMP_LOCAL):
+        return jsonify({"exists": False}), 200
+    st = os.stat(_FULL_DUMP_LOCAL)
+    return jsonify({
+        "exists": True,
+        "size_mb": round(st.st_size / 1_048_576, 2),
+        "mtime": st.st_mtime,
+    })
 
 
 @app.route('/__api__', defaults={'path': ''}, methods=['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'])

@@ -13,14 +13,17 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 from backend.config import CONFIG
 
-# URL sqlite requiere forward slashes
-_DB_URL = "sqlite:///" + CONFIG.DB_PATH.replace("\\", "/")
+_ENGINE_KWARGS = {"pool_pre_ping": True}
+if CONFIG.DB_IS_SQLITE:
+    _ENGINE_KWARGS["connect_args"] = {"check_same_thread": False}
 
-engine = create_engine(_DB_URL, connect_args={"check_same_thread": False})
+engine = create_engine(CONFIG.DATABASE_URL, **_ENGINE_KWARGS)
 
 
 @event.listens_for(engine, "connect")
 def _set_sqlite_pragmas(dbapi_conn, _record):
+    if not CONFIG.DB_IS_SQLITE:
+        return
     cur = dbapi_conn.cursor()
     cur.execute("PRAGMA foreign_keys=ON")
     cur.execute("PRAGMA journal_mode=WAL")
@@ -64,3 +67,7 @@ def dispose_engine():
     "connect") se re-aplica automaticamente en esa conexion nueva.
     """
     engine.dispose()
+
+
+def database_is_sqlite() -> bool:
+    return CONFIG.DB_IS_SQLITE

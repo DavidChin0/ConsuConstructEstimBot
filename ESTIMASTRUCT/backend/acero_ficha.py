@@ -217,6 +217,60 @@ def _to_mL(v) -> float:
     return round(v / 100.0, 3) if v > 50 else round(v, 3)
 
 
+def _parse_frame_forces(rows) -> dict:
+    """Lee la hoja 'Frame Output - Frame Forces' de ETABS.
+    Devuelve dict {frame_id -> {combo, p_kn, v2_kn, m3_knm}} con el combo de
+    mayor |M3| (momento fuerte gobernante) por frame.
+
+    Columnas ETABS: Frame, OutputCase (o CaseType), P, V2, V3, T, M2, M3.
+    Unidades esperadas: kN / m (si se exportó en kN, m).
+    """
+    hi, hit = _find_header(
+        rows,
+        requeridas=[],
+        opcionales=["frame", "member", "uniquename",
+                    "outputcase", "loadcase", "loadcombo", "combo", "casetype",
+                    "p", "v2", "v3", "m3", "m2", "t",
+                    "steptype", "stepnum"],
+    )
+    if hi is None:
+        return {}
+
+    col_frame = _buscar_col(hit or {}, "frame", "member", "uniquename")
+    col_case  = _buscar_col(hit or {}, "outputcase", "loadcase", "loadcombo", "combo")
+    col_p     = _buscar_col(hit or {}, "p")
+    col_v2    = _buscar_col(hit or {}, "v2")
+    col_m3    = _buscar_col(hit or {}, "m3")
+
+    if col_frame is None or col_m3 is None:
+        return {}
+
+    best = {}  # frame -> record con mayor |M3|
+    for row in rows[hi + 1:]:
+        if not any(row):
+            continue
+        if any((c or "").upper().startswith("TABLE") for c in row):
+            continue
+
+        def cell(idx):
+            return row[idx] if (idx is not None and idx < len(row)) else None
+
+        fid = (cell(col_frame) or "").strip()
+        if not fid:
+            continue
+        m3 = _to_float(cell(col_m3))
+        if m3 is None:
+            continue
+        if fid not in best or abs(m3) > abs(best[fid]["m3_knm"]):
+            best[fid] = {
+                "combo": (cell(col_case) or "").strip(),
+                "p_kn":  _to_float(cell(col_p))  or 0.0,
+                "v2_kn": _to_float(cell(col_v2)) or 0.0,
+                "m3_knm": m3,
+            }
+    return best
+
+
 def _parse_miembros(rows) -> list:
     """Lee la tabla de miembros / Steel Frame Design. Devuelve lista de
     {frame, perfil, rol, longitud_mL, dc, combo}.
@@ -315,6 +369,7 @@ def parse_acero_bytes(raw: bytes) -> dict:
         return out
 
     all_members = []
+    forces_by_frame = {}  # frame -> {combo, p_kn, v2_kn, m3_knm}
     for ws in wb.worksheets:
         buf = io.StringIO()
         w = csv.writer(buf)
@@ -329,6 +384,11 @@ def parse_acero_bytes(raw: bytes) -> dict:
         mb = _parse_miembros(rows)
         if mb:
             all_members.extend(mb)
+        else:
+            # Intentar como hoja de fuerzas (Frame Output - Frame Forces)
+            ff = _parse_frame_forces(rows)
+            if ff:
+                forces_by_frame.update(ff)
     try:
         wb.close()
     except Exception:  # noqa: BLE001
@@ -336,12 +396,16 @@ def parse_acero_bytes(raw: bytes) -> dict:
 
     # Merge: join by frame ID to combine dc (from design summary) + length (from assigns)
     # Build index: frame -> best record (prefer record with dc; fill missing length from assigns)
+    _PROG_DET = "program determined"
+
     by_frame = {}
     for m in all_members:
         fid = m.get("frame", "").strip()
-        if not fid or fid.lower() in ("", "program determined"):
-            out["miembros"].append(m)
-            continue
+        if not fid:
+            continue  # fila sin ID de frame → descartar
+        # Normalizar "Program Determined" como perfil ausente
+        if (m.get("perfil") or "").strip().lower() == _PROG_DET:
+            m = {**m, "perfil": ""}
         if fid not in by_frame:
             by_frame[fid] = m.copy()
         else:
@@ -353,13 +417,29 @@ def parse_acero_bytes(raw: bytes) -> dict:
             # Fill missing length from new record
             if existing.get("longitud_mL") is None and m.get("longitud_mL") is not None:
                 existing["longitud_mL"] = m["longitud_mL"]
-            # Fill missing perfil/rol
-            if not existing.get("perfil") and m.get("perfil"):
+            # Fill missing or "Program Determined" perfil with real value
+            if (not existing.get("perfil") or existing["perfil"].strip().lower() == _PROG_DET) and m.get("perfil"):
                 existing["perfil"] = m["perfil"]
             if not existing.get("rol") and m.get("rol"):
                 existing["rol"] = m["rol"]
 
     out["miembros"].extend(by_frame.values())
+
+    # Merge fuerzas (Frame Forces) — kN/m → t/t·m (÷ 9.80665)
+    if forces_by_frame:
+        _KN_TO_T = 1.0 / 9.80665
+        for m in out["miembros"]:
+            fid = m.get("frame", "").strip()
+            ff = forces_by_frame.get(fid)
+            if not ff:
+                continue
+            m["p_t"]   = round(ff["p_kn"]   * _KN_TO_T, 4)   # axial [t]  +comp/-tens
+            m["v2_t"]  = round(ff["v2_kn"]  * _KN_TO_T, 4)   # cortante [t]
+            m["m3_tm"] = round(ff["m3_knm"] * _KN_TO_T, 4)   # momento fuerte [t·m]
+            m["combo_fuerzas"] = ff["combo"]
+        out["avisos"].append(
+            f"Frame Forces: {len(forces_by_frame)} frames con fuerzas mapeadas."
+        )
 
     if not out["miembros"]:
         out["avisos"].append("No se reconocio la tabla de miembros en el .xlsx.")

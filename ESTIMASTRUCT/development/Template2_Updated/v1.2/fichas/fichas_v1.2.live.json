@@ -5640,7 +5640,7 @@
         "total": 0.5
       }
     ],
-    "color_tipo": "verde",
+    "color_tipo": "blanco",
     "_nota": "Costeada 2026-07-07 (aprobada A+B); precios REF cotizar: MA-375/376/377"
   },
   {
@@ -17129,7 +17129,7 @@
         "total": 67.5
       }
     ],
-    "color_tipo": "verde"
+    "color_tipo": "blanco"
   },
   {
     "codigo": "SN-17",
@@ -20684,7 +20684,7 @@
         "total": 500
       }
     ],
-    "color_tipo": "verde"
+    "color_tipo": "blanco"
   },
   {
     "codigo": "EXT-05",
@@ -21707,7 +21707,7 @@
     "cantidad": 0,
     "precio_unitario": 0,
     "insumos": [],
-    "color_tipo": "verde",
+    "color_tipo": "blanco",
     "_stub": true,
     "_nota": "Agregado 2026-07-14 como match de tipo VA-1 aluminio en template Valle de Angeles"
   },
@@ -21719,7 +21719,7 @@
     "cantidad": 0,
     "precio_unitario": 0,
     "insumos": [],
-    "color_tipo": "verde",
+    "color_tipo": "blanco",
     "_stub": true,
     "_nota": "Agregado 2026-07-14 para clasificar Default Floor de contexto"
   },
@@ -21731,7 +21731,7 @@
     "cantidad": 0,
     "precio_unitario": 0,
     "insumos": [],
-    "color_tipo": "verde",
+    "color_tipo": "blanco",
     "_stub": true,
     "_nota": "Agregado 2026-07-14 para clasificar familias de referencia no facturables"
   }

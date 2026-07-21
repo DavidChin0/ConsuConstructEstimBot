@@ -146,6 +146,59 @@ async def import_etabs_acero(pid: str, request: Request,
     agg = agregar_por_ficha(miembros)
     avisos.extend(agg.get("avisos") or [])
 
+    # ── Crear DisenoElemento por miembro (para sidebar + Hoja §D-H) ──────────
+    # Borra elementos previos de ETABS para esta obra (reimport limpio)
+    db.query(DisenoElemento).filter(
+        DisenoElemento.presupuesto_id == pid,
+        DisenoElemento.material_tipo == "ACERO",
+    ).delete(synchronize_session=False)
+
+    for m in miembros:
+        perfil = (m.get("perfil") or "").strip()
+        if not perfil or not _perfil_acero_valido(perfil):
+            continue
+        rol = (m.get("rol") or "VIGA").strip().upper()
+        tipo_elem = "COLUMNA" if rol == "COLUMNA" else "VIGA_SIMPLE"
+        longitud_m = float(m.get("longitud_mL") or 0)
+        dc = m.get("dc")
+        combo = (m.get("combo") or "").strip()
+        frame_id = (m.get("frame") or "").strip()
+
+        el = DisenoElemento(
+            presupuesto_id=pid,
+            material_tipo="ACERO",
+            perfil_acero=perfil,
+            acero_grado="A992",
+            tipo=tipo_elem,
+            longitud_m=longitud_m,
+            csi="05 20 00" if tipo_elem == "COLUMNA" else "05 10 00",
+            type_mark=frame_id,
+        )
+        db.add(el)
+        db.flush()
+
+        # Fuerzas (disponibles si el XLSX incluye Frame Output - Frame Forces)
+        p_t   = float(m.get("p_t")   or 0)
+        v2_t  = float(m.get("v2_t")  or 0)
+        m3_tm = float(m.get("m3_tm") or 0)
+        combo_fuerzas = (m.get("combo_fuerzas") or combo or "").strip()
+
+        caso = CasoDiseno(
+            diseno_elemento_id=el.id,
+            nombre=combo_fuerzas or combo or "ETABS",
+            origen="ETABS",
+            combo_etabs=combo_fuerzas or combo,
+            gobierna=True,
+            # Columna: Pu=axial, Mux=M3, Vu=V2
+            pu_t=p_t if tipo_elem == "COLUMNA" else 0,
+            mu_xx_tm=m3_tm if tipo_elem == "COLUMNA" else 0,
+            vu_t=v2_t,
+            # Viga: mu=M3, vu=V2, nu=axial
+            mu_tm=m3_tm if tipo_elem != "COLUMNA" else 0,
+            nu_t=p_t if tipo_elem != "COLUMNA" else 0,
+        )
+        db.add(caso)
+
     # ── Generar partidas Div 05 (opcional) ───────────────────────────────────
     partidas_generadas = []
     if gen and agg["por_ficha"]:
@@ -162,9 +215,12 @@ async def import_etabs_acero(pid: str, request: Request,
             )
             partidas_generadas.append({
                 "id": p.id, "clave": clave_csi, "ficha": ficha,
+                "perfil": f["perfil"], "rol": f["rol"],
                 "cantidad": float(p.cantidad), "unidad": "mL",
             })
         db.commit()
+    else:
+        db.commit()  # commit DisenoElemento aunque no se generen partidas
 
     return {
         "status": "ok",

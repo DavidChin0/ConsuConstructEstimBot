@@ -38,6 +38,7 @@ PYTHON        = r"D:\LLM\python\python.exe"
 # ──────────────────────────────────────────────
 _IRONPYTHON_SCRIPTS = {
     "dump":          "revit_dump_snippet.py",
+    "dump-full":     "revit_full_dump_snippet.py",
     "marks_master":  "revit_marks_master.py",
     "keynote_path":  "revit_get_keynote_path.py",
     "marks_legacy":  "revit_set_marks_snippet.py",
@@ -83,6 +84,12 @@ _PYTHON_SCRIPTS = {
         "desc":   "Actualiza la hoja 'Scripts & Skills' en Auditoria_MCP_Master_CANON.xlsx.",
         "args":   [],
         "cwd":    r"D:\GitHub\revit-estimastruct-audit\audit",
+    },
+    "viewer-postprocess": {
+        "module": "backend.scripts_runner.viewer_postprocess",
+        "label":  "Viewer Post-process",
+        "desc":   "Convierte OBJ exports a GLB y escribe scene_index.json enriquecido con datos del Full Dump (levels, rooms, materials_full, project_info).",
+        "args":   [],
     },
 }
 
@@ -139,6 +146,24 @@ async def get_status():
     }
 
 
+@router.get("/health")
+async def get_health():
+    """Health check profundo: uptime del proceso MCP + latencia real del pipe Revit."""
+    mcp_up = mcp_http.is_mcp_running()
+    if not mcp_up:
+        return {"mcp_running": False, "uptime_seconds": None, "pipe_ok": False, "latency_ms": None}
+    ping = await mcp_http.ping_pipe()
+    st = mcp_http._start_time
+    uptime = (time.time() - st) if st else None
+    return {
+        "mcp_running": True,
+        "uptime_seconds": uptime,
+        "pipe_ok": ping["pipe_ok"],
+        "latency_ms": ping["latency_ms"],
+        "detail": ping.get("detail"),
+    }
+
+
 # ──────────────────────────────────────────────
 # MCP LIFECYCLE
 # ──────────────────────────────────────────────
@@ -160,13 +185,15 @@ def list_scripts():
     ironpy = [
         {"key": k, "file": v, "type": "ironpython",
          "label": {
-             "dump":         "Dump Modelo",
+             "dump":         "Dump Modelo (audit)",
+             "dump-full":    "Full Dump (viewer)",
              "marks_master": "Set Marks Master",
              "keynote_path": "Obtener Ruta TXT",
              "marks_legacy": "Set Marks (Legacy)",
          }.get(k, k),
          "desc": {
-             "dump":         "Vuelca todos los elementos, keynotes, compuestos y schedules al JSON de auditoría.",
+             "dump":         "Vuelca keynotes, compuestos y schedules al JSON de auditoría (rápido).",
+             "dump-full":    "Dump completo: project_info, levels, grids, views, sheets, rooms, all_instances, materials_full + secciones del dump de auditoría. Fuente de verdad para el Viewer 3D.",
              "marks_master": "Asigna TypeMark/Mark a materiales, tipos, floors y doors/windows desde csi_to_codigo.json.",
              "keynote_path": "Retorna la ruta del archivo .txt de keynotes cargado en el proyecto activo.",
              "marks_legacy": "⚠️ Deprecado — usa DB.Transaction. NO inyectar via execute_revit_code.",
@@ -271,3 +298,85 @@ class ToolCallRequest(BaseModel):
 @router.post("/call")
 async def call_mcp_tool(body: ToolCallRequest):
     return await mcp_http.call_tool(body.tool, body.arguments)
+
+
+# ──────────────────────────────────────────────
+# FULL DUMP — viewer data source
+# ──────────────────────────────────────────────
+_FULL_DUMP_PATH = Path(r"D:\OneDrive\Bots\Estimbot\EXPORTS\project_full_dump.json")
+_VIEWER_ROOT    = Path(r"D:\OneDrive\Bots\Viewer\projects")
+
+
+@router.get("/full-dump")
+async def get_full_dump():
+    """Return project_full_dump.json. Run inject/dump-full first to generate it."""
+    if not _FULL_DUMP_PATH.exists():
+        raise HTTPException(
+            404,
+            "project_full_dump.json not found — run 'Full Dump (viewer)' from Revit MCP panel first."
+        )
+    with open(_FULL_DUMP_PATH, encoding="utf-8") as f:
+        return json.load(f)
+
+
+@router.get("/full-dump/meta")
+async def get_full_dump_meta():
+    """Lightweight metadata check (mtime + section sizes) without loading full JSON."""
+    if not _FULL_DUMP_PATH.exists():
+        return {"exists": False}
+    stat = _FULL_DUMP_PATH.stat()
+    try:
+        with open(_FULL_DUMP_PATH, encoding="utf-8") as f:
+            data = json.load(f)
+        mats = data.get("materials_full", [])
+        mats_with_tex = sum(1 for m in mats if m.get("texture_paths"))
+        return {
+            "exists": True,
+            "dump_version": data.get("_meta", {}).get("dump_version", "unknown"),
+            "size_mb": round(stat.st_size / 1_048_576, 2),
+            "mtime": stat.st_mtime,
+            "project_name": data.get("project_info", {}).get("name") or data.get("project_info", {}).get("file_name"),
+            "levels":    len(data.get("levels", [])),
+            "views":     len(data.get("views", [])),
+            "rooms":     len(data.get("rooms", [])),
+            "instances": len(data.get("all_instances", [])),
+            "materials": len(mats),
+            "materials_with_textures": mats_with_tex,
+            "compounds": len(data.get("compound_elements", [])),
+        }
+    except Exception as e:
+        return {"exists": True, "size_mb": round(stat.st_size / 1_048_576, 2), "error": str(e)}
+
+
+@router.get("/viewer-projects")
+def list_viewer_projects():
+    """List available GLB projects in the viewer folder."""
+    if not _VIEWER_ROOT.exists():
+        return []
+    projects = []
+    for proj_dir in sorted(_VIEWER_ROOT.iterdir()):
+        if not proj_dir.is_dir():
+            continue
+        glb_files = list(proj_dir.glob("*_viewer.glb"))
+        scene_idx = proj_dir / "scene_index.json"
+        projects.append({
+            "name":        proj_dir.name,
+            "path":        str(proj_dir),
+            "has_glb":     bool(glb_files),
+            "glb_name":    glb_files[0].name if glb_files else None,
+            "has_scene_index": scene_idx.exists(),
+        })
+    return projects
+
+
+from fastapi.responses import FileResponse
+
+
+@router.get("/viewer-glb/{project}/{filename}")
+async def serve_viewer_glb(project: str, filename: str):
+    """Serve GLB file for the 3D viewer."""
+    path = _VIEWER_ROOT / project / filename
+    if not path.exists() or path.suffix not in (".glb", ".json"):
+        raise HTTPException(404, f"File not found: {filename}")
+    media = "model/gltf-binary" if path.suffix == ".glb" else "application/json"
+    return FileResponse(str(path), media_type=media)

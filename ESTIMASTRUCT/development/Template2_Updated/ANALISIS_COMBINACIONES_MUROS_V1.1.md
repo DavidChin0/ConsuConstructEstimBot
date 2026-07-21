@@ -237,6 +237,6 @@ BRECHA: ~27 combinaciones faltantes
 
 ## 📎 REFERENCIAS
 
-- **Fichas V1.1:** `D:\OneDrive\Bots\Estimbot\Estimacion\development\Template2_Updated\v1.1\fichas\fichas_v1.1.json`
+- **Fichas V1.1:** `D:\GitHub\EstimBot\ConsuConstructEstimBot\ESTIMASTRUCT\development\Template2_Updated\v1.1\fichas\fichas_v1.1.json`
 - **Lista requerida:** Proporcionada en screenshot (35+ combinaciones)
 - **Clasificación:** MasterFormat 2018 (Divisiones 04, 05, 09)

@@ -17,10 +17,24 @@ By ConsuConstruct.com, dentro del ecosistema Estimbot.
 - Exportación de insumos necesarios por obra activa, separados por actividad, usando `rendimiento` por insumo y una hoja global con consolidado, `cantidad de insumos` y ROUNDUP
 - Soporte para análisis estructural y detalle técnico
 
+## Documentos canónicos
+
+La verdad viva de EstimaStruct ya no debe salir de manuales dispersos.
+
+Leer en este orden:
+
+1. `docs/source_of_truth_estimastruct_20260719.md`
+2. `docs/manual_mega_operativo_estimastruct_20260719.md`
+3. `docs/sop_revit_mcp_estimastruct_20260719.md`
+4. `docs/postgres_runtime_estimastruct_20260719.md`
+5. `CHANGELOG.md`
+
+Documentos viejos como `MANUAL_ESTIMASTRUCT.md`, `MANUAL_USUARIO.md` y `ARQUITECTURA_Y_FLUJO.md` quedan como contexto útil, no como contrato principal.
+
 ## Stack
 
 - Backend: FastAPI
-- Database: SQLite
+- Database: PostgreSQL primario o SQLite legacy de compatibilidad
 - Frontend: Vanilla JavaScript, HTML, CSS
 - Integración: Revit 2027 + pyRevit
 
@@ -36,11 +50,13 @@ By ConsuConstruct.com, dentro del ecosistema Estimbot.
 
 - Raíz viva: `D:\GitHub\EstimBot\ConsuConstructEstimBot\ESTIMASTRUCT`
 - Backend: `backend\` (FastAPI :8002) — BD viva en `C:\EstimaStruct\data\estimacion.db`
+- Runtime PostgreSQL primario soportado: ver `docs/postgres_runtime_estimastruct_20260719.md`
 - Frontend: `ESTIMASTRUCT\` (Flask :5000) + `frontend\` (JS/CSS/vendor)
 
 Lanzador único (backend 8002 + frontend 5000 en una ventana):
 
 - `START_UNICA.ps1`
+- `START_POSTGRES_UNICA.ps1` — wrapper local para levantar contra PostgreSQL `estimastruct` sin tocar la UI
 
 ## Project layout
 
@@ -53,6 +69,7 @@ Lanzador único (backend 8002 + frontend 5000 en una ventana):
 ## Notes
 
 - El flujo operativo está pensado para que Revit alimente cantidades y EstimaStruct consolide presupuesto.
+- PostgreSQL puede ser la verdad primaria del core; SQLite sigue existiendo como snapshot de compatibilidad para backup/export/import.
 - Los nombres de las actividades en `v1.1` se consideran la referencia estable.
 - El proyecto forma parte del módulo de automatización de Estimbot.
 - El `sobrecosto` es el único margen aplicado sobre el costo directo; el IVA ya viene absorbido dentro de los costos de insumos y no se suma aparte.
@@ -67,3 +84,4 @@ Lanzador único (backend 8002 + frontend 5000 en una ventana):
 - La descripción canónica de un código también se normaliza por frecuencia; si el mismo código aparece con nombres distintos, la base conserva un nombre estándar por código.
 - `HER-00` es una excepción operativa: su valor se calcula como porcentaje de la mano de obra total de la ficha y no entra en la normalización de precio.
 - La auditoría XLSX solo considera insumos reales: `MA`, `MO`, `SC`, `EQ`, `HER`, `DIS` y `FL`. No usa `Type Mark` ni `CSI` como llave de auditoría.
+- La semántica canónica con Revit MCP es: EstimaStruct manda el catálogo CSI; Revit MCP inspecciona, audita y ayuda a aplicar cambios, pero no redefine la verdad del presupuesto. El SOP operativo vive en `docs/sop_revit_mcp_estimastruct_20260719.md`.

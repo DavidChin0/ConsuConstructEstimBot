@@ -82,7 +82,9 @@
       <button class="dev-menu-item" data-step="4">Actualizar Cantidades de Revit</button>
     </div>
   </div>
+  <a id="btn-viewer3d" href="/viewer" target="_blank" class="btn-cronograma hidden" title="Viewer 3D — mapa completo del modelo Revit" style="text-decoration:none;display:inline-flex;align-items:center">🗺 Viewer 3D</a>
   <button id="btn-cronograma" class="btn-cronograma hidden" title="Ver cronograma (Gantt)">📅 Cronograma</button>
+  <button id="btn-mcp-quick" class="btn-cronograma hidden" title="Revit MCP — abrir panel y levantar servidor si está apagado"><span id="mcp-quick-dot" style="width:7px;height:7px;border-radius:50%;background:#f44336;display:inline-block;margin-right:5px;vertical-align:middle"></span>🔧 MCP</button>
   <div id="export-menu-wrap" class="export-menu-wrap hidden">
     <button id="btn-exportar" class="btn-export">⬇ Exportar ▾</button>
     <div id="export-menu" class="export-menu hidden">
@@ -431,55 +433,128 @@
     </div>
   </div>
 
-  <div style="display:grid;grid-template-columns:240px 1fr 1fr;gap:12px;padding:12px;flex:1;overflow:auto">
+  <div id="revit-mcp-content" style="flex:1;overflow:auto;display:flex;flex-direction:column">
 
-    <!-- Col 1: Estado MCP -->
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;display:flex;flex-direction:column">
-      <div style="padding:10px 14px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-dim)">⚡ Estado MCP</div>
-      <div style="padding:12px;display:flex;flex-direction:column;gap:8px">
-        <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;padding:4px 0">
-          <span style="color:var(--text-dim)">HTTP :8001</span>
-          <span id="rmcp-s-mcp" class="rmcp-val" style="font-weight:600;font-size:11px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">—</span>
+    <!-- Barra sticky con dropdown Vista (patrón hermanos: Diseño/Acero/Conexión) -->
+    <div style="position:sticky;top:0;z-index:5;background:var(--bg);display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:11px 16px;border-bottom:1px solid var(--border)">
+      <b style="font-size:15px;margin-right:4px">Servidor MCP</b>
+      <span style="font-size:11px;color:var(--text-dim);font-style:italic">← control y ejecución de scripts Revit</span>
+      <label style="font-size:11px;color:var(--text-dim);margin-left:8px">Vista:</label>
+      <select id="revit-mcp-vista-select" style="background:var(--surface2);border:1px solid var(--accent);color:var(--text);padding:4px 8px;border-radius:3px;font-weight:600;font-size:13px">
+        <option value="panel">🖥️ Panel de Control</option>
+        <option value="guia">📖 Cómo usar</option>
+      </select>
+    </div>
+
+    <!-- VISTA 1: PANEL DE CONTROL -->
+    <div id="rmcp-vista-panel" style="padding:12px 16px;display:flex;flex-direction:column;gap:0">
+
+      <!-- Fila 1: Estado + Contexto de trabajo -->
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+
+        <div style="flex:1;min-width:260px;border:1px solid var(--border);border-radius:5px;padding:10px 13px;margin-bottom:10px;background:var(--surface)">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+            <span style="font-size:12px;font-weight:700;color:var(--accent)">Estado del sistema</span>
+            <button id="rmcp-btn-health" class="btn-cancel" onclick="rmcpHealthCheck(this)" title="Ping profundo al pipe de Revit: uptime + latencia" style="font-size:10px;padding:2px 8px">🩺 Health Check</button>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px dashed var(--border);font-size:12px">
+            <span style="color:var(--text-dim)">Proceso MCP :8001</span><span id="rmcp-s-mcp" class="rmcp-val">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px dashed var(--border);font-size:12px">
+            <span style="color:var(--text-dim)">Documento Revit</span><span id="rmcp-s-doc" class="rmcp-val">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:12px">
+            <span style="color:var(--text-dim)">Bridge pyRevit</span><span id="rmcp-s-pipe" class="rmcp-val">—</span>
+          </div>
+          <div id="rmcp-health-row" style="display:none;justify-content:space-between;align-items:center;padding:5px 0;border-top:1px dashed var(--border);font-size:12px">
+            <span style="color:var(--text-dim)">Health</span><span id="rmcp-health-val" class="rmcp-val">—</span>
+          </div>
+          <div id="rmcp-revit-info" style="display:none;margin-top:8px;padding:7px 9px;background:var(--bg);border:1px solid var(--border);border-radius:4px;font-size:11px;color:var(--text-dim);line-height:1.5;white-space:pre-wrap;word-break:break-all;max-height:120px;overflow-y:auto"></div>
         </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;padding:4px 0">
-          <span style="color:var(--text-dim)">Revit Doc</span>
-          <span id="rmcp-s-doc" class="rmcp-val" style="font-weight:600;font-size:11px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">—</span>
+
+        <div style="flex:2;min-width:300px;border:1px solid var(--border);border-radius:5px;padding:10px 13px;margin-bottom:10px;background:var(--surface)">
+          <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:5px">Contexto de trabajo</div>
+          <div style="display:flex;gap:14px;flex-wrap:wrap">
+            <label style="flex:1;min-width:180px;font-size:11px;color:var(--text-dim);display:flex;flex-direction:column;gap:4px">Obra activa
+              <select id="rmcp-obra-select" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px"><option value="">Cargando obras…</option></select>
+            </label>
+            <label style="flex:1;min-width:180px;font-size:11px;color:var(--text-dim);display:flex;flex-direction:column;gap:4px">Schedule CSV
+              <select id="rmcp-csv-select" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px"><option value="">Cargando CSVs…</option></select>
+            </label>
+          </div>
+          <div style="font-size:11px;color:var(--text-dim);font-style:italic;margin-top:8px;line-height:1.5">Los scripts usan la obra y el CSV seleccionados como fuente/destino. Cambia aquí antes de ejecutar.</div>
         </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;padding:4px 0">
-          <span style="color:var(--text-dim)">Pipe Status</span>
-          <span id="rmcp-s-pipe" class="rmcp-val" style="font-weight:600;font-size:11px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">—</span>
-        </div>
-        <div id="rmcp-revit-info" style="display:none;font-size:11px;color:var(--text-dim);line-height:1.6;background:var(--bg);border:1px solid var(--border);padding:8px;border-radius:4px;margin-top:4px;white-space:pre-wrap;word-break:break-all;max-height:120px;overflow-y:auto"></div>
-        <hr style="border:none;border-top:1px solid var(--border);margin:4px 0">
-        <div style="font-size:11px;color:var(--text-dim)">Obra activa (import/keynotes):</div>
-        <select id="rmcp-obra-select" style="width:100%;padding:4px 8px;border-radius:4px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:11px"><option value="">Cargando obras…</option></select>
-        <div style="font-size:11px;color:var(--text-dim);margin-top:6px">Schedule CSV:</div>
-        <select id="rmcp-csv-select" style="width:100%;padding:4px 8px;border-radius:4px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:11px"><option value="">Cargando CSVs…</option></select>
       </div>
-    </div>
 
-    <!-- Col 2: Python Scripts -->
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;display:flex;flex-direction:column">
-      <div style="padding:10px 14px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-dim)">🐍 Python — Scripts Offline</div>
-      <div id="rmcp-py-cards" style="padding:12px;display:flex;flex-direction:column;gap:8px;overflow-y:auto"></div>
-    </div>
+      <!-- Fila 2: Scripts Python offline + IronPython vía MCP -->
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start">
 
-    <!-- Col 3: IronPython via MCP -->
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;display:flex;flex-direction:column">
-      <div style="padding:10px 14px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-dim)">🧪 IronPython — Inyectar via MCP</div>
-      <div id="rmcp-iron-cards" style="padding:12px;display:flex;flex-direction:column;gap:8px;overflow-y:auto"></div>
-    </div>
+        <div style="flex:1;min-width:320px;border:1px solid var(--border);border-radius:5px;padding:10px 13px;margin-bottom:10px;background:var(--surface)">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <div style="font-size:12px;font-weight:700;color:var(--accent)">Scripts Python (offline)</div>
+            <span style="font-size:9px;font-weight:700;color:var(--accent);border:1px solid var(--accent);border-radius:8px;padding:1px 7px">SIN REVIT</span>
+          </div>
+          <div id="rmcp-py-cards" style="display:flex;flex-direction:column;gap:8px"></div>
+        </div>
 
-    <!-- Consola -->
-    <div id="rmcp-console-panel" style="grid-column:1/-1;background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;max-height:240px;display:flex;flex-direction:column">
-      <div style="padding:10px 14px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-dim);display:flex;align-items:center;justify-content:space-between">
-        <span>▶ Consola</span>
-        <button onclick="rmcpClearLog()" class="btn-cancel" style="font-size:10px;padding:3px 10px">Limpiar</button>
+        <div style="flex:1;min-width:320px;border:1px solid var(--border);border-radius:5px;padding:10px 13px;margin-bottom:10px;background:var(--surface)">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <div style="font-size:12px;font-weight:700;color:var(--accent)">Snippets IronPython (vía MCP)</div>
+            <span style="font-size:9px;font-weight:700;color:var(--text-dim);border:1px solid var(--text-dim);border-radius:8px;padding:1px 7px">REQUIERE MCP ●</span>
+          </div>
+          <div id="rmcp-iron-cards" style="display:flex;flex-direction:column;gap:8px"></div>
+        </div>
       </div>
-      <div id="rmcp-output" style="font-family:'Cascadia Code','Consolas',monospace;font-size:11px;color:#a5d6a7;background:#111;padding:10px 14px;overflow-y:auto;flex:1;white-space:pre-wrap;word-break:break-all;line-height:1.5">Listo. Esperando comandos…
+
+      <!-- Fila 3: Consola -->
+      <div id="rmcp-console-panel" style="border:1px solid var(--border);border-radius:5px;padding:10px 13px;margin-bottom:10px;background:var(--surface)">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <div style="font-size:12px;font-weight:700;color:var(--accent)">Consola</div>
+          <button class="btn-cancel" onclick="rmcpClearLog()" style="margin-left:auto;font-size:11px;padding:3px 10px">⌫ Limpiar</button>
+        </div>
+        <div id="rmcp-output" style="background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:9px 11px;min-height:120px;max-height:260px;overflow:auto;font-family:'Cascadia Code',Consolas,monospace;font-size:11px;line-height:1.6;white-space:pre-wrap;word-break:break-all;color:var(--text-dim)">Listo. Esperando comandos…
 </div>
+      </div>
     </div>
 
+    <!-- VISTA 2: CÓMO USAR (patrón box(titulo, body) de los módulos hermanos) -->
+    <div id="rmcp-vista-guia" style="display:none;padding:12px 16px;max-width:860px">
+
+      <div style="border:1px solid var(--border);border-radius:5px;padding:10px 13px;margin-bottom:10px;background:var(--surface)">
+        <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:5px">¿Qué es este panel?</div>
+        <div style="font-size:12px;color:var(--text);line-height:1.6">Controla el <b>servidor Revit MCP</b>: el proceso local que conecta EstimaStruct con Revit a través del bridge pyRevit. Desde aquí levantas/detienes ese proceso, ejecutas scripts de sincronización y ves su salida en la consola — sin salir de la app.</div>
+      </div>
+
+      <div style="border:1px solid var(--border);border-radius:5px;padding:10px 13px;margin-bottom:10px;background:var(--surface)">
+        <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:5px">Botones del encabezado</div>
+        <div style="font-size:12px;color:var(--text);line-height:1.6">
+          <b>⚡ Levantar MCP</b> — inicia el proceso del servidor MCP en tu máquina.<br>
+          <b>■ Detener MCP</b> — apaga el proceso (los scripts vía MCP dejarán de funcionar).<br>
+          <b>↺ Refrescar</b> — vuelve a consultar el estado (proceso, documento Revit, bridge).<br>
+          <b>✕ Cerrar</b> — cierra el panel; el servidor sigue corriendo si estaba arriba.<br>
+          El punto junto al título resume el estado: <span style="color:#4caf50">●</span> arriba, <span style="color:#f44336">●</span> abajo.
+        </div>
+      </div>
+
+      <div style="border:1px solid var(--border);border-radius:5px;padding:10px 13px;margin-bottom:10px;background:var(--surface)">
+        <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:5px">Python offline vs IronPython vía MCP</div>
+        <div style="font-size:12px;color:var(--text);line-height:1.6">
+          <span style="font-size:9px;font-weight:700;color:var(--accent);border:1px solid var(--accent);border-radius:8px;padding:1px 7px">PY</span> <b>Python offline</b>: corre fuera de Revit (CPython). Trabaja sobre CSVs exportados y la BD de EstimaStruct. <b>No necesita</b> Revit abierto ni el MCP levantado.<br>
+          <span style="font-size:9px;font-weight:700;color:var(--text-dim);border:1px solid var(--text-dim);border-radius:8px;padding:1px 7px">IP</span> <b>IronPython vía MCP</b>: snippet inyectado <b>dentro</b> del proceso de Revit por el bridge pyRevit. Requiere MCP arriba y un documento abierto en Revit.<br>
+          <span style="font-size:9px;font-weight:700;color:#e67e22;border:1px solid #e67e22;border-radius:8px;padding:1px 7px">⚠ DEPRECADO</span> marcado así = existe un reemplazo; evita usarlo en flujos nuevos.
+        </div>
+      </div>
+
+      <div style="border:1px solid var(--border);border-radius:5px;padding:10px 13px;margin-bottom:10px;background:var(--surface)">
+        <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:5px">Obra activa y Schedule CSV</div>
+        <div style="font-size:12px;color:var(--text);line-height:1.6"><b>Obra activa</b> = el presupuesto de EstimaStruct sobre el que actúan los scripts (destino de cantidades y partidas). <b>Schedule CSV</b> = el archivo exportado desde Revit (botón "Exportar Schedules") que sirve de fuente. Selecciona ambos <b>antes</b> de pulsar ▶ Ejecutar; si un script no aplica a una obra, ignora la selección.</div>
+      </div>
+
+      <div style="border:1px solid var(--border);border-radius:5px;padding:10px 13px;margin-bottom:10px;background:var(--surface)">
+        <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:5px">Cómo leer la consola</div>
+        <div style="font-size:12px;color:var(--text);line-height:1.6">Cada línea abre con timestamp en gris. <span style="color:#4caf50">Verde</span> = operación exitosa; <span style="color:#f44336">rojo</span> = error (revisa el mensaje completo, suele incluir el traceback); <span style="color:var(--accent)">amarillo</span> = información/progreso. "⌫ Limpiar" borra la vista, no detiene nada.</div>
+      </div>
+    </div>
   </div>
 </div>
 

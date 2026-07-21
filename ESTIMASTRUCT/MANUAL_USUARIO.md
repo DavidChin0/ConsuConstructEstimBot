@@ -1,4 +1,9 @@
+> [!CONTEXT]
+> **[HISTORICO 2026-07-19]** Manual de usuario previo a la consolidación documental nueva. Sigue sirviendo para contexto funcional, pero ya no manda como verdad principal. Ver `docs/source_of_truth_estimastruct_20260719.md`, `docs/manual_mega_operativo_estimastruct_20260719.md` y `docs/sop_revit_mcp_estimastruct_20260719.md`.
+
 # EstimaStruct — Manual de Usuario
+
+> **ESTADO:** satélite. No usar como autoridad documental principal.
 
 > Manual operativo: cada menú, botón, el ciclo de exportación y cómo se conecta todo.
 > Complemento de `ARQUITECTURA_Y_FLUJO.md` (el contrato técnico). Base: código real, 2026-06-01.

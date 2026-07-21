@@ -9,12 +9,29 @@ Todos overridables por variable de entorno.
 """
 import os
 from pathlib import Path
+from sqlalchemy.engine import make_url
 
 _BACKEND = Path(__file__).resolve().parent
 
 class CONFIG:
+    PROJECT_ROOT = _BACKEND.parent
+    PROJECT_NAME = "EstimaStruct"
+    CANONICAL_ROOT = os.getenv("ESTIMASTRUCT_CANONICAL_ROOT", str(PROJECT_ROOT))
+
     # BD viva FUERA de OneDrive (FASE 0). Local NTFS => WAL seguro.
     DB_PATH     = os.getenv("ESTIMA_DB_PATH",     r"C:\EstimaStruct\data\estimacion.db")
+    DATABASE_URL = os.getenv(
+        "ESTIMASTRUCT_DATABASE_URL",
+        "sqlite:///" + DB_PATH.replace("\\", "/"),
+    )
+    DATABASE_DIALECT = make_url(DATABASE_URL).get_backend_name()
+    DB_IS_SQLITE = DATABASE_DIALECT == "sqlite"
+    AUTO_CREATE_SCHEMA = os.getenv(
+        "ESTIMASTRUCT_AUTO_CREATE_SCHEMA",
+        "true" if DB_IS_SQLITE else "false",
+    ).strip().lower() in {"1", "true", "yes", "on"}
+    UI_COMPAT_DB_PATH = os.getenv("ESTIMASTRUCT_UI_DB", r"C:\EstimaStruct\data\estimastruct.db")
+    SQLITE_EXPORT_NAME = os.getenv("ESTIMASTRUCT_SQLITE_EXPORT_NAME", "estimacion.db")
 
     # Valor "para el Banco" por obra (info hardcodeada de EstimaStruct; se
     # persiste al generar el PDF banco y luego migrara al Supabase del cliente).

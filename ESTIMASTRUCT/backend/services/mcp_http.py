@@ -5,7 +5,7 @@ call_tool() envía tool/call JSON-RPC al endpoint MCP HTTP.
 """
 from __future__ import annotations
 
-import os, sys, subprocess, asyncio, json, httpx
+import os, sys, subprocess, asyncio, json, time, httpx
 from typing import Optional
 
 MCP_URL   = "http://127.0.0.1:8001/mcp/"
@@ -15,6 +15,9 @@ MCP_SCRIPT = os.path.join(MCP_DIR, "main_pipe.py")
 PYTHON     = r"D:\LLM\python\python.exe"
 
 _mcp_proc: Optional[subprocess.Popen] = None
+# Epoch del último start exitoso. None = desconocido (proceso levantado antes de
+# este restart de FastAPI) o MCP detenido.
+_start_time: Optional[float] = None
 
 
 def is_mcp_running() -> bool:
@@ -27,8 +30,10 @@ def is_mcp_running() -> bool:
 
 
 def start_mcp() -> dict:
-    global _mcp_proc
+    global _mcp_proc, _start_time
     if is_mcp_running():
+        # Proceso ya arriba (posiblemente de antes de este restart de FastAPI):
+        # si no tenemos _start_time, queda None → el frontend muestra "desconocido".
         return {"ok": True, "status": "already_running"}
     if not os.path.exists(MCP_SCRIPT):
         return {"ok": False, "error": f"main_pipe.py not found: {MCP_SCRIPT}"}
@@ -39,16 +44,16 @@ def start_mcp() -> dict:
         stderr=subprocess.DEVNULL,
     )
     # Give it 3s to start
-    import time
     for _ in range(6):
         time.sleep(0.5)
         if is_mcp_running():
+            _start_time = time.time()
             return {"ok": True, "status": "started", "pid": _mcp_proc.pid}
     return {"ok": False, "error": "MCP started but HTTP not responding on :8001", "pid": _mcp_proc.pid}
 
 
 def stop_mcp() -> dict:
-    global _mcp_proc
+    global _mcp_proc, _start_time
     stopped_pid = None
     if _mcp_proc and _mcp_proc.poll() is None:
         stopped_pid = _mcp_proc.pid
@@ -58,6 +63,7 @@ def stop_mcp() -> dict:
         except subprocess.TimeoutExpired:
             _mcp_proc.kill()
         _mcp_proc = None
+    _start_time = None
     return {"ok": True, "stopped_pid": stopped_pid}
 
 
@@ -95,6 +101,22 @@ async def call_tool(tool_name: str, arguments: dict, timeout: int = 60) -> dict:
 
 async def get_revit_status() -> dict:
     return await call_tool("get_revit_status", {}, timeout=10)
+
+
+async def ping_pipe() -> dict:
+    """Health check profundo: round-trip real JSON-RPC contra el pipe de Revit.
+
+    pipe_ok = True SOLO si call_tool respondió ok:true (no basta respuesta HTTP).
+    """
+    t0 = time.time()
+    r = await get_revit_status()
+    latency_ms = round((time.time() - t0) * 1000.0, 1)
+    ok = bool(r.get("ok"))
+    return {
+        "pipe_ok": ok,
+        "latency_ms": latency_ms,
+        "detail": r.get("output") if ok else r.get("error"),
+    }
 
 
 async def execute_ironpython(code: str) -> dict:

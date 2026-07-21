@@ -1,4 +1,9 @@
+> [!CONTEXT]
+> **[HISTORICO 2026-07-19]** Manual amplio de arquitectura redactado antes del recableado PostgreSQL, del proxy Flask same-origin y de la consolidación documental nueva. Se conserva como contexto histórico. La verdad viva fue reemplazada por `docs/source_of_truth_estimastruct_20260719.md`, `docs/manual_mega_operativo_estimastruct_20260719.md` y `docs/sop_revit_mcp_estimastruct_20260719.md`.
+
 # 📖 MANUAL ESTIMASTRUCT — Arquitectura Completa
+
+> **ESTADO:** histórico/satélite. No usar como contrato principal.
 
 **Última actualización:** 26 abril 2026  
 **Versión:** 1.0  

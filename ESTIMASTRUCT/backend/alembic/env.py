@@ -23,8 +23,8 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# URL de la BD viva — misma logica que db.py (forward slashes para sqlite).
-config.set_main_option("sqlalchemy.url", "sqlite:///" + CONFIG.DB_PATH.replace("\\", "/"))
+# URL de la BD viva — misma logica que db.py.
+config.set_main_option("sqlalchemy.url", CONFIG.DATABASE_URL)
 
 # add your model's MetaData object here
 # for 'autogenerate' support

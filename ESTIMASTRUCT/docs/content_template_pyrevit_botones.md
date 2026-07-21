@@ -42,7 +42,7 @@ Librería: `C:\ProgramData\Autodesk\RVT 2027\Libraries\English\US\Pipe\Fittings\
 | Agua caliente | **CPVC** (no está en librería estándar, bajar de fabricante) | — | — | — |
 
 Detalle exhaustivo de cada familia (rutas exactas, roles secundarios como Cross/Cap/Union): ver
-D:\OneDrive\Bots\Estimbot\Estimacion\docs\revit_content_generate_layout.md
+D:\GitHub\EstimBot\ConsuConstructEstimBot\ESTIMASTRUCT\docs\revit_content_generate_layout.md
 
 ### ✅ Auditoría en vivo (obra Valle de Angeles, 2026-07-06) — Pipe Types
 

@@ -369,7 +369,7 @@ class Settings(BaseSettings):
     model_config = {"env_prefix": "ESTIMA_", "env_file": r"D:\Secrets\estimastruct.env"}
 
     DB_PATH: Path = Path(r"C:\EstimaStruct\data\estimacion.db")
-    FICHAS_DIR: Path = Path(r"D:\OneDrive\Bots\Estimbot\Estimacion\development\Template2_Updated")
+    FICHAS_DIR: Path = Path(r"D:\GitHub\EstimBot\ConsuConstructEstimBot\ESTIMASTRUCT\development\Template2_Updated")
     EXPORTS_DIR: Path = Path(r"D:\OneDrive\Bots\Estimbot\EXPORTS")
     CORS_ORIGINS: list[str] = ["http://localhost:5000"]
     SOBRECOSTO_DEFAULT: float = 20.0        # hoy es un literal mágico repetido en 6 routers

@@ -8,6 +8,8 @@ $Host.UI.RawUI.WindowTitle = 'EstimaStruct'
 $PY       = 'D:\LLM\python\python.exe'
 $PROJECT  = $PSScriptRoot   # portable: el lanzador vive en la raiz del repo
 $API      = 'http://localhost:8002'
+$DB_URL   = $env:ESTIMASTRUCT_DATABASE_URL
+$AUTO_CREATE = $env:ESTIMASTRUCT_AUTO_CREATE_SCHEMA
 
 # Para el boton "Publicar a Portal": pega aca tu Supabase secret key (sb_secret_...).
 # NO subir a git. Dejalo vacio si no vas a publicar.
@@ -63,32 +65,36 @@ Start-Sleep -Milliseconds 600
 Remove-Item (Join-Path $PROJECT 'backend\__pycache__'), (Join-Path $PROJECT 'backend\routers\__pycache__') -Recurse -Force -ErrorAction SilentlyContinue
 
 Write-Host '[2/3] Verificando dependencias...' -ForegroundColor DarkGray
-& $PY -c "import uvicorn, flask, fastapi, sqlalchemy, pydantic, requests" 2>$null
+& $PY -c "import uvicorn, flask, fastapi, sqlalchemy, pydantic, requests, psycopg" 2>$null
 if ($LASTEXITCODE -ne 0) {
   Write-Host '      faltan deps, instalando...' -ForegroundColor DarkGray
-  & $PY -m pip install fastapi uvicorn sqlalchemy flask pydantic requests -q
+  & $PY -m pip install fastapi uvicorn sqlalchemy flask pydantic requests "psycopg[binary]" -q
 }
 
 Write-Host '[3/3] Iniciando servidores...' -ForegroundColor DarkGray
 $back = Start-Job -Name back -ScriptBlock {
-  param($py, $dir, $sbk)
+  param($py, $dir, $sbk, $dbUrl, $autoCreate)
   try { $PSNativeCommandUseErrorActionPreference = $false } catch {}
   Set-Location $dir
   if ($sbk) { $env:SUPABASE_SECRET_KEY = $sbk }
+  if ($dbUrl) { $env:ESTIMASTRUCT_DATABASE_URL = $dbUrl }
+  if ($autoCreate) { $env:ESTIMASTRUCT_AUTO_CREATE_SCHEMA = $autoCreate }
   & $py -m uvicorn backend.main:app --host 0.0.0.0 --port 8002 --reload 2>&1
-} -ArgumentList $PY, $PROJECT, $SUPABASE_SECRET_KEY
+} -ArgumentList $PY, $PROJECT, $SUPABASE_SECRET_KEY, $DB_URL, $AUTO_CREATE
 
 $front = Start-Job -Name front -ScriptBlock {
-  param($py, $dir, $api)
+  param($py, $dir, $api, $dbUrl)
   try { $PSNativeCommandUseErrorActionPreference = $false } catch {}
   Set-Location $dir
   $env:ESTIMASTRUCT_API_BASE = $api
+  if ($dbUrl) { $env:ESTIMASTRUCT_DATABASE_URL = $dbUrl }
   & $py app.py 2>&1
-} -ArgumentList $PY, (Join-Path $PROJECT 'ESTIMASTRUCT'), $API
+} -ArgumentList $PY, (Join-Path $PROJECT 'ESTIMASTRUCT'), $API, $DB_URL
 
 Write-Host ''
 Write-Host '  Frontend : http://localhost:5000/' -ForegroundColor Cyan
 Write-Host '  Backend  : http://localhost:8002/' -ForegroundColor Magenta
+if ($DB_URL) { Write-Host "  DB primaria: $DB_URL" -ForegroundColor DarkYellow }
 Write-Host '  LAN UI    : http://192.168.x.x:5000/' -ForegroundColor DarkCyan
 Write-Host '  (cerrar esta ventana detiene los servidores)' -ForegroundColor DarkGray
 Write-Host ''
