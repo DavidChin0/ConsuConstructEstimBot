@@ -601,15 +601,30 @@ document.getElementById("env-toggle").addEventListener("click",()=>{
 async function boot(){
   show($loading); $loadMsg.textContent="Conectando a EstimaStruct…";
 
-  // 1. Load full dump
+  // 1. Load full dump (cache-bust with timestamp)
+  const dumpUrl = FULL_DUMP_URL + "?_=" + Date.now();
   try{
-    const r = await fetch(FULL_DUMP_URL);
-    if(!r.ok) throw new Error(r.statusText);
+    const r = await fetch(dumpUrl, {cache: "no-store"});
+    if(!r.ok){
+      const detail = `HTTP ${r.status} ${r.statusText} → ${dumpUrl}`;
+      throw new Error(detail);
+    }
     dump = await r.json();
   }catch(e){
     hide($loading);
-    $projTitle.textContent = "Sin datos — ejecuta Full Dump";
+    $projTitle.textContent = "Sin datos";
     $projMeta.textContent = e.message;
+    // show actionable panel
+    document.getElementById("no-glb").style.display = "flex";
+    document.getElementById("no-glb").innerHTML = `
+      <div class="big">📡</div>
+      <div style="color:var(--text);font-size:14px;font-weight:600">No se pudieron cargar los datos</div>
+      <code style="font-size:11px;max-width:90%;word-break:break-all">${e.message}</code>
+      <div style="font-size:12px;margin-top:8px">
+        1. Verifica que Flask :5000 esté corriendo<br>
+        2. Ejecuta <b>Full Dump (viewer)</b> desde el panel Revit MCP del dashboard<br>
+        3. Presiona <b>🔄 Recargar datos</b>
+      </div>`;
     return;
   }
 

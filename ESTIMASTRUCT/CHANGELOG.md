@@ -5,9 +5,15 @@
 
 ## Siguiente Paso
 
+**CASE-VIEWER-001** — Viewer 3D Babylon.js integrado con EstimaStruct. Debugging en curso: datos cargan (2.37 MB full_v2), paneles Niveles/Materiales/Ambientes/Capas, 369 materiales con texturas reales de Revit. Pendiente: verificar render canvas, GLB pipeline, y persistencia sesión.
+
 **CASE-REVIT-MCP-001** — Mapeo completo de snippets IronPython via execute_revit_code: 48 tools Demolinator catalogados, crear biblioteca de snippets con UI en el panel para controlar Revit desde EstimaStruct.
 
 Decisión Director pendiente: ¿promover `05 31 13.3` y `08 51 13.4` como partidas en PG?
+
+## 2026-07-21 — CASE-VIEWER-001: 3D Viewer Babylon.js integrado + full dump v2
+
+- [2026-07-21] [Director/Opus]: **CASE-VIEWER-001** iniciado y en debugging. `revit_full_dump_snippet.py` extendido a `full_v2`: materials_full ahora incluye textures (369/719 extraídas via AppearanceAsset.GetRenderingAsset() + fallback Parameters), transparency/shininess/smoothness/reflectivity, surface/cut patterns + colores, appearance_asset name + appearance_params. all_instances incluye `params: {}` (todos los parámetros del elemento). Compound layers incluyen `material_color_rgb` + `material_transparency` directo (sin lookup). Dump inyectado via MCP Named Pipe → `project_full_dump.json` full_v2, 2.37 MB, 8 niveles, 2344 instancias, 719 materiales, 101 compuestos. `viewer.html` creado standalone Babylon.js CDN: sidebar Niveles/Materiales/Ambientes/Capas, filter por nivel, fly-to room, info panel con params. Fix crítico IronPython 2.7: `GetConnectedProperties()` sin args (original `connected(0)` crasheaba), `str(StorageType)` vs `.ToString()`, `_safe_bip()` para BIPs opcionales, getattr guards en Color/patterns. Fix viewer "Sin datos": FastAPI --reload no cargó `/full-dump` → rutas Flask directas en `app.py` sirven JSON sin depender de FastAPI. Botón Full Dump cambio a toast (MCP pipe inestable via HTTP bridge). Flask :5000 `/viewer` → 200. | Siguiente paso: CASE-VIEWER-001 debugging continúa — verificar canvas Babylon, GLB pipeline, UX panels.
 
 ## 2026-07-21 — Revit MCP Controls panel integrado + fichas v1.3
 
