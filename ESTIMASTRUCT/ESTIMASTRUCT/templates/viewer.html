@@ -579,10 +579,25 @@ async function initScene(){
     pipeline.imageProcessing.exposure = 1.0;
   } catch(_) {}
 
-  // pick on click
+  // pick on click — show info + smooth camera fly-to
   scene.onPointerObservable.add(info=>{
     if(info.type !== BABYLON.PointerEventTypes.POINTERPICK) return;
-    if(info.pickInfo.hit && info.pickInfo.pickedMesh) showInfo(info.pickInfo.pickedMesh);
+    const mesh = info.pickInfo.pickedMesh;
+    if (!mesh) return;
+    showInfo(mesh);
+    // Smooth fly-to: animate camera target to mesh center, keep distance
+    if (mesh.name && !mesh.name.startsWith('__')) {
+      const bv = mesh.getBoundingInfo().boundingBox;
+      const tgt = bv.centerWorld.clone();
+      const cam = scene.activeCamera;
+      if (!cam || !cam.setTarget) return;
+      BABYLON.Animation.CreateAndStartAnimation(
+        "camFly", cam, "target",
+        60, 45, cam.target.clone(), tgt,
+        BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT,
+        new BABYLON.SineEase()
+      );
+    }
   });
 
   engine.runRenderLoop(()=>scene.render());
@@ -626,6 +641,10 @@ async function loadGlb(project){
     hide($loading);
     $statInst.textContent = allMeshes.length + " meshes";
     startOrbitIntro();
+    // Freeze world matrices after enrichScene so transforms don't recalculate every frame
+    setTimeout(() => {
+      try { scene.freezeActiveMeshes(); } catch(_) {}
+    }, 3000);
   }catch(e){
     console.error("GLB load error:", e);
     showNoGlb();
@@ -1040,6 +1059,37 @@ function addWaterPool(center, r, groundY) {
       rim.receiveShadows = true;
       rim.isPickable = false;
     });
+
+    // Fountain particle system — water jets
+    try {
+      const emitter = BABYLON.MeshBuilder.CreateSphere("__fountainEmitter",
+        {diameter: 0.3, segments: 4}, scene);
+      emitter.position.set(px, poolY + 0.2, pz);
+      emitter.isVisible = false; emitter.isPickable = false;
+
+      const ps = new BABYLON.ParticleSystem("__fountain", 200, scene);
+      ps.particleTexture = new BABYLON.Texture(
+        "https://assets.babylonjs.com/textures/flare.png", scene);
+      ps.emitter = emitter;
+      ps.minEmitBox = new BABYLON.Vector3(-0.05, 0, -0.05);
+      ps.maxEmitBox = new BABYLON.Vector3( 0.05, 0,  0.05);
+      ps.color1 = new BABYLON.Color4(0.7, 0.8, 1.0, 1.0);
+      ps.color2 = new BABYLON.Color4(0.5, 0.7, 0.95, 0.5);
+      ps.colorDead = new BABYLON.Color4(0.3, 0.5, 0.8, 0.0);
+      ps.minSize = 0.1; ps.maxSize = 0.25;
+      ps.minLifeTime = 1.0; ps.maxLifeTime = 2.0;
+      ps.emitRate = 60;
+      ps.blendMode = BABYLON.ParticleSystem.BLENDMODE_ADD;
+      ps.gravity = new BABYLON.Vector3(0, -3.8, 0);
+      ps.direction1 = new BABYLON.Vector3(-0.3, 4, -0.3);
+      ps.direction2 = new BABYLON.Vector3( 0.3, 5,  0.3);
+      ps.minAngularSpeed = 0; ps.maxAngularSpeed = Math.PI;
+      ps.minEmitPower = 1; ps.maxEmitPower = 2;
+      ps.updateSpeed = 0.015;
+      ps.start();
+      console.log("[enrichScene] fountain particles OK");
+    } catch(e) { console.warn("fountain particles:", e.message); }
+
   } catch(e) { console.warn("[enrichScene] pool failed:", e.message); }
 }
 
