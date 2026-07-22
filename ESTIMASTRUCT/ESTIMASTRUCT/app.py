@@ -288,6 +288,12 @@ def viewer_page():
     return render_template('viewer.html')
 
 
+@app.route('/static/viewer/<path:filename>')
+def serve_viewer_static(filename):
+    """Serve PolyHaven HDRIs and textures for the 3D viewer."""
+    return send_from_directory(os.path.join(FRONTEND_PATH, 'viewer'), filename)
+
+
 @app.route('/matrices')
 def matrices_page():
     """Página - Listar matrices"""

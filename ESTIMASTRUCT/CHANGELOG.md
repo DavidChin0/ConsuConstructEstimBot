@@ -1,15 +1,27 @@
 > [!CONTEXT]
 > Registro externo de cambios de EstimaStruct. Alineado con `index.md` y con el estado actual del vault.
 
+> **Architecture.md:** Ver `docs/architecture.md` para topología C4, ADRs y principios. El CHANGELOG es historial temporal; architecture.md es el estado actual.
+
 # CHANGELOG - EstimaStruct
 
 ## Siguiente Paso
+
+**CASE-SAAS-001 (P0)** — EstimaStruct SaaS: FastAPI AWS ECS/Lambda + RDS PostgreSQL + Next.js web + PWA/React Native mobile + Custom EstimaStruct GPT CAG + OWASP audits. ADR-007 + ADR-008 en `docs/architecture.md §9`. Siguiente frente: FastAPI cloud + RDS + auth JWT/OAuth2.
 
 **CASE-VIEWER-001** — Viewer 3D Babylon.js integrado con EstimaStruct. Debugging en curso: datos cargan (2.37 MB full_v2), paneles Niveles/Materiales/Ambientes/Capas, 369 materiales con texturas reales de Revit. Pendiente: verificar render canvas, GLB pipeline, y persistencia sesión.
 
 **CASE-REVIT-MCP-001** — Mapeo completo de snippets IronPython via execute_revit_code: 48 tools Demolinator catalogados, crear biblioteca de snippets con UI en el panel para controlar Revit desde EstimaStruct.
 
-Decisión Director pendiente: ¿promover `05 31 13.3` y `08 51 13.4` como partidas en PG?
+Decisión Director pendiente: ¿promover `05 31 13.3` y `08 51 13.4` como partidas en PG? [Pendiente ADR §9 si se decide promover]
+
+## 2026-07-21 — CASE-SAAS-001 declarado + architecture.md actualizado con P0 SaaS + ADR-007/ADR-008
+
+- [2026-07-21] [Director/Opus]: **CASE-SAAS-001** P0 declarado — EstimaStruct SaaS multi-tenant: web+mobile+AWS API+CAG GPT+OWASP. `docs/architecture.md` actualizado: header con estado P0, §1 context con SaaS users + AWS target, §2 goals con 6 restricciones P0 (OWASP/JWT/ECS-RDS/Next.js/CAG/multi-tenancy), §7.1 RAG corpus entry (3,687 chunks 100% Nomic-embedded backfill completado), §7.3 CASE-SAAS-001 en tabla open cases, ADR-007 (local→AWS SaaS migration), ADR-008 (CAG layer Custom EstimaStruct GPT). | Siguiente paso: CASE-SAAS-001 frente 1 — FastAPI AWS ECS/Lambda + RDS PG + auth JWT/OAuth2.
+
+## 2026-07-21 — architecture.md creado como fuente de verdad de arquitectura
+
+- [2026-07-21] [Director/Opus]: `docs/architecture.md` creado — C4 Level 1/2/3 (PlantUML), flujos Mermaid sequenceDiagram (10), ERD Mermaid, 6 ADRs (Flask proxy, PG primario, pricing service, ETABS 3-hoja JOIN, MCP subprocess HTTP, catálogo fichas versionado). Reemplaza changelogs como fuente de contexto arquitectural. `docs/architecture_investigation.json` como JSON intermedio del agente investigador (regenerable). Skill `read-architecture` instalada en `~/.claude/skills/read-architecture.md`. Verificación: 22/22 routers, 10/10 flujos, 14/14 tablas, 8/8 integraciones externas, 8/8 CASEs presentes desde el JSON. | Siguiente paso: referenciar `[architecture.md §N]` en futuros CHANGELOGs en lugar de re-explicar la arquitectura.
 
 ## 2026-07-21 — CASE-VIEWER-001: 3D Viewer Babylon.js integrado + full dump v2
 
@@ -67,6 +79,8 @@ Decisión Director pendiente: ¿promover `05 31 13.3` y `08 51 13.4` como partid
 
 ## 2026-07-19 — Source of truth única + manual mega operativo
 
+> ⚠️ Supersedido por `docs/architecture.md §1-§8` (2026-07-21) — estos docs son históricos, no actualizar.
+
 - [2026-07-19] [Codex]: creada la fuente canónica `docs/source_of_truth_estimastruct_20260719.md` para consolidar en un solo documento la verdad operativa de EstimaStruct: topología real, jerarquía documental, módulos vivos, pricing, runtime PostgreSQL/SQLite y semántica EstimaStruct ↔ Revit MCP. | Siguiente paso: mantener cualquier cambio de semántica/runtime primero en este documento y luego en el manual operativo.
 - [2026-07-19] [Codex]: creado `docs/manual_mega_operativo_estimastruct_20260719.md` como manual completo de operación del producto, módulo por módulo, con endpoints reales y flujos correctos Revit/ETABS/export/portal/cronograma/backup. | Siguiente paso: usar este manual como onboarding operativo y dejar los manuales viejos solo como satélite.
 - [2026-07-19] [Codex]: creado `docs/sop_revit_mcp_estimastruct_20260719.md` para cerrar el contrato operativo EstimaStruct ↔ Revit MCP: catálogo primero, keynotes después, auditoría luego, writes MCP solo asistidos y verificables. | Siguiente paso: usar este SOP como gate obligatorio antes de cualquier write semántico sobre Revit.
@@ -74,7 +88,7 @@ Decisión Director pendiente: ¿promover `05 31 13.3` y `08 51 13.4` como partid
 
 ## 2026-07-19 — Base de autonomía EstimaStruct + PostgreSQL primario con export SQLite
 
-- [2026-07-19] [Codex]: `backend/config.py` ahora define `ESTIMASTRUCT_DATABASE_URL` como fuente primaria de conexión, detecta dialecto (`sqlite`/`postgresql`), separa root canónico del producto y deja `ESTIMASTRUCT_UI_DB` como compat legacy en vez de verdad operativa. | Siguiente paso: apuntar `ESTIMASTRUCT_DATABASE_URL` a PostgreSQL real y fijar el root canónico fuera del árbol viejo de EstimBot.
+- [2026-07-19] [Codex]: `backend/config.py` ahora define `ESTIMASTRUCT_DATABASE_URL` como fuente primaria de conexión, detecta dialecto (`sqlite`/`postgresql`), separa root canónico del producto y deja `ESTIMASTRUCT_UI_DB` como compat legacy en vez de verdad operativa. | Siguiente paso: apuntar `ESTIMASTRUCT_DATABASE_URL` a PostgreSQL real y fijar el root canónico fuera del árbol viejo de EstimBot. [→ ADR-002: PostgreSQL primario §9]
 - [2026-07-19] [Codex]: `backend/db.py` ya no está amarrado a SQLite; crea engine desde `DATABASE_URL`, mantiene PRAGMAs solo si el dialecto es SQLite y agrega `database_is_sqlite()` para cortar lógica condicional de runtime. | Siguiente paso: correr Alembic sobre PostgreSQL y dejar de depender de `create_all` fuera de entorno SQLite local.
 - [2026-07-19] [Codex]: `backend/main.py` y `backend/alembic/env.py` quedaron alineados con el nuevo runtime: `create_all` solo corre si `ESTIMASTRUCT_AUTO_CREATE_SCHEMA=true`, y Alembic usa la misma `DATABASE_URL` real que el backend. | Siguiente paso: generar la primera migración Postgres-first del esquema actual y validar bootstrap limpio en una BD vacía.
 - [2026-07-19] [Codex]: agregados `backend/db_transfer.py` y `backend/scripts_runner/migrate_sqlite_to_postgres.py` para dos rutas explícitas: export/import de snapshots SQLite compatibles y migración offline/CLI desde `estimacion.db` hacia PostgreSQL primario. | Siguiente paso: correr una migración piloto a PostgreSQL de staging y comparar conteos/totales por tabla contra la SQLite viva.
@@ -105,7 +119,7 @@ Decisión Director pendiente: ¿promover `05 31 13.3` y `08 51 13.4` como partid
 
 ## 2026-07-16 — Fix de detección backend tras migración + acceso por IP/LAN
 
-- [2026-07-16] [Codex]: `ESTIMASTRUCT/app.py` ahora inyecta `api_base="/__api__"` y expone un proxy same-origin `GET/POST/PUT/PATCH/DELETE/OPTIONS /__api__/*` hacia FastAPI. Con eso el frontend deja de hablarle directo a `:8002` y se muere el problema de CORS / IP / LAN / localhost mezclado. | Siguiente paso: validar la UI desde `localhost:5000` y también desde la IP LAN del equipo.
+- [2026-07-16] [Codex]: `ESTIMASTRUCT/app.py` ahora inyecta `api_base="/__api__"` y expone un proxy same-origin `GET/POST/PUT/PATCH/DELETE/OPTIONS /__api__/*` hacia FastAPI. Con eso el frontend deja de hablarle directo a `:8002` y se muere el problema de CORS / IP / LAN / localhost mezclado. | Siguiente paso: validar la UI desde `localhost:5000` y también desde la IP LAN del equipo. [→ ADR-001: Flask proxy same-origin §9]
 - [2026-07-16] [Codex]: `backend/main.py` quedó permisivo para este entorno local (`allow_origins=["*"]`) y `START_UNICA.ps1` del repo vivo ahora levanta uvicorn en `0.0.0.0` en vez de `127.0.0.1`; además el chequeo de deps ya incluye `requests` porque el proxy Flask lo usa. | Siguiente paso: abrir la UI por IP y confirmar que `/presupuestos` carga sin error de backend.
 - [2026-07-16] [Codex]: `START_UNICA.ps1` del repo vivo desactiva el ruido `NativeCommandError` de PowerShell para logs normales de Flask/uvicorn y la copia legacy `D:\OneDrive\Bots\Estimbot\Estimacion\START_UNICA.ps1` quedó como shim que redirige al repo vivo `D:\GitHub\EstimBot\ConsuConstructEstimBot\ESTIMASTRUCT`. | Siguiente paso: usar solo el launcher del repo vivo o el shim legacy ya redirigido; no volver a arrancar servidores desde el árbol muerto manualmente.
 

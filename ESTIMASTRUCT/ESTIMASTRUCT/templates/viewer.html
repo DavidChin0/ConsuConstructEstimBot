@@ -245,6 +245,7 @@ a{color:var(--accent2);text-decoration:none}
 <!-- Babylon.js via CDN -->
 <script src="https://cdn.babylonjs.com/babylon.js"></script>
 <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+<script src="https://cdn.babylonjs.com/materialsLibrary/babylonjs.materials.min.js"></script>
 
 <script>
 "use strict";
@@ -615,9 +616,10 @@ async function loadGlb(project){
     await new Promise(r => requestAnimationFrame(r));
     await new Promise(r => requestAnimationFrame(r));
 
-    frameMeshes(allMeshes);
+    const frameResult = frameMeshes(allMeshes);
     applyPolyHavenTextures(scene);
     applyLevelFilter();
+    if (frameResult) enrichScene(frameResult.center, frameResult.radius);
     hide($loading);
     $statInst.textContent = allMeshes.length + " meshes";
   }catch(e){
@@ -650,32 +652,220 @@ document.getElementById("env-toggle").addEventListener("click",()=>{
   }
 });
 
-// ── AUTO-FRAME — uses ArcRotateCamera.zoomOn() (Babylon built-in, handles all edge cases) ──
+// ── AUTO-FRAME ──
+// Key learning: terrain mesh bloats bounding box → exclude it, zoom on building only
 function frameMeshes(meshList) {
   const cam = scene.activeCamera;
   if (!cam || !meshList || !meshList.length) return;
 
-  // Only meshes with actual geometry (skip root/helper nodes)
-  const geom = meshList.filter(m => {
+  // Exclude terrain/topography — they bloat AABB and push camera too far
+  const _TERRAIN_KW = ['terreno','topograf','terrain','ground_mesh','topo'];
+  const building = meshList.filter(m => {
+    const n = (m.name||"").toLowerCase();
+    const hasTerrain = _TERRAIN_KW.some(k => n.includes(k));
+    try { return !hasTerrain && m.getTotalVertices && m.getTotalVertices() > 0; }
+    catch(_){ return false; }
+  });
+  const targets = building.length > 3 ? building : meshList.filter(m => {
     try { return m.getTotalVertices && m.getTotalVertices() > 0; } catch(_){ return false; }
   });
-  const targets = geom.length ? geom : meshList;
 
-  // Refresh bounding info so world matrices are current
   targets.forEach(m => { try { m.refreshBoundingInfo(); } catch(_){} });
 
   try {
-    // zoomOn: Babylon built-in that computes world-space AABB and sets target+radius
     cam.zoomOn(targets, true);
-    // Pull back a bit — zoomOn fits tight to the frustum edge
-    cam.radius *= 1.4;
-    cam.lowerRadiusLimit = Math.max(0.5, cam.radius * 0.01);
-    cam.upperRadiusLimit = cam.radius * 10;
-    console.log("[frameMeshes] zoomOn OK, radius:", cam.radius.toFixed(1),
+    cam.radius *= 0.75;  // tighter — zoomOn is conservative
+    cam.lowerRadiusLimit = Math.max(0.5, cam.radius * 0.005);
+    cam.upperRadiusLimit = cam.radius * 15;
+    console.log("[frameMeshes] OK radius:", cam.radius.toFixed(1),
                 "target:", cam.target.x.toFixed(1), cam.target.y.toFixed(1), cam.target.z.toFixed(1));
+    return { center: cam.target.clone(), radius: cam.radius };
   } catch(e) {
-    console.warn("[frameMeshes] zoomOn failed:", e.message);
+    console.warn("[frameMeshes] failed:", e.message);
   }
+}
+
+// ── SCENE ENRICHMENT — sky, ground, IBL, procedural trees ──
+async function enrichScene(center, radius) {
+  if (!center || !radius) return;
+  const groundY = center.y - radius * 0.08;
+
+  // 1. IBL from Babylon CDN (prefiltered .env = best PBR lighting, fast)
+  try {
+    scene.environmentTexture = BABYLON.CubeTexture.CreateFromPrefilteredData(
+      "https://assets.babylonjs.com/environments/environmentSpecular.env", scene
+    );
+    scene.environmentIntensity = 0.7;
+  } catch(e) { console.warn("IBL failed:", e.message); }
+
+  // 2. Atmospheric sky using SkyMaterial (requires materialsLibrary)
+  let skyboxMesh;
+  try {
+    const skyMat = new BABYLON.SkyMaterial("__skyMat", scene);
+    skyMat.backFaceCulling = false;
+    skyMat.turbidity = 5;
+    skyMat.luminance = 0.9;
+    skyMat.inclination = 0.35;   // sun angle — afternoon
+    skyMat.azimuth = 0.25;
+    skyMat.rayleigh = 2;
+    skyMat.mieCoefficient = 0.005;
+    skyMat.mieDirectionalG = 0.98;
+    skyboxMesh = BABYLON.MeshBuilder.CreateBox("__skybox", {size: radius * 50}, scene);
+    skyboxMesh.material = skyMat;
+    skyboxMesh.infiniteDistance = true;
+    skyboxMesh.isPickable = false;
+    // Align sun direction with directional light
+    const sun = scene.getLightByName("sun");
+    if (sun) {
+      skyMat.useSunPosition = true;
+      skyMat.sunPosition = sun.position.clone();
+    }
+    console.log("[enrichScene] SkyMaterial OK");
+  } catch(e) {
+    // Fallback: plain blue background
+    console.warn("SkyMaterial failed, fallback:", e.message);
+    scene.clearColor = new BABYLON.Color4(0.52, 0.77, 0.92, 1);
+  }
+
+  // 3. Ground — grass PBR with subdivisions for realism
+  const ground = BABYLON.MeshBuilder.CreateGround("__ground", {
+    width: radius * 10, height: radius * 10, subdivisions: 4
+  }, scene);
+  const gMat = new BABYLON.PBRMaterial("__groundMat", scene);
+  gMat.albedoColor = new BABYLON.Color3(0.28, 0.44, 0.18);
+  gMat.metallic = 0; gMat.roughness = 0.95;
+  // tile the texture per unit so it doesn't stretch
+  gMat.albedoColor = new BABYLON.Color3(0.30, 0.46, 0.20);
+  ground.material = gMat;
+  ground.position.x = center.x;
+  ground.position.y = groundY;
+  ground.position.z = center.z;
+  ground.receiveShadows = true;
+  ground.isPickable = false;
+
+  // 4. Driveway / path slab in front of building
+  const path = BABYLON.MeshBuilder.CreateGround("__path", {
+    width: radius * 0.18, height: radius * 0.45
+  }, scene);
+  const pMat = new BABYLON.PBRMaterial("__pathMat", scene);
+  pMat.albedoColor = new BABYLON.Color3(0.55, 0.52, 0.48);
+  pMat.metallic = 0; pMat.roughness = 0.92;
+  path.material = pMat;
+  path.position.set(center.x + radius * 0.2, groundY + 0.02, center.z - radius * 0.35);
+  path.receiveShadows = true;
+  path.isPickable = false;
+
+  // 5. Shadow generator on sun light
+  try {
+    const sun = scene.getLightByName("sun");
+    if (sun && !sun._shadowGenerator) {
+      const sg = new BABYLON.ShadowGenerator(2048, sun);
+      sg.useBlurExponentialShadowMap = true;
+      sg.blurKernel = 32;
+      sg.bias = 0.001;
+      sun._shadowGenerator = sg;
+      allMeshes.forEach(m => { try { sg.addShadowCaster(m, true); } catch(_){} });
+      ground.receiveShadows = true;
+      path.receiveShadows = true;
+      console.log("[enrichScene] shadows 2048 OK");
+    }
+  } catch(e) { console.warn("shadows failed:", e.message); }
+
+  // 6. Procedural trees (varied sizes, two species)
+  addProceduralTrees(center, radius, groundY);
+
+  // 7. Decorative street lamp posts
+  addLampPosts(center, radius, groundY);
+
+  // 8. Ambient particles / atmosphere (very subtle)
+  try {
+    scene.fogMode = BABYLON.Scene.FOGMODE_EXP2;
+    scene.fogColor = new BABYLON.Color3(0.72, 0.82, 0.92);
+    scene.fogDensity = 0.0004;
+  } catch(_) {}
+
+  console.log("[enrichScene] done — groundY:", groundY.toFixed(1));
+}
+
+function addProceduralTrees(center, r, groundY) {
+  // Two tree types: tall slim (pine-like) and wide canopy (oak-like)
+  const treeLayouts = [
+    // [dx, dz, type] type 0=pine, 1=oak
+    [-r*0.38, r*0.30, 0], [r*0.44, -r*0.20, 1], [-r*0.24, -r*0.35, 0],
+    [r*0.32, r*0.40, 1], [-r*0.50, r*0.14, 0], [r*0.20, -r*0.44, 1],
+    [-r*0.40, -r*0.24, 0], [r*0.52, r*0.22, 1],
+    [-r*0.60, -r*0.10, 0], [r*0.28, r*0.55, 1],
+    [-r*0.18, r*0.52, 0], [r*0.58, -r*0.32, 1],
+  ];
+
+  // Shared materials (reused across all trees = fewer draw calls)
+  const tMatBrown = new BABYLON.PBRMaterial("__tMat", scene);
+  tMatBrown.albedoColor = new BABYLON.Color3(0.38, 0.26, 0.12); tMatBrown.metallic=0; tMatBrown.roughness=0.97;
+  const tMatPine = new BABYLON.PBRMaterial("__cMatPine", scene);
+  tMatPine.albedoColor = new BABYLON.Color3(0.12, 0.35, 0.12); tMatPine.metallic=0; tMatPine.roughness=0.90;
+  const tMatOak = new BABYLON.PBRMaterial("__cMatOak", scene);
+  tMatOak.albedoColor = new BABYLON.Color3(0.22, 0.50, 0.18); tMatOak.metallic=0; tMatOak.roughness=0.88;
+
+  treeLayouts.forEach(([dx, dz, type], i) => {
+    const scale = r / 140;
+    const h = (type === 0 ? (18 + (i%3)*4) : (13 + (i%3)*3)) * scale;
+    const px = center.x + dx, pz = center.z + dz;
+
+    const trunk = BABYLON.MeshBuilder.CreateCylinder(`__t${i}`,
+      {height: h*0.4, diameterTop: h*0.05, diameterBottom: h*0.10, tessellation: 6}, scene);
+    trunk.material = tMatBrown;
+    trunk.position.set(px, groundY + h*0.2, pz);
+    trunk.isPickable = false;
+
+    if (type === 0) {
+      // Pine: stacked cone tiers
+      for (let t=0; t<3; t++) {
+        const tier = BABYLON.MeshBuilder.CreateCylinder(`__tp${i}_${t}`,
+          {height: h*0.35, diameterTop: 0.1, diameterBottom: h*(0.40-t*0.10), tessellation: 7}, scene);
+        tier.material = tMatPine;
+        tier.position.set(px, groundY + h*(0.38 + t*0.22), pz);
+        tier.isPickable = false;
+      }
+    } else {
+      // Oak: single wide rounded canopy
+      const canopy = BABYLON.MeshBuilder.CreateSphere(`__tc${i}`,
+        {diameter: h*0.75, segments: 5}, scene);
+      canopy.material = tMatOak;
+      canopy.position.set(px, groundY + h*0.65, pz);
+      canopy.scaling.y = 0.72;
+      canopy.isPickable = false;
+    }
+  });
+  console.log("[enrichScene] trees:", treeLayouts.length);
+}
+
+function addLampPosts(center, r, groundY) {
+  const postMat = new BABYLON.PBRMaterial("__lampMat", scene);
+  postMat.albedoColor = new BABYLON.Color3(0.3, 0.3, 0.32); postMat.metallic=0.8; postMat.roughness=0.3;
+  const globeMat = new BABYLON.StandardMaterial("__globeMat", scene);
+  globeMat.emissiveColor = new BABYLON.Color3(1.0, 0.95, 0.75);
+
+  const lampsPos = [
+    [center.x + r*0.22, center.z - r*0.25],
+    [center.x - r*0.22, center.z - r*0.25],
+    [center.x + r*0.22, center.z + r*0.22],
+    [center.x - r*0.22, center.z + r*0.22],
+  ];
+  const postH = r * 0.07;
+  lampsPos.forEach(([px, pz], i) => {
+    const post = BABYLON.MeshBuilder.CreateCylinder(`__post${i}`,
+      {height: postH, diameter: postH*0.08, tessellation: 6}, scene);
+    post.material = postMat;
+    post.position.set(px, groundY + postH*0.5, pz);
+    post.isPickable = false;
+
+    const globe = BABYLON.MeshBuilder.CreateSphere(`__globe${i}`,
+      {diameter: postH*0.18, segments: 4}, scene);
+    globe.material = globeMat;
+    globe.position.set(px, groundY + postH*1.02, pz);
+    globe.isPickable = false;
+  });
+  console.log("[enrichScene] lamp posts:", lampsPos.length);
 }
 
 // ── POLYHAVEN TEXTURE MATCHING ──
