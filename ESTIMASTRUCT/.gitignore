@@ -10,3 +10,7 @@ ESTIMASTRUCT/logs/
 *.log
 EXPORTS/
 .env*
+*.bak_*
+*.bak
+frontend/viewer/hdri/
+docs/architecture_investigation.json

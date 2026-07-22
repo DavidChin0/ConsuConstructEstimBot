@@ -685,6 +685,27 @@ function frameMeshes(meshList) {
   }
 }
 
+// ── POLYHAVEN PBR HELPER — create PBR material from local textures ──
+const _phCache = {};
+function _makePBRFromPH(id, scale, sc) {
+  const key = id + "_" + scale;
+  if (_phCache[key]) return _phCache[key];
+  const base = "/static/viewer/textures/" + id + "_";
+  const m = new BABYLON.PBRMaterial("__env_" + key, sc || scene);
+  m.albedoColor = new BABYLON.Color3(0.7, 0.68, 0.65);
+  m.metallic = 0; m.roughness = 0.85;
+  m.environmentIntensity = 0.4;
+  const uv = (t) => { t.uScale = scale; t.vScale = scale; return t; };
+  m.albedoTexture        = uv(new BABYLON.Texture(base + "diff_1k.png", sc || scene));
+  m.bumpTexture          = uv(new BABYLON.Texture(base + "nor_gl_1k.png", sc || scene));
+  m.metallicTexture      = uv(new BABYLON.Texture(base + "arm_1k.png", sc || scene));
+  m.useAmbientOcclusionFromMetallicTextureRed  = true;
+  m.useRoughnessFromMetallicTextureGreen       = true;
+  m.useMetallnessFromMetallicTextureBlue       = true;
+  _phCache[key] = m;
+  return m;
+}
+
 // ── SCENE ENRICHMENT — sky, ground, IBL, procedural trees ──
 async function enrichScene(center, radius) {
   if (!center || !radius) return;
@@ -727,15 +748,13 @@ async function enrichScene(center, radius) {
     scene.clearColor = new BABYLON.Color4(0.52, 0.77, 0.92, 1);
   }
 
-  // 3. Ground — grass PBR with subdivisions for realism
+  // 3. Ground — concrete wall texture tiled for soil/earth look
   const ground = BABYLON.MeshBuilder.CreateGround("__ground", {
-    width: radius * 10, height: radius * 10, subdivisions: 4
+    width: radius * 12, height: radius * 12, subdivisions: 4
   }, scene);
-  const gMat = new BABYLON.PBRMaterial("__groundMat", scene);
-  gMat.albedoColor = new BABYLON.Color3(0.28, 0.44, 0.18);
-  gMat.metallic = 0; gMat.roughness = 0.95;
-  // tile the texture per unit so it doesn't stretch
-  gMat.albedoColor = new BABYLON.Color3(0.30, 0.46, 0.20);
+  const gMat = _makePBRFromPH("concrete_wall_006", 18, scene);
+  // Darken + tint green so it reads as earth/grass from above
+  gMat.albedoColor = new BABYLON.Color3(0.30, 0.48, 0.22);
   ground.material = gMat;
   ground.position.x = center.x;
   ground.position.y = groundY;
@@ -743,17 +762,23 @@ async function enrichScene(center, radius) {
   ground.receiveShadows = true;
   ground.isPickable = false;
 
-  // 4. Driveway / path slab in front of building
+  // 4a. Driveway / access path (asphalt texture)
   const path = BABYLON.MeshBuilder.CreateGround("__path", {
-    width: radius * 0.18, height: radius * 0.45
+    width: radius * 0.15, height: radius * 0.5
   }, scene);
-  const pMat = new BABYLON.PBRMaterial("__pathMat", scene);
-  pMat.albedoColor = new BABYLON.Color3(0.55, 0.52, 0.48);
-  pMat.metallic = 0; pMat.roughness = 0.92;
-  path.material = pMat;
-  path.position.set(center.x + radius * 0.2, groundY + 0.02, center.z - radius * 0.35);
+  path.material = _makePBRFromPH("asphalt_floor", 6, scene);
+  path.position.set(center.x + radius * 0.18, groundY + 0.02, center.z - radius * 0.30);
   path.receiveShadows = true;
   path.isPickable = false;
+
+  // 4b. Sidewalk slab (concrete tile)
+  const sidewalk = BABYLON.MeshBuilder.CreateGround("__sidewalk", {
+    width: radius * 0.25, height: radius * 0.08
+  }, scene);
+  sidewalk.material = _makePBRFromPH("floor_tiles_06", 8, scene);
+  sidewalk.position.set(center.x, groundY + 0.04, center.z - radius * 0.55);
+  sidewalk.receiveShadows = true;
+  sidewalk.isPickable = false;
 
   // 5. Shadow generator on sun light
   try {
@@ -767,6 +792,7 @@ async function enrichScene(center, radius) {
       allMeshes.forEach(m => { try { sg.addShadowCaster(m, true); } catch(_){} });
       ground.receiveShadows = true;
       path.receiveShadows = true;
+      sidewalk.receiveShadows = true;
       console.log("[enrichScene] shadows 2048 OK");
     }
   } catch(e) { console.warn("shadows failed:", e.message); }

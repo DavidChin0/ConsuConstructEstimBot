@@ -19,6 +19,7 @@ FRONTEND_PATH = os.path.join(os.path.dirname(ESTIMASTRUCT_PATH), "frontend")
 app = Flask(__name__,
             template_folder=ESTIMASTRUCT_PATH + "/templates",
             static_folder=FRONTEND_PATH)
+app.config['TEMPLATES_AUTO_RELOAD'] = True
 DB_PATH = os.environ.get("ESTIMASTRUCT_UI_DB", r"C:\EstimaStruct\data\estimastruct.db")  # Compat legacy: SQLite solo para dashboard UI viejo.
 API_BASE = os.environ.get("ESTIMASTRUCT_API_BASE", "http://localhost:8002")
 INDEX_TEMPLATE_PATH = os.path.join(ESTIMASTRUCT_PATH, "templates", "index.html")
