@@ -237,6 +237,7 @@ a{color:var(--accent2);text-decoration:none}
       <span class="spacer"></span>
       <span class="stat" id="stat-instances"></span>
       <button id="env-toggle">🌤 Día</button>
+      <button id="shot-btn" title="Capturar pantalla → OneDrive" style="margin-left:6px">📷</button>
     </div>
   </div>
 
@@ -714,6 +715,27 @@ document.getElementById("env-toggle").addEventListener("click",()=>{
 });
 let envMode = "day"; // compat alias
 
+// ── SCREENSHOT — canvas → OneDrive via /__save_shot ──
+document.getElementById("shot-btn").addEventListener("click", async () => {
+  if (!engine || !$canvas) return;
+  try {
+    engine.stopRenderLoop();
+    scene.render(); // one clean frame
+    const image = $canvas.toDataURL("image/png");
+    engine.runRenderLoop(() => scene.render());
+    const r = await fetch("/__save_shot", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({image})
+    });
+    const j = await r.json();
+    if (j.ok) feedback("📷 Guardado: " + j.file, 4000);
+    else feedback("📷 Error: " + (j.error||"?"), 3000);
+  } catch(e) {
+    feedback("📷 Error: " + e.message, 3000);
+  }
+});
+
 // ── AUTO-FRAME ──
 // Key learning: terrain mesh bloats bounding box → exclude it, zoom on building only
 function frameMeshes(meshList) {
@@ -865,7 +887,10 @@ async function enrichScene(center, radius) {
   // 7. Decorative street lamp posts
   addLampPosts(center, radius, groundY);
 
-  // 8. Ambient particles / atmosphere (very subtle)
+  // 8. Water pool (WaterMaterial from materialsLibrary)
+  addWaterPool(center, radius, groundY);
+
+  // 9. Ambient atmosphere fog
   try {
     scene.fogMode = BABYLON.Scene.FOGMODE_EXP2;
     scene.fogColor = new BABYLON.Color3(0.72, 0.82, 0.92);
@@ -958,14 +983,82 @@ function addLampPosts(center, r, groundY) {
   console.log("[enrichScene] lamp posts:", lampsPos.length);
 }
 
+function addWaterPool(center, r, groundY) {
+  try {
+    // Pool basin walls (concrete)
+    const poolW = r * 0.12, poolD = r * 0.09;
+    const px = center.x - r * 0.30, pz = center.z + r * 0.25;
+    const poolY = groundY + 0.03;
+
+    // Pool floor
+    const poolFloor = BABYLON.MeshBuilder.CreateGround("__poolFloor",
+      {width: poolW, height: poolD}, scene);
+    poolFloor.material = _makePBRFromPH("floor_tiles_06", 6, scene);
+    poolFloor.position.set(px, poolY - 0.3, pz);
+    poolFloor.receiveShadows = true;
+    poolFloor.isPickable = false;
+
+    // Water surface (WaterMaterial if available, else PBR fallback)
+    const waterGround = BABYLON.MeshBuilder.CreateGround("__water",
+      {width: poolW * 0.95, height: poolD * 0.95, subdivisions: 8}, scene);
+    waterGround.position.set(px, poolY, pz);
+    waterGround.isPickable = false;
+
+    if (typeof BABYLON.WaterMaterial !== 'undefined') {
+      const waterMat = new BABYLON.WaterMaterial("__waterMat", scene, new BABYLON.Vector2(512, 512));
+      waterMat.bumpTexture = new BABYLON.Texture("https://assets.babylonjs.com/textures/waterbump.png", scene);
+      waterMat.windForce = -15; waterMat.waveHeight = 0.3; waterMat.windDirection = new BABYLON.Vector2(1, 1);
+      waterMat.waterColor = new BABYLON.Color3(0.1, 0.2, 0.4);
+      waterMat.colorBlendFactor = 0.3;
+      waterMat.addToRenderList(poolFloor);
+      scene.meshes.filter(m => m !== waterGround).forEach(m => {
+        try { waterMat.addToRenderList(m); } catch(_) {}
+      });
+      waterGround.material = waterMat;
+      console.log("[enrichScene] WaterMaterial pool OK");
+    } else {
+      // PBR fallback — semi-transparent blue
+      const wMat = new BABYLON.PBRMaterial("__waterFallback", scene);
+      wMat.albedoColor = new BABYLON.Color3(0.05, 0.18, 0.45);
+      wMat.metallic = 0.0; wMat.roughness = 0.05;
+      wMat.alpha = 0.75;
+      waterGround.material = wMat;
+      console.log("[enrichScene] water fallback PBR");
+    }
+
+    // Pool rim (concrete border)
+    const rimMat = _makePBRFromPH("concrete_wall_006", 3, scene);
+    [[0, poolD/2],[0,-poolD/2],[poolW/2, 0],[-poolW/2, 0]].forEach(([dx, dz], i) => {
+      const isLong = i >= 2;
+      const rim = BABYLON.MeshBuilder.CreateBox(`__poolRim${i}`, {
+        width:  isLong ? 0.4 : poolW + 0.4,
+        height: 0.4,
+        depth:  isLong ? poolD : 0.4
+      }, scene);
+      rim.material = rimMat;
+      rim.position.set(px + dx, poolY + 0.2, pz + dz);
+      rim.receiveShadows = true;
+      rim.isPickable = false;
+    });
+  } catch(e) { console.warn("[enrichScene] pool failed:", e.message); }
+}
+
 // ── POLYHAVEN TEXTURE MATCHING ──
 const _PH_MAP = [
-  { kw: ['concrete','conc','hormig','cement','slab'], id: 'concrete_wall_006', scale: 4 },
-  { kw: ['tile','ceram','porcel','piso','suelo','floor'], id: 'floor_tiles_06',   scale: 6 },
-  { kw: ['plaster','paint','beige','pared','wall','yeso','gyps','tablayeso','plycem'], id: 'beige_wall_001', scale: 3 },
-  { kw: ['metal','steel','acero','iron','alumin','galvan','corrugat'], id: 'corrugated_iron', scale: 2 },
-  { kw: ['brick','ladrillo','mampost'], id: 'brick_4',       scale: 3 },
-  { kw: ['asphalt','paviment','pavement','road'], id: 'asphalt_floor', scale: 5 },
+  // Concrete / structure
+  { kw: ['concrete','conc','hormig','cement','slab','losa','zapata','columna','viga','cimentac'], id: 'concrete_wall_006', scale: 4 },
+  // Ceramic / floor tile
+  { kw: ['tile','ceram','porcel','piso','suelo','floor','baldosa','loseta'], id: 'floor_tiles_06', scale: 6 },
+  // Plaster / drywall / painted surfaces — Revit: Generic Wall, Interior Wall, Painted
+  { kw: ['plaster','paint','beige','pared','wall','yeso','gyps','tablayeso','plycem','drywall',
+          'interior','exterior','gypsum','stucco','enlucido','cielo','techo','raso'], id: 'beige_wall_001', scale: 3 },
+  // Metal / structural steel — Revit: Steel, Beam, Column, HSS, W-Shape
+  { kw: ['metal','steel','acero','iron','alumin','galvan','corrugat','hss','wshape',
+          'ibeam','tubular','perfil','platina','lámina'], id: 'corrugated_iron', scale: 2 },
+  // Brick / masonry
+  { kw: ['brick','ladrillo','mampost','block','bloque','adobe'], id: 'brick_4', scale: 3 },
+  // Asphalt / pavement
+  { kw: ['asphalt','paviment','pavement','road','parking','estacion'], id: 'asphalt_floor', scale: 5 },
 ];
 
 function _matchPH(name) {
@@ -1014,6 +1107,7 @@ function applyPolyHavenTextures(sc) {
   let swapped = 0;
   sc.meshes.forEach(mesh => {
     if (!mesh.material) return;
+    if (mesh instanceof BABYLON.InstancedMesh) return; // instances share parent material
     const entry = _matchPH(mesh.material.name) || _matchPH(mesh.name);
     if (!entry) return;
     mesh.material = getPBR(entry);

@@ -295,6 +295,25 @@ def serve_viewer_static(filename):
     return send_from_directory(os.path.join(FRONTEND_PATH, 'viewer'), filename)
 
 
+@app.route('/__save_shot', methods=['POST'])
+def save_viewer_screenshot():
+    """Save a base64 PNG screenshot from the 3D viewer canvas to OneDrive."""
+    import base64, time as _time
+    data = request.get_json(silent=True) or {}
+    b64 = data.get('image', '')
+    if not b64:
+        return {'ok': False, 'error': 'no image'}, 400
+    if b64.startswith('data:image/png;base64,'):
+        b64 = b64[len('data:image/png;base64,'):]
+    out_dir = r'D:\OneDrive\Desktop\My Brain\ConsuConstruct\00 Notes\viewer_shots'
+    os.makedirs(out_dir, exist_ok=True)
+    fname = f"viewer_{int(_time.time())}.png"
+    path = os.path.join(out_dir, fname)
+    with open(path, 'wb') as f:
+        f.write(base64.b64decode(b64))
+    return {'ok': True, 'path': path, 'file': fname}
+
+
 @app.route('/matrices')
 def matrices_page():
     """Página - Listar matrices"""
