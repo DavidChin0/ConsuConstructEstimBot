@@ -236,7 +236,7 @@ a{color:var(--accent2);text-decoration:none}
       <span>Drag izq — orbitar &nbsp;|&nbsp; Drag der — pan &nbsp;|&nbsp; Scroll — zoom &nbsp;|&nbsp; WASD — pan (clic canvas primero) &nbsp;|&nbsp; Clic — inspeccionar</span>
       <span class="spacer"></span>
       <span class="stat" id="stat-instances"></span>
-      <button id="env-toggle">🌤 Exterior</button>
+      <button id="env-toggle">🌤 Día</button>
     </div>
   </div>
 
@@ -521,6 +521,8 @@ async function initScene(){
   const cam = new BABYLON.ArcRotateCamera("cam", -Math.PI/2.5, Math.PI/3.5, 20, BABYLON.Vector3.Zero(), scene);
   cam.lowerRadiusLimit = 0.5;
   cam.upperRadiusLimit = 5000;
+  cam.lowerBetaLimit  = 0.05;            // prevent going underground
+  cam.upperBetaLimit  = Math.PI / 2.02;  // max overhead angle
   cam.wheelDeltaPercentage = 0.02;
   cam.panningSensibility = 50;
   cam.angularSensibilityX = 500;
@@ -622,6 +624,7 @@ async function loadGlb(project){
     if (frameResult) enrichScene(frameResult.center, frameResult.radius);
     hide($loading);
     $statInst.textContent = allMeshes.length + " meshes";
+    startOrbitIntro();
   }catch(e){
     console.error("GLB load error:", e);
     showNoGlb();
@@ -634,23 +637,82 @@ function showNoGlb(){
   $statInst.textContent = "Sin modelo GLB";
 }
 
-// ── ENV TOGGLE ──
-let envMode = "exterior";
-document.getElementById("env-toggle").addEventListener("click",()=>{
-  if(!scene) return;
-  envMode = envMode==="exterior" ? "interior" : "exterior";
+// ── ORBIT INTRO — slow turntable on load, stops on user input ──
+let _orbitActive = false;
+let _orbitObs = null;
+function startOrbitIntro() {
+  if (_orbitActive) return;
+  _orbitActive = true;
+  const cam = scene.activeCamera;
+  if (!cam) return;
+  const speed = 0.0003; // radians per frame — very gentle
+  _orbitObs = scene.onBeforeRenderObservable.add(() => {
+    if (!_orbitActive) return;
+    cam.alpha += speed;
+  });
+  // Stop on any pointer or key interaction
+  const stop = () => {
+    _orbitActive = false;
+    if (_orbitObs) { scene.onBeforeRenderObservable.remove(_orbitObs); _orbitObs = null; }
+    $canvas.removeEventListener("pointerdown", stop);
+    $canvas.removeEventListener("wheel", stop);
+    $canvas.removeEventListener("keydown", stop);
+  };
+  $canvas.addEventListener("pointerdown", stop, { once: true });
+  $canvas.addEventListener("wheel",       stop, { once: true });
+  $canvas.addEventListener("keydown",     stop, { once: true });
+  console.log("[viewer] orbit intro started");
+}
+
+// ── ENV TOGGLE (day → interior → dusk → night → day) ──
+const ENV_MODES = ["day","interior","dusk","night"];
+const ENV_LABELS = { day:"🌤 Día", interior:"🏠 Interior", dusk:"🌇 Atardecer", night:"🌙 Noche" };
+let envModeIdx = 0;
+
+function applyEnvMode(mode) {
   const hem = scene.getLightByName("hem");
   const sun = scene.getLightByName("sun");
-  if(envMode==="interior"){
-    if(hem) hem.intensity=0.5;
-    if(sun) sun.intensity=0.6;
-    document.getElementById("env-toggle").textContent="🏠 Interior";
-  } else {
+  const skyMat = scene.getMaterialByName("__skyMat");
+  const globes = scene.meshes.filter(m => m.name.startsWith("__globe"));
+
+  if (mode === "day") {
     if(hem) hem.intensity=0.7;
     if(sun) sun.intensity=1.2;
-    document.getElementById("env-toggle").textContent="🌤 Exterior";
+    if(skyMat) { skyMat.inclination=0.35; skyMat.luminance=0.9; skyMat.turbidity=5; }
+    scene.environmentIntensity = 0.7;
+    scene.fogDensity = 0.0004;
+    globes.forEach(g => { if(g.material) g.material.emissiveColor = new BABYLON.Color3(0, 0, 0); });
+  } else if (mode === "interior") {
+    if(hem) hem.intensity=0.5;
+    if(sun) sun.intensity=0.6;
+    if(skyMat) { skyMat.inclination=0.35; skyMat.luminance=0.8; }
+    scene.environmentIntensity = 0.4;
+    globes.forEach(g => { if(g.material) g.material.emissiveColor = new BABYLON.Color3(0, 0, 0); });
+  } else if (mode === "dusk") {
+    if(hem) hem.intensity=0.35;
+    if(sun) { sun.intensity=0.7; sun.diffuse = new BABYLON.Color3(1.0, 0.6, 0.3); }
+    if(skyMat) { skyMat.inclination=0.48; skyMat.luminance=0.7; skyMat.turbidity=8; skyMat.rayleigh=3; }
+    scene.environmentIntensity = 0.5;
+    scene.fogDensity = 0.0008;
+    globes.forEach(g => { if(g.material) g.material.emissiveColor = new BABYLON.Color3(1.0, 0.92, 0.65); });
+  } else if (mode === "night") {
+    if(hem) hem.intensity=0.05;
+    if(sun) { sun.intensity=0.0; }
+    if(skyMat) { skyMat.inclination=0.49; skyMat.luminance=0.2; skyMat.turbidity=20; }
+    scene.clearColor = new BABYLON.Color4(0.02, 0.02, 0.06, 1);
+    scene.environmentIntensity = 0.1;
+    scene.fogDensity = 0.0015;
+    globes.forEach(g => { if(g.material) g.material.emissiveColor = new BABYLON.Color3(1.2, 1.1, 0.8); });
   }
+  document.getElementById("env-toggle").textContent = ENV_LABELS[mode];
+}
+
+document.getElementById("env-toggle").addEventListener("click",()=>{
+  if(!scene) return;
+  envModeIdx = (envModeIdx + 1) % ENV_MODES.length;
+  applyEnvMode(ENV_MODES[envModeIdx]);
 });
+let envMode = "day"; // compat alias
 
 // ── AUTO-FRAME ──
 // Key learning: terrain mesh bloats bounding box → exclude it, zoom on building only
@@ -811,6 +873,8 @@ async function enrichScene(center, radius) {
   } catch(_) {}
 
   console.log("[enrichScene] done — groundY:", groundY.toFixed(1));
+  // Apply initial day mode after scene objects exist
+  setTimeout(() => applyEnvMode(ENV_MODES[envModeIdx]), 100);
 }
 
 function addProceduralTrees(center, r, groundY) {
