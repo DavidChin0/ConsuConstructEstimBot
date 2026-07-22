@@ -233,7 +233,7 @@ a{color:var(--accent2);text-decoration:none}
     </div>
 
     <div id="bottombar">
-      <span>WASD — mover &nbsp;|&nbsp; Drag — orbitar &nbsp;|&nbsp; Scroll — zoom &nbsp;|&nbsp; Click — inspeccionar</span>
+      <span>Drag izq — orbitar &nbsp;|&nbsp; Drag der — pan &nbsp;|&nbsp; Scroll — zoom &nbsp;|&nbsp; WASD — pan (clic canvas primero) &nbsp;|&nbsp; Clic — inspeccionar</span>
       <span class="spacer"></span>
       <span class="stat" id="stat-instances"></span>
       <button id="env-toggle">🌤 Exterior</button>
@@ -515,24 +515,70 @@ function showInfo(mesh){
 async function initScene(){
   engine = new BABYLON.Engine($canvas, true, {preserveDrawingBuffer:true,stencil:true});
   scene  = new BABYLON.Scene(engine);
-  scene.clearColor = new BABYLON.Color4(0.05,0.05,0.05,1);
+  scene.clearColor = new BABYLON.Color4(0.12,0.12,0.14,1);
 
-  const cam = new BABYLON.ArcRotateCamera("cam", -Math.PI/2, Math.PI/4, 20, BABYLON.Vector3.Zero(), scene);
-  cam.lowerRadiusLimit = 1;
-  cam.upperRadiusLimit = 500;
-  cam.wheelDeltaPercentage = 0.01;
+  const cam = new BABYLON.ArcRotateCamera("cam", -Math.PI/2.5, Math.PI/3.5, 20, BABYLON.Vector3.Zero(), scene);
+  cam.lowerRadiusLimit = 0.5;
+  cam.upperRadiusLimit = 5000;
+  cam.wheelDeltaPercentage = 0.02;
+  cam.panningSensibility = 50;
+  cam.angularSensibilityX = 500;
+  cam.angularSensibilityY = 500;
+  cam.pinchDeltaPercentage = 0.01;
+  cam.minZ = 0.1;
+  cam.maxZ = 10000;
   cam.attachControl($canvas, true);
 
-  new BABYLON.HemisphericLight("hem", new BABYLON.Vector3(0,1,0), scene).intensity = 0.7;
+  // canvas focus for keyboard
+  $canvas.tabIndex = 0;
+  $canvas.style.outline = "none";
+  $canvas.addEventListener("click", () => $canvas.focus());
+  setTimeout(() => $canvas.focus(), 100);
+
+  // WASD — pan target in horizontal plane
+  const _keys = {};
+  $canvas.addEventListener("keydown", e => { _keys[e.key.toLowerCase()] = true;  e.preventDefault(); });
+  $canvas.addEventListener("keyup",   e => { _keys[e.key.toLowerCase()] = false; });
+  scene.registerBeforeRender(() => {
+    const c = scene.activeCamera;
+    if (!c) return;
+    const moving = _keys["w"]||_keys["s"]||_keys["a"]||_keys["d"];
+    if (!moving) return;
+    const fwd = c.target.subtract(c.position); fwd.y = 0; fwd.normalize();
+    const right = BABYLON.Vector3.Cross(fwd, BABYLON.Vector3.Up()).normalize();
+    const spd = Math.max(0.5, c.radius * 0.018);
+    if (_keys["w"]) c.target.addInPlace(fwd.scale( spd));
+    if (_keys["s"]) c.target.addInPlace(fwd.scale(-spd));
+    if (_keys["a"]) c.target.addInPlace(right.scale(-spd));
+    if (_keys["d"]) c.target.addInPlace(right.scale( spd));
+  });
+
+  // Lights — three-point setup for architectural rendering
+  const hem = new BABYLON.HemisphericLight("hem", new BABYLON.Vector3(0,1,0), scene);
+  hem.intensity = 0.5;
+  hem.groundColor = new BABYLON.Color3(0.2, 0.2, 0.25);
+
   const sun = new BABYLON.DirectionalLight("sun", new BABYLON.Vector3(-1,-2,-1), scene);
-  sun.intensity = 1.2;
+  sun.position = new BABYLON.Vector3(500, 1000, 500);
+  sun.intensity = 1.0;
+
+  const fill = new BABYLON.DirectionalLight("fill", new BABYLON.Vector3(1,-0.5,1), scene);
+  fill.intensity = 0.3;
+
+  // Post-processing — FXAA for clean edges
+  try {
+    const pipeline = new BABYLON.DefaultRenderingPipeline("pipeline", true, scene, [cam]);
+    pipeline.fxaaEnabled = true;
+    pipeline.samples = 4;
+    pipeline.imageProcessingEnabled = true;
+    pipeline.imageProcessing.contrast = 1.1;
+    pipeline.imageProcessing.exposure = 1.0;
+  } catch(_) {}
 
   // pick on click
   scene.onPointerObservable.add(info=>{
     if(info.type !== BABYLON.PointerEventTypes.POINTERPICK) return;
-    if(info.pickInfo.hit && info.pickInfo.pickedMesh){
-      showInfo(info.pickInfo.pickedMesh);
-    }
+    if(info.pickInfo.hit && info.pickInfo.pickedMesh) showInfo(info.pickInfo.pickedMesh);
   });
 
   engine.runRenderLoop(()=>scene.render());
@@ -564,6 +610,13 @@ async function loadGlb(project){
     });
 
     glbLoaded = true;
+    // Wait 2 frames so Babylon finalizes world matrices + bounding info after import
+    await new Promise(r => scene.executeWhenReady(r));
+    await new Promise(r => requestAnimationFrame(r));
+    await new Promise(r => requestAnimationFrame(r));
+
+    frameMeshes(allMeshes);
+    applyPolyHavenTextures(scene);
     applyLevelFilter();
     hide($loading);
     $statInst.textContent = allMeshes.length + " meshes";
@@ -596,6 +649,99 @@ document.getElementById("env-toggle").addEventListener("click",()=>{
     document.getElementById("env-toggle").textContent="🌤 Exterior";
   }
 });
+
+// ── AUTO-FRAME — uses ArcRotateCamera.zoomOn() (Babylon built-in, handles all edge cases) ──
+function frameMeshes(meshList) {
+  const cam = scene.activeCamera;
+  if (!cam || !meshList || !meshList.length) return;
+
+  // Only meshes with actual geometry (skip root/helper nodes)
+  const geom = meshList.filter(m => {
+    try { return m.getTotalVertices && m.getTotalVertices() > 0; } catch(_){ return false; }
+  });
+  const targets = geom.length ? geom : meshList;
+
+  // Refresh bounding info so world matrices are current
+  targets.forEach(m => { try { m.refreshBoundingInfo(); } catch(_){} });
+
+  try {
+    // zoomOn: Babylon built-in that computes world-space AABB and sets target+radius
+    cam.zoomOn(targets, true);
+    // Pull back a bit — zoomOn fits tight to the frustum edge
+    cam.radius *= 1.4;
+    cam.lowerRadiusLimit = Math.max(0.5, cam.radius * 0.01);
+    cam.upperRadiusLimit = cam.radius * 10;
+    console.log("[frameMeshes] zoomOn OK, radius:", cam.radius.toFixed(1),
+                "target:", cam.target.x.toFixed(1), cam.target.y.toFixed(1), cam.target.z.toFixed(1));
+  } catch(e) {
+    console.warn("[frameMeshes] zoomOn failed:", e.message);
+  }
+}
+
+// ── POLYHAVEN TEXTURE MATCHING ──
+const _PH_MAP = [
+  { kw: ['concrete','conc','hormig','cement','slab'], id: 'concrete_wall_006', scale: 4 },
+  { kw: ['tile','ceram','porcel','piso','suelo','floor'], id: 'floor_tiles_06',   scale: 6 },
+  { kw: ['plaster','paint','beige','pared','wall','yeso','gyps','tablayeso','plycem'], id: 'beige_wall_001', scale: 3 },
+  { kw: ['metal','steel','acero','iron','alumin','galvan','corrugat'], id: 'corrugated_iron', scale: 2 },
+  { kw: ['brick','ladrillo','mampost'], id: 'brick_4',       scale: 3 },
+  { kw: ['asphalt','paviment','pavement','road'], id: 'asphalt_floor', scale: 5 },
+];
+
+function _matchPH(name) {
+  if (!name) return null;
+  const n = name.toLowerCase();
+  for (const e of _PH_MAP) {
+    if (e.kw.some(k => n.includes(k))) return e;
+  }
+  return null;
+}
+
+function applyPolyHavenTextures(sc) {
+  const base = "/static/viewer/textures/";
+  const cache = {};
+
+  function getPBR(entry) {
+    if (cache[entry.id]) return cache[entry.id];
+    const pbr = new BABYLON.PBRMaterial("ph_" + entry.id, sc);
+    const p = base + entry.id + "_";
+
+    // Safe defaults — model is visible immediately, textures refine on load
+    pbr.albedoColor  = new BABYLON.Color3(0.75, 0.73, 0.70);
+    pbr.metallic     = 0.0;
+    pbr.roughness    = 0.75;
+    pbr.environmentIntensity = 0.4;
+
+    const diff = new BABYLON.Texture(p + "diff_1k.png", sc);
+    diff.uScale = entry.scale; diff.vScale = entry.scale;
+    pbr.albedoTexture = diff;
+
+    const nor = new BABYLON.Texture(p + "nor_gl_1k.png", sc);
+    nor.uScale = entry.scale; nor.vScale = entry.scale;
+    pbr.bumpTexture = nor;
+
+    const arm = new BABYLON.Texture(p + "arm_1k.png", sc);
+    arm.uScale = entry.scale; arm.vScale = entry.scale;
+    pbr.metallicTexture = arm;
+    pbr.useAmbientOcclusionFromMetallicTextureRed = true;
+    pbr.useRoughnessFromMetallicTextureGreen      = true;
+    pbr.useMetallnessFromMetallicTextureBlue      = true;
+
+    cache[entry.id] = pbr;
+    return pbr;
+  }
+
+  let swapped = 0;
+  sc.meshes.forEach(mesh => {
+    if (!mesh.material) return;
+    const entry = _matchPH(mesh.material.name) || _matchPH(mesh.name);
+    if (!entry) return;
+    mesh.material = getPBR(entry);
+    swapped++;
+  });
+  console.log("[PH] textures applied:", swapped, "meshes");
+  feedback("Texturas PBR aplicadas: " + swapped + " meshes", 3000);
+}
 
 // ── MAIN BOOT ──
 async function boot(){
