@@ -9,11 +9,15 @@
 
 **CASE-SAAS-001 (P0)** — EstimaStruct SaaS: FastAPI AWS ECS/Lambda + RDS PostgreSQL + Next.js web + PWA/React Native mobile + Custom EstimaStruct GPT CAG + OWASP audits. ADR-007 + ADR-008 en `docs/architecture.md §9`. Siguiente frente: FastAPI cloud + RDS + auth JWT/OAuth2.
 
-**CASE-VIEWER-001** — Viewer 3D Babylon.js integrado con EstimaStruct. Debugging en curso: datos cargan (2.37 MB full_v2), paneles Niveles/Materiales/Ambientes/Capas, 369 materiales con texturas reales de Revit. Pendiente: verificar render canvas, GLB pipeline, y persistencia sesión.
+**CASE-VIEWER-001** — Viewer 3D OPERATIVO. 5 commits 2026-07-22: SkyMaterial + IBL + shadows + 12 árboles + 4 lámparas + WaterMaterial pool + fuente de partículas + 4 modos de ambiente (Día/Interior/Atardecer/Noche) + orbit intro + fly-to on click + screenshot endpoint. 358 meshes en escena (304 GLB + 54 objetos de entorno). Pendiente: despliegue en cloud (CASE-SAAS-001).
 
 **CASE-REVIT-MCP-001** — Mapeo completo de snippets IronPython via execute_revit_code: 48 tools Demolinator catalogados, crear biblioteca de snippets con UI en el panel para controlar Revit desde EstimaStruct.
 
 Decisión Director pendiente: ¿promover `05 31 13.3` y `08 51 13.4` como partidas en PG? [Pendiente ADR §9 si se decide promover]
+
+## 2026-07-22 — CASE-VIEWER-001 completado (Iteration 2)
+
+- [2026-07-22] [Sonnet]: Viewer 3D Babylon.js — 5 commits de enriquecimiento de escena: enrichScene wired en loadGlb, SkyMaterial + IBL + shadows 2048px, 12 árboles procedurales (pine+oak), 4 lámparas PBR, WaterMaterial pool + fuente de partículas, 4 modos ambiente (Día/Interior/Atardecer/Noche), orbit intro + camera fly-to on pick, freezeActiveMeshes para perf, /__save_shot endpoint para screenshots → OneDrive, TEMPLATES_AUTO_RELOAD, _makePBRFromPH helper. 358 meshes en escena, 72 meshes texturizados PolyHaven. babylonjs-engine skill actualizado con todos los patrones aprendidos. | Siguiente: CASE-SAAS-001 frente 1 cloud.
 
 ## 2026-07-21 — CASE-SAAS-001 declarado + architecture.md actualizado con P0 SaaS + ADR-007/ADR-008
 
