@@ -1,6 +1,11 @@
 > [!CONTEXT]
 > Manual mega operativo de EstimaStruct al 2026-07-19. Describe cómo operar el producto completo desde runtime hasta módulos y flujos Revit/ETABS.
 
+> [!WARNING]
+> **DEPRECADO 2026-07-21.** Estado actual vive en [`docs/architecture.md`](architecture.md).
+> Secciones cubiertas: §4 Components, §5 Flows.
+> Este archivo es registro histórico — no actualizar.
+
 # EstimaStruct — Manual Mega Operativo 2026-07-19
 
 ## 1. Antes de tocar nada

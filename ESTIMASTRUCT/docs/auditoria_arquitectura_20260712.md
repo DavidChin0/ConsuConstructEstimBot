@@ -4,6 +4,11 @@
 > NO se modificó código vivo: este documento es el entregable. Complementa (no reemplaza) a
 > `ARQUITECTURA_Y_FLUJO.md`, que sigue siendo el contrato del flujo de negocio.
 
+> [!WARNING]
+> **HISTÓRICO 2026-07-12.** Las decisiones de esta auditoría fueron formalizadas en [`docs/architecture.md §9 ADRs`](architecture.md).
+> Ver ADR-001 a ADR-006 para el resultado de esta auditoría.
+> No actualizar este archivo.
+
 # EstimaStruct — Auditoría de Arquitectura 2026-07-12
 
 ---

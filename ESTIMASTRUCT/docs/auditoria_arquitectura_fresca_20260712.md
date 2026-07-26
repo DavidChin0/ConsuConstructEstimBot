@@ -3,6 +3,11 @@
 > verificando código actual con evidencia `path:line` fresca (no copiada de `auditoria_arquitectura_20260712.md`,
 > que se usó solo como checklist de qué buscar). NO se modificó código vivo: este documento es el entregable.
 
+> [!WARNING]
+> **HISTÓRICO 2026-07-12.** Las decisiones de esta auditoría fueron formalizadas en [`docs/architecture.md §9 ADRs`](architecture.md).
+> Ver ADR-001 a ADR-006 para el resultado de esta auditoría.
+> No actualizar este archivo.
+
 # EstimaStruct — Auditoría de Arquitectura (independiente) 2026-07-12
 
 ---

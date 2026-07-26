@@ -490,6 +490,20 @@ function initExportPdfBanco() {
 }
 
 // --- CRONOGRAMA (GANTT) ---
+// Redisenio 2026-07-26: tabla real con columnas alineadas (sticky en ambos ejes),
+// timeline de dos bandas (meses + semanas/dias), zoom, buscador, fases colapsables
+// y linea de "hoy". El contrato del backend (GET .../cronograma, POST .../personal,
+// GET .../export-cronograma) no cambia — ver backend/routers/cronograma.py.
+
+const GANTT_ZOOM_PXD = { dia: 26, semana: 7, mes: 2.6 };   // px por dia calendario, por nivel de zoom
+const GANTT_BAR_MIN_LABEL = 30;   // ancho minimo (px) de barra para meter el "Xd" adentro
+const GANTT_MESES_ES = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+
+let _ganttData = null;              // ultima respuesta cruda del backend (para re-renderizar sin refetch)
+let _ganttZoom = "semana";          // dia | semana | mes
+let _ganttFiltro = "";              // texto de busqueda activo (CSI o descripcion)
+let _ganttColapsadas = new Set();   // nombres de fase colapsados
+
 function exportarCronograma() {
   if (!state.activeId) return;
   window.open(`${API}/presupuestos/${state.activeId}/export-cronograma`, "_blank");
@@ -498,6 +512,10 @@ function exportarCronograma() {
 async function abrirCronograma() {
   if (!state.activeId) { alert("Abrí una obra primero."); return; }
   document.getElementById("modal-cronograma").classList.remove("hidden");
+  _ganttColapsadas.clear();
+  _ganttFiltro = "";
+  const buscar = document.getElementById("gantt-buscar");
+  if (buscar) buscar.value = "";
   cargarGantt();
 }
 
@@ -508,6 +526,7 @@ async function cargarGantt(keepScroll = false) {
   if (!keepScroll) body.innerHTML = `<div class="gantt-loading">Calculando cronograma…</div>`;
   try {
     const data = await api("GET", `/presupuestos/${state.activeId}/cronograma`);
+    _ganttData = data;
     renderGantt(data);
     body.scrollLeft = sx; body.scrollTop = sy;
   } catch (err) {
@@ -515,60 +534,191 @@ async function cargarGantt(keepScroll = false) {
   }
 }
 
-const CUAD_MAX = 6;   // opciones de cuadrillas en el selector
+function _ganttRerenderConScroll() {
+  const body = document.getElementById("gantt-body");
+  const sx = body.scrollLeft, sy = body.scrollTop;
+  renderGantt(_ganttData);
+  body.scrollLeft = sx; body.scrollTop = sy;
+}
+
+function _fmtFechaCorta(iso) {
+  const d = new Date(iso + "T00:00:00");
+  return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function _ganttMatch(a, q) {
+  return (a.csi || "").toLowerCase().includes(q) || (a.descripcion || "").toLowerCase().includes(q);
+}
 
 function renderGantt(data) {
   document.getElementById("gantt-titulo").textContent = `Cronograma — ${data.nombre}`;
-  document.getElementById("gantt-meta").textContent =
-    `${data.fecha_inicio} → entrega est. ${data.fecha_fin} · ${data.dias_laborables ?? data.dias_calendario} días laborables (L-V + sáb ½) · ${data.semanas} semanas · ${data.meses ?? ""} meses · ${data.actividades.length} actividades · Esp/Ay = cuadrilla en paralelo (1 cuadrilla = 3 esp + 3 ay)`;
 
-  const PXD = 7;                       // px por día calendario
+  // --- KPIs del header (reemplaza el parrafo corrido anterior) ---
+  const kpis = [
+    ["Inicio", data.fecha_inicio],
+    ["Entrega est.", data.fecha_fin],
+    ["Días laborables", fmt(data.dias_laborables ?? data.dias_calendario, 1)],
+    ["Semanas", data.semanas],
+    ["Meses", data.meses ?? "—"],
+    ["Actividades", data.actividades.length],
+  ];
+  document.getElementById("gantt-kpis").innerHTML = kpis.map(([lbl, val]) =>
+    `<div class="g-kpi"><b>${esc(String(val))}</b><span>${esc(lbl)}</span></div>`).join("");
+
+  const PXD = GANTT_ZOOM_PXD[_ganttZoom] || 7;
   const totalDias = data.dias_calendario;
-  const width = totalDias * PXD;
+  const width = Math.round(totalDias * PXD);
   const d0 = new Date(data.fecha_inicio + "T00:00:00");
+  const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
+  const offHoy = Math.round((hoy - d0) / 86400000);
 
-  // Eje: una marca por semana
-  let ticks = "";
-  for (let w = 0; w * 7 < totalDias; w++) {
-    const x = w * 7 * PXD;
-    const dt = new Date(d0.getTime() + w * 7 * 86400000);
-    ticks += `<div class="g-tick" style="left:${x}px"><b>S${w + 1}</b><small>${dt.getDate()}/${dt.getMonth() + 1}</small></div>`;
+  // Sombreado de fines de semana: un solo repeating-linear-gradient por track,
+  // en fase con el primer sabado desde el inicio del cronograma.
+  const offSab = (6 - d0.getDay() + 7) % 7;
+  const body = document.getElementById("gantt-body");
+  body.style.setProperty("--g-daypx", `${PXD}px`);
+  body.style.setProperty("--g-period", `${7 * PXD}px`);
+  body.style.setProperty("--g-sat-off", `${offSab * PXD}px`);
+
+  // --- Banda superior: meses ---
+  let meses = "";
+  {
+    let cursor = new Date(d0);
+    let diaAcum = 0;
+    while (diaAcum < totalDias) {
+      const y = cursor.getFullYear(), m = cursor.getMonth();
+      const finMes = new Date(y, m + 1, 1);
+      const dias = Math.min(Math.round((finMes - cursor) / 86400000), totalDias - diaAcum);
+      meses += `<div class="g-month" style="width:${dias * PXD}px">${GANTT_MESES_ES[m]} '${String(y).slice(2)}</div>`;
+      cursor = finMes;
+      diaAcum += dias;
+    }
   }
 
-  // Filas agrupadas por fase
-  let rows = "";
-  let faseAct = null;
-  data.actividades.forEach(a => {
-    if (a.fase !== faseAct) {
-      faseAct = a.fase;
-      rows += `<div class="g-row g-faserow"><div class="g-label g-fase-lbl">${esc(a.fase)}</div><div class="g-track" style="width:${width}px"></div></div>`;
+  // --- Banda inferior: dias (zoom dia) o semanas (zoom semana/mes) ---
+  let ticks = "";
+  if (_ganttZoom === "dia") {
+    for (let i = 0; i < totalDias; i++) {
+      const dt = new Date(d0.getTime() + i * 86400000);
+      const finde = dt.getDay() === 0 || dt.getDay() === 6;
+      ticks += `<div class="g-tick${finde ? " g-tick-finde" : ""}" style="left:${i * PXD}px;width:${PXD}px"><b>${dt.getDate()}</b></div>`;
     }
-    const x = a.offset_dias * PXD;
-    const w = Math.max(PXD, a.span_dias * PXD);
+  } else {
+    for (let w = 0; w * 7 < totalDias; w++) {
+      const x = w * 7 * PXD;
+      const dt = new Date(d0.getTime() + w * 7 * 86400000);
+      ticks += `<div class="g-tick" style="left:${x}px"><b>S${w + 1}</b><small>${dt.getDate()}/${dt.getMonth() + 1}</small></div>`;
+    }
+  }
+
+  // Linea vertical de "hoy" (solo si cae dentro del rango del cronograma)
+  const lineaHoy = (offHoy >= 0 && offHoy <= totalDias)
+    ? `<div class="g-today" style="left:calc(var(--g-label-w) + ${Math.round(offHoy * PXD)}px)" title="Hoy"></div>` : "";
+
+  const q = _ganttFiltro.trim().toLowerCase();
+
+  // --- Filas agrupadas por fase (colapsables), con barra-resumen por fase ---
+  function filaActividad(a) {
     const ne = a.n_esp ?? 3, na = a.n_ay ?? 3;
     const pid = esc(a.partida_id || "");
-    const tip = `${esc(a.csi)} — ${esc(a.descripcion)} | ${fmt(a.cantidad)} ${esc(a.unidad)} · ${a.duracion_dias}d · ${ne} esp + ${na} ay · jh ${a.jh_esp}/${a.jh_ay} · ${a.fecha_inicio}→${a.fecha_fin} · ${esc(a.fuente)}`;
-    rows += `<div class="g-row">
-        <div class="g-label" title="${tip}">
-          <span class="g-ord">${a.orden + 1}</span>
-          <span class="g-dot" style="background:${a.fase_color}"></span>
-          <span class="g-csi">${esc(a.csi)}</span>
-          <span class="g-desc">${esc(a.descripcion)}</span>
-          <span class="g-pers">
-            <input type="number" min="1" max="12" value="${ne}" class="g-esp ${ne !== 3 ? "g-pers-on" : ""}" data-pid="${pid}" title="Especialistas (albañil, armador, soldador…)" />
-            <input type="number" min="1" max="12" value="${na}" class="g-ay ${na !== 3 ? "g-pers-on" : ""}" data-pid="${pid}" title="Ayudantes / peones" />
-          </span>
+    const x = Math.round(a.offset_dias * PXD);
+    const w = Math.max(PXD, Math.round(a.span_dias * PXD));
+    const critica = a._critica ? " — ruta crítica de la fase" : "";
+    const tip = `${esc(a.csi)} — ${esc(a.descripcion)} | ${fmt(a.cantidad)} ${esc(a.unidad)} · ${a.duracion_dias}d · ${ne} esp + ${na} ay · jh ${a.jh_esp}/${a.jh_ay} · ${a.fecha_inicio}→${a.fecha_fin} · ${esc(a.fuente)}${critica}`;
+    const angosta = w < GANTT_BAR_MIN_LABEL;
+    const dLabel = `${a.duracion_dias}d`;
+    const oculta = (q && !_ganttMatch(a, q)) ? " g-hide" : "";
+    return `<div class="g-row${a._critica ? " g-crit" : ""}${oculta}">
+      <div class="g-label" title="${tip}">
+        <span class="g-ord">${a.orden + 1}</span>
+        <span class="g-dot" style="background:${a.fase_color}"></span>
+        <span class="g-csi">${esc(a.csi)}</span>
+        <span class="g-desc">${esc(a.descripcion)}</span>
+        <span class="g-cant">${fmt(a.cantidad)} <small>${esc(a.unidad)}</small></span>
+        <span class="g-dur">${a.duracion_dias}d</span>
+        <span class="g-fecha">${_fmtFechaCorta(a.fecha_inicio)}</span>
+        <span class="g-fecha">${_fmtFechaCorta(a.fecha_fin)}</span>
+        <span class="g-pers-cell"><input type="number" min="1" max="12" value="${ne}" class="g-esp ${ne !== 3 ? "g-pers-on" : ""}" data-pid="${pid}" title="Especialistas (albañil, armador, soldador…)" /></span>
+        <span class="g-pers-cell"><input type="number" min="1" max="12" value="${na}" class="g-ay ${na !== 3 ? "g-pers-on" : ""}" data-pid="${pid}" title="Ayudantes / peones" /></span>
+      </div>
+      <div class="g-track" style="width:${width}px">
+        <div class="g-bar" style="left:${x}px;width:${w}px;background:${a.fase_color}" title="${tip}">${angosta ? "" : `<span class="g-bar-d">${dLabel}</span>`}</div>
+        ${angosta ? `<span class="g-bar-d-out" style="left:${x + w + 4}px">${dLabel}</span>` : ""}
+      </div>
+    </div>`;
+  }
+
+  let rows = "";
+  let faseAct = null;
+  let buffer = [];
+
+  function cerrarFase() {
+    if (!buffer.length) return;
+    const nombreFase = buffer[0].fase;
+    const color = buffer[0].fase_color;
+    const minOff = Math.min(...buffer.map(a => a.offset_dias));
+    const maxFin = Math.max(...buffer.map(a => a.offset_dias + a.span_dias));
+    const jhTotal = buffer.reduce((s, a) => s + (a.jh_esp || 0) + (a.jh_ay || 0), 0);
+    // ruta critica de la fase: la actividad con mayor duracion (solo si hay mas de 1)
+    if (buffer.length > 1) {
+      const maxDur = Math.max(...buffer.map(a => a.duracion_dias));
+      buffer.forEach(a => { a._critica = a.duracion_dias === maxDur && maxDur > 0; });
+    }
+    const anyMatch = !q || buffer.some(a => _ganttMatch(a, q));
+    const colapsada = !q && _ganttColapsadas.has(nombreFase);   // buscando = siempre expandida
+    const xr = Math.round(minOff * PXD), wr = Math.max(PXD, Math.round((maxFin - minOff) * PXD));
+    rows += `<div class="g-fase-group${colapsada ? " collapsed" : ""}${(q && !anyMatch) ? " g-hide" : ""}" data-fase="${esc(nombreFase)}">
+      <div class="g-row g-faserow" data-fase-toggle="${esc(nombreFase)}">
+        <div class="g-label">
+          <button type="button" class="g-fase-chevron">${colapsada ? "▸" : "▾"}</button>
+          <span class="g-dot" style="background:${color}"></span>
+          <span class="g-fase-nombre">${esc(nombreFase)}</span>
+          <span class="g-fase-count">${buffer.length} act. · ${maxFin - minOff}d · ${fmt(jhTotal, 0)} jh</span>
         </div>
         <div class="g-track" style="width:${width}px">
-          <div class="g-bar" style="left:${x}px;width:${w}px;background:${a.fase_color}" title="${tip}"><span class="g-bar-d">${a.duracion_dias}d</span></div>
+          <div class="g-bar g-bar-fase" style="left:${xr}px;width:${wr}px;background:${color}" title="${esc(nombreFase)} — ${buffer.length} actividades · ${maxFin - minOff}d · ${fmt(jhTotal, 0)} jh"></div>
         </div>
-      </div>`;
+      </div>
+      ${buffer.map(filaActividad).join("")}
+    </div>`;
+    buffer = [];
+  }
+
+  data.actividades.forEach(a => {
+    if (a.fase !== faseAct) { cerrarFase(); faseAct = a.fase; }
+    buffer.push(a);
   });
+  cerrarFase();
 
   document.getElementById("gantt-body").innerHTML =
-    `<div class="g-axis-row"><div class="g-axis-spacer"><span class="g-hdr-pers g-hdr-esp" title="Especialistas (albañil, armador, soldador…)">Esp</span><span class="g-hdr-pers g-hdr-ay" title="Ayudantes / peones">Ay</span></div><div class="g-axis" style="width:${width}px">${ticks}</div></div>
-     <div class="g-rows">${rows}</div>`;
+    `<div class="g-head-row">
+       <div class="g-axis-spacer g-colheads">
+         <span class="g-ch-ord">#</span><span></span><span class="g-ch-csi">CSI</span>
+         <span class="g-ch-desc">Descripción</span><span class="g-ch-cant">Cant.</span>
+         <span class="g-ch-dur">Días</span><span class="g-ch-fecha">Inicio</span>
+         <span class="g-ch-fecha">Fin</span><span class="g-ch-pers">Esp</span><span class="g-ch-pers">Ay</span>
+       </div>
+       <div class="g-months" style="width:${width}px">${meses}</div>
+     </div>
+     <div class="g-subaxis-row">
+       <div class="g-axis-spacer"></div>
+       <div class="g-axis" style="width:${width}px">${ticks}</div>
+     </div>
+     <div class="g-rows">${rows}${lineaHoy}</div>`;
 
+  _wireGanttRowEvents();
+}
+
+function _wireGanttRowEvents() {
+  document.querySelectorAll("#gantt-body .g-faserow").forEach(row => {
+    row.addEventListener("click", () => {
+      const fase = row.dataset.faseToggle;
+      if (_ganttColapsadas.has(fase)) _ganttColapsadas.delete(fase); else _ganttColapsadas.add(fase);
+      _ganttRerenderConScroll();
+    });
+  });
+  document.querySelectorAll("#gantt-body .g-esp, #gantt-body .g-ay").forEach(inp =>
+    inp.addEventListener("click", (e) => e.stopPropagation()));
   document.querySelectorAll("#gantt-body .g-esp, #gantt-body .g-ay").forEach(inp =>
     inp.addEventListener("change", (e) => {
       const pid = e.target.dataset.pid;
@@ -589,6 +739,45 @@ async function setPersonal(partidaId, nEsp, nAy) {
   }
 }
 
+function _initGanttToolbar() {
+  document.querySelectorAll("#gantt-zoom .g-zoom-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      if (btn.dataset.zoom === _ganttZoom || !_ganttData) return;
+      _ganttZoom = btn.dataset.zoom;
+      document.querySelectorAll("#gantt-zoom .g-zoom-btn").forEach(b => b.classList.toggle("active", b === btn));
+      renderGantt(_ganttData);   // cambio de escala: arranca con scroll en 0
+    });
+  });
+  const buscar = document.getElementById("gantt-buscar");
+  if (buscar) buscar.addEventListener("input", () => {
+    _ganttFiltro = buscar.value;
+    if (_ganttData) _ganttRerenderConScroll();
+  });
+  _initGanttResizer();
+}
+
+function _initGanttResizer() {
+  const resizer = document.getElementById("gantt-resizer");
+  const modal = document.querySelector("#modal-cronograma .modal-gantt");
+  if (!resizer || !modal) return;
+  let arrastrando = false, x0 = 0, w0 = 0;
+  resizer.addEventListener("mousedown", (e) => {
+    arrastrando = true; x0 = e.clientX;
+    w0 = parseFloat(getComputedStyle(modal).getPropertyValue("--g-label-w")) || 680;
+    resizer.classList.add("dragging");
+    e.preventDefault();
+  });
+  window.addEventListener("mousemove", (e) => {
+    if (!arrastrando) return;
+    const w = Math.min(920, Math.max(480, w0 + (e.clientX - x0)));
+    modal.style.setProperty("--g-label-w", `${w}px`);
+  });
+  window.addEventListener("mouseup", () => {
+    arrastrando = false;
+    resizer.classList.remove("dragging");
+  });
+}
+
 function initCronograma() {
   const btn = document.getElementById("btn-cronograma");
   if (btn) btn.addEventListener("click", abrirCronograma);
@@ -601,6 +790,7 @@ function initCronograma() {
   if (modal) modal.addEventListener("click", (e) => {
     if (e.target.id === "modal-cronograma") e.target.classList.add("hidden");
   });
+  _initGanttToolbar();
 }
 
 async function publicarAPortal() {
@@ -1038,10 +1228,22 @@ async function actualizarObra() {
 
 // --- PANEL TABS ---
 function initPanelTabs() {
-  document.querySelectorAll(".tab-btn").forEach(btn => {
+  // Fix 2026-07-26: antes enganchaba TODO `.tab-btn` del documento, incluidos
+  // los tabs de Diseño (`data-dtab`, sin `data-tab`) que calculo-estructural.js
+  // maneja aparte. Al clickear un tab de Diseño, este handler también corría:
+  // btn.dataset.tab → undefined → no encontraba `#tab-undefined`, pero ANTES ya
+  // había limpiado `.active` de TODOS los `.tab-content` del documento —
+  // incluido `#tab-detalle` del panel inferior, que quedaba sin tab activo.
+  // Acotado a los tabs que realmente pertenecen al panel inferior (`#panel-bottom`,
+  // atributo `[data-tab]`). Los de Diseño (`data-dtab`) y Acero (`data-atab`,
+  // generados dinámicamente en calculo-estructural.js ~2078) no se tocan.
+  const scope = document.getElementById("panel-bottom");
+  if (!scope) return;
+  const tabBtns = scope.querySelectorAll(".tab-btn[data-tab]");
+  tabBtns.forEach(btn => {
     btn.addEventListener("click", () => {
-      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-      document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+      tabBtns.forEach(b => b.classList.remove("active"));
+      scope.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
       btn.classList.add("active");
       const tab = document.getElementById(`tab-${btn.dataset.tab}`);
       if (tab) tab.classList.add("active");
@@ -1164,10 +1366,12 @@ function showPanelPartida(partida) {
 
   updatePanelValues(partida);
 
-  // Switch to detalle tab
-  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-  document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
-  document.querySelector(".tab-btn[data-tab='detalle']").classList.add("active");
+  // Switch to detalle tab — acotado a #panel-bottom (mismo bug/fix que initPanelTabs(),
+  // ver 2026-07-26: barrer TODO .tab-btn/.tab-content del documento pisaba los
+  // tabs de Diseño/Acero que viven en otros paneles).
+  panel.querySelectorAll(".tab-btn[data-tab]").forEach(b => b.classList.remove("active"));
+  panel.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+  panel.querySelector(".tab-btn[data-tab='detalle']").classList.add("active");
   document.getElementById("tab-detalle").classList.add("active");
 
   initInsumoSearch(partida.id);
@@ -2006,7 +2210,7 @@ function setModuloActivo(m) {
 
 // ─── REVIT MCP CONTROLS ──────────────────────────────────────────────────────
 
-const _RMCP = { interval: null, initialized: false };
+const _RMCP = { interval: null, initialized: false, mcpOnline: false };
 
 function rmcpLog(msg, cls = 'rmcp-ok') {
   const el = document.getElementById('rmcp-output');
@@ -2021,7 +2225,7 @@ function rmcpClearLog() { const el = document.getElementById('rmcp-output'); if 
 async function rmcpRefreshStatus() {
   try {
     const r = await fetch('/__api__/revit-mcp/status').then(x => x.json());
-    const dot   = document.getElementById('rmcp-mcp-dot');
+    const badge = document.getElementById('revit-mcp-status-badge');
     const label = document.getElementById('rmcp-mcp-label');
     const sMcp  = document.getElementById('rmcp-s-mcp');
     const sDoc  = document.getElementById('rmcp-s-doc');
@@ -2029,13 +2233,14 @@ async function rmcpRefreshStatus() {
     const info  = document.getElementById('rmcp-revit-info');
     const qdot  = document.getElementById('mcp-quick-dot');
     if (qdot) qdot.style.background = r.mcp_running ? '#4caf50' : '#f44336';
-    if (!dot) return;
+    _RMCP.mcpOnline = !!r.mcp_running;
+    if (!badge) { rmcpApplyRequirements(); return; }
     if (r.mcp_running) {
-      dot.style.background = '#4caf50';
+      badge.className = 'rmcp-pill on';
       label.textContent = 'MCP activo :8001';
       sMcp.textContent = '● Online'; sMcp.className = 'rmcp-val ok';
     } else {
-      dot.style.background = '#f44336';
+      badge.className = 'rmcp-pill off';
       label.textContent = 'MCP inactivo';
       sMcp.textContent = '○ Offline'; sMcp.className = 'rmcp-val err';
     }
@@ -2051,16 +2256,70 @@ async function rmcpRefreshStatus() {
       sPipe.textContent = '—'; sPipe.className = 'rmcp-val';
       info.style.display = 'none';
     }
-  } catch (e) { rmcpLog('Error status: ' + e.message, 'rmcp-err'); }
+    // Diagnóstico "dónde está el MCP" — plegado si está online, auto-abierto si no.
+    rmcpRenderDiag(r.diagnostics, !r.mcp_running);
+    rmcpApplyRequirements();
+  } catch (e) {
+    _RMCP.mcpOnline = false;
+    rmcpLog('Error status: ' + e.message, 'rmcp-err');
+    rmcpApplyRequirements();
+  }
+}
+
+// Pinta el bloque "Diagnóstico MCP": rutas + existencia + URL sondeada + stderr
+// real del último arranque fallido + comando manual copiable. openIt=true lo
+// auto-expande (offline / arranque fallido); si no hay diag, lo oculta entero.
+function rmcpRenderDiag(diag, openIt) {
+  const box  = document.getElementById('rmcp-diag');
+  const body = document.getElementById('rmcp-diag-body');
+  if (!box || !body) return;
+  if (!diag) { box.style.display = 'none'; return; }
+  box.style.display = 'block';
+  if (openIt) box.open = true;
+
+  const row = (label, val, okState) => {
+    const cls = okState === false ? 'rmcp-val err' : (okState === true ? 'rmcp-val ok' : '');
+    return `<div class="rmcp-diag-row"><span>${esc(label)}</span><span class="${cls}">${esc(val)}</span></div>`;
+  };
+  let html = '';
+  html += row('main_pipe.py', diag.script + (diag.script_exists ? '  ✓' : '  ✗ NO EXISTE'), diag.script_exists);
+  html += row('Python', diag.python + (diag.python_exists ? '  ✓' : '  ✗ NO EXISTE'), diag.python_exists);
+  html += row('URL sondeada', diag.probe_url);
+  if (diag.last_start_error) {
+    html += `<div class="rmcp-diag-stderr-label">stderr del último intento de arranque:</div><pre class="rmcp-diag-pre">${esc(diag.last_start_error)}</pre>`;
+  }
+  html += `<div class="rmcp-diag-cmd-row"><code class="rmcp-diag-cmd" id="rmcp-diag-cmd">${esc(diag.manual_cmd)}</code><button type="button" class="rmcp-mini-btn" onclick="rmcpCopyDiagCmd(this)">📋 Copiar</button></div>`;
+  body.innerHTML = html;
+}
+
+function rmcpCopyDiagCmd(btn) {
+  const code = document.getElementById('rmcp-diag-cmd');
+  const cmd = code ? code.textContent : '';
+  if (!cmd) return;
+  const done = () => { const old = btn.textContent; btn.textContent = '✓ Copiado'; setTimeout(() => { btn.textContent = old; }, 1500); };
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(cmd).then(done).catch(() => rmcpLog('No se pudo copiar al portapapeles.', 'rmcp-err'));
+  } else {
+    rmcpLog('Portapapeles no disponible — copia el comando manualmente de la caja de arriba.', 'rmcp-err');
+  }
 }
 
 async function rmcpStart() {
   rmcpLog('Levantando MCP…', 'rmcp-info');
   try {
     const r = await fetch('/__api__/revit-mcp/start', {method:'POST'}).then(x => x.json());
-    if (r.ok) { rmcpLog(`MCP iniciado${r.pid?' PID='+r.pid:''} — ${r.status}`, 'rmcp-ok'); setTimeout(rmcpRefreshStatus, 600); }
-    else        rmcpLog('Error: ' + (r.error || JSON.stringify(r)), 'rmcp-err');
+    if (r.ok) {
+      rmcpLog(`MCP iniciado${r.pid?' PID='+r.pid:''} — ${r.status}`, 'rmcp-ok');
+    } else {
+      rmcpLog('Error: ' + (r.error || JSON.stringify(r)), 'rmcp-err');
+      if (r.stderr_tail) rmcpLog('stderr real del arranque:\n' + r.stderr_tail, 'rmcp-err');
+      // Muestra de inmediato el diagnóstico (rutas + comando manual) sin esperar
+      // el próximo poll de 30s — es exactamente el momento en que el Director
+      // necesita saber "dónde está" el MCP.
+      if (r.diagnostics) rmcpRenderDiag(r.diagnostics, true);
+    }
   } catch (e) { rmcpLog('Error: ' + e.message, 'rmcp-err'); }
+  setTimeout(rmcpRefreshStatus, 600);
 }
 
 async function rmcpStop() {
@@ -2073,28 +2332,56 @@ async function rmcpStop() {
 }
 
 async function rmcpLoadObras() {
+  const sel = document.getElementById('rmcp-obra-select');
+  if (!sel) return;
+  sel.classList.remove('rmcp-select-error');
+  sel.innerHTML = '<option value="">Cargando obras…</option>';
   try {
-    const obras = await fetch('/__api__/presupuestos').then(x => x.json());
-    const sel = document.getElementById('rmcp-obra-select');
-    if (!sel) return;
+    const resp = await fetch('/__api__/presupuestos');
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const obras = await resp.json();
     sel.innerHTML = '<option value="">— Sin obra —</option>' +
-      obras.map(o => `<option value="${o.id}">${o.nombre}</option>`).join('');
-  } catch (e) { /* silencioso */ }
+      obras.map(o => `<option value="${esc(o.id)}">${esc(o.nombre)}</option>`).join('');
+  } catch (e) {
+    // Nunca silencioso: el select queda visiblemente en estado de error y se loguea.
+    sel.innerHTML = '<option value="">⚠ Error cargando obras</option>';
+    sel.classList.add('rmcp-select-error');
+    rmcpLog('Error cargando obras (/__api__/presupuestos): ' + e.message, 'rmcp-err');
+  }
+  rmcpApplyRequirements();
 }
 
 async function rmcpLoadCsvs() {
+  const sel = document.getElementById('rmcp-csv-select');
+  if (!sel) return;
+  sel.classList.remove('rmcp-select-error');
+  sel.innerHTML = '<option value="">Cargando CSVs…</option>';
   try {
-    const csvs = await fetch('/__api__/revit-mcp/schedules').then(x => x.json());
-    const sel = document.getElementById('rmcp-csv-select');
-    if (!sel) return;
+    const resp = await fetch('/__api__/revit-mcp/schedules');
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const csvs = await resp.json();
     sel.innerHTML = csvs.length
-      ? csvs.map(c => `<option value="${c.path}">${c.name}</option>`).join('')
+      ? csvs.map(c => `<option value="${esc(c.path)}">${esc(c.name)}</option>`).join('')
       : '<option value="">Sin CSVs en S5_schedules</option>';
-  } catch (e) { /* silencioso */ }
+  } catch (e) {
+    sel.innerHTML = '<option value="">⚠ Error cargando CSVs</option>';
+    sel.classList.add('rmcp-select-error');
+    rmcpLog('Error cargando CSVs (/__api__/revit-mcp/schedules): ' + e.message, 'rmcp-err');
+  }
+  rmcpApplyRequirements();
 }
 
 function rmcpGetObra() { return document.getElementById('rmcp-obra-select')?.value || ''; }
 function rmcpGetCsv()  { return document.getElementById('rmcp-csv-select')?.value || ''; }
+
+function _rmcpResultEl(btnEl) { return btnEl.closest('.rmcp-card')?.querySelector('.rmcp-result') || null; }
+
+function _rmcpSetResult(btnEl, ok, text) {
+  const el = _rmcpResultEl(btnEl);
+  if (!el) return;
+  el.textContent = (ok ? '✓ ' : '✗ ') + text;
+  el.className = 'rmcp-result ' + (ok ? 'ok' : 'err');
+}
 
 async function rmcpRunScript(key, type, btnEl) {
   const obra = rmcpGetObra();
@@ -2107,23 +2394,25 @@ async function rmcpRunScript(key, type, btnEl) {
 
   if (type === 'python') {
     if (key === 'import-quantities') {
-      if (!obra) { rmcpLog('Selecciona una obra.', 'rmcp-err'); _rmcpReset(btnEl); return; }
-      if (!csv)  { rmcpLog('Selecciona un CSV.', 'rmcp-err'); _rmcpReset(btnEl); return; }
+      if (!obra) { rmcpLog('Selecciona una obra.', 'rmcp-err'); _rmcpSetResult(btnEl, false, 'Falta obra activa'); _rmcpReset(btnEl); return; }
+      if (!csv)  { rmcpLog('Selecciona un CSV.', 'rmcp-err'); _rmcpSetResult(btnEl, false, 'Falta CSV'); _rmcpReset(btnEl); return; }
       url = `${API}/obras/${obra}/import-quantities`;
       opts.headers = {'Content-Type':'application/json'};
       opts.body = JSON.stringify({csv_path: csv});
     } else if (key === 'validate-units') {
-      if (!csv) { rmcpLog('Selecciona un CSV.', 'rmcp-err'); _rmcpReset(btnEl); return; }
+      if (!csv) { rmcpLog('Selecciona un CSV.', 'rmcp-err'); _rmcpSetResult(btnEl, false, 'Falta CSV'); _rmcpReset(btnEl); return; }
+      // pid no lo usa validate_units.py; con obra pasa por /obras/{pid}, sin obra por /python/validate-units.
       url = obra ? `${API}/obras/${obra}/validate-units` : `${API}/python/validate-units`;
       opts.headers = {'Content-Type':'application/json'};
       opts.body = JSON.stringify({csv_path: csv});
     } else if (key === 'generate-keynotes') {
-      if (!obra) { rmcpLog('Selecciona una obra.', 'rmcp-err'); _rmcpReset(btnEl); return; }
+      if (!obra) { rmcpLog('Selecciona una obra.', 'rmcp-err'); _rmcpSetResult(btnEl, false, 'Falta obra activa'); _rmcpReset(btnEl); return; }
       url = `${API}/obras/${obra}/generate-keynotes`;
     } else {
       url = `${API}/python/${key}`;
     }
   } else {
+    if (!_RMCP.mcpOnline) { rmcpLog('MCP apagado — presiona "Levantar MCP".', 'rmcp-err'); _rmcpSetResult(btnEl, false, 'MCP offline'); _rmcpReset(btnEl); return; }
     url = `${API}/inject/${key}`;
   }
 
@@ -2132,19 +2421,31 @@ async function rmcpRunScript(key, type, btnEl) {
     if (r.ok || r.output) {
       rmcpLog((r.output || JSON.stringify(r, null, 2)).trim(), 'rmcp-ok');
       btnEl.className = 'rmcp-run done-ok';
+      _rmcpSetResult(btnEl, true, 'Completado');
     } else {
       rmcpLog('ERROR: ' + (r.error || r.detail || JSON.stringify(r)), 'rmcp-err');
       btnEl.className = 'rmcp-run done-err';
+      _rmcpSetResult(btnEl, false, 'Error — ver consola');
     }
   } catch (e) {
     rmcpLog('Fetch error: ' + e.message, 'rmcp-err');
     btnEl.className = 'rmcp-run done-err';
+    _rmcpSetResult(btnEl, false, 'Fetch error — ver consola');
   }
   btnEl.disabled = false; btnEl.textContent = '▶ Ejecutar';
-  setTimeout(() => { btnEl.className = 'rmcp-run'; }, 3000);
+  setTimeout(() => { btnEl.className = 'rmcp-run'; rmcpApplyRequirements(); }, 3000);
 }
 
-function _rmcpReset(btn) { btn.disabled = false; btn.className = 'rmcp-run'; btn.textContent = '▶ Ejecutar'; }
+function _rmcpReset(btn) { btn.disabled = false; btn.className = 'rmcp-run'; btn.textContent = '▶ Ejecutar'; rmcpApplyRequirements(); }
+
+// Requisitos por script (obra/csv/mcp) para deshabilitar el botón con motivo visible
+// en vez de dejar que el Director lo clickee al vacío (ver rmcpApplyRequirements).
+function _rmcpPyReq(key) {
+  if (key === 'import-quantities') return 'obra,csv';
+  if (key === 'validate-units')    return 'csv';
+  if (key === 'generate-keynotes') return 'obra';
+  return '';
+}
 
 async function rmcpBuildCards() {
   const data = await fetch('/__api__/revit-mcp/scripts').then(x => x.json());
@@ -2155,28 +2456,63 @@ async function rmcpBuildCards() {
   ];
   const allPy = [...data.python, ...pyExtra];
 
-  const mkRun = (key, t) => `<button class="rmcp-run" onclick="rmcpRunScript('${key}','${t}',this)">▶ Ejecutar</button>`;
+  const mkRun = (key, t, req) => `<button class="rmcp-run" data-req="${esc(req || '')}" onclick="rmcpRunScript('${key}','${t}',this)">▶ Ejecutar</button>`;
 
   document.getElementById('rmcp-py-cards').innerHTML = allPy.map(s => `
     <div class="rmcp-card">
-      <div class="rmcp-card-top"><span class="rmcp-badge badge-py">PY</span><span class="rmcp-name">${s.label || s.key}</span></div>
-      <div class="rmcp-desc">${s.desc || ''}</div>
-      <div class="rmcp-actions">${mkRun(s.key,'python')}</div>
+      <div class="rmcp-card-top"><span class="rmcp-badge badge-py">PY</span><span class="rmcp-name">${esc(s.label || s.key)}</span></div>
+      <div class="rmcp-desc">${esc(s.desc || '')}</div>
+      <div class="rmcp-actions">${mkRun(s.key, 'python', _rmcpPyReq(s.key))}</div>
+      <div class="rmcp-reason"></div>
+      <div class="rmcp-result"></div>
     </div>`).join('');
 
   document.getElementById('rmcp-iron-cards').innerHTML = data.ironpython.map(s => `
     <div class="rmcp-card${s.deprecated?' deprecated':''}">
       <div class="rmcp-card-top">
         <span class="rmcp-badge ${s.deprecated?'badge-warn':'badge-iron'}">${s.deprecated?'⚠️':'IP'}</span>
-        <span class="rmcp-name">${s.label || s.key}</span>
+        <span class="rmcp-name">${esc(s.label || s.key)}</span>
       </div>
-      <div class="rmcp-desc">${s.desc || ''}</div>
+      <div class="rmcp-desc">${esc(s.desc || '')}</div>
       <div class="rmcp-actions">
         ${s.deprecated
-          ? '<span style="font-size:10px;color:#ffc107">No inyectar — usa DB.Transaction</span>'
-          : mkRun(s.key,'iron')}
+          ? '<span class="rmcp-nocan">No inyectar — usa DB.Transaction</span>'
+          : mkRun(s.key, 'iron', 'mcp')}
       </div>
+      <div class="rmcp-reason"></div>
+      <div class="rmcp-result"></div>
     </div>`).join('');
+
+  rmcpApplyRequirements();
+}
+
+// Aplica/limpia estado disabled + motivo visible según obra/csv seleccionados y
+// si el MCP está online. Se re-evalúa en cada refresh de status y cambio de selects.
+function rmcpApplyRequirements() {
+  const obra  = rmcpGetObra();
+  const csv   = rmcpGetCsv();
+  const mcpOn = !!_RMCP.mcpOnline;
+  document.querySelectorAll('#revit-mcp-content .rmcp-run[data-req]').forEach(btn => {
+    if (btn.classList.contains('running')) return; // no tocar mientras corre
+    const reqs = (btn.dataset.req || '').split(',').filter(Boolean);
+    const faltantes = [];
+    if (reqs.includes('obra') && !obra) faltantes.push('Selecciona una obra');
+    if (reqs.includes('csv')  && !csv)  faltantes.push('Selecciona un CSV');
+    if (reqs.includes('mcp')  && !mcpOn) faltantes.push('Requiere MCP online');
+    const card = btn.closest('.rmcp-card');
+    const reasonEl = card?.querySelector('.rmcp-reason');
+    if (faltantes.length) {
+      btn.disabled = true;
+      btn.title = faltantes.join(' · ');
+      card?.classList.add('rmcp-blocked');
+      if (reasonEl) { reasonEl.textContent = faltantes.join(' · '); reasonEl.style.display = 'block'; }
+    } else {
+      btn.disabled = false;
+      btn.title = '';
+      card?.classList.remove('rmcp-blocked');
+      if (reasonEl) reasonEl.style.display = 'none';
+    }
+  });
 }
 
 function rmcpInitVistaToggle() {
@@ -2190,13 +2526,45 @@ function rmcpInitVistaToggle() {
   });
 }
 
+// Reevalúa botones disabled cuando el Director cambia la obra o el CSV activo.
+function rmcpInitSelectListeners() {
+  const obraSel = document.getElementById('rmcp-obra-select');
+  const csvSel  = document.getElementById('rmcp-csv-select');
+  if (obraSel && !obraSel.dataset.wired) { obraSel.dataset.wired = '1'; obraSel.addEventListener('change', rmcpApplyRequirements); }
+  if (csvSel  && !csvSel.dataset.wired)  { csvSel.dataset.wired  = '1'; csvSel.addEventListener('change', rmcpApplyRequirements); }
+}
+
+// Bug preexistente (2026-07-26, 2da ronda): initModuloDropdown() en app.js solo
+// resetea el <select> de módulo al pulsar "✕ Cerrar" — nunca oculta la vista,
+// a diferencia de los 4 módulos hermanos (initDisenoView/initEtabsView/
+// initAceroView/initConexionView en calculo-estructural.js), que cablean su
+// propio btnClose con `view.style.display='none'`. Se sigue ese mismo patrón acá.
+// Además: para el polling de 30s (setInterval en initRevitMcp) — si no se limpia
+// al cerrar, sigue latiendo con la vista oculta.
+function rmcpInitCloseButton() {
+  const btn = document.getElementById('btn-cerrar-revit-mcp-view');
+  if (!btn || btn.dataset.wired) return;
+  btn.dataset.wired = '1';
+  btn.addEventListener('click', () => {
+    const view = document.getElementById('revit-mcp-view');
+    if (view) view.style.display = 'none';
+    const s = document.getElementById('sel-modulo'); if (s) s.value = '';
+    if (_RMCP.interval) { clearInterval(_RMCP.interval); _RMCP.interval = null; }
+  });
+}
+
 async function initRevitMcp() {
   rmcpInitVistaToggle();
+  rmcpInitSelectListeners();
+  rmcpInitCloseButton();
+  // El polling se re-arma en CADA apertura del panel (si "Cerrar" lo paró antes),
+  // independiente del guard de _RMCP.initialized de abajo — si no, reabrir el
+  // panel después de cerrarlo una vez lo dejaría sin polling para siempre.
+  if (!_RMCP.interval) _RMCP.interval = setInterval(rmcpRefreshStatus, 30000);
   if (_RMCP.initialized) return;
   _RMCP.initialized = true;
   await Promise.all([rmcpRefreshStatus(), rmcpLoadObras(), rmcpLoadCsvs(), rmcpBuildCards()]);
-  if (_RMCP.interval) clearInterval(_RMCP.interval);
-  _RMCP.interval = setInterval(rmcpRefreshStatus, 30000);
+  rmcpApplyRequirements();
 }
 
 // Botón rápido 🔧 MCP (toolbar): abre el panel y levanta el MCP si está apagado.

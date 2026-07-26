@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Características — EstimaStruct</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* Paleta de marca ConsuConstruct (misma identidad del sitio público, NO el
+       tema dark+amber de la app interna — esta es una página de showcase/marketing,
+       corresponde que sea clara y use la marca, no el dark mode de las herramientas). */
+    :root {
+      --gold: #F8BE16;
+      --ink: #2c2c2c;
+      --ink-soft: #1a1a1a;
+      --text-body: #555;
+      --text-dim: #666;
+      --text-faint: #777;
+      --panel-bg: #f9f9f9;
+      --card-shadow: rgba(0,0,0,0.08);
+      --blue-accent: #2196F3;
+      --orange-accent: #FF9800;
+      --green-accent: #4CAF50;
+      --red-warn: #e74c3c;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+    }
+
+    .header {
+      background: linear-gradient(135deg, var(--ink-soft) 0%, var(--ink) 100%);
+      color: white;
+      padding: 60px 20px;
+      text-align: center;
+      border-bottom: 3px solid var(--gold);
+    }
+
+    .header h1 {
+      font-family: 'Cinzel', serif;
+      font-size: 3em;
+      font-weight: 700;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+    }
+
+    .header p {
+      font-size: 1.1em;
+      color: #e0e0e0;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .brand-link {
+      color: var(--gold);
+      text-decoration: none;
+      font-weight: 600;
+      margin-top: 20px;
+      display: inline-block;
+    }
+
+    .brand-link:hover {
+      text-decoration: underline;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 60px 20px;
+    }
+
+    .intro {
+      background: white;
+      border-left: 4px solid var(--gold);
+      padding: 30px;
+      margin-bottom: 60px;
+      border-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .intro h2 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.8em;
+      margin-bottom: 15px;
+      color: var(--ink);
+    }
+
+    .intro p {
+      font-size: 1.05em;
+      color: var(--text-body);
+      line-height: 1.8;
+    }
+
+    .modules-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 30px;
+      margin-bottom: 60px;
+    }
+
+    .module-card {
+      background: white;
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .module-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    }
+
+    .module-header {
+      background: linear-gradient(135deg, var(--ink) 0%, var(--ink-soft) 100%);
+      color: var(--gold);
+      padding: 20px;
+      border-bottom: 2px solid var(--gold);
+    }
+
+    .module-header h3 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.4em;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .module-icon {
+      font-size: 2em;
+      margin-bottom: 8px;
+    }
+
+    .module-body {
+      padding: 25px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .module-description {
+      font-size: 0.95em;
+      color: var(--text-dim);
+      margin-bottom: 15px;
+      line-height: 1.7;
+    }
+
+    .module-features {
+      list-style: none;
+      margin-bottom: 15px;
+      flex: 1;
+    }
+
+    .module-features li {
+      padding: 8px 0;
+      padding-left: 20px;
+      position: relative;
+      color: var(--text-body);
+      font-size: 0.92em;
+      line-height: 1.5;
+    }
+
+    .module-features li:before {
+      content: "▸";
+      position: absolute;
+      left: 0;
+      color: var(--gold);
+      font-weight: bold;
+    }
+
+    .module-tech {
+      background: var(--panel-bg);
+      padding: 12px;
+      border-left: 3px solid var(--gold);
+      font-size: 0.88em;
+      color: var(--text-faint);
+      margin-top: auto;
+    }
+
+    .tech-label {
+      font-weight: 600;
+      color: var(--ink);
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    /* MCP Integration Section */
+    .mcp-section {
+      background: white;
+      border-radius: 6px;
+      padding: 40px;
+      margin-bottom: 60px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      border-left: 4px solid var(--gold);
+    }
+
+    .mcp-section h2 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.8em;
+      color: var(--ink);
+      margin-bottom: 30px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid var(--gold);
+    }
+
+    .mcp-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+      gap: 30px;
+    }
+
+    .mcp-card {
+      background: var(--panel-bg);
+      border-radius: 4px;
+      padding: 25px;
+      border: 2px solid var(--gold);
+    }
+
+    .mcp-card h3 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.3em;
+      color: var(--ink);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mcp-icon {
+      font-size: 1.6em;
+    }
+
+    .mcp-endpoint {
+      background: white;
+      padding: 12px;
+      border-radius: 3px;
+      margin: 12px 0;
+      font-family: 'Courier New', monospace;
+      font-size: 0.85em;
+      color: var(--ink);
+      word-break: break-all;
+      border-left: 3px solid var(--gold);
+    }
+
+    .mcp-use-case {
+      background: white;
+      padding: 15px;
+      border-radius: 3px;
+      margin-top: 15px;
+      line-height: 1.7;
+      color: var(--text-body);
+      border-left: 3px solid var(--green-accent);
+    }
+
+    .mcp-use-case strong {
+      color: var(--ink);
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    /* Database Section */
+    .database-section {
+      background: white;
+      border-radius: 6px;
+      padding: 40px;
+      margin-bottom: 60px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      border-left: 4px solid var(--gold);
+    }
+
+    .database-section h2 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.8em;
+      color: var(--ink);
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid var(--gold);
+    }
+
+    .db-stack {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .db-component {
+      background: var(--panel-bg);
+      padding: 20px;
+      border-radius: 4px;
+      border-top: 3px solid var(--gold);
+    }
+
+    .db-component h3 {
+      font-family: 'Cinzel', serif;
+      color: var(--ink);
+      margin-bottom: 10px;
+      font-size: 1.1em;
+    }
+
+    .db-component p {
+      color: var(--text-dim);
+      font-size: 0.95em;
+      line-height: 1.6;
+    }
+
+    /* Footer */
+    .footer {
+      background: var(--ink);
+      color: white;
+      text-align: center;
+      padding: 40px 20px;
+      border-top: 3px solid var(--gold);
+    }
+
+    .footer h3 {
+      font-family: 'Cinzel', serif;
+      color: var(--gold);
+      margin-bottom: 15px;
+    }
+
+    .footer p {
+      color: #ddd;
+      margin-bottom: 10px;
+    }
+
+    .footer a {
+      color: var(--gold);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .header h1 {
+        font-size: 2em;
+      }
+
+      .modules-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .mcp-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .mcp-section,
+      .database-section,
+      .content-section,
+      .intro {
+        padding: 20px;
+      }
+    }
+
+    .badge {
+      display: inline-block;
+      background: var(--gold);
+      color: var(--ink);
+      padding: 4px 10px;
+      border-radius: 3px;
+      font-size: 0.8em;
+      font-weight: 600;
+      margin: 3px 0;
+    }
+
+    .code-block {
+      background: #f4f4f4;
+      border-left: 3px solid var(--gold);
+      padding: 12px;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.85em;
+      overflow-x: auto;
+      margin: 10px 0;
+    }
+
+    /* Secciones de contenido genéricas (Workflow, Deployment) — mismo patrón
+       visual que .mcp-section/.database-section, antes repetido como estilo
+       inline en cada bloque. */
+    .content-section {
+      background: white;
+      border-radius: 6px;
+      padding: 40px;
+      margin-bottom: 60px;
+      box-shadow: 0 4px 12px var(--card-shadow);
+      border-left: 4px solid var(--gold);
+    }
+
+    .content-section h2 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.8em;
+      color: var(--ink);
+      margin-bottom: 30px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid var(--gold);
+    }
+
+    /* Grid de pasos del pipeline estimativo (antes 8 <div style="..."> idénticos) */
+    .pipeline-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 20px;
+    }
+
+    .pipeline-step {
+      text-align: center;
+      padding: 20px;
+      background: var(--panel-bg);
+      border-radius: 4px;
+      border-top: 3px solid var(--gold);
+    }
+
+    .pipeline-step .pipeline-icon { font-size: 2em; margin-bottom: 10px; }
+    .pipeline-step strong { color: var(--ink); display: block; margin-bottom: 8px; }
+    .pipeline-step span { color: var(--text-dim); font-size: 0.9em; }
+
+    /* Callout con borde de color (Requisitos / Formatos soportados / nota aritmética) */
+    .callout {
+      margin-top: 15px;
+      padding: 12px;
+      background: white;
+      border-left: 3px solid var(--gold);
+      border-radius: 3px;
+    }
+    .callout strong { color: var(--ink); display: block; margin-bottom: 5px; }
+    .callout span, .callout-text { color: var(--text-dim); font-size: 0.9em; }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <h1>EstimaStruct</h1>
+  <p>Plataforma de estimación de costos para ingeniería y arquitectura. Análisis estructural, takeoff cuantitativo desde Revit, presupuestos auditables.</p>
+  <a href="https://consuconstruct.com" class="brand-link" target="_blank">ConsuConstruct</a>
+</div>
+
+<!-- CONTAINER -->
+<div class="container">
+
+  <!-- INTRO -->
+  <div class="intro">
+    <h2>¿Qué es EstimaStruct?</h2>
+    <p>
+      EstimaStruct integra diseño estructural, importación de cantidades desde Revit/ETABS y generación de presupuestos en una aplicación local.
+      Reemplaza hojas de cálculo manuales con un pipeline reproducible ficha → partida → capítulo → presupuesto, manteniendo trazabilidad completa de fórmulas y auditoría de precios.
+    </p>
+  </div>
+
+  <!-- MODULES -->
+  <h2 style="font-family: 'Cinzel', serif; font-size: 2em; color: var(--ink); margin-bottom: 40px; padding-bottom: 15px; border-bottom: 3px solid var(--gold);">Módulos Principales</h2>
+
+  <div class="modules-grid">
+
+    <!-- Presupuesto -->
+    <div class="module-card">
+      <div class="module-header">
+        <div class="module-icon">📊</div>
+        <h3>Presupuesto</h3>
+      </div>
+      <div class="module-body">
+        <p class="module-description">
+          Motor de estimación por partidas CSI MasterFormat. Integra catálogo de fichas con costos históricos (mano de obra, materiales, sub-matrices OPUS) y overhead configurable (administración, utilidad, imprevistos, IVA).
+        </p>
+        <ul class="module-features">
+          <li>CRUD presupuestos + plantillas versionadas</li>
+          <li>Capítulos agrupados por CSI (Div 00–33)</li>
+          <li>Partidas con cantidad, unitario, total</li>
+          <li>Bucketing 3-vías (MO, MA, Sub-matriz)</li>
+          <li>Cálculo de PU = base × (1 + sobrecosto%)</li>
+          <li>Export XLSX, PDF, Portal Supabase</li>
+        </ul>
+        <div class="module-tech">
+          <span class="tech-label">Stack:</span>
+          FastAPI + PostgreSQL · Decimal(4dp) ROUND_HALF_UP
+        </div>
+      </div>
+    </div>
+
+    <!-- Viewer 3D -->
+    <div class="module-card">
+      <div class="module-header">
+        <div class="module-icon">🗺️</div>
+        <h3>Viewer 3D</h3>
+      </div>
+      <div class="module-body">
+        <p class="module-description">
+          Visualizador de modelos BIM en 3D. Lee archivos GLB exportados desde Revit y renderiza con Babylon.js, permitiendo inspección geométrica completa del proyecto sin abrir Revit.
+        </p>
+        <ul class="module-features">
+          <li>Renderizado Babylon.js (WebGL)</li>
+          <li>Navegación 3D fluida (pan, zoom, rotación)</li>
+          <li>Modelos desde Revit (exportar como GLB)</li>
+          <li>Texturas PBR (diffuse, normal, roughness)</li>
+          <li>Soporte for furniture + structural elements</li>
+          <li>Perf optimizado para localhost</li>
+        </ul>
+        <div class="module-tech">
+          <span class="tech-label">Stack:</span>
+          Babylon.js · WebGL · GLB assets
+        </div>
+      </div>
+    </div>
+
+    <!-- Database -->
+    <div class="module-card">
+      <div class="module-header">
+        <div class="module-icon">🗂️</div>
+        <h3>Base de Datos</h3>
+      </div>
+      <div class="module-body">
+        <p class="module-description">
+          Repositorio central de cantidad, precios y insumos. PostgreSQL primario (desde 2026-07-20) con soporte legacy SQLite. Mantiene integridad transaccional y auditoría de cambios.
+        </p>
+        <ul class="module-features">
+          <li>Postgres primario (:5432), SQLite compat</li>
+          <li>ORM SQLAlchemy 2.0 + Alembic migrations</li>
+          <li>Recursos (catálogo maestro precios)</li>
+          <li>Insumos por partida (rebucketing automático)</li>
+          <li>Backup/Restore ZIP (portable)</li>
+          <li>UUID PKs, Decimal money, ACID</li>
+        </ul>
+        <div class="module-tech">
+          <span class="tech-label">Stack:</span>
+          PostgreSQL 16 · SQLAlchemy · Alembic
+        </div>
+      </div>
+    </div>
+
+    <!-- Diseño Estructural -->
+    <div class="module-card">
+      <div class="module-header">
+        <div class="module-icon">📐</div>
+        <h3>Diseño Estructural</h3>
+      </div>
+      <div class="module-body">
+        <p class="module-description">
+          Suite de cálculo para concreto reforzado (ACI 318) y acero estructural (AISC 360-16 LRFD). Genera automáticamente partidas CSI para concreto, acero y encofrado.
+        </p>
+        <ul class="module-features">
+          <li>Concreto: vigas, columnas, losas (CHOC-08)</li>
+          <li>Acero: perfiles LRFD, conexiones (§J)</li>
+          <li>Cálculo de refuerzo (As, Av/S, At/S)</li>
+          <li>Takeoff: volumen concreto, peso acero, área encofrado</li>
+          <li>Import de ETABS (combos, cargas últimas)</li>
+          <li>Fórmulas con notación Mathcad (KaTeX)</li>
+        </ul>
+        <div class="module-tech">
+          <span class="tech-label">Stack:</span>
+          Python calculo_* · KaTeX rendering · Pydantic
+        </div>
+      </div>
+    </div>
+
+    <!-- Cronograma -->
+    <div class="module-card">
+      <div class="module-header">
+        <div class="module-icon">📅</div>
+        <h3>Cronograma</h3>
+      </div>
+      <div class="module-body">
+        <p class="module-description">
+          Generador de gráficos Gantt a partir de rendimientos y cuadrillas. Calcula duración de actividades y prorrateo a valor de banco.
+        </p>
+        <ul class="module-features">
+          <li>Overrides MO diario (n_esp, n_ay)</li>
+          <li>Cálculo automático de duración</li>
+          <li>Cadena crítica + buffers</li>
+          <li>Export XLSX (compatible MS Project)</li>
+          <li>Prorrateo a valor para financiamiento</li>
+          <li>UI interactiva (drag, edit, delete)</li>
+        </ul>
+        <div class="module-tech">
+          <span class="tech-label">Stack:</span>
+          FastAPI + openpyxl
+        </div>
+      </div>
+    </div>
+
+    <!-- RAG Retrieval -->
+    <div class="module-card">
+      <div class="module-header">
+        <div class="module-icon">🔍</div>
+        <h3>RAG Retrieval</h3>
+      </div>
+      <div class="module-body">
+        <p class="module-description">
+          Búsqueda semántica sobre documentación y especificaciones de proyecto. Semantically integrado con fichas CSI y notas técnicas.
+        </p>
+        <ul class="module-features">
+          <li>Indexación semántica de partidas</li>
+          <li>Búsqueda por descripción, CSI, keywords</li>
+          <li>Filtro por unidad, tipo de insumo</li>
+          <li>Integración con catálogo maestro</li>
+          <li>Sugerencias de fichas similares</li>
+          <li>Auditoría de resultados (relevancia)</li>
+        </ul>
+        <div class="module-tech">
+          <span class="tech-label">Stack:</span>
+          Full-text search + vector embeddings
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MCP INTEGRATIONS -->
+  <div class="mcp-section">
+    <h2>Integraciones MCP (Model Context Protocol)</h2>
+
+    <div class="mcp-grid">
+
+      <!-- Revit MCP -->
+      <div class="mcp-card">
+        <h3>
+          <span class="mcp-icon">🔧</span>
+          Revit MCP
+        </h3>
+
+        <p style="color: var(--text-dim); line-height: 1.7; margin-bottom: 15px;">
+          Integración bidireccional con Revit 2027 a través de bridge pyRevit. Inyecta IronPython dentro del proceso de Revit para automatizar extracción de cantidades, generación de keynotes y sincronización de propiedades.
+        </p>
+
+        <div class="mcp-endpoint">
+          POST /revit-mcp/start<br>
+          GET /revit-mcp/status<br>
+          POST /revit-mcp/import-quantities<br>
+          POST /revit-mcp/generate-keynotes
+        </div>
+
+        <div class="mcp-use-case">
+          <strong>Caso de uso: Extracción automática de cantidades</strong>
+          Abre un modelo Revit, selecciona elementos (vigas, columnas, losas). El MCP exporta schedules (CSV), EstimaStruct parsea e importa cantidades automáticamente en la tabla de presupuesto, mapeando por Type Mark o CSI keynote. Acelera takeoff de horas a minutos.
+        </div>
+
+        <div class="callout" style="border-left-color: var(--blue-accent);">
+          <strong>Requisitos:</strong>
+          <span>Revit 2027 + pyRevit instalado · Puerto 8100 libre · Windows 11</span>
+        </div>
+      </div>
+
+      <!-- ETABS MCP -->
+      <div class="mcp-card">
+        <h3>
+          <span class="mcp-icon">🏗️</span>
+          ETABS Integration
+        </h3>
+
+        <p style="color: var(--text-dim); line-height: 1.7; margin-bottom: 15px;">
+          Parser CSV para modelos de ETABS (CSi). Importa resultados de análisis sísmico (fuerzas últimas, momentos, cortantes) y alimenta directamente el motor de diseño estructural (CHOC-08, acero LRFD).
+        </p>
+
+        <div class="mcp-endpoint">
+          POST /etabs/import-results<br>
+          POST /etabs/parse-csv<br>
+          GET /etabs/spectrum-export
+        </div>
+
+        <div class="mcp-use-case">
+          <strong>Caso de uso: Diseño sísmico integrado</strong>
+          Exporta resultados de análisis ETABS (Concrete Frame Design, combos sísmicos). EstimaStruct parsea CSV → crea elementos de diseño + casos de carga → calcula automáticamente refuerzo (As, Av/S) y genera partidas CSI 03 (concreto) + 05 (acero). Cierra el loop análisis → diseño → presupuesto sin reescrituras.
+        </div>
+
+        <div class="callout" style="border-left-color: var(--orange-accent);">
+          <strong>Formatos soportados:</strong>
+          <span>CSV (Concrete Design export) · XLSX schedules · Unidades: kgf, kN, ton</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- DATABASE STACK -->
+  <div class="database-section">
+    <h2>Stack Tecnológico</h2>
+
+    <div class="db-stack">
+      <div class="db-component">
+        <h3>Backend</h3>
+        <p>
+          <strong>FastAPI 0.111</strong> · 24+ routers especializados (presupuestos, partidas, insumos, diseño, export).<br>
+          <strong>Uvicorn 0.29</strong> ASGI server en :8002.<br>
+          <strong>Pydantic 2.7</strong> validación de requests.
+        </p>
+      </div>
+
+      <div class="db-component">
+        <h3>Base de Datos</h3>
+        <p>
+          <strong>PostgreSQL 16</strong> primario (desde 2026-07-20).<br>
+          <strong>SQLAlchemy 2.0</strong> + Alembic migrations.<br>
+          <strong>SQLite legacy</strong> para backup/export.
+        </p>
+      </div>
+
+      <div class="db-component">
+        <h3>Frontend</h3>
+        <p>
+          <strong>Flask 3.1</strong> server-rendered templates + Jinja2.<br>
+          <strong>Vanilla JS</strong> modular (core.js, app.js, calculo-estructural.js).<br>
+          <strong>KaTeX</strong> para rendering de fórmulas matemáticas.
+        </p>
+      </div>
+
+      <div class="db-component">
+        <h3>Rendering</h3>
+        <p>
+          <strong>Babylon.js</strong> viewer 3D (WebGL).<br>
+          <strong>ReportLab 4.5</strong> + Chromium headless para PDF con membrete.<br>
+          <strong>openpyxl 3.1</strong> para XLSX export.
+        </p>
+      </div>
+
+      <div class="db-component">
+        <h3>Integraciones</h3>
+        <p>
+          <strong>Revit MCP HTTP :8100</strong> (pyRevit bridge).<br>
+          <strong>ETABS CSV parser</strong> (sísmico, concreto, acero).<br>
+          <strong>Supabase REST</strong> para Portal público.
+        </p>
+      </div>
+
+      <div class="db-component">
+        <h3>Runtime</h3>
+        <p>
+          <strong>Python 3.x</strong> + Windows 11 PowerShell launcher.<br>
+          <strong>PostgreSQL Windows service</strong>.<br>
+          <strong>CORS local</strong> (sin auth — localhost only).
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- WORKFLOW -->
+  <div class="content-section">
+    <h2>Pipeline Estimativo</h2>
+
+    <div class="pipeline-grid">
+      <div class="pipeline-step">
+        <div class="pipeline-icon">📋</div>
+        <strong>Cargar Plantilla</strong>
+        <span>from-template (JSON v1.0–v1.3)</span>
+      </div>
+
+      <div class="pipeline-step">
+        <div class="pipeline-icon">⚙️</div>
+        <strong>Instanciar CSI</strong>
+        <span>Capítulos + Partidas</span>
+      </div>
+
+      <div class="pipeline-step">
+        <div class="pipeline-icon">🔢</div>
+        <strong>Bucketing 3-vías</strong>
+        <span>MO + MA + Matriz</span>
+      </div>
+
+      <div class="pipeline-step">
+        <div class="pipeline-icon">💰</div>
+        <strong>Costo Base</strong>
+        <span>PU = base × (1 + SC%)</span>
+      </div>
+
+      <div class="pipeline-step">
+        <div class="pipeline-icon">📊</div>
+        <strong>Takeoff</strong>
+        <span>Manual / Revit / Diseño</span>
+      </div>
+
+      <div class="pipeline-step">
+        <div class="pipeline-icon">📈</div>
+        <strong>Recalcular</strong>
+        <span>Total = Qty × PU</span>
+      </div>
+
+      <div class="pipeline-step">
+        <div class="pipeline-icon">☁️</div>
+        <strong>Overhead</strong>
+        <span>Admin + Util + IV + IVA</span>
+      </div>
+
+      <div class="pipeline-step">
+        <div class="pipeline-icon">📄</div>
+        <strong>Export</strong>
+        <span>PDF, XLSX, Portal</span>
+      </div>
+    </div>
+
+    <div class="callout" style="margin-top: 30px; padding: 15px; background: #fffbf0;">
+      <strong>Aritmética garantizada</strong>
+      <span>Decimal(str) + ROUND_HALF_UP a 4 dp en boundaries de escritura. Sin drift float en re-cálculos sucesivos.</span>
+    </div>
+  </div>
+
+  <!-- DEPLOYMENT -->
+  <div class="content-section">
+    <h2>Deployment Local</h2>
+
+    <p style="color: var(--text-dim); margin-bottom: 20px; line-height: 1.7;">
+      EstimaStruct está optimizado para ejecución local en Windows 11. Coordina dos procesos (FastAPI + Flask), PostgreSQL y opcionales (Revit MCP, ETABS).
+    </p>
+
+    <div class="code-block">
+START_POSTGRES_UNICA.ps1
+  ├─ git pull origin main
+  ├─ Lee D:\Secrets\postgres_credentials.txt
+  ├─ export ESTIMASTRUCT_DATABASE_URL=postgresql+psycopg://...
+  └─ START_UNICA.ps1
+        ├─ Kill-Port 5000 / 8002 (recursivo)
+        ├─ Borra __pycache__ (limpieza)
+        ├─ Verifica deps
+        ├─ Job "back": uvicorn backend.main:app :8002
+        └─ Job "front": python ESTIMASTRUCT/app.py :5000
+    </div>
+
+    <p style="color: var(--red-warn); font-weight: 600; margin-top: 15px;">⚠️ No usar START_UNICA.ps1 directo — levanta SQLite legacy sin variables de Postgres.</p>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <h3>EstimaStruct</h3>
+  <p>Ingeniería · Estimación · Auditoría · Presupuesto</p>
+  <p>
+    By <a href="https://consuconstruct.com" target="_blank">ConsuConstruct</a> —
+    <a href="https://github.com/ConsuConstructBot/ESTIMASTRUCT" target="_blank">GitHub</a>
+  </p>
+  <p style="margin-top: 20px; font-size: 0.9em; color: #aaa;">
+    © 2026 ConsuConstruct. Código abierto, diseñado para ingeniería real.
+  </p>
+</div>
+
+</body>
+</html>

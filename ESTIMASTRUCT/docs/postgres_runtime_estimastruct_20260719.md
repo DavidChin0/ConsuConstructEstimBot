@@ -1,6 +1,11 @@
 > [!CONTEXT]
 > Runtime PostgreSQL primario de EstimaStruct con compatibilidad explícita de snapshot SQLite.
 
+> [!WARNING]
+> **DEPRECADO 2026-07-21.** Estado actual vive en [`docs/architecture.md §3`](architecture.md).
+> Cubre: §3.2 Container Table (PostgreSQL) + §9 ADR-002.
+> Este archivo es registro histórico — no actualizar.
+
 # EstimaStruct — PostgreSQL primario + SQLite de compatibilidad
 
 ## Estado al 2026-07-19

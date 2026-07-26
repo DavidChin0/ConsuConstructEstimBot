@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matriz - ESTIMASTRUCT</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            text-align: center;
+            font-size: 2em;
+        }
+
+        header nav {
+            text-align: center;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        header nav a {
+            color: white;
+            text-decoration: none;
+        }
+
+        header nav a:hover {
+            text-decoration: underline;
+        }
+
+        .section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .section h2 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+            border-bottom: 2px solid #2980b9;
+            padding-bottom: 10px;
+        }
+
+        .ficha-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+        }
+
+        .ficha-field {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .ficha-field .label {
+            font-size: 0.8em;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .ficha-field .value {
+            font-size: 1.1em;
+            color: #2c3e50;
+        }
+
+        .ficha-field .value.total {
+            font-weight: bold;
+            color: #2980b9;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        th {
+            background: #ecf0f1;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        tr:hover {
+            background: #f9f9f9;
+        }
+
+        .tag {
+            display: inline-block;
+            background: #ecf0f1;
+            color: #2c3e50;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .loading, .empty {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+
+        .error-box {
+            text-align: center;
+            padding: 40px;
+            color: #c0392b;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Matriz <span id="tituloCodigo"></span></h1>
+            <nav>
+                <a href="/matrices">← Volver a Matrices</a> ·
+                <a href="/">Dashboard</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <div id="contenido">
+            <div class="section">
+                <div class="loading">Cargando...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const MATRIZ_ID = {{ matriz_id }};
+
+        function fmtMoney(n) {
+            return '$' + (Number(n) || 0).toFixed(2);
+        }
+
+        async function cargarMatriz() {
+            const contenido = document.getElementById('contenido');
+            try {
+                const res = await fetch(`/api/matriz/${MATRIZ_ID}`);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const matriz = await res.json();
+
+                if (!matriz || !matriz.id) {
+                    contenido.innerHTML = `
+                        <div class="section">
+                            <div class="empty">No se encontró la matriz #${MATRIZ_ID}.</div>
+                        </div>`;
+                    return;
+                }
+
+                document.title = `Matriz ${matriz.codigo_matriz} - ESTIMASTRUCT`;
+                document.getElementById('tituloCodigo').textContent = matriz.codigo_matriz || '';
+
+                const recursos = matriz.recursos || [];
+                const filas = recursos.length
+                    ? recursos.map(r => `
+                        <tr>
+                            <td><span class="tag">${r.tipo_recurso || ''}</span></td>
+                            <td>${r.codigo || ''}</td>
+                            <td>${r.descripcion || ''}</td>
+                            <td>${r.rendimiento ?? ''}</td>
+                            <td>${r.unidad_recurso || ''}</td>
+                            <td>${fmtMoney(r.precio_unitario)}</td>
+                            <td><strong>${fmtMoney(r.precio_total)}</strong></td>
+                        </tr>`).join('')
+                    : `<tr><td colspan="7" class="empty">Esta matriz no tiene recursos asociados.</td></tr>`;
+
+                contenido.innerHTML = `
+                    <div class="section">
+                        <h2>Ficha de la matriz</h2>
+                        <div class="ficha-grid">
+                            <div class="ficha-field">
+                                <span class="label">Código</span>
+                                <span class="value">${matriz.codigo_matriz || ''}</span>
+                            </div>
+                            <div class="ficha-field">
+                                <span class="label">Descripción</span>
+                                <span class="value">${matriz.descripcion || ''}</span>
+                            </div>
+                            <div class="ficha-field">
+                                <span class="label">Unidad</span>
+                                <span class="value">${matriz.unidad_matriz || ''}</span>
+                            </div>
+                            <div class="ficha-field">
+                                <span class="label">Mo Unitario</span>
+                                <span class="value">${fmtMoney(matriz.mo_unitario)}</span>
+                            </div>
+                            <div class="ficha-field">
+                                <span class="label">Ma Unitario</span>
+                                <span class="value">${fmtMoney(matriz.ma_unitario)}</span>
+                            </div>
+                            <div class="ficha-field">
+                                <span class="label">Total Unitario</span>
+                                <span class="value total">${fmtMoney(matriz.total_unitario)}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h2>Recursos (${recursos.length})</h2>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Tipo</th>
+                                    <th>Código</th>
+                                    <th>Descripción</th>
+                                    <th>Rendimiento</th>
+                                    <th>Unidad</th>
+                                    <th>Precio Unitario</th>
+                                    <th>Precio Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>${filas}</tbody>
+                        </table>
+                    </div>`;
+            } catch (error) {
+                console.error('Error cargando matriz:', error);
+                contenido.innerHTML = `
+                    <div class="section">
+                        <div class="error-box">Error al cargar la matriz: ${error.message}</div>
+                    </div>`;
+            }
+        }
+
+        cargarMatriz();
+    </script>
+</body>
+</html>

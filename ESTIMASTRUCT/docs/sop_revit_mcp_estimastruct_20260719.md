@@ -1,6 +1,11 @@
 > [!CONTEXT]
 > SOP canónico de integración EstimaStruct ↔ Revit MCP al 2026-07-19. Aterriza el flujo real de catálogo, keynotes, schedules, auditoría y write asistido.
 
+> [!WARNING]
+> **DEPRECADO 2026-07-21.** Estado actual vive en [`docs/architecture.md §8`](architecture.md).
+> Cubre integración Revit MCP Broker — ver §8 Connections + §5.2 Flow Import Revit.
+> Este archivo es registro histórico — no actualizar.
+
 # SOP — EstimaStruct ↔ Revit MCP 2026-07-19
 
 ## 1. Propósito

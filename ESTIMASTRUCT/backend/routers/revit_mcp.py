@@ -103,30 +103,38 @@ def _read_ironpython_code(script_filename: str) -> str:
     return m.group(1)
 
 
+def _run_cmd_blocking(cmd: list[str], cwd: str) -> dict:
+    """Corre el comando de forma síncrona (subprocess.run clásico).
+
+    NO usar asyncio.create_subprocess_exec aquí: uvicorn con --reload en Windows
+    fuerza asyncio.SelectorEventLoop (ver uvicorn/loops/asyncio.py, use_subprocess=True
+    cuando hay reloader), y SelectorEventLoop NO implementa creación de subprocesos en
+    Windows → asyncio.create_subprocess_exec revienta con NotImplementedError en TODO
+    boton "Ejecutar" de scripts Python (confirmado 2026-07-26 vía backend/logs/errors.jsonl).
+    subprocess.run corre en un thread del pool (asyncio.to_thread) y no depende del
+    loop del proceso, así que funciona sin importar qué event loop use uvicorn.
+    """
+    try:
+        proc = subprocess.run(
+            cmd, cwd=cwd,
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+            timeout=120,
+        )
+        text = proc.stdout.decode("utf-8", errors="replace")
+        return {"ok": proc.returncode == 0, "output": text, "returncode": proc.returncode}
+    except subprocess.TimeoutExpired as e:
+        text = (e.output or b"").decode("utf-8", errors="replace")
+        return {"ok": False, "output": text, "error": "Timeout (120s) ejecutando el script."}
+
+
 async def _run_python_module(module: str, extra_args: list[str] = None) -> dict:
     cmd = [PYTHON, "-m", module] + (extra_args or [])
-    proc = await asyncio.create_subprocess_exec(
-        *cmd,
-        cwd=str(_REPO),
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.STDOUT,
-    )
-    stdout, _ = await asyncio.wait_for(proc.communicate(), timeout=120)
-    text = stdout.decode("utf-8", errors="replace")
-    return {"ok": proc.returncode == 0, "output": text, "returncode": proc.returncode}
+    return await asyncio.to_thread(_run_cmd_blocking, cmd, str(_REPO))
 
 
 async def _run_python_file(filepath: str, cwd: str = None, extra_args: list = None) -> dict:
     cmd = [PYTHON, filepath] + (extra_args or [])
-    proc = await asyncio.create_subprocess_exec(
-        *cmd,
-        cwd=cwd or str(_REPO),
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.STDOUT,
-    )
-    stdout, _ = await asyncio.wait_for(proc.communicate(), timeout=120)
-    text = stdout.decode("utf-8", errors="replace")
-    return {"ok": proc.returncode == 0, "output": text, "returncode": proc.returncode}
+    return await asyncio.to_thread(_run_cmd_blocking, cmd, cwd or str(_REPO))
 
 
 # ──────────────────────────────────────────────
@@ -143,6 +151,10 @@ async def get_status():
         "mcp_running": mcp_up,
         "mcp_url": mcp_http.MCP_URL,
         "revit_status": revit_status,
+        # Rutas/comando manual/último error de arranque — siempre incluido (barato:
+        # solo os.path.exists), el frontend decide cuándo mostrarlo (Pedido Director
+        # 2026-07-26: "si el MCP no es detectado, tiene que decir dónde está").
+        "diagnostics": mcp_http.get_diagnostics(),
     }
 
 
@@ -233,6 +245,19 @@ async def inject_script(name: str, body: InjectRequest = None):
 # ──────────────────────────────────────────────
 # PYTHON SCRIPTS
 # ──────────────────────────────────────────────
+class ValidateUnitsRequest(BaseModel):
+    csv_path: str
+
+
+@router.post("/python/validate-units")
+async def validate_units_sin_obra(body: ValidateUnitsRequest):
+    """Ruta específica registrada ANTES de /python/{script}: 'validate-units' no vive
+    en _PYTHON_SCRIPTS (solo aplica vía /obras/{pid}/validate-units), así que sin esta
+    ruta el JS caía en el catch-all y devolvía 404 'not in catalog' cuando no hay obra
+    activa seleccionada (validate_units.py no usa el pid de todas formas)."""
+    return await _run_python_module("backend.scripts_runner.validate_units", [body.csv_path])
+
+
 @router.post("/python/{script}")
 async def run_python_script(script: str):
     if script not in _PYTHON_SCRIPTS:

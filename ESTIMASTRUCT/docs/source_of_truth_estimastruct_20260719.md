@@ -1,9 +1,16 @@
 > [!CONTEXT]
 > Fuente viva canónica de EstimaStruct al 2026-07-19. Este documento consolida la verdad operativa del sistema a partir de código real, RAG y documentación auditada.
 
+> [!WARNING]
+> **DEPRECADO 2026-07-21.** Estado actual vive en [`docs/architecture.md`](architecture.md).
+> Secciones cubiertas: §1 Context, §2 Goal, §3 Containers, §5 Principios.
+> Este archivo es registro histórico — no actualizar.
+
 # EstimaStruct — Source of Truth 2026-07-19
 
 ## 1. Qué documento manda
+
+> ⚠️ **2026-07-21:** `docs/architecture.md` es ahora #1 — este doc es histórico.
 
 Desde el 2026-07-19, la jerarquía viva de verdad para EstimaStruct queda así:
 

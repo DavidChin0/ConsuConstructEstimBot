@@ -16,6 +16,14 @@ import requests
 ESTIMASTRUCT_PATH = os.path.dirname(os.path.abspath(__file__))
 FRONTEND_PATH = os.path.join(os.path.dirname(ESTIMASTRUCT_PATH), "frontend")
 
+# Assets 3D del viewer (GLB + texturas 2K + furniture + HDRI): ~193 MB de binarios.
+# Viven FUERA del repo desde 2026-07-26 para no inflar el historial de git de forma
+# permanente. Override por env si se mueven de lugar; el fallback es la ruta vieja
+# dentro del repo (frontend/viewer), que sigue funcionando si alguien los deja ahi.
+VIEWER_ASSETS_PATH = os.environ.get("ESTIMASTRUCT_VIEWER_ASSETS", r"D:\GitHub\3d Viewer assets")
+if not os.path.isdir(VIEWER_ASSETS_PATH):
+    VIEWER_ASSETS_PATH = os.path.join(FRONTEND_PATH, "viewer")
+
 app = Flask(__name__,
             template_folder=ESTIMASTRUCT_PATH + "/templates",
             static_folder=FRONTEND_PATH)
@@ -147,6 +155,18 @@ def _render_front():
 def index():
     """Home - Dashboard (PRODUCCION)"""
     return _render_front()
+
+
+@app.route('/features')
+def features():
+    """Features & Modules showcase"""
+    return render_template('features.html')
+
+
+@app.route('/monitoring')
+def monitoring():
+    """Monitoreo de errores/estado del sistema (consume /__api__/diagnostics/*)"""
+    return render_template('monitoring.html')
 
 
 @app.route('/api/matrices')
@@ -291,8 +311,11 @@ def viewer_page():
 
 @app.route('/static/viewer/<path:filename>')
 def serve_viewer_static(filename):
-    """Serve PolyHaven HDRIs and textures for the 3D viewer."""
-    return send_from_directory(os.path.join(FRONTEND_PATH, 'viewer'), filename)
+    """Sirve los assets 3D del viewer (GLB, texturas PolyHaven, furniture, HDRI).
+
+    Desde 2026-07-26 viven fuera del repo — ver VIEWER_ASSETS_PATH arriba.
+    """
+    return send_from_directory(VIEWER_ASSETS_PATH, filename)
 
 
 @app.route('/__save_shot', methods=['POST'])

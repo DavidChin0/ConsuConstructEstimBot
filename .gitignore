@@ -32,3 +32,7 @@ EXPORTS/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Assets 3D del viewer (GLB, texturas 2K, furniture, HDRI) ~193MB
+# Viven fuera del repo: "D:/GitHub/3d Viewer assets" (override: ESTIMASTRUCT_VIEWER_ASSETS)
+ESTIMASTRUCT/frontend/viewer/
