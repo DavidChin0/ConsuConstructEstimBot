@@ -12,5 +12,12 @@ EXPORTS/
 .env*
 *.bak_*
 *.bak
-frontend/viewer/hdri/
+# Assets 3D del viewer (GLB + texturas 2K + furniture + HDRI, ~193 MB) viven
+# fuera del repo desde 2026-07-26 (D:\GitHub\3d Viewer assets) para no inflar
+# el historial de git. Esta regla cubre el directorio COMPLETO por si alguien
+# lo recrea localmente como fallback (ver VIEWER_ASSETS_PATH en app.py) — antes
+# solo estaba ignorado frontend/viewer/hdri/, así que cualquier textura/GLB
+# nuevo en frontend/viewer/ (fuera de hdri/) NO estaba protegido y se podía
+# volver a trackear por accidente.
+frontend/viewer/
 docs/architecture_investigation.json
