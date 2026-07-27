@@ -87,8 +87,14 @@ _PYTHON_SCRIPTS = {
     },
     "viewer-postprocess": {
         "module": "backend.scripts_runner.viewer_postprocess",
-        "label":  "Viewer Post-process",
-        "desc":   "Convierte OBJ exports a GLB y escribe scene_index.json enriquecido con datos del Full Dump (levels, rooms, materials_full, project_info).",
+        "label":  "Viewer Post-process (OBJ, legacy)",
+        "desc":   "LEGACY — convierte OBJ exports a GLB. El export OBJ de Revit fusiona geometría y pierde el ElementId, así que el GLB queda sin identidad por elemento. Usar 'Viewer IFC → GLB' en su lugar.",
+        "args":   [],
+    },
+    "viewer-ifc-glb": {
+        "module": "backend.scripts_runner.viewer_ifc_pipeline",
+        "label":  "Viewer IFC → GLB",
+        "desc":   "Exporta el modelo abierto a IFC4 vía MCP y lo convierte a GLB con un nodo por elemento (nombre = ElementId) y keynote/categoría/nivel horneados en los extras. Reemplaza el pipeline OBJ. Requiere Revit abierto + MCP online.",
         "args":   [],
     },
 }
