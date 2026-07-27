@@ -2458,7 +2458,13 @@ function showInfo(mesh){
   // ── NOTE TAB ──
   {
     const noteDiv  = document.getElementById('info-tab-note');
-    const noteKey  = `note_${(props.id || mesh.name || '').replace(/\W/g,'_')}`;
+    // Fix 2026-07-26 (pipeline IFC): props.id llega como number (ElementId crudo del
+    // cross-ref por dump), no string — .replace() sobre un number tira TypeError acá
+    // y aborta showInfo() ANTES de llegar a show($infoPanel) al final de la función,
+    // así que el panel de info se quedaba invisible en TODO click (confirmado en vivo).
+    // Las otras 2 lecturas de props.id (~2211, ~2453) ya envolvían en String(); esta
+    // era la única que no.
+    const noteKey  = `note_${String(props.id || mesh.name || '').replace(/\W/g,'_')}`;
     const saved    = localStorage.getItem(noteKey) || '';
     noteDiv.innerHTML = `
       <div style="font-size:9px;color:var(--text3);margin-bottom:5px">
@@ -10585,11 +10591,21 @@ function frameMeshes(meshList) {
   const cam = scene.activeCamera;
   if (!cam || !meshList || !meshList.length) return;
 
-  // Exclude terrain/topography — they bloat AABB and push camera too far
+  // Exclude terrain/topography — they bloat AABB and push camera too far.
+  // Fix 2026-07-26 (pipeline IFC): antes solo miraba m.name, que alcanzaba porque
+  // el exportador OBJ viejo ponía nombres descriptivos ("Sólido topográfico...").
+  // El pipeline IFC nuevo nombra los meshes con el ElementId pelado (p.ej. "2497786")
+  // a propósito (para el cross-ref por instById) — así que el filtro por nombre dejó
+  // de matchear cualquier cosa. Confirmado en vivo: 0/249 meshes cruzaban el filtro,
+  // y el sólido topográfico real (270×210×97m) se colaba en el framing, inflando
+  // cam.radius a 340m+ y encuadrando el sitio en vez del edificio. Ahora también
+  // mira _revitProps.category/.type — poblado por el cross-ref del dump ANTES de
+  // este punto (loadGlb() ~línea 2735) — que sigue siendo texto descriptivo.
   const _TERRAIN_KW = ['terreno','topograf','terrain','ground_mesh','topo'];
+  const _isTerrainKw = s => _TERRAIN_KW.some(k => (s || "").toLowerCase().includes(k));
   const building = meshList.filter(m => {
-    const n = (m.name||"").toLowerCase();
-    const hasTerrain = _TERRAIN_KW.some(k => n.includes(k));
+    const rp = m._revitProps || {};
+    const hasTerrain = _isTerrainKw(m.name) || _isTerrainKw(rp.category) || _isTerrainKw(rp.type);
     try { return !hasTerrain && m.getTotalVertices && m.getTotalVertices() > 0; }
     catch(_){ return false; }
   });
