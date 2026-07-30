@@ -4,7 +4,7 @@ import sys, os
 from backend.db import get_db
 from backend.models import Presupuesto, Capitulo, Partida, ConfigPresupuesto, InsumoPartida
 from decimal import Decimal
-from backend.services.pricing import recalcular_partida, rebucket_insumos, quantize_money
+from backend.services.pricing import recalcular_partida, rebucket_insumos, quantize_money, calc_base
 
 router = APIRouter(tags=["calculos"])
 
@@ -73,25 +73,26 @@ def reporte(pid: str, db: Session = Depends(get_db)):
     sobrecosto = float(cfg.sobrecosto) if cfg and cfg.sobrecosto is not None else 20.0
 
     costo_directo = 0.0
+    total_real = 0.0
     capitulos_out = []
     for cap in p.capitulos:
-        cap_total = sum(float(pa.total or 0) for pa in cap.partidas)
-        costo_directo += cap_total
-        capitulos_out.append({"clave": cap.clave, "nombre": cap.nombre, "total": cap_total})
+        cap_directo = sum(float(pa.cantidad or 0) * calc_base(pa.costo_mo, pa.costo_ma, pa.unitario_matriz) for pa in cap.partidas)
+        cap_total = sum(float(pa.total or 0) for pa in cap.partidas)  # partida.total YA incluye sobrecosto (pricing.recalcular_partida)
+        costo_directo += cap_directo
+        total_real += cap_total
+        capitulos_out.append({"clave": cap.clave, "nombre": cap.nombre, "costo_directo": cap_directo, "total": cap_total})
 
     indirectos_detalle = {}
-    factor = 1.0
     if cfg:
         pct = float(cfg.sobrecosto or 0)
         indirectos_detalle["sobrecosto"] = {"pct": pct, "monto": costo_directo * pct / 100}
-        factor += pct / 100
 
     return {
         "nombre": p.nombre,
         "moneda": p.moneda,
         "sobrecosto": sobrecosto,
         "costo_directo": costo_directo,
-        "total_con_indirectos": costo_directo * factor,
+        "total_con_indirectos": total_real,
         "indirectos": indirectos_detalle,
         "capitulos": capitulos_out,
     }
