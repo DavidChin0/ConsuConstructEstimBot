@@ -29,6 +29,7 @@ from backend.services.perfiles_memoria import memoria_props_seccion, catalogo_pe
 from backend.services.unidades_memoria import memoria_factores_unidad
 from backend.services.predimensionar_memoria import memoria_predimensionar
 from backend.services.acero_ficha_memoria import memoria_agregacion_ficha
+from backend.services.placas_base_memoria import memoria_placa_base_envolvente
 
 router = APIRouter(prefix="/auditoria", tags=["auditoria-formulas"])
 
@@ -100,13 +101,17 @@ def resumen():
              "endpoint": "POST /auditoria/acero-ficha/memoria-rapida",
              "pasos": 12, "modulo": "auditoria", "nuevo_2026_07_31": True,
              "flag": "✔ la regla silenciosa 'perfil dual sin rol ⇒ COLUMNA', la envolvente D/C que descarta N−1 miembros y el acero no mapeado que no se presupuesta ahora se ven"},
+            {"id": "placasbase", "nombre": "Placas base §J8 (envolvente ETABS por pedestal)",
+             "archivo": "backend/services/placas_base_memoria.py",
+             "endpoint": "POST /auditoria/placas-base/memoria-rapida · POST /auditoria/placas-base/{pid}/memoria",
+             "pasos": 1, "modulo": "auditoria", "nuevo_2026_07_31": True,
+             "flag": "✔ REUSA memoria_conexion (calculo_conexion_acero.py) — el §J8 de la placa YA estaba narrado; lo único ciego era la envolvente: qué combo de ETABS ganó y cuántos se descartaron. Último módulo del mapa, cierra goal-19691."},
         ],
         "ciegos_pendientes": [
-            {"archivo": "backend/routers/acero_diseno.py", "dominio": "Placas base masivas (envolvente D/C por pedestal) — reusar memoria_conexion existente", "riesgo": "bajo"},
             {"archivo": "backend/routers/export.py:399-400", "dominio": "Split 2-vías para display Excel (contradice el modelo 3-vías real, no escribe a BD)", "riesgo": "bajo"},
             {"archivo": "backend/routers/conexion_acero.py", "dominio": "Falta GET /conexiones/{cid}/memoria — la conexión PERSISTIDA no es auditable, sólo la calculadora en vivo", "riesgo": "bajo"},
         ],
-        "fuente": "docs/auditoria_formulas_mapa_estructura.md (2026-07-27) · tanda 2 cerrada 2026-07-31",
+        "fuente": "docs/auditoria_formulas_mapa_estructura.md (2026-07-27) · tanda 2 cerrada 2026-07-31 (placas base ultimo modulo, goal-19691)",
     }
 
 
@@ -461,5 +466,137 @@ def acero_ficha_memoria_rapida(body: AceroFichaRapida):
     try:
         return memoria_agregacion_ficha([m.model_dump() for m in body.miembros],
                                         meta_extra={"origen": "calculadora libre"})
+    except ValueError as ex:
+        raise HTTPException(status_code=422, detail=str(ex))
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 8) PLACAS BASE §J8 — routers/acero_diseno.py (envolvente ETABS por pedestal).
+#    RIESGO BAJO. Último módulo ciego del mapa (goal-19691) — REUSA
+#    memoria_conexion (calculo_conexion_acero.py) para el combo gobernante;
+#    lo único propio de esta sección es exponer la envolvente misma.
+# ─────────────────────────────────────────────────────────────────────────────
+class ReaccionRapida(BaseModel):
+    """Una fila de Joint Reactions de ETABS, ya en el formato de
+    seccion_ficha.parse_reacciones_texto (o pegada directo por el usuario)."""
+    combo: str = ""
+    FX: float = 0.0
+    FY: float = 0.0
+    FZ: float = 0.0
+
+
+class PlacaBaseRapida(BaseModel):
+    """Calculadora en vivo — UN pedestal + sus reacciones ya filtradas al
+    joint. NO toca la BD. Defaults = pedestal P1 real de la obra de referencia
+    (Auto v1.1 03 31 00.20, 40x40, W250X49 sobre C1/C9) con 2 combos DEAD/SISMO
+    de ejemplo, para que el usuario vea la envolvente funcionando de entrada."""
+    pedestal:       str   = "P1"
+    joint:          str   = "101"
+    perfil_columna: str   = "W250X49"
+    acero:          str   = "A992"
+    fc_kg_cm2:      float = 210.0
+    lado_cm:        float = 40.0
+    A2_cm2:         float = 0.0
+    t_placa_cm:     float = 1.9
+    B_placa_cm:     float = 0.0
+    N_placa_cm:     float = 0.0
+    unidad:         str   = "kgf"
+    reacciones: list[ReaccionRapida] = [
+        ReaccionRapida(combo="DEAD",  FX=200,  FY=150,  FZ=-18000),
+        ReaccionRapida(combo="SISMO", FX=3200, FY=2600, FZ=-24500),
+    ]
+
+
+@router.post("/placas-base/memoria-rapida")
+def placas_base_memoria_rapida(body: PlacaBaseRapida):
+    """Narra §J8 de UN pedestal con reacciones tecleadas a mano: corre la
+    misma envolvente que `POST /diseno/{pid}/placas-base-etabs` (mayor DC
+    entre TODOS los combos) y narra el combo gobernante con `memoria_conexion`
+    — el motor real de conexiones, no una copia. NO toca la BD."""
+    spec = {
+        "pedestal": body.pedestal, "joint": body.joint,
+        "perfil_columna": body.perfil_columna, "acero": body.acero,
+        "fc_kg_cm2": body.fc_kg_cm2, "lado_cm": body.lado_cm, "A2_cm2": body.A2_cm2,
+        "t_placa_cm": body.t_placa_cm, "B_placa_cm": body.B_placa_cm,
+        "N_placa_cm": body.N_placa_cm,
+    }
+    try:
+        return memoria_placa_base_envolvente(
+            spec, [r.model_dump() for r in body.reacciones], body.unidad,
+            meta_extra={"origen": "calculadora libre"})
+    except ValueError as ex:
+        raise HTTPException(status_code=422, detail=str(ex))
+
+
+class ReaccionRapidaJoint(ReaccionRapida):
+    """Igual que ReaccionRapida pero con `joint`, para poder filtrar la tabla
+    completa de Joint Reactions al pedestal que se está narrando (JSON, sin
+    pegar texto)."""
+    joint: str = ""
+
+
+class PlacaBaseMemoriaReal(BaseModel):
+    """Placas base de un pedestal REAL de la obra (geometría/f'c/perfil desde
+    DisenoElemento en BD) + reacciones pegadas por el usuario. Las reacciones
+    de ETABS NO se persisten en ningún lado del sistema (igual que en
+    `POST /diseno/{pid}/placas-base-etabs`), por eso se pegan aquí también —
+    la geometría sí es real, las reacciones son el mismo stateless import."""
+    pedestal:       str = ""     # type_mark del pedestal, ej. "P1"
+    joint:          str = ""     # joint de ETABS a filtrar de las reacciones
+    perfil_columna: str = ""     # override; si vacío usa el de las notas del pedestal
+    t_placa_cm:     float = 0.0
+    B_placa_cm:     float = 0.0
+    N_placa_cm:     float = 0.0
+    unidad:         str = "kgf"
+    texto:          str = ""     # Joint Reactions pegado (Joint,OutputCase,FX,FY,FZ,...)
+    reacciones: list[ReaccionRapidaJoint] = []
+
+
+@router.post("/placas-base/{pid}/memoria")
+def placas_base_memoria_real(pid: str, body: PlacaBaseMemoriaReal,
+                             db: Session = Depends(get_db)):
+    """Narra §J8 para UN pedestal REAL de la obra: geometría/f'c/perfil desde
+    `DisenoElemento` en BD (mismo parseo `_pedestal_de_elem` que usa el preseed
+    `GET /diseno/{pid}/pedestales-base`), reacciones pegadas por el usuario.
+    Read-only: no persiste nada, no llama `placas-base-etabs`."""
+    from backend.models import DisenoElemento
+    from backend.routers.acero_diseno import _pedestal_de_elem
+    from backend.seccion_ficha import parse_reacciones_texto
+
+    pres = db.query(Presupuesto).filter(Presupuesto.id == pid).first()
+    if not pres:
+        raise HTTPException(404, "Presupuesto no encontrado")
+
+    elems = db.query(DisenoElemento).filter(DisenoElemento.presupuesto_id == pid).all()
+    e = next((x for x in elems
+              if (x.type_mark or "").strip().upper() == body.pedestal.strip().upper()), None)
+    if not e:
+        raise HTTPException(404, f"Pedestal '{body.pedestal}' no encontrado en esta obra")
+
+    spec = _pedestal_de_elem(e)
+    spec["joint"] = body.joint
+    if body.perfil_columna:
+        spec["perfil_columna"] = body.perfil_columna
+    if body.t_placa_cm:
+        spec["t_placa_cm"] = body.t_placa_cm
+    if body.B_placa_cm:
+        spec["B_placa_cm"] = body.B_placa_cm
+    if body.N_placa_cm:
+        spec["N_placa_cm"] = body.N_placa_cm
+
+    if body.reacciones:
+        reacc_all = [r.model_dump() for r in body.reacciones]
+    elif (body.texto or "").strip():
+        reacc_all = parse_reacciones_texto(body.texto).get("reacciones") or []
+    else:
+        reacc_all = []
+    reacc = [r for r in reacc_all
+             if str(r.get("joint") or "").strip() == body.joint.strip()] if body.joint else reacc_all
+
+    try:
+        return memoria_placa_base_envolvente(
+            spec, reacc, body.unidad,
+            meta_extra={"presupuesto_id": pres.id, "presupuesto_nombre": pres.nombre,
+                        "origen": "pedestal real (BD) + reacciones pegadas"})
     except ValueError as ex:
         raise HTTPException(status_code=422, detail=str(ex))

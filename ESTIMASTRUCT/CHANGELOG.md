@@ -5,6 +5,13 @@
 
 # CHANGELOG - EstimaStruct
 
+## 2026-07-31 — Auditoría de fórmulas ciegas: CERRADA (7/7 módulos narrados)
+
+- [2026-07-31] [Sonnet]: Último módulo del mapa de auditoría — **Placas Base §J8** (`acero_diseno.py::pedestales_base/placas_base_etabs`). Confirmado y reusado `calculo_conexion_acero.py::memoria_conexion` (tipo `PLACA_BASE`) tal cual — lo único ciego era la **envolvente** de combos ETABS (Pu/Vu por combo, se retenía el de mayor DC sin exponer cuál ganó ni cuántos se descartaron, hallazgo C-08 del mapa). Nuevo `backend/services/placas_base_memoria.py::memoria_placa_base_envolvente()` corre la misma selección que producción y narra el combo gobernante + los descartados (ADR-003 respetado, no reimplementa §J8). Endpoints `POST /auditoria/placas-base/memoria-rapida` y `POST /auditoria/placas-base/{pid}/memoria`. Verificado en vivo contra pedestal real P5 de Casa StoneRaise (`b1fd0136-...`, perfil W6X16): 2 combos, gobierna SISMO DC=0.163, DEAD expuesto como descartado; error paths (sin perfil→422, pedestal inexistente→404) iguales a producción. `GET /auditoria/resumen`: módulo movido de `ciegos_pendientes` a `narrados`. Fix cosmético de paso: banner de banderas usaba mal `cumple_normativa`/`advertencias` y mostraba "✗ 0 banderas" en rojo con conexión que sí cumple.
+- [2026-07-31] [David]: Aprobado el prorrateo bancario (`export_pdf_memoria.py::prorrateo_banco`) — mismo cálculo de siempre (`valor_banco/total_real`), solo centralizado para que PDF y memoria narrada no diverjan. `meta.pendiente_aprobacion_director` → `False`.
+
+Con esto los 7 módulos ciegos de `docs/auditoria_formulas_mapa_estructura.md` quedan narrados: partidas (factores), cronograma, perfiles_acero, seccion_ficha, predimensionar, acero_ficha, placas_base. Auditoría de fórmulas cerrada.
+
 ## 2026-07-31 — Auditoría de Fórmulas, tanda 2: los 7 módulos ciegos restantes narrados (⚠ prorrateo bancario PENDIENTE DE APROBACIÓN DEL DIRECTOR)
 
 - [2026-07-31] [Opus 5]: Cerrada la lista de "módulos ciegos" de `docs/auditoria_formulas_mapa_estructura.md`. De los 10 ciegos originales (2026-07-27) quedaban 7 tras la tanda de pricing/calculos/mampostería; los 7 quedan narrados, con endpoint propio, wiring de frontend completo y verificación en vivo contra Postgres real. **Cobertura: 7 dominios narrados → 14.** `GET /auditoria/resumen` mueve los 7 de `ciegos_pendientes` a `narrados` (quedan 3 ciegos, todos de riesgo bajo, listados abajo).

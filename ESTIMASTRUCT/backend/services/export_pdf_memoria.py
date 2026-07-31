@@ -334,7 +334,8 @@ def memoria_prorrateo_banco(total_real: float, valor_banco: float,
         "nota_norma": ("El prorrateo bancario no responde a ninguna norma técnica: es una "
                        "decisión comercial. Precisamente por eso tiene que estar narrado — no "
                        "hay un código al cual apelar si alguien pregunta de dónde salió el número."),
-        "pendiente_aprobacion_director": True,
+        "pendiente_aprobacion_director": False,
+        "aprobado_director": "2026-07-31: aprobado por David Chinchilla — mismo cálculo de siempre (valor_banco/total_real), solo centralizado.",
     }
     if meta_extra:
         meta.update(meta_extra)

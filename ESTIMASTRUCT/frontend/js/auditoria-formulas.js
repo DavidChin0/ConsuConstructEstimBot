@@ -20,6 +20,19 @@ const auditoriaState = {
   partidaId: null,
   resumenCache: null,
   calculosCache: null,       // { pid, memoria }
+  // Placas base §J8 — envolvente ETABS por pedestal (reusa memoria_conexion).
+  placasSub: "calc",         // calc | real
+  placas: {
+    pedestal: "P1", joint: "101", perfil_columna: "W250X49", acero: "A992",
+    fc_kg_cm2: 210, lado_cm: 40, A2_cm2: 0, t_placa_cm: 1.9,
+    B_placa_cm: 0, N_placa_cm: 0, unidad: "kgf",
+  },
+  placasReacTexto: JSON.stringify([
+    { combo: "DEAD",  FX: 200,  FY: 150,  FZ: -18000 },
+    { combo: "SISMO", FX: 3200, FY: 2600, FZ: -24500 },
+  ], null, 1),
+  placasReal: { pid: null, pedestal: "", joint: "" },
+  placasPedestales: null,    // cache de GET /diseno/{pid}/pedestales-base
 };
 let auditoriaTimer = null;
 
@@ -75,6 +88,7 @@ const AUD_SEC_INTRO = {
   "Agrupación": "Se agrupa por (ficha, perfil normalizado, rol), no sólo por ficha: dos perfiles distintos que mapean a la misma ficha producen filas separadas.",
   "Envolvente D/C por ficha": "Cada ficha reporta UN D/C: el del miembro peor. Los otros N−1 miembros y sus combos desaparecen del reporte.",
   "Verificación": "Los checks que hasta 2026-07-31 no existían en ninguna parte. No verifican que el cálculo esté bien — verifican que no haya decisiones tomadas en silencio.",
+  "Envolvente ETABS": "Producción corre §J8 con Pu/Vu de CADA combo del joint y se queda con el de mayor DC — el usuario ve un solo número y no sabe qué combo lo produjo ni cuántos se descartó. El resto de la memoria (Materiales, Geometría, Demanda, Placa base §J8, Verificación) es memoria_conexion() sin tocar: el mismo motor de conexiones AISC §J que ya narraba la calculadora en vivo, no una fórmula nueva.",
 };
 
 function audValorHtml(p) {
@@ -990,6 +1004,180 @@ function audRenderAceroFicha() {
   audRecalcAceroFicha();
 }
 
+// ── VISTA: Placas base §J8 (envolvente ETABS por pedestal) ──────────────────
+// Reusa memoria_conexion (calculo_conexion_acero.py) para el combo gobernante
+// — lo único propio de esta vista es la lista de reacciones (JSON, igual que
+// acero-ficha) que alimenta la envolvente.
+function audPlacasSpecRow(k, l, u, step) {
+  const v = auditoriaState.placas[k];
+  return `<div style="display:flex;align-items:center;gap:6px;padding:3px 0">
+    <span style="min-width:150px;font-size:11px;color:var(--text-dim)">${esc(l)}</span>
+    <input data-audpb="${k}" type="${typeof v === "number" ? "number" : "text"}" step="${step || "any"}"
+      value="${esc(String(v === null || v === undefined ? "" : v))}"
+      style="width:130px;background:var(--bg);border:1px solid var(--accent);color:var(--text);padding:3px 6px;border-radius:3px;font-family:monospace;font-weight:600"/>
+    <span style="font-size:10px;color:var(--text-dim)">${esc(u || "")}</span>
+  </div>`;
+}
+
+async function audRecalcPlacasBase() {
+  const dev = document.getElementById("aud-placas-dev");
+  if (!dev) return;
+  let reacciones;
+  try {
+    reacciones = JSON.parse(auditoriaState.placasReacTexto);
+    if (!Array.isArray(reacciones)) throw new Error("Se espera una lista de reacciones.");
+  } catch (err) {
+    dev.innerHTML = `<div style="color:#e74c3c;font-size:12px">JSON inválido: ${esc(err.message)}</div>`;
+    return;
+  }
+  let m;
+  try {
+    m = await api("POST", "/auditoria/placas-base/memoria-rapida",
+      { ...auditoriaState.placas, reacciones });
+  } catch (err) { dev.innerHTML = `<div style="color:#e74c3c;font-size:12px">Error: ${esc(err.message)}</div>`; return; }
+  const sub = document.createElement("div");
+  renderMemoriaGenerica(sub, m);
+  dev.innerHTML = audBannerHtml(m.meta || {});
+  dev.appendChild(sub);
+}
+
+function audBindPlacasBaseInputs() {
+  document.querySelectorAll("#aud-placas-form input[data-audpb]").forEach(inp => {
+    inp.addEventListener("input", () => {
+      const k = inp.dataset.audpb;
+      const wasNum = typeof auditoriaState.placas[k] === "number";
+      auditoriaState.placas[k] = wasNum ? (parseFloat(inp.value) || 0) : inp.value;
+      clearTimeout(auditoriaTimer);
+      auditoriaTimer = setTimeout(audRecalcPlacasBase, 300);
+    });
+  });
+  const ta = document.getElementById("aud-placas-reac-txt");
+  if (ta) ta.addEventListener("input", () => {
+    auditoriaState.placasReacTexto = ta.value;
+    clearTimeout(auditoriaTimer);
+    auditoriaTimer = setTimeout(audRecalcPlacasBase, 400);
+  });
+}
+
+async function audRenderPlacasBaseReal() {
+  const wrap = document.getElementById("aud-placas-real-wrap");
+  if (!wrap) return;
+  const pres = audPresupuestosDisponibles();
+  if (!pres.length) {
+    wrap.innerHTML = `<div style="color:#e67e22;font-size:12px;padding:10px">No hay presupuesto activo. Abre un presupuesto en la pantalla principal y vuelve aquí.</div>`;
+    return;
+  }
+  const pid = pres[0].id;
+  auditoriaState.placasReal.pid = pid;
+  if (!auditoriaState.placasPedestales || auditoriaState.placasPedestales.pid !== pid) {
+    wrap.innerHTML = `<div style="color:var(--text-dim);font-size:12px;padding:10px">Cargando pedestales…</div>`;
+    try {
+      const r = await api("GET", `/diseno/${pid}/pedestales-base`);
+      auditoriaState.placasPedestales = { pid, peds: r.pedestales || [] };
+    } catch (err) {
+      wrap.innerHTML = `<div style="color:#e74c3c;font-size:12px">Error: ${esc(err.message)}</div>`;
+      return;
+    }
+  }
+  const peds = auditoriaState.placasPedestales.peds;
+  if (!peds.length) {
+    wrap.innerHTML = `<div style="color:#e67e22;font-size:12px;padding:10px">Esta obra no tiene pedestales (Pn) en Diseño Elemento.</div>`;
+    return;
+  }
+  const sel0 = auditoriaState.placasReal.pedestal || peds[0].pedestal;
+  auditoriaState.placasReal.pedestal = sel0;
+  const opts = peds.map(p => `<option value="${esc(p.pedestal)}" ${p.pedestal === sel0 ? "selected" : ""}>
+    ${esc(p.pedestal)} — ${esc(p.perfil_columna || "sin perfil")} · ${esc(p.notas || "")}</option>`).join("");
+  wrap.innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+      <span style="font-size:11px;color:var(--text-dim)">Pedestal real (BD):</span>
+      <select id="aud-placas-real-sel" style="min-width:280px;max-width:520px;background:var(--surface2);border:1px solid var(--accent);color:var(--text);padding:4px 8px;border-radius:3px;font-size:12px">${opts}</select>
+      <span style="font-size:11px;color:var(--text-dim)">joint ETABS:</span>
+      <input id="aud-placas-real-joint" type="text" value="${esc(auditoriaState.placasReal.joint)}"
+        style="width:90px;background:var(--bg);border:1px solid var(--accent);color:var(--text);padding:3px 6px;border-radius:3px;font-family:monospace"/>
+    </div>
+    <div style="border:1px solid var(--accent);border-radius:5px;padding:9px 12px;margin-bottom:12px;background:var(--surface)">
+      <div style="font-size:10px;font-weight:700;color:var(--accent);letter-spacing:.5px;margin-bottom:6px">JOINT REACTIONS (pegar tabla ETABS o dejar el JSON de ejemplo)</div>
+      <textarea id="aud-placas-real-txt" spellcheck="false" style="width:100%;height:120px;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:3px;font-family:monospace;font-size:11px;line-height:1.5">${esc(auditoriaState.placasReacTexto)}</textarea>
+      <div style="font-size:10px;color:var(--text-dim);margin-top:5px">Reacciones NO se persisten en ningún lado del sistema (igual que POST /diseno/{pid}/placas-base-etabs) — se pegan cada vez.</div>
+    </div>
+    <div id="aud-placas-real-dev" style="font-size:14px"></div>`;
+
+  const sel = document.getElementById("aud-placas-real-sel");
+  const jointInp = document.getElementById("aud-placas-real-joint");
+  const txt = document.getElementById("aud-placas-real-txt");
+  const load = async () => {
+    auditoriaState.placasReal.pedestal = sel.value;
+    auditoriaState.placasReal.joint = jointInp.value;
+    auditoriaState.placasReacTexto = txt.value;
+    const dev = document.getElementById("aud-placas-real-dev");
+    dev.innerHTML = `<div style="color:var(--text-dim);font-size:12px">Calculando…</div>`;
+    let reacciones;
+    try { reacciones = JSON.parse(txt.value); if (!Array.isArray(reacciones)) throw 0; }
+    catch (err) { dev.innerHTML = `<div style="color:#e74c3c;font-size:12px">JSON inválido en reacciones.</div>`; return; }
+    try {
+      const m = await api("POST", `/auditoria/placas-base/${pid}/memoria`, {
+        pedestal: sel.value, joint: jointInp.value, reacciones,
+      });
+      const sub = document.createElement("div");
+      renderMemoriaGenerica(sub, m);
+      dev.innerHTML = audBannerHtml(m.meta || {});
+      dev.appendChild(sub);
+    } catch (err) {
+      dev.innerHTML = `<div style="color:#e74c3c;font-size:12px">Error: ${esc(err.message)}</div>`;
+    }
+  };
+  sel.addEventListener("change", load);
+  jointInp.addEventListener("input", () => { clearTimeout(auditoriaTimer); auditoriaTimer = setTimeout(load, 350); });
+  txt.addEventListener("input", () => { clearTimeout(auditoriaTimer); auditoriaTimer = setTimeout(load, 400); });
+  load();
+}
+
+function audRenderPlacasBase() {
+  const c = document.getElementById("auditoria-content");
+  if (!c) return;
+  const sub = auditoriaState.placasSub;
+  c.innerHTML = `
+    <div style="padding:14px 16px;max-width:1000px">
+      <div style="display:flex;align-items:baseline;gap:9px;margin-bottom:9px;flex-wrap:wrap">
+        <span style="font-size:14px;font-weight:700;color:var(--text)">Placas base §J8 — envolvente ETABS por pedestal</span>
+        <span style="font-size:9px;font-weight:700;padding:1px 8px;border-radius:8px;background:#8a94a622;color:#8a94a6;border:1px solid #8a94a6">RIESGO BAJO</span>
+      </div>
+      <div style="font-size:11px;color:var(--text-dim);margin-bottom:12px;line-height:1.55">
+        Narra <code>routers/acero_diseno.py::placas_base_etabs</code>. Último módulo ciego del mapa de
+        auditoría — y el que menos costaba narrar: el §J8 de la placa YA lo narra
+        <code>memoria_conexion()</code> (calculadora de conexiones AISC §J). Lo único que faltaba era la
+        <b>envolvente</b>: producción corre §J8 con Pu=|FZ|/Vu=hypot(FX,FY) de <b>cada</b> combo del joint
+        y retiene el de mayor DC sin decir cuál ganó ni cuántos se descartaron. Esta vista corre la misma
+        envolvente y narra el combo gobernante con el motor real — no reimplementa nada.
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <button class="aud-placas-sub" data-sub="calc" style="font-size:12px;padding:5px 12px;border-radius:14px;cursor:pointer;border:1px solid ${sub === "calc" ? "var(--accent)" : "var(--border)"};background:${sub === "calc" ? "var(--accent)" : "var(--surface2)"};color:${sub === "calc" ? "#1a1a1a" : "var(--text)"};font-weight:700">🧮 Calculadora libre</button>
+        <button class="aud-placas-sub" data-sub="real" style="font-size:12px;padding:5px 12px;border-radius:14px;cursor:pointer;border:1px solid ${sub === "real" ? "var(--accent)" : "var(--border)"};background:${sub === "real" ? "var(--accent)" : "var(--surface2)"};color:${sub === "real" ? "#1a1a1a" : "var(--text)"};font-weight:700">📥 Pedestal real (BD)</button>
+      </div>
+      ${sub === "calc" ? `
+        <div id="aud-placas-form" style="border:1px solid var(--accent);border-radius:5px;padding:9px 12px;margin-bottom:12px;background:var(--surface)">
+          <div style="font-size:10px;font-weight:700;color:var(--accent);letter-spacing:.5px;margin-bottom:6px">PEDESTAL + PLACA — edita aquí</div>
+          <div style="display:flex;gap:26px;flex-wrap:wrap">
+            <div>${audPlacasSpecRow("pedestal", "pedestal", "")}${audPlacasSpecRow("joint", "joint ETABS", "")}${audPlacasSpecRow("perfil_columna", "perfil de columna", "")}${audPlacasSpecRow("acero", "acero", "")}${audPlacasSpecRow("unidad", "unidad reacciones", "kgf·kn·t")}</div>
+            <div>${audPlacasSpecRow("fc_kg_cm2", "f'c pedestal", "kgf/cm²")}${audPlacasSpecRow("lado_cm", "lado pedestal → A2", "cm")}${audPlacasSpecRow("t_placa_cm", "espesor placa", "cm")}${audPlacasSpecRow("B_placa_cm", "B placa (0=deriva)", "cm")}${audPlacasSpecRow("N_placa_cm", "N placa (0=deriva)", "cm")}</div>
+          </div>
+        </div>
+        <div style="border:1px solid var(--accent);border-radius:5px;padding:9px 12px;margin-bottom:12px;background:var(--surface)">
+          <div style="font-size:10px;font-weight:700;color:var(--accent);letter-spacing:.5px;margin-bottom:6px">REACCIONES DEL JOINT (JSON — combo/FX/FY/FZ, mismo formato del parser ETABS)</div>
+          <textarea id="aud-placas-reac-txt" spellcheck="false" style="width:100%;height:130px;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:3px;font-family:monospace;font-size:11px;line-height:1.5">${esc(auditoriaState.placasReacTexto)}</textarea>
+        </div>
+        <div id="aud-placas-dev" style="font-size:14px">cargando…</div>
+      ` : `<div id="aud-placas-real-wrap"></div>`}
+    </div>`;
+
+  c.querySelectorAll(".aud-placas-sub").forEach(b => b.addEventListener("click", () => {
+    auditoriaState.placasSub = b.dataset.sub; audRenderPlacasBase();
+  }));
+  if (sub === "calc") { audBindPlacasBaseInputs(); audRecalcPlacasBase(); }
+  else audRenderPlacasBaseReal();
+}
+
 // ── Shell / router de vistas ─────────────────────────────────────────────────
 function renderAuditoria() {
   const panel = document.getElementById("auditoria-view");
@@ -1001,6 +1189,7 @@ function renderAuditoria() {
   else if (v === "calculos") audRenderCalculos();
   else if (v === "mamposteria") audRenderMamposteria();
   else if (v === "aceroficha") audRenderAceroFicha();
+  else if (v === "placasbase") audRenderPlacasBase();
   else if (AUD_CALCS[v]) audRenderCalc(v);          // banco · cantidad · cronograma · perfil · unidades · predim
   else audRenderResumen();
 }
