@@ -1,0 +1,5 @@
+title: Borrar MEP Generado
+tooltip: Borra tuberias/conduit/cajas generados por Generate Layout y Conduit by Circuito, para regenerar limpio.
+author: EstimBot
+engine:
+  clean: true

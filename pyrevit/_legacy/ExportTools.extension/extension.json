@@ -1,0 +1,15 @@
+{
+    "builtin": "False",
+    "default_enabled": "True",
+    "type": "extension",
+    "rocket_mode_compatible": "True",
+    "name": "ExportTools",
+    "description": "EstimBot - Export Schedules y Conexiones de Acero para EstimAStruct",
+    "author": "David Chinchilla / ConsuConstruct",
+    "author_profile": "",
+    "url": "",
+    "website": "",
+    "image": "",
+    "templates": {},
+    "dependencies": []
+}
