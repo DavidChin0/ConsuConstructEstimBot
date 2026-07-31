@@ -9,6 +9,7 @@ from backend.db import get_db
 from backend.models import Capitulo, Partida, ConfigPresupuesto, DIVISIONES_CSI, InsumoPartida
 from backend.csi_utils import infer_csi, is_valid_csi
 from backend.services.pricing import recalcular_partida, calc_base, precio_unitario
+from backend.services.partidas_memoria import takeoff_cantidad
 
 router = APIRouter(tags=["partidas"])
 
@@ -68,6 +69,11 @@ class ClaveCsiIn(BaseModel):
 
 
 def _safe_factor(v, default=1.0):
+    """Comportamiento SIN CAMBIOS (un 0 se convierte en `default`, un negativo pasa).
+    Se conserva porque hay presupuestos vivos calculados con esta semántica.
+    Lo que cambió el 2026-07-31 es que ya no corre ciego: el takeoff pasa por
+    `services/partidas_memoria.takeoff_cantidad`, que devuelve `advertencias[]`
+    y alimenta `POST /auditoria/partidas/memoria-rapida` (ADR-003, fuente única)."""
     f = float(v or default)
     return f if f else default
 
@@ -155,10 +161,9 @@ def actualizar_revit_q(pid: str, data: RevitQIn, db: Session = Depends(get_db)):
     p = db.query(Partida).get(pid)
     if not p:
         raise HTTPException(404, "Partida no encontrada")
-    p.revit_q = math.ceil(float(data.revit_q or 0))
-    fe = _safe_factor(p.factor_e)
-    ff = _safe_factor(p.factor_f)
-    p.cantidad = p.revit_q * fe * ff
+    tk = takeoff_cantidad(data.revit_q, p.factor_e, p.factor_f)
+    p.revit_q = tk["revit_q"]
+    p.cantidad = tk["cantidad"]
     sobrecosto = _get_sobrecosto(p.capitulo_id, db)
     _calcular_partida(p, sobrecosto)
     db.commit()
@@ -167,6 +172,7 @@ def actualizar_revit_q(pid: str, data: RevitQIn, db: Session = Depends(get_db)):
         "revit_q": float(p.revit_q),
         "cantidad": float(p.cantidad),
         "total": float(p.total),
+        "advertencias": tk["advertencias"],   # aditivo — ver services/partidas_memoria.py
     }
 
 
@@ -181,12 +187,10 @@ def actualizar_factores(pid: str, data: FactoresIn, db: Session = Depends(get_db
         p.factor_f = data.factor_f
     if data.color_tipo is not None:
         p.color_tipo = data.color_tipo
-    # recalcular cantidad con nuevos factores
-    fe = _safe_factor(p.factor_e)
-    ff = _safe_factor(p.factor_f)
-    rq = math.ceil(float(p.revit_q or 0))
-    p.revit_q = rq
-    p.cantidad = rq * fe * ff
+    # recalcular cantidad con nuevos factores (motor único: partidas_memoria)
+    tk = takeoff_cantidad(p.revit_q, p.factor_e, p.factor_f)
+    p.revit_q = tk["revit_q"]
+    p.cantidad = tk["cantidad"]
     sobrecosto = _get_sobrecosto(p.capitulo_id, db)
     _calcular_partida(p, sobrecosto)
     db.commit()
@@ -197,6 +201,7 @@ def actualizar_factores(pid: str, data: FactoresIn, db: Session = Depends(get_db
         "color_tipo": p.color_tipo,
         "cantidad": float(p.cantidad),
         "total": float(p.total),
+        "advertencias": tk["advertencias"],   # aditivo — ver services/partidas_memoria.py
     }
 
 

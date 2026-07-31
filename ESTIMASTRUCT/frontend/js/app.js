@@ -2187,13 +2187,14 @@ function initModuloDropdown() {
   patchClose("btn-cerrar-acero-view");
   patchClose("btn-cerrar-conexion-view");
   patchClose("btn-cerrar-revit-mcp-view");
+  patchClose("btn-cerrar-auditoria-view");
 
   // Botón rápido MCP en la toolbar (abre panel + auto-start si está apagado)
   document.getElementById("btn-mcp-quick")?.addEventListener("click", mcpQuickOpen);
 }
 
 function setModuloActivo(m) {
-  ["diseno", "etabs", "acero", "conexion", "revit-mcp"].forEach(v => {
+  ["diseno", "etabs", "acero", "conexion", "revit-mcp", "auditoria"].forEach(v => {
     const el = document.getElementById(`${v}-view`);
     if (el) el.style.display = (v === m) ? "flex" : "none";
   });
@@ -2205,6 +2206,7 @@ function setModuloActivo(m) {
   if (m === "acero") renderAcero();
   if (m === "conexion") renderConexion();
   if (m === "revit-mcp") initRevitMcp();
+  if (m === "auditoria" && typeof renderAuditoria === "function") renderAuditoria();
 }
 
 

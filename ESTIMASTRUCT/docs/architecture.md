@@ -60,6 +60,16 @@ backend/
 ├── config.py             CONFIG dataclass (env-overridable paths)
 ├── services/
 │   ├── pricing.py        FUENTE ÚNICA calc_base / precio_unitario / rebucket_insumos
+│   ├── pricing_memoria.py    narra pricing.py (memoria_pricing) — Auditoría de Fórmulas, 2026-07-27
+│   ├── calculos_memoria.py   narra routers/calculos.py (memoria_calculos_presupuesto), expone bug doble sobrecosto
+│   ├── mamposteria_memoria.py    MOTOR takeoff_mamposteria + memoria (TMS 402-16) — reemplazó 2 constantes mágicas, 2026-07-27
+│   ├── export_pdf_memoria.py     MOTOR prorrateo_banco + memoria — factor bancario, residuo, margen implícito (2026-07-31) ⚠ pend. aprobación Director
+│   ├── partidas_memoria.py       MOTOR takeoff_cantidad + memoria — ceil + _safe_factor (0→1, negativos), advertencias[] (2026-07-31)
+│   ├── cronograma_memoria.py     narra cronograma.py — cascada de 4 fuentes + offsets de fase (2026-07-31)
+│   ├── perfiles_memoria.py       narra perfiles_acero.props_seccion — expone `fuente` tabla/derivada/hss (2026-07-31)
+│   ├── unidades_memoria.py       narra seccion_ficha.factores_unidad — fallback silencioso a kgf (2026-07-31)
+│   ├── predimensionar_memoria.py narra calculo_estructural.predimensionar — heurística ≠ ACI 318 (2026-07-31)
+│   ├── acero_ficha_memoria.py    narra acero_ficha.agregar_por_ficha — regla dual⇒COLUMNA, envolvente D/C (2026-07-31)
 │   ├── partidas_bridge.py
 │   ├── etabs_parse.py
 │   └── mcp_http.py       cliente HTTP contra Revit MCP :8100
@@ -76,6 +86,7 @@ backend/
 │   ├── portal_publish.py POST → Supabase REST
 │   ├── revit_mcp.py      inject IronPython, import quantities, keynotes
 │   ├── db_backup.py      export/import ZIP (portable Postgres↔SQLite)
+│   ├── auditoria_formulas.py  Auditoría de Fórmulas — 14 dominios narrados (2026-07-27 pricing/calculos/mampostería · 2026-07-31 los 7 ciegos restantes)
 │   └── memory.py / diagnostics.py / updater.py / scripts.py
 └── calculo_*.py          motores puros (sísmico CHOC-08, acero LRFD, conexiones §J)
 ```
@@ -202,6 +213,8 @@ FastAPI 0.111 + Pydantic 2.7. Sin autenticación (localhost only). CORS `*`. Pre
 | GET/POST/PUT/DELETE | `/insumos/*` | CRUD insumo con rebucket auto |
 | GET/POST | `/recursos/*` | catálogo maestro |
 | GET  | `/diseno/*` `/sismo/*` `/conexion/*` `/miembro-acero/*` | motores estructurales |
+| GET/POST | `/auditoria/resumen` \| `/auditoria/pricing/*` \| `/auditoria/calculos/{pid}/memoria` \| `/auditoria/mamposteria/memoria-rapida` | Auditoría de Fórmulas (2026-07-27) — narra pricing.py + calculos.py + mampostería |
+| GET/POST | `/auditoria/banco/*` \| `/cantidad/*` \| `/cronograma/*` \| `/perfil/*` \| `/unidades/*` \| `/predimensionar/*` \| `/acero-ficha/*` | Auditoría de Fórmulas tanda 2 (2026-07-31) — los 7 módulos ciegos restantes. Todos read-only; `/banco/{pid}/memoria` NO persiste `valor_banco` (a diferencia del export real) |
 | GET  | `/cronograma/{pid}` `/export-cronograma/{pid}` | Gantt |
 | GET  | `/export/{pid}` `/export-pdf/{pid}` `/preview-pdf/{pid}` `/export-pdf-html/{pid}` | outputs |
 | GET  | `/db/export-zip` \| POST `/db/import-zip` | backup portable |
@@ -275,6 +288,21 @@ Ninguna. Backend escucha solo en `127.0.0.1:8002`, frontend Flask en `127.0.0.1:
 - Rationale: cliente único → multi-tenant SaaS; agentes IA como interfaz primaria; OWASP Top 10.
 - Trade-offs: reescritura de auth, feature-flags multi-tenant, coste API LLM, complejidad MCP STDIO.
 
+**ADR-010: Expansión de scope CASE-SAAS-001 — MCP público, PDF→CAD, PDF→3D (2026-07-27).**
+- Decisión: se amplía el scope de CASE-SAAS-001 con tres iniciativas nuevas, y se reordena la ejecución en 9 fases con dependencias duras. Detalle completo en `docs/roadmap_case_saas_001_scope_v2.md`.
+  1. **MCP público para LLMs externos** — superficie comercial distinta del `estimastruct-mcp` interno (12 tools STDIO, 2026-07-26). Transporte HTTP/SSE (STDIO no sirve para acceso remoto multi-tenant), auth por API key o OAuth por tenant, rate limiting y billing por uso. Superficie v1 **solo lectura + cálculo dry-run**: las 3 tools de escritura del MCP interno no se exponen, porque el servidor no exige aprobación por sí mismo — ese gate lo pone hoy el cliente MCP local, garantía que no existe con un agente de terceros.
+  2. **PDF→CAD→estimación** — extracción de geometría y cantidades desde plano PDF, mapeo a fichas CSI. MVP acotado a **PDF vectorial**; escaneado queda como fase aparte con go/no-go tras medir precisión. Escribe a `partida.revit_q`, reusando el flujo de takeoff existente (no se crea flujo nuevo de presupuesto).
+  3. **PDF→3D vía Meshy** — pipeline PDF→imagen→Meshy→GLB al viewer Babylon existente. Requiere secret nuevo `MESHY_API_KEY`.
+- Rationale: el MCP público es la única de las tres que convierte capacidad existente en superficie vendible del SaaS. PDF→CAD es el único item del roadmap que abre mercado **no-BIM** (adopción BIM baja en LATAM debilita el diferenciador Revit para el prospecto promedio). PDF→3D es diferenciador de demo/pitch, no capacidad de ingeniería.
+- Trade-offs:
+  - **Orden no negociable `F0 → F1 → F2 → F4`**: exponer el MCP público antes de auth y multi-tenancy sería publicar una API que devuelve todas las obras de todos los clientes. Hoy hay 0 de 144 endpoints con autenticación y CORS `["*"]`.
+  - **F0 (estabilización) bloquea todo**: 0 tests en el repo sobre un motor de dinero que ya tuvo un bug de doble conteo en producción (2026-07-03), y una sola migración Alembic (`606c3f3a7b6b_baseline`) que impide provisionar una RDS limpia.
+  - **PDF→3D introduce riesgo de credibilidad**: una malla generada por IA no tiene identidad por elemento ni fidelidad dimensional, a diferencia del pipeline Revit→IFC→GLB (248/248 elementos matcheados). Mezclarlas sin distinción visual permitiría confundir dato BIM real con generación aproximada. Mitigación obligatoria: modo separado, marca visual permanente, y bloqueo funcional — un mesh Meshy no alimenta `revit_q` ni ninguna cantidad.
+  - **PDF→CAD introduce riesgo financiero**: una cantidad mal extraída es dinero mal presupuestado con apariencia de automatización confiable. Revisión humana obligatoria antes de aceptar cantidades.
+  - **Costo variable nuevo**: Meshy cobra por generación y el LLM por token — ambos requieren cuota/rate-limiting por tenant (F1/F8), no son costo fijo.
+  - **Timeline realista**: cadena crítica del SaaS vendible (F0→F1→F2→F4) = 14-19 semanas; scope completo de las 9 fases = 7-9 meses para un operador. Los ítems nuevos (2) y (3) son features desde cero, no gaps a cerrar.
+- Correcciones al estado documentado, verificadas contra código 2026-07-27: `§5.1` dice "11 endpoints puente Revit MCP" — hay **17** rutas en `routers/revit_mcp.py`. El import ETABS no es "solo combos de concreto" — son **5 endpoints** (concreto, acero ×2, conexiones, sismo); el gap real es que todos son upload de archivo unidireccional, sin conexión viva ni escritura de vuelta.
+
 ---
 
 ## 8. Deployment & Infrastructure
@@ -340,7 +368,8 @@ Alembic en `backend/alembic/`; `alembic upgrade head` requerido en Postgres (sch
 - SQLite legacy `estimastruct.db` aún sirve dashboard UI viejo; consolidar en Postgres pendiente.
 - Fichas JSON no propagan cambios a presupuestos ya instanciados (by-copy).
 - Alembic history debe auditarse vs `Base.metadata` — riesgo drift si `AUTO_CREATE_SCHEMA=true` en Postgres.
-- Sin tests unitarios formales del pipeline pricing (validación por auditoría manual de snapshots).
+- **Cero tests automatizados en el repo** (ni unitarios ni de integración): no existe `tests/`, `pytest.ini` ni CI. Toda validación es manual o por auditoría de snapshots. Es el bloqueo F0 del roadmap CASE-SAAS-001 §scope v2.
+- ✔ **[RESUELTO 2026-07-30, commit `0a7cbae`] Doble aplicación de sobrecosto en `/reporte`.** El hallazgo original (2026-07-27, vía `GET /auditoria/calculos/{pid}/memoria`): `/calcular` y `/reporte` llamaban "costo_directo" a dos cosas distintas — `/reporte` sumaba `partida.total` (que YA lleva sobrecosto) y volvía a multiplicar por `factor`. En "Casa StoneRaise" (sc=20%) daba Δ = L.328,435.49 (factor 1.44 = 1.2²). Corregido en `routers/calculos.py:75-92`: `reporte()` calcula `costo_directo` con `calc_base` (misma definición que `/calcular`) y devuelve `total_con_indirectos = Σ partida.total` sin re-aplicar el factor. **Re-verificado en vivo 2026-07-31** contra Postgres: Casa StoneRaise Δ = L.0.01 · CC132 Camilo (sc=25%) Δ = L.0.01 — residuo de redondeo, no doble aplicación.
 
 **Roadmap (CASE-SAAS-001 P0, ADR-007/008/009):**
 1. MCP STDIO `estimastruct-mcp` + Skill EstimaStruct full-system (Frente 1, prioridad inmediata).
@@ -358,4 +387,4 @@ Alembic en `backend/alembic/`; `alembic upgrade head` requerido en Postgres (sch
 
 ---
 
-*Última actualización: 2026-07-24. Próxima revisión: al cerrar Frente 1 de CASE-SAAS-001.*
+*Última actualización: 2026-07-27 (Auditoría de Fórmulas — pricing/calculos narrados). Próxima revisión: al cerrar Frente 1 de CASE-SAAS-001.*

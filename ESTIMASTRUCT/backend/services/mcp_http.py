@@ -1,5 +1,10 @@
 """mcp_http.py — Cliente HTTP para el MCP server de Revit (main_pipe.py --http en :8001).
 
+CANON 2026-07-30: revit-estimastruct-audit quedó deprecado. revit-mcp-stdio es
+el Revit MCP oficial de ConsuConstruct (agentes + EstimaStruct + pipe STDIO).
+Protocolo idéntico (MCP JSON-RPC real, mismo tool execute_revit_code, mismo
+puerto 8001) — verificado en vivo contra Revit real antes del swap.
+
 start() lanza main_pipe.py --http como subproceso.
 call_tool() envía tool/call JSON-RPC al endpoint MCP HTTP.
 """
@@ -11,7 +16,7 @@ from typing import Optional
 
 MCP_URL   = "http://127.0.0.1:8001/mcp/"
 MCP_PROBE = "http://127.0.0.1:8001/"
-MCP_DIR   = r"D:\GitHub\revit-estimastruct-audit\mcp_server"
+MCP_DIR   = r"D:\GitHub\revit-mcp-stdio\revit-mcp-stdio.extension"
 MCP_SCRIPT = os.path.join(MCP_DIR, "main_pipe.py")
 PYTHON     = r"D:\LLM\python\python.exe"
 

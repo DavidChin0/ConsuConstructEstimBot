@@ -743,6 +743,22 @@ def _ascii_to_latex(s: str):
     return t
 
 
+def _resaltar_termino(latex, termino, color="#e74c3c"):
+    """Envuelve la primera ocurrencia LITERAL de `termino` dentro de `latex` en
+    \\textcolor{color}{...} para señalarlo visualmente (KaTeX soporta \\textcolor
+    nativo, sin extensión). Si `termino` no aparece tal cual, devuelve `latex`
+    sin tocar — degradación elegante, nunca revienta el render.
+
+    Genérico y reutilizable por CUALQUIER memoria narrada (pricing, calculos,
+    y los 8 módulos ciegos pendientes) para marcar el término culpable de un
+    hallazgo DENTRO de una fórmula que el motor ya produjo — nunca inventa una
+    fórmula nueva, solo resalta un fragmento de la real. Ver contrato
+    `hallazgos` en services/calculos_memoria.py."""
+    if not latex or not termino or termino not in latex:
+        return latex
+    return latex.replace(termino, r"\textcolor{" + color + "}{" + termino + "}", 1)
+
+
 LATEX_BY_FORMULA = {
     # Materiales
     "Ec = 15100·√f'c": r"E_c = 15100\sqrt{f'_c}",

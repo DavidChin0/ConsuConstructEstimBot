@@ -913,8 +913,12 @@ function duplicateBasesFicha(idx) {
 
 function updateBasesUndoBtn(levels) {
   const btn = document.getElementById("btn-bases-undo");
-  document.getElementById("bases-undo-levels").textContent = levels;
-  btn.disabled = levels === 0;
+  const label = document.getElementById("bases-undo-levels");
+  // La carga de fichas no puede depender de un detalle opcional del footer.
+  // Si el HTML cacheado es de una versión anterior, el contador no existe;
+  // antes ese null abortaba selectBasesVersion() y la tabla quedaba cargando.
+  if (label) label.textContent = levels;
+  if (btn) btn.disabled = levels === 0;
 }
 
 function updateBasesChangesCount() {

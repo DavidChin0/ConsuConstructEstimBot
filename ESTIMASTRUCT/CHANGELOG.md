@@ -5,7 +5,166 @@
 
 # CHANGELOG - EstimaStruct
 
+## 2026-07-31 — Auditoría de Fórmulas, tanda 2: los 7 módulos ciegos restantes narrados (⚠ prorrateo bancario PENDIENTE DE APROBACIÓN DEL DIRECTOR)
+
+- [2026-07-31] [Opus 5]: Cerrada la lista de "módulos ciegos" de `docs/auditoria_formulas_mapa_estructura.md`. De los 10 ciegos originales (2026-07-27) quedaban 7 tras la tanda de pricing/calculos/mampostería; los 7 quedan narrados, con endpoint propio, wiring de frontend completo y verificación en vivo contra Postgres real. **Cobertura: 7 dominios narrados → 14.** `GET /auditoria/resumen` mueve los 7 de `ciegos_pendientes` a `narrados` (quedan 3 ciegos, todos de riesgo bajo, listados abajo).
+
+  **Regla que gobernó toda la tanda (ADR-003, no negociable):** ningún módulo `*_memoria.py` recalcula. Para los 5 casos donde el motor ya corría en producción (`cronograma.duracion_actividad`, `perfiles_acero.props_seccion`, `seccion_ficha.factores_unidad`, `calculo_estructural.predimensionar`, `acero_ficha.agregar_por_ficha`) **no se escribió motor nuevo**: la memoria importa la función real y narra su salida. Para los 2 casos donde la aritmética vivía inline en un router (prorrateo bancario y factores de cantidad) se extrajo un motor puro y **el router pasó a llamarlo**, de modo que el número del PDF/de la BD y el número narrado son literalmente el mismo cálculo, no dos copias que puedan divergir.
+
+  ### 1 · Prorrateo bancario — `services/export_pdf_memoria.py` · RIESGO ALTO · ⚠ **PENDIENTE APROBACIÓN DEL DIRECTOR**
+
+  Único cálculo del sistema cuyo resultado sale del taller y llega a un tercero como documento formal. Motor puro `prorrateo_banco()` + `memoria_prorrateo_banco()` (13 pasos). `routers/export_pdf.py::_export_pdf_banco` ahora obtiene el `factor` de ese motor (misma aritmética, una sola fuente). Endpoints: `POST /auditoria/banco/memoria-rapida` (stateless) y `GET /auditoria/banco/{pid}/memoria?valor_banco=…` (read-only sobre BD, **no persiste `valor_banco`** — a diferencia del export real, que sí lo guarda en `valores_banco.json`).
+
+  Tres cosas que el PDF nunca dijo y ahora se ven:
+
+  | Hallazgo | Qué es | Verificado en vivo (CC132 Camilo/Checkers, Postgres real) |
+  |---|---|---|
+  | **El factor** | Multiplica TODOS los PU y totales del PDF; no aparecía en ninguna parte del documento ni de la UI | `total_real` = L.1,097,110.30 · `valor_banco` de prueba L.1,009,341.48 → **factor 0.920000**, Δ = **−8.00%** por precio unitario. Supera el umbral de alerta ±5% → advertencia |
+  | **Residuo de redondeo** | La fila TOTAL se **fuerza** a `valor_banco`; la suma de las filas ya redondeadas a 2 decimales no da eso | Σ de las **98 filas** = L.1,009,341.47 vs TOTAL impreso L.1,009,341.48 → **residuo L.0.01**. Decisión deliberada y defendible, pero el PDF no la declara: si el revisor del banco suma la columna a mano, no cuadra |
+  | **Margen implícito** | Si `valor_banco` cae bajo el costo directo, el papel documenta una obra a pérdida y nadie avisa | `costo_directo` = L.877,688.24 → sobrecosto real del presupuesto **25.00%**, margen implícito tras prorrateo **15.00%**. Check `ok_margen` = OK en este caso |
+
+  También narra el `BUFFER_CONTRATIEMPOS_DIAS = 26` del Gantt bancario (constante fija, no cálculo) y aclara que los "días" son **activos** (6/semana), ~17% menos que días calendario — el PDF no distingue.
+
+  **Por qué NO se da por cerrado:** el Director marcó este módulo como de revisión humana obligatoria antes de merge aunque el código sea aditivo. El cambio en `export_pdf.py` es de una línea y aritméticamente idéntico (verificado: el PDF banco sigue generando 200 / 128,461 bytes / `%PDF-`), pero el riesgo es del documento, no del código. `meta.pendiente_aprobacion_director = true` viaja en la respuesta y el frontend pinta la bandera. **Queda abierto (goal-19692 parcial).**
+
+  ### 2 · Factores de cantidad — `services/partidas_memoria.py` · RIESGO ALTO
+
+  Motor puro `takeoff_cantidad()` + `memoria_cantidad()` (9 pasos). `routers/partidas.py` (`PATCH /revit-q` y `PATCH /factores`) ahora lo llama en vez de repetir la aritmética inline, y **devuelve `advertencias[]` en la respuesta** (campo aditivo, no rompe clientes) — igual que se hizo con mampostería. Endpoints: `POST /auditoria/cantidad/memoria-rapida` y `GET /auditoria/cantidad/partida/{id}/memoria`.
+
+  `_safe_factor` **no se cambió** (hay presupuestos vivos calculados con esa semántica); lo que se elimina es la ceguera. Los tres comportamientos silenciosos expuestos:
+
+  | # | Comportamiento | Efecto real |
+  |---|---|---|
+  | 1 | `factor = 0` ⇒ **1.0** | Quien teclea 0 esperando anular la partida obtiene la **cantidad completa**. Verificado: `revit_q=12.4, fe=0, ff=1.05` → `fe_efectivo=1.0`, cantidad **13.65** (no 0), con advertencia explícita |
+  | 2 | Factor **negativo** pasa | `_safe_factor` sólo atrapa el 0, no el signo. Verificado: `revit_q=10, fe=-1` → cantidad **−10**, total **−L.1,000** que RESTA del presupuesto |
+  | 3 | `ceil()` oculto | `revit_q` se redondea siempre hacia arriba antes de los factores. Verificado: 12.4 → 13 (se facturan 0.6 unidades por encima de lo medido) |
+
+  **Regresión verificada contra la BD real:** las **1,145 partidas** de Postgres recorridas comparando la fórmula vieja inline contra `takeoff_cantidad()` → **0 mismatches** en `revit_q` y en `cantidad`. Censo del estado actual: **0** partidas con factor 0→1, **0** con factor negativo, **14** donde el `ceil()` movió la cantidad. Es decir: el rewiring es aritméticamente idéntico y hoy no hay ninguna partida contaminada por los casos 1 y 2 — el valor del cambio es preventivo y de trazabilidad, no correctivo.
+
+  ### 3 · Cronograma — `services/cronograma_memoria.py` · RIESGO MEDIO
+
+  Sólo memoria (17 pasos); el motor sigue siendo `backend/cronograma.py` intacto. Endpoints: `POST /auditoria/cronograma/memoria-rapida` y `GET /auditoria/cronograma/partida/{id}/memoria`. Lo que estaba ciego:
+
+  - **Cascada de 4 fuentes traducida a español y a un CHECK:** `TIEMPOS_FIJOS` (1 CSI) > `MANUAL_SPLIT` (32 CSIs) > catálogo V1.2 (**288 CSIs** cargados en vivo) > `SIN_TIEMPO`. El último asigna el **mínimo de 1 día** y el Gantt lo dibuja igual que cualquier otra barra. Verificado: `03 31 13.2` (concreto premezclado, 20 m³) → fuente `MANUAL`, 2 días, fase "4. Cimentación y estructura", offset 8; un CSI inexistente (`99 99 99`, 500 m²) → fuente `SIN_TIEMPO`, **1 día**, con advertencia de que el plazo está subestimado.
+  - **Offsets de fase mágicos** (0, 3, 8, 22, 29, 50, 80, 120 días) marcados como `tipo=check` con la nota de que el plazo total sale en buena medida de esas constantes hardcodeadas, no del cálculo de jornadas. Una división CSI fuera de `CAP_FASE` cae al default "9. Acabados" offset 80 → advertencia.
+  - **Días activos vs calendario:** se agrega el paso `D_cal ≈ D × 7/6`. Un plazo de 120 días activos son ~140 calendario; el PDF no aclara cuál muestra.
+  - **Holgura del redondeo** (`H = N × D − JH`) por oficio, para ver cuándo la duración la gobierna el otro oficio o el piso de 1 día.
+
+  ### 4 · Propiedades de sección de acero — `services/perfiles_memoria.py` · RIESGO MEDIO
+
+  Sólo memoria (16-20 pasos según la ruta). Endpoints: `POST /auditoria/perfil/memoria-rapida` y `GET /auditoria/perfil/catalogo`. **Es el gap más traicionero del sistema:** no produce un número visiblemente malo — invalida en silencio memorias de acero que se ven perfectas. `calculo_miembro_acero` narra φMn = φ·Fy·Zx con LaTeX y referencia AISC, impecable, pero ese `Zx` puede venir de tres sitios y la memoria nunca lo decía. Ahora `fuente` es un paso con `tipo=check`:
+
+  | Ruta | Perfiles del catálogo | Verificado en vivo |
+  |---|---|---|
+  | `tabla` (AISC/CISC exacto) | **11** | W200X36 → Zx = **380 cm³**, 0 advertencias |
+  | `derivada` (3 rectángulos) | **5** | W250X33 → Zx = **428.43 cm³** derivado, **2 advertencias**: ~3% conservador por admisión del docstring **y** la advertencia propia de `TABLA_W` de que derivar sobre la geometría de `PERFILES_ACERO` (tf/tw imprecisos) da Zx/ry **25-34% bajos** |
+  | `hss` (sección cerrada) | **3** | HSS8X8X1/4 → Zx = **345.16 cm³**, 1 advertencia (no aplica LTB, Cw = 0) |
+
+  Cuando la ruta es `derivada` se narran las cinco fórmulas de derivación con sus números reales, y se cierra el círculo con el paso `Mp = Fy·Zx` para que se vea que la calidad de φMn es exactamente la calidad de ese Zx.
+
+  ### 5 · Conversión de unidades ETABS — `services/unidades_memoria.py` · RIESGO MEDIO en probabilidad, ALTO en consecuencia
+
+  Sólo memoria (9 pasos). Endpoint: `POST /auditoria/unidades/memoria-rapida`. `seccion_ficha.factores_unidad()` aplica un factor a **cada** fuerza y momento que entra desde ETABS; si la unidad no está en `UNIDAD_FACTORES` cae en **kgf sin avisar**. Verificado en vivo:
+
+  | Unidad declarada | Reconocida | Factor de fuerza | P de ejemplo (50,000) |
+  |---|---|---|---|
+  | `kgf` | sí | 0.001 | 50 t |
+  | `kN` | sí | 0.10197162 | 5,098.58 t |
+  | `kip` | **NO → cae a kgf** | 0.001 | 50 t (¡debería ser otra cosa!) |
+
+  El paso `reconocida` es ahora un CHECK visible y la memoria cuantifica la sensibilidad: elegir kgf cuando los datos venían en kN divide todas las fuerzas por **101.97** (un pedestal con Pu real de 50 t se diseña para 0.49 t). Es el error más difícil de detectar del sistema porque escala TODO de forma uniforme y ningún resultado suelto "se ve mal".
+
+  ### 6 · Predimensionamiento — `services/predimensionar_memoria.py` · RIESGO BAJO
+
+  Sólo memoria (7-10 pasos). Endpoint: `POST /auditoria/predimensionar/memoria-rapida`. El resultado numérico nunca estuvo en duda; el aporte es dejar ESCRITO que las dos reglas son **heurística del despacho, no ACI 318-19** (la norma no predimensiona, verifica), y agregar los checks que la regla no conoce. Verificado: VIGA L=500 cm / b_apoyo=30 → b=25 h=45 d=41, sin banderas; COLUMNA 2 niveles → 20×20 cm con **advertencia ACI 318-19 §18.7.2.1** (pórtico especial resistente a momento exige 30 cm mínimo — y Honduras es zona sísmica activa); COLUMNA 5 niveles → 40×40 cm, sin banderas. Se agrega también el control `L/h` contra ACI 318-19 Tabla 9.3.1.1.
+
+  ### 7 · Agregación de acero por ficha Div 05 — `services/acero_ficha_memoria.py` · RIESGO BAJO en plata, ALTO en trazabilidad
+
+  Sólo memoria (12-15 pasos). Endpoint: `POST /auditoria/acero-ficha/memoria-rapida`. **Tratado como tarea propia por el riesgo de violar ADR-003:** no es una fórmula sino una cadena de decisiones, y era tentador reimplementar la agregación en la capa de memoria. No se hizo — se llama `agregar_por_ficha(miembros)` y la memoria sólo recorre la entrada para DESCRIBIR lo que el motor ya decidió (cuántos miembros entraron a cada grupo, cuál fue el segundo D/C más alto). Ninguna cifra de la memoria sustituye una del motor. Los tres descartes silenciosos ahora se ven, verificados con un set de 5 miembros:
+
+  1. **Regla "perfil dual sin rol ⇒ COLUMNA".** 6 perfiles del catálogo mapean a dos fichas Div 05 distintas según el rol. `agregar_por_ficha` sí emitía el aviso en `avisos[]` desde siempre — pero **ese array nunca se renderizó en ningún lado**. Verificado: frame `C1` con `W200X36` y rol vacío → ficha **C-7** (columna) cuando pudo haber sido **VA-8** (viga), con otros insumos y otro costo.
+  2. **Envolvente D/C que descarta N−1 miembros.** Cada ficha reporta un solo `dc_max` y un solo `combo_gobernante`. La memoria agrega el segundo D/C más alto y su combo, para ver si la envolvente la define un caso aislado o todo el grupo.
+  3. **Acero que no se presupuesta.** Verificado: `W44X335` (fuera de `FICHAS_ACERO`) → **8.00 mL** de acero real del modelo que no entran a ninguna partida, contra 17.20 mL sí mapeados. No es un error de cálculo: es material que se cae del presupuesto sin dejar rastro.
+
+  ### Frontend
+
+  `frontend/js/auditoria-formulas.js`: **no se duplicó el renderer.** Se agregó un motor genérico data-driven (`AUD_CALCS`) donde cada módulo se declara como endpoint + campos + intro, y se pinta con el `renderMemoriaGenerica()` / `audCardHtml()` / `kx()` ya existentes. Se agregó `audBannerHtml()` (contrato `meta.advertencias` + `meta.cumple_normativa` + `meta.pendiente_aprobacion_director`), sub-tabs "calculadora libre / real (BD)" para los tres módulos que leen Postgres, vista tabular propia para acero-ficha y 30 entradas nuevas en `AUD_SEC_INTRO`. 7 `<option>` nuevas en `ESTIMASTRUCT/templates/index.html`. El cache-bust no requiere bump manual: `app.py::_current_asset_version()` usa el mtime del glob de `frontend/js/*.js` por request (verificado: `asset_version` servido = 1785481750 = mtime real del JS editado).
+
+  ### Verificación (backend limpio contra Postgres real, sin mocks)
+
+  Puertos 8002/5000 liberados y `__pycache__` borrado antes de arrancar (gotcha de procesos zombi + asset_version). Todo contra `postgresql+psycopg://…@127.0.0.1:5432/estimastruct`.
+
+  - `GET /auditoria/resumen` → 200 · **narrados = 14** (era 7) · `ciegos_pendientes` = 3.
+  - Los 16 endpoints `/auditoria/*` responden 200, tanto directo a FastAPI :8002 como **a través del proxy Flask `/__api__`** (la ruta que usa el navegador).
+  - **Chromium headless** sobre el Flask real, las 7 vistas nuevas: `banco` 13 tarjetas / 54 nodos KaTeX · `cantidad` 10/42 · `cronograma` 18/72 · `perfil` 20/81 · `unidades` 9/36 · `predim` 10/42 · `aceroficha` 15/72. **0 errores de consola** en las 7. Índice de cobertura: 26 filas de tabla.
+  - No-regresión: `GET …/export-pdf?report=banco` → 200, 128,461 bytes, magic `%PDF-`; `report=presupuesto` → 200, 112,079 bytes.
+  - Regresión aritmética de partidas: 1,145 partidas reales, 0 mismatches (detalle arriba).
+  - El `valor_banco` de prueba que el export real persistió en `C:\EstimaStruct\data\valores_banco.json` fue **revertido** — el archivo quedó como estaba.
+
+  ### Bug conocido re-verificado (no tocado)
+
+  El **doble sobrecosto en `/reporte`** (hallazgo de esta misma auditoría, 2026-07-27) fue corregido el 2026-07-30 en el commit `0a7cbae` y **sigue corregido**: verificado en vivo contra dos presupuestos reales — Casa StoneRaise (sc 20%) `/reporte` L.1,642,177.49 vs `/calcular` L.1,642,177.50 → **Δ = L.0.01**; CC132 Camilo (sc 25%) → **Δ = L.0.01**. Residuo de redondeo, no doble aplicación (el bug daba Δ = L.328,435.49). `docs/architecture.md §9` seguía diciendo "**NO corregido**" — **documentación stale corregida** en esta sesión, citando el commit y la re-verificación.
+
+  ### Lo que queda ciego (3, todos riesgo bajo)
+
+  | Archivo | Dominio | Costo de cerrar |
+  |---|---|---|
+  | `routers/acero_diseno.py` | Placas base masivas — envolvente D/C por pedestal | **muy bajo**: `memoria_conexion(elem, caso)` ya existe y el endpoint ya tiene `elem`/`caso` en la forma exacta que consume. Es exponerla, no escribir fórmula |
+  | `routers/export.py:399-400` | Split 2-vías para display Excel — contradice visualmente el modelo 3-vías real | bajo; **no escribe a BD** |
+  | `routers/conexion_acero.py` | Falta `GET /conexiones/{cid}/memoria`: la conexión **persistida** no es auditable, sólo la calculadora en vivo | bajo; la memoria ya existe |
+
+  **Archivos tocados:** `backend/services/{export_pdf,partidas,cronograma,perfiles,unidades,predimensionar,acero_ficha}_memoria.py` (7 nuevos) · `backend/routers/auditoria_formulas.py` (14 endpoints, resumen actualizado) · `backend/routers/export_pdf.py` (1 línea: factor desde el motor) · `backend/routers/partidas.py` (2 endpoints al motor + `advertencias[]`) · `frontend/js/auditoria-formulas.js` · `ESTIMASTRUCT/templates/index.html` · `docs/architecture.md` · `CHANGELOG.md`. **No se tocó** `backend/db.py`, `backend/models.py`, ni el schema.
+
+## 2026-07-28 — PDF con membrete: modal reparado
+
+- [2026-07-28] [Codex]: Corregida la traducción global de `ESTIMASTRUCT/templates/index.html`. `applyLang()` reemplazaba con `textContent` el contenido entero de cada elemento `[data-es]`; al cargar, destruía los `<select>` e `<input>` dentro de los labels del modal PDF. El menú recibía el clic, pero `openExportPdf()` fallaba al encontrar `#epdf-report` nulo. Ahora actualiza únicamente el nodo de texto directo y conserva los controles. Verificado en Chromium headless: menú → modal visible → controles presentes → descarga PDF.
+
+## 2026-07-28 — Bases de Datos: carga de fichas no aborta si falta el contador de Undo
+
+- [2026-07-28] [Codex]: Corregido `frontend/js/bases-drawer.js::updateBasesUndoBtn()`. El backend PostgreSQL y `GET /bases/{v1.0…v1.3}` estaban sanos, pero el frontend intentaba asignar `.textContent` a `#bases-undo-levels` sin comprobar su existencia. Con HTML cacheado/anterior, lanzaba `Cannot set properties of null`, abortaba `selectBasesVersion()` y dejaba la vista en “Cargando fichas…”. Ahora el contador y el botón de Undo se actualizan solo si existen. Verificado: `node --check` limpio, asset nuevo servido por Flask y las 4 bases responden 200 vía proxy.
+
+## 2026-07-27 — Mampostería: eliminadas las 2 constantes mágicas (3.5 kg/m² y 0.023 m³/m²) → fórmula parametrizada TMS 402-16 + narración en Auditoría
+
+- [2026-07-27] [Opus]: `routers/diseno_estructural.py::crear_mamposteria` (líneas ~1163-1172) calculaba acero y concreto de relleno con dos constantes hardcodeadas sin fórmula, sin parámetros y sin referencia normativa — módulo #3 de la lista de "10 módulos ciegos" de `docs/auditoria_formulas_mapa_estructura.md`, riesgo ALTO (afecta cantidades reales de presupuesto).
+
+  **Auditoría aritmética de los valores viejos (verificada, no asumida — los comentarios NO coincidían con los valores):**
+
+  | Coeficiente | Viejo | Nuevo (default) | Desviación del viejo |
+  |---|---|---|---|
+  | Acero, contra su propio comentario ("1 varilla Ø1/2\" c/0.60m" = **vertical solo**) | 3.5 kg/m² | 1.6574 kg/m² | **+111.2%** (el viejo era 2.11×) |
+  | Acero, contra el default nuevo (vert. + horiz. #4@0.60 c/u, lo que TMS exige) | 3.5 kg/m² | **3.3147 kg/m²** | **+5.6%** |
+  | Concreto de relleno, contra su propio comentario ("celdas c/0.20, secc 15×15cm") | 0.023 m³/m² | 0.1125 m³/m² | **−79.6%** |
+  | Concreto de relleno, contra el default nuevo (relleno parcial, celdas c/0.60) | 0.023 m³/m² | **0.0375 m³/m²** | **−38.7%** |
+
+  Diagnóstico exacto: (a) **acero** — 3.5 no es "vertical @0.60" (eso son 0.9944/0.60 = 1.657 kg/m²); es aproximadamente el refuerzo en AMBAS direcciones (3.3147). El número era casi defendible pero el comentario y la etiqueta de la partida ("Acero **vertical** mampostería") eran falsos. (b) **concreto** — 0.023 ≈ 0.0225 = el ÁREA de UNA celda (0.15×0.15 m²) usada como si fuera m³/m²: **error dimensional**, le faltaba dividir por el espaciamiento de celdas. Impacto en presupuesto real (paño 5×3 m = 15 m²): acero 52.5 → 49.72 kg (−5.3%), concreto de relleno 0.345 → 0.5625 m³ (**+63.0%**, la subestimación del relleno era la de plata).
+
+  **Norma — corrección de nomenclatura (el Director pidió "norma ACI"):** ACI 318 **no cubre mampostería**, tiene un código hermano. La referencia correcta es **TMS 402 "Building Code Requirements for Masonry Structures"**. Hasta la edición 2013 se publicaba como el estándar conjunto **TMS 402/ACI 530/ASCE 5** (comité MSJC); a finales de 2013 ACI y ASCE cedieron sus derechos a The Masonry Society y desde la ed. 2016 se designa sólo **TMS 402-16 / TMS 402-22**. O sea: "ACI 530" es válido sólo para ediciones ≤2013 y "ACI 318" para mampostería es directamente un error — se cita TMS 402-16 en todo el módulo. Requisitos usados (muro de cortante de mampostería ESPECIAL reforzada, **TMS 402-16 §7.3.2.6**, mismos números que adopta IBC/IRC §R606.12.3.2): Σ(ρv+ρh) ≥ 0.0020·Ag · ρ ≥ 0.0007·Ag en cada dirección · s ≤ 48 in (1.219 m); más **§6.1.4.4** (refuerzo embebido en grout → las celdas rellenas son al menos las reforzadas, de ahí que `s_celda` default = `s_vertical`). **CHOC-08 — honestidad sobre la fuente:** tiene capítulo de Estructuras de Mampostería y Honduras es zona sísmica activa (este repo ya implementa su Cap. 1 sísmico en `calculo_sismico_choc08.py`, de estructura Z/S/I/Rw/C derivada de UBC), pero **no se pudo verificar contra el documento oficial ni el artículo ni el valor numérico de su cuantía mínima de mampostería**. Por eso los números se anclan en TMS 402-16 y NO se le atribuye a CHOC-08 una cifra no comprobada — pendiente del Director confirmar el capítulo y, si difiere, ajustar `RHO_MIN_*` (un solo lugar, ya no hay constantes regadas).
+
+  **`backend/services/mamposteria_memoria.py` (NUEVO):** motor puro `takeoff_mamposteria()` + memoria narrada `memoria_mamposteria()` (24 pasos, 5 constantes, mismo contrato `{meta, pasos, constantes}` que los otros 6 motores). Fórmulas reales: `acero_kg_m2 = w_v/s_v + w_h/s_h` y `concreto_m3_m2 = a_celda/s_celda`. El peso lineal de la varilla **no** se tabuló de nuevo: se DERIVA con `π/4·db²·10⁻⁴·γs` reusando `DENSIDAD_ACERO = 7850` importada de `calculo_estructural.py` — la misma constante y el mismo método (`As·10⁻⁴·L·γs`) de `takeoff_viga`/`takeoff_columna`, así no hay dos fuentes de verdad. Reproduce el nominal ASTM A615 con <0.1% de error (#3 0.5594 vs 0.560 · #4 0.9944 vs 0.994 · #5 1.5538 vs 1.552 · #6 2.2374 vs 2.235). Ancho de celda derivado del espesor (`t − 2×2.5 cm` de pared de cara, ASTM C90), no fijo. Devuelve además los checks de cuantía y una lista `advertencias` — **hallazgo nuevo:** con bloque de **25 cm** el default #4@0.60 en ambas direcciones YA NO cumple (Σρ = 0.00169 < 0.0020) y el endpoint ahora lo dice en vez de callarlo.
+
+  **`MampoCreate` (Pydantic body, NO schema BD):** 8 campos opcionales nuevos con defaults justificados — `barra_vertical`/`barra_horizontal` (`#4`), `s_vertical_m`/`s_horizontal_m` (0.60), `con_refuerzo_horizontal` (`True`), `celda_ancho_cm` (None → derivado de `t`), `celda_largo_cm` (15), `s_celda_m` (None → `= s_vertical_m`). La respuesta del endpoint ahora incluye `coeficientes`, `params`, `normativa` y `advertencias` para trazabilidad. Partidas re-etiquetadas con los parámetros reales ("Acero de refuerzo mampostería MR-01 — #4@0.60m vert. + #4@0.60m horiz.", "Concreto de relleno … celdas 15×15cm @0.60m") en vez del "Acero **vertical**" que mentía.
+
+  **Auditabilidad (SÍ alcanzó, no quedó pendiente):** endpoint `POST /auditoria/mamposteria/memoria-rapida` en `routers/auditoria_formulas.py`; en `GET /auditoria/resumen` mampostería **pasó de `ciegos_pendientes` a `narrados`** (7 narrados / 7 ciegos, antes 6/8); vista nueva 🧱 en `frontend/js/auditoria-formulas.js` (`audRenderMamposteria`) con calculadora en vivo (12 inputs, debounce 250 ms) + banner verde/rojo de cumplimiento normativo, reusando `renderMemoriaGenerica`/`audCardHtml`/`kx` existentes — **no se duplicó el renderer**; opción en el `<select>` de `templates/index.html`. Se generalizó `data-vista` del índice (antes ternario hardcodeado pricing/calculos, ahora `x.id`) y el color del `flag` (verde si empieza con ✔).
+
+  **Verificado en vivo contra Postgres real** (backend :8002 reiniciado — corría sin `--reload`; frontend :5000 arriba): `POST /diseno/55d932d2-.../mamposteria` (Apartamento Valle de Angeles) con refuerzo y relleno activados → `acero_kg=49.72` (viejo: 52.5), `concreto_m3=0.5625` (viejo: 0.345), `coeficientes.acero_kg_m2=3.31471`, `coeficientes.concreto_m3_m2=0.0375`, `normativa.cumple=true`, 3 partidas generadas (04 20 00 · 03 20 00 · 03 30 00). Caso t=25 cm devuelve `cumple=false` con la advertencia de cuantía. Varilla inválida → 422 limpio con la lista de válidas. `POST /auditoria/mamposteria/memoria-rapida` → 24 pasos, todos con LaTeX resuelto. **Las 6 partidas de prueba (MR-AUD-01/02) fueron borradas del presupuesto real al terminar.** No se tocó `backend/db.py`, `backend/models.py` ni el schema. Archivos: `backend/services/mamposteria_memoria.py` (nuevo), `backend/routers/diseno_estructural.py`, `backend/routers/auditoria_formulas.py`, `frontend/js/auditoria-formulas.js`, `ESTIMASTRUCT/templates/index.html`. | Siguiente: confirmar el capítulo de mampostería del CHOC-08 contra el documento oficial y ajustar `RHO_MIN_TOTAL`/`RHO_MIN_DIR` si difiere de TMS 402; y decidir si los presupuestos históricos con partidas de mampostería se recalculan (el relleno estaba subestimado ~63%).
+
+## 2026-07-27 — Auditoría de Fórmulas: banner "⚠ Hallazgo" interactivo (click → fórmula real con término culpable marcado)
+
+- [2026-07-27] [Fable]: El banner de la vista 🧾 Indirectos era texto estático. Pedido del Director: hacerlo clickeable, mostrando la fórmula LaTeX REAL (no idealizada) con el término exacto que causa el error resaltado dentro de la ecuación renderizada — patrón genérico para los 8 módulos ciegos que faltan auditar, no solo el bug de sobrecosto actual.
+
+  **Contrato de datos nuevo — `hallazgos`** (aditivo, no rompe los 5 motores narrados existentes): cualquier paso `tipo="check"` puede llevar una lista `hallazgos`, donde cada entrada apunta por símbolo (`simbolo_ref`) a OTRO paso ya narrado en la misma memoria y trae su fórmula/sustitución real con el fragmento LaTeX culpable ya resaltado. Helper genérico nuevo `_resaltar_termino(latex, termino, color)` en `backend/calculo_estructural.py`: envuelve la primera ocurrencia literal de `termino` en `\textcolor{...}{...}` — si el término no aparece tal cual, devuelve el latex sin tocar (degradación elegante). No reinventa ninguna fórmula, solo marca un fragmento de la que el motor ya produjo.
+
+  **`backend/services/calculos_memoria.py`:** el paso `⚠ Hallazgo` ahora trae `hallazgos` con 2 entradas reales — (1) `costo_directo₂` con `\text{partida.total}` marcado (nota: ya incluye sobrecosto porque `total = cantidad×PU` y `PU` ya lo aplicó), (2) `total₂` con `\times\text{factor}` marcado (nota: aquí se aplica el sobrecosto por SEGUNDA vez). Ambas fórmulas son las mismas ya narradas arriba en Vista B — solo se resuelve su `.latex` un poco antes en el flujo para poder resaltarlas, sin duplicar aritmética ni inventar una fórmula "corregida".
+
+  **`frontend/js/auditoria-formulas.js`:** `audCardHtml()` ahora renderiza el bloque `hallazgos` de cualquier paso (nueva función `audHallazgoItemHtml`, reusa `kx()` existente, no crea un renderer paralelo de KaTeX). El banner de 🧾 Indirectos (`audRenderCalculos`) se generalizó: en vez de leer `meta.bug_doble_sobrecosto` a mano, filtra `m.pasos` por `tipo==="check" && hallazgos.length` y lista cada uno como un `<details>` nativo (sin JS de binding — expand/collapse gratis del navegador) cuyo cuerpo es el mismo `audCardHtml(p)` ya usado en la narración completa. Cuando se narren los 8 módulos ciegos pendientes, cualquier hallazgo con este mismo contrato aparece solo en este banner sin tocar este archivo.
+
+  **Verificado en vivo contra Postgres real** (backend :8002 + frontend :5000 arrancados manualmente, sin `git pull` del wrapper por cambios locales sin commitear pendientes de la sesión anterior): `GET /auditoria/calculos/b1fd0136-2af0-47e1-b4eb-23e54776c0ae/memoria` (Casa StoneRaise) devuelve `diff_total=328435.4881` (coincide exacto con el Δ=L.328,435.49 conocido) y el paso `⚠` trae `hallazgos` con los 2 LaTeX marcados: `\text{costo\_directo}_{\text{reporte}} = \sum \textcolor{#e74c3c}{\text{partida.total}}` y `\text{total\_con\_indirectos} = \text{costo\_directo}\textcolor{#e74c3c}{\times\text{factor}}`. Ambos parsean sin error contra el `katex.js` vendorizado real (headless, 3/3 OK incluyendo `latex_sub_marcada`). `node --check` limpio en el JS. `py_compile` limpio en `calculo_estructural.py` y `calculos_memoria.py`. Archivo servido por Flask confirmado con las funciones nuevas (`audHallazgoItemHtml`, `problemaItemHtml`) vía `curl http://127.0.0.1:5000/js/auditoria-formulas.js`.
+
+  No se tocó `backend/db.py`, `backend/models.py`, ni schema. No se corrigió el bug de doble sobrecosto (sigue pendiente decisión del Director, ver entrada 🔴 abajo) — esta sesión solo hizo el hallazgo interactivo/localizable. Archivos modificados: `backend/calculo_estructural.py` (+`_resaltar_termino`), `backend/services/calculos_memoria.py` (+`hallazgos` en el paso ⚠), `frontend/js/auditoria-formulas.js` (+`audHallazgoItemHtml`, banner genérico). | Siguiente: al narrar cada uno de los 8 módulos ciegos, adjuntar `hallazgos` a sus pasos `check` cuando corresponda — el banner y el render ya están listos, no requieren cambios.
+
 ## Siguiente Paso
+
+**CASE-SAAS-001 SCOPE v2 (2026-07-27) — 🔴 PRIORIDAD ACTUAL.** Roadmap fasado completo en `docs/roadmap_case_saas_001_scope_v2.md` [→ ADR-010 §9]. Scope expandido con 3 iniciativas nuevas del Director: **MCP público para LLMs externos** (HTTP/SSE, auth por tenant, solo lectura + cálculo dry-run — distinto del `estimastruct-mcp` interno de 12 tools), **PDF→CAD→estimación** (MVP solo vectorial, escribe a `partida.revit_q`), **PDF→3D vía Meshy** (secret nuevo `MESHY_API_KEY`, modo visual separado obligatorio). Reordenado en 9 fases: F0 estabilización `[BLOQUEA TODO]` → F1 auth/multi-tenancy → F2 AWS → F4 MCP público, con F3 (RAG+CAG), F5 (ETABS), F6 (Revit STDIO), F7 (PDF→CAD), F8 (Meshy) en paralelo. **Chequeo de realismo:** "producto al 80%, 100% local en 2 semanas" es creíble SOLO para el producto local mono-usuario (~85% real); para el scope SaaS completo el estado real es **~12-18%** — 0 de 7 frentes cerrados, 0 endpoints con auth, **0 tests en todo el repo**, CORS `["*"]`, **una sola migración Alembic** (baseline, bloquea RDS), `backend/cag/` inexistente, y los 3 ítems nuevos con 0 líneas. Trabajo pendiente ~160-235 días-persona vs ~10 de dos semanas = **factor 16x-23x**. Cadena crítica del SaaS vendible = 14-19 semanas; scope completo = 7-9 meses. | Siguiente: **F0** — declarar `mcp`/`httpx`/`ifcopenshell` en `requirements.txt`, auditar y regenerar migraciones Alembic, golden snapshots del pipeline de pricing (incl. regresión del bug de doble conteo 2026-07-03), cerrar Frente 1 con la Skill full-system, y spike de 1 día PDF→CAD sobre 5 planos vectoriales reales para medir precisión. Decisiones D1-D8 pendientes del Director en §6 del roadmap.
 
 **CASE-REVIT-API-DICT-001 (completado 2026-07-23)** — Mapeo completo de 70 endpoints MCP Revit via tool_manifest.py: JSON estructurado con 35 read + 35 write tools, categorías (status/views/families/levels/colors/code/building/editing/structure/annotation/analysis/docs/rooms/views/tags/transform/MEP/params/interop/details/clash/document/pyrevit), 20 endpoints sin mapear (geometry avanzada, worksets, design options, phasing, etc.), request/response schemas, auth notes, limitations. Output: `D:\OneDrive\Bots\Estimbot\output\revit_api_dictionary.json` (1.8MB). scripts.md actualizado. Listo para review Fable. | Siguiente: MCP STDIO `estimastruct-mcp` CASE-SAAS-001 Frente 1.
 
@@ -16,6 +175,26 @@
 **CASE-REVIT-MCP-001** — Mapeo completo de snippets IronPython via execute_revit_code: 48 tools Demolinator catalogados, crear biblioteca de snippets con UI en el panel para controlar Revit desde EstimaStruct.
 
 Decisión Director pendiente: ¿promover `05 31 13.3` y `08 51 13.4` como partidas en PG? [Pendiente ADR §9 si se decide promover]
+
+**🔴 Decisión Director pendiente (2026-07-27):** ¿`/calcular` o `/reporte` tiene la semántica correcta de `costo_directo`/sobrecosto? La Auditoría de Fórmulas nueva (`GET /auditoria/calculos/{pid}/memoria`) confirmó con datos reales que **hoy `/reporte` aplica el sobrecosto DOS VECES** (ver entrada 2026-07-27 abajo, medido en vivo: Δ=L.328,435.49 en "Casa StoneRaise"). No corregido — auditoría de solo-lectura, decisión de negocio pendiente.
+
+## 2026-07-27 — Auditoría de Fórmulas: pricing y calculos.py narrados (motor + router + Hoja)
+
+- [2026-07-27] [Fable]: Construido el módulo **Auditoría de Fórmulas** siguiendo el patrón canónico de 4 capas (skill `estimastruct-modulo`) para consolidar y narrar TODAS las fórmulas de cálculo del backend en un solo lugar, priorizado sobre el mapa de estructura (`docs/auditoria_formulas_mapa_estructura.md`, 14 archivos con fórmulas, 4 ya narrados / 10 ciegos).
+
+  **Prioridad 1 — `services/pricing.py` (antes 100% ciego, el motor financiero).** `backend/services/pricing_memoria.py` nuevo: `memoria_pricing(...)` narra bucketing 3-vías (`rebucket_insumos`) → `costo_base` (`calc_base`) → `PU` (`precio_unitario`) → `total` → cuantización ADR-004, paso a paso con símbolo/fórmula/sustitución numérica real/LaTeX — SIEMPRE llamando las funciones puras reales de `pricing.py`, nunca reimplementando la aritmética (ADR-003). Cuando se narra una partida real de BD, agrega un paso de verificación que compara el recálculo en vivo (desde insumos actuales) contra lo persistido, exponiendo posible drift sin corregirlo.
+
+  **Prioridad 2 — `routers/calculos.py` (indirectos).** `backend/services/calculos_memoria.py` nuevo: `memoria_calculos_presupuesto(p)` narra READ-ONLY (nunca llama `_recalcular_todo` ni `recalcular_partida`, que escriben) AMBAS semánticas reales del código — Vista A (`/calcular`: `costo_directo = Σ cantidad·costo_base`, sin markup) y Vista B (`/reporte`: `costo_directo = Σ partida.total`, YA con markup) — y agrega un paso `⚠ Hallazgo` explícito flageando la doble aplicación de sobrecosto, **sin corregirla** (instrucción explícita: auditar es mostrar la verdad, no arreglarla). Verificado en vivo contra Postgres real: presupuesto "Casa StoneRaise" (sc=20%) → `/calcular` da L.1,642,177.50, `/reporte` da L.1,970,612.99, **Δ=L.328,435.49**, factor real 1.4400 = 1.2² (coincide exacto con doble aplicación); presupuesto "Apartamento Valle de Angeles" (sc=0%) → Δ=0 (por eso el bug era invisible hasta ahora).
+
+  **Router nuevo** `backend/routers/auditoria_formulas.py` (prefix `/auditoria`, registrado en `main.py`): `GET /auditoria/resumen` (índice estático de cobertura: 4 narrados + 2 nuevos + 8 ciegos pendientes), `POST /auditoria/pricing/memoria-rapida` (calculadora stateless), `GET /auditoria/pricing/partida/{id}/memoria` (partida real de BD), `GET /auditoria/calculos/{pid}/memoria` (presupuesto real).
+
+  **Frontend** — Hoja de Auditoría nueva: `frontend/js/auditoria-formulas.js`, tab `🔍 Auditoría de Fórmulas` en el dropdown `⚙ Módulos` (`ESTIMASTRUCT/templates/index.html`, panel `#auditoria-view` estilo `acero-view`/`conexion-view`), mismo patrón visual DATO/CÁLC/RESULT/CHECK que la Hoja de Diseño Estructural (reusa `kx()`/KaTeX vendorizado existente, sin dependencia nueva). 3 vistas por dropdown: 📋 Índice (tabla narrados vs ciegos con botones "Abrir módulo →" que saltan a diseño/sismo/acero/conexión — así los 4 motores ya narrados quedan enlazados desde un solo punto, no dispersos), 💰 Pricing (calculadora libre en vivo + selector de partida real del presupuesto activo), 🧾 Indirectos (banner ⚠ visible con el hallazgo del doble sobrecosto cuando aplica, con los números reales del presupuesto abierto).
+
+  **Verificación:** `py_compile` limpio en los 4 archivos backend nuevos; import real sin circularidad (`from backend.routers import auditoria_formulas`); `node --check` limpio en los 2 JS; 39 fórmulas LaTeX (mapas + `_ascii_to_latex` de sustituciones reales) validadas headless contra `katex.js` vendorizado — 0 fallan. E2E contra Postgres real (servicios levantados vía `START_POSTGRES_UNICA.ps1`): `GET /auditoria/resumen` 200, `POST /auditoria/pricing/memoria-rapida` 200 con aritmética correcta, `GET /auditoria/pricing/partida/{id}/memoria` 200 contra partida real de "Casa StoneRaise" (750.00 MO desde 2 insumos reales, cross-check contra `GET /partidas/{id}/insumos` confirma coincidencia exacta), `GET /auditoria/calculos/{pid}/memoria` 200 reproduciendo el bug de doble sobrecosto con números reales en dos presupuestos distintos (ver arriba). Frontend: `js/auditoria-formulas.js` servido 200 por Flask, home 200 — verificación visual final pendiente del Director en su Chrome (Ctrl+F5; la extensión Claude-in-Chrome tiene localhost bloqueado por política anti-SSRF).
+
+  **Pendiente — 8 módulos ciegos restantes** (fuera de scope esta sesión, quedan documentados en `GET /auditoria/resumen` y en el mapa): `routers/export_pdf.py` (prorrateo bancario, riesgo alto), `routers/partidas.py` (`_safe_factor` 0→1 silencioso, riesgo alto), `routers/diseno_estructural.py` mampostería (constantes 3.5 kg/m² / 0.023 m³/m² sin norma, riesgo alto), `cronograma.py` (riesgo medio), `perfiles_acero.py::props_seccion` (tabla vs derivada ~3% conservadora, riesgo medio), `seccion_ficha.py::factores_unidad` (error de unidad escala ×9.8, riesgo medio), `calculo_estructural.py::predimensionar` (riesgo bajo, quick win — fórmulas ya en docstring), `routers/acero_diseno.py` placas base (riesgo bajo, quick win — reusa `memoria_conexion` existente). Priorización completa en `docs/auditoria_formulas_mapa_estructura.md §6`.
+
+  Archivos nuevos: `backend/services/pricing_memoria.py`, `backend/services/calculos_memoria.py`, `backend/routers/auditoria_formulas.py`, `frontend/js/auditoria-formulas.js`. Modificados: `backend/main.py` (registro de router), `ESTIMASTRUCT/templates/index.html` (opción de módulo + panel + script tag), `frontend/js/app.js` (`setModuloActivo` + `patchClose`), `docs/architecture.md` (§2.3, §5.1, §9 — bug documentado con evidencia real). No se tocó `backend/db.py`, `backend/models.py`, ni el schema. No se corrigió el bug de doble sobrecosto (fuera de scope, flageado explícitamente arriba). | Siguiente: decisión del Director sobre `/calcular` vs `/reporte`; luego narrar los 8 módulos ciegos restantes en orden de riesgo (§6 del mapa).
 
 ## 2026-07-26 — Verificación visual pipeline IFC: el edificio finalmente se ve (con 2 fixes)
 

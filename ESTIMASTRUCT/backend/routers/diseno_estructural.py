@@ -26,6 +26,7 @@ from backend.models import (
 )
 from backend.calculo_estructural import calcular_caso, memoria_calculo, predimensionar
 from backend.calculo_miembro_acero import memoria_miembro
+from backend.services.mamposteria_memoria import takeoff_mamposteria
 from backend.perfiles_acero import TABLA_W, PERFILES_ACERO, _norm_w
 from backend.acero_ficha import (
     mapear_perfil_a_ficha, agregar_por_ficha,
@@ -1142,6 +1143,12 @@ def resumen_csi(pid: str, db: Session = Depends(get_db)):
     }
 
 class MampoCreate(BaseModel):
+    """Body del takeoff de mampostería.
+
+    Los campos de refuerzo/celda son OPCIONALES con defaults justificados por
+    TMS 402-16 §7.3.2.6 (ver backend/services/mamposteria_memoria.py). Son
+    Pydantic puro — NO tocan el esquema de BD.
+    """
     type_mark:     str   = "MR-01"
     longitud_m:    float = 0.0
     altura_m:      float = 0.0
@@ -1150,26 +1157,59 @@ class MampoCreate(BaseModel):
     con_relleno:   bool  = False
     notas:         str   = ""
 
+    # ── Refuerzo (TMS 402-16 §7.3.2.6) ──────────────────────────────────────
+    # #4 @0.60 m en AMBAS direcciones: en muro de 15–20 cm da Σρ ≥ 0.0020 y
+    # ρ ≥ 0.0007 por dirección, con s muy por debajo del tope de 1.219 m (48 in).
+    barra_vertical:          str   = "#4"
+    s_vertical_m:            float = 0.60
+    barra_horizontal:        str   = "#4"
+    s_horizontal_m:          float = 0.60
+    con_refuerzo_horizontal: bool  = True
+
+    # ── Celda de relleno (grout) ────────────────────────────────────────────
+    # celda_ancho_cm = None → se deriva del espesor: t − 2·2.5 cm de pared de
+    # cara (ASTM C90). s_celda_m = None → se iguala a s_vertical_m: relleno
+    # PARCIAL de sólo las celdas reforzadas (TMS 402-16 §6.1.4.4 exige el
+    # refuerzo embebido en grout). Para muro totalmente relleno: s_celda_m=0.20.
+    celda_ancho_cm:  float | None = None
+    celda_largo_cm:  float = 15.0
+    s_celda_m:       float | None = None
+
 @router.post("/{pid}/mamposteria")
 def crear_mamposteria(pid: str, data: MampoCreate, db: Session = Depends(get_db)):
     """
-    Takeoff simple de muro de mampostería. Genera partidas CSI 04 y 03.
-    Sin diseño estructural complejo.
+    Takeoff de muro de mampostería reforzada. Genera partidas CSI 04 y 03.
+
+    2026-07-27 — se eliminaron las dos constantes mágicas que vivían aquí
+    (3.5 kg/m² y 0.023 m³/m², sin fórmula ni norma). Ahora la aritmética vive
+    en `services/mamposteria_memoria.takeoff_mamposteria` (fuente única,
+    parametrizada, con checks TMS 402-16 §7.3.2.6) y está narrada paso a paso
+    en la Hoja de Auditoría (`POST /auditoria/mamposteria/memoria-rapida`).
+    Ver el docstring de ese módulo para la auditoría aritmética de los valores
+    viejos y la nota de nomenclatura ACI 318 / ACI 530 / TMS 402.
     """
     pres = db.query(Presupuesto).filter(Presupuesto.id == pid).first()
     if not pres:
         raise HTTPException(status_code=404, detail="Presupuesto no encontrado")
 
-    mark   = data.type_mark
-    area_m2 = round(data.longitud_m * data.altura_m, 4)
+    mark = data.type_mark
 
-    # Acero vertical (si con_refuerzo): 1 varilla Ø1/2" c/0.60m
-    ACERO_KG_M2 = 3.5 if data.con_refuerzo else 0.0   # kg/m² approx
-    acero_kg = round(area_m2 * ACERO_KG_M2, 2)
+    try:
+        tk = takeoff_mamposteria(
+            longitud_m=data.longitud_m, altura_m=data.altura_m, espesor_cm=data.espesor_cm,
+            con_refuerzo=data.con_refuerzo, con_relleno=data.con_relleno,
+            barra_vertical=data.barra_vertical, s_vertical_m=data.s_vertical_m,
+            barra_horizontal=data.barra_horizontal, s_horizontal_m=data.s_horizontal_m,
+            con_refuerzo_horizontal=data.con_refuerzo_horizontal,
+            celda_ancho_cm=data.celda_ancho_cm, celda_largo_cm=data.celda_largo_cm,
+            s_celda_m=data.s_celda_m,
+        )
+    except ValueError as ex:
+        raise HTTPException(status_code=422, detail=str(ex))
 
-    # Concreto de relleno (si con_relleno): celdas cada 0.20m, secc ≈ 15×15cm
-    CONCRETO_M3_M2 = 0.023 if data.con_relleno else 0.0  # m³/m² approx
-    concreto_m3 = round(area_m2 * CONCRETO_M3_M2, 4)
+    area_m2     = tk["area_m2"]
+    acero_kg    = tk["acero_kg"]
+    concreto_m3 = tk["concreto_m3"]
 
     partidas_gen = []
 
@@ -1187,17 +1227,22 @@ def crear_mamposteria(pid: str, data: MampoCreate, db: Session = Depends(get_db)
         cap03 = _get_o_crear_capitulo(pid, "03", db)
 
     if data.con_refuerzo and acero_kg > 0:
+        _pr = tk["params"]
+        _desc_ac = (f"Acero de refuerzo mampostería {mark} — "
+                    f"{_pr['barra_vertical']}@{_pr['s_vertical_m']:.2f}m vert.")
+        if _pr["con_refuerzo_horizontal"]:
+            _desc_ac += f" + {_pr['barra_horizontal']}@{_pr['s_horizontal_m']:.2f}m horiz."
         p_ace = _crear_o_actualizar_partida(
-            cap03, "03 20 00",
-            f"Acero vertical mampostería {mark}",
-            "kg", acero_kg, mark, db,
+            cap03, "03 20 00", _desc_ac, "kg", acero_kg, mark, db,
         )
         partidas_gen.append({"clave": "03 20 00", "cantidad": acero_kg, "unidad": "kg"})
 
     if data.con_relleno and concreto_m3 > 0:
+        _pr = tk["params"]
         p_con = _crear_o_actualizar_partida(
             cap03, "03 30 00",
-            f"Concreto de relleno mampostería {mark}",
+            (f"Concreto de relleno mampostería {mark} — celdas "
+             f"{_pr['celda_ancho_cm']:.0f}×{_pr['celda_largo_cm']:.0f}cm @{_pr['s_celda_m']:.2f}m"),
             "m3", concreto_m3, mark, db,
         )
         partidas_gen.append({"clave": "03 30 00", "cantidad": concreto_m3, "unidad": "m3"})
@@ -1205,11 +1250,23 @@ def crear_mamposteria(pid: str, data: MampoCreate, db: Session = Depends(get_db)
     db.commit()
 
     return {
-        "status":    "ok",
-        "mark":      mark,
-        "area_m2":   area_m2,
-        "acero_kg":  acero_kg,
+        "status":      "ok",
+        "mark":        mark,
+        "area_m2":     area_m2,
+        "acero_kg":    acero_kg,
         "concreto_m3": concreto_m3,
-        "partidas":  partidas_gen,
+        "partidas":    partidas_gen,
+        # Trazabilidad: de dónde salieron los coeficientes (antes eran constantes
+        # mágicas sin origen). La memoria narrada completa está en
+        # POST /auditoria/mamposteria/memoria-rapida con los mismos parámetros.
+        "coeficientes": {
+            "acero_kg_m2":    tk["acero_kg_m2"],
+            "acero_v_kg_m2":  tk["acero_v_kg_m2"],
+            "acero_h_kg_m2":  tk["acero_h_kg_m2"],
+            "concreto_m3_m2": tk["concreto_m3_m2"],
+        },
+        "params":       tk["params"],
+        "normativa":    tk["normativa"],
+        "advertencias": tk["advertencias"],
     }
 

@@ -22,6 +22,7 @@ from backend import membrete as MB
 from backend import cronograma as crono_engine
 from backend.routers.export import safe_fname
 from backend.services.pricing import calc_base
+from backend.services.export_pdf_memoria import prorrateo_banco
 
 router = APIRouter(tags=["export-pdf"])
 
@@ -319,7 +320,12 @@ def _export_pdf_banco(p: Presupuesto, ctx: dict, q) -> StreamingResponse:
     if costo_directo <= 0:
         raise HTTPException(400, "La obra no tiene costo directo (costo_directo == 0)")
 
-    factor = valor_banco / total_real
+    # Fuente ÚNICA del factor: services/export_pdf_memoria.prorrateo_banco.
+    # Misma aritmética que antes (factor = valor_banco / total_real); lo que
+    # cambia es que ahora el número que sale en el PDF y el que narra
+    # GET /auditoria/export-pdf/{pid}/memoria son literalmente el mismo cálculo,
+    # no dos copias que puedan divergir (ADR-003).
+    factor = prorrateo_banco(total_real, valor_banco, costo_directo)["factor"]
 
     # persiste el bundle elegido para esta obra (valor + campos de membrete)
     _obra_banco_save(p.id, valor_banco, {k: q.get(k) for k in BANCO_TEXT_KEYS})

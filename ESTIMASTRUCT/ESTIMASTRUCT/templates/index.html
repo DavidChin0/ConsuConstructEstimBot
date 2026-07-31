@@ -108,6 +108,7 @@
     <option value="conexion" data-es="🔗 Conexión Acero" data-en="🔗 Steel Connection">🔗 Conexión Acero</option>
     <option value="etabs" data-es="🏗️ ETABS (sismo)" data-en="🏗️ ETABS (seismic)">🏗️ ETABS (sismo)</option>
     <option value="revit-mcp">🔧 Revit MCP</option>
+    <option value="auditoria" data-es="🔍 Auditoría de Fórmulas" data-en="🔍 Formula Audit">🔍 Auditoría de Fórmulas</option>
   </select>
   <button id="btn-nueva-obra" data-es="+ Nueva Obra" data-en="+ New Project">+ Nueva Obra</button>
   <button id="lang-toggle" onclick="toggleLang()" style="font-size:11px;font-weight:600;padding:4px 10px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:3px;cursor:pointer;height:28px">🌐 EN</button>
@@ -417,6 +418,30 @@
     </div>
   </div>
   <div id="conexion-content" style="overflow:auto;flex:1"></div>
+</div>
+
+<!-- PANEL: AUDITORÍA DE FÓRMULAS — consolida las memorias narradas + pricing/indirectos nuevos -->
+<div id="auditoria-view" style="display:none;position:fixed;inset:0;z-index:200;background:var(--bg);flex-direction:column;">
+  <div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--surface)">
+    <h2 style="margin:0;font-size:15px" data-es="🔍 Auditoría de Fórmulas" data-en="🔍 Formula Audit">🔍 Auditoría de Fórmulas <span style="font-size:11px;color:var(--text-dim);font-weight:400">— todas las fórmulas de cálculo del backend, en un solo lugar</span></h2>
+    <select id="auditoria-vista-sel" style="font-size:12px;font-weight:600;padding:3px 8px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:3px;cursor:pointer;height:28px;margin-left:14px">
+      <option value="resumen">📋 Índice / cobertura</option>
+      <option value="pricing">💰 Pricing (costeo de partida)</option>
+      <option value="calculos">🧾 Indirectos de presupuesto</option>
+      <option value="mamposteria">🧱 Mampostería reforzada (TMS 402)</option>
+      <option value="banco">🏦 Prorrateo bancario (PDF al banco)</option>
+      <option value="cantidad">📐 Factores de cantidad (takeoff Revit)</option>
+      <option value="cronograma">📅 Cronograma — duración y fase</option>
+      <option value="perfil">🔩 Propiedades de sección de acero</option>
+      <option value="unidades">⚖️ Conversión de unidades ETABS</option>
+      <option value="predim">📏 Predimensionamiento</option>
+      <option value="aceroficha">🏗️ Acero por ficha Div 05</option>
+    </select>
+    <div style="margin-left:auto;display:flex;gap:8px">
+      <button id="btn-cerrar-auditoria-view" class="btn-cancel" style="font-size:12px;padding:5px 12px">✕ Cerrar</button>
+    </div>
+  </div>
+  <div id="auditoria-content" style="overflow:auto;flex:1"></div>
 </div>
 
 <!-- PANEL: REVIT MCP CONTROLS -->
@@ -1257,6 +1282,7 @@
 <script src="js/core.js?v={{ asset_version }}"></script>
 <script src="js/app.js?v={{ asset_version }}"></script>
 <script src="js/calculo-estructural.js?v={{ asset_version }}"></script>
+<script src="js/auditoria-formulas.js?v={{ asset_version }}"></script>
 <script src="js/bases-drawer.js?v={{ asset_version }}"></script>
 <script src="js/tabla-render.js?v={{ asset_version }}"></script>
 <script src="js/db-backup.js?v={{ asset_version }}"></script>
@@ -1318,7 +1344,14 @@
   function applyLang(lang) {
     document.documentElement.setAttribute('data-lang', lang);
     document.querySelectorAll('[data-es]').forEach(function(el) {
-      el.textContent = lang === 'en' ? (el.dataset.en || el.textContent) : el.dataset.es;
+      var text = lang === 'en' ? (el.dataset.en || el.dataset.es) : el.dataset.es;
+      // No reemplazar el contenido completo de contenedores: labels con
+      // inputs/selects perderían sus controles (incluido el modal PDF).
+      var textNode = Array.prototype.find.call(el.childNodes, function(node) {
+        return node.nodeType === Node.TEXT_NODE && node.nodeValue.trim();
+      });
+      if (textNode) textNode.nodeValue = text;
+      else if (!el.children.length) el.textContent = text;
     });
     document.querySelectorAll('[data-es-placeholder]').forEach(function(el) {
       el.placeholder = lang === 'en' ? (el.dataset.enPlaceholder || el.placeholder) : el.dataset.esPlaceholder;
