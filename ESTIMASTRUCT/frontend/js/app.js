@@ -2413,6 +2413,10 @@ async function rmcpRunScript(key, type, btnEl) {
     } else {
       url = `${API}/python/${key}`;
     }
+  } else if (type === 'pipe') {
+    // PipeClient (Named Pipe) — transporte verificado 2026-08-02 (goal-20178/20188).
+    // No requiere "Levantar MCP" como /inject: solo Revit abierto con el modelo activo.
+    url = `${API}/pipe/${key}`;
   } else {
     if (!_RMCP.mcpOnline) { rmcpLog('MCP apagado — presiona "Levantar MCP".', 'rmcp-err'); _rmcpSetResult(btnEl, false, 'MCP offline'); _rmcpReset(btnEl); return; }
     url = `${API}/inject/${key}`;
@@ -2479,7 +2483,9 @@ async function rmcpBuildCards() {
       <div class="rmcp-actions">
         ${s.deprecated
           ? '<span class="rmcp-nocan">No inyectar — usa DB.Transaction</span>'
-          : mkRun(s.key, 'iron', 'mcp')}
+          : (s.transport === 'pipe'
+              ? mkRun(s.key, 'pipe', '')   // PipeClient: no requiere MCP online (goal-20188)
+              : mkRun(s.key, 'iron', 'mcp'))}
       </div>
       <div class="rmcp-reason"></div>
       <div class="rmcp-result"></div>

@@ -113,6 +113,67 @@ def _read_ironpython_code(path: Path, var_name: str = "CODE") -> str:
     return m.group(1)
 
 
+# ──────────────────────────────────────────────
+# PIPECLIENT ACTIONS  (ADR-012 / goal-20178, expuesto por goal-20188)
+# ──────────────────────────────────────────────
+# dump/dump-full/marks_master viven como funciones en revit-mcp-stdio
+# (estimastruct_tools.py) sobre PipeClient (Named Pipe) — el transporte verificado
+# en vivo 2026-08-02 (140 objects / 349 keynotes / 102 compound, 4.3s). A diferencia
+# de /inject/{name}, que corre el mismo CODE pero por el MCP HTTP :8001 frágil
+# (execute_ironpython) y exige "Levantar MCP", estas NO necesitan el MCP levantado:
+# solo Revit abierto con el modelo activo + revit-mcp-stdio instalado (dependencia
+# de instalación, ADR-001). El connect_timeout lo fija cada función (60/120s).
+_REVIT_MCP_STDIO_REPO = _ESTIMASTRUCT_TOOLS_PATH.parents[2]   # D:\GitHub\revit-mcp-stdio
+
+# keys que se sirven por PipeClient en vez de /inject (ver list_scripts / frontend)
+_PIPE_KEYS = {"dump", "dump-full", "marks_master"}
+
+
+def _pipe_funcs() -> dict:
+    """Importa las funciones PipeClient de revit-mcp-stdio (mismo patrón sys.path
+    que scripts_router._trigger_revit_dump). Import perezoso: no cargar el repo al
+    importar el router, solo al primer uso real de una acción pipe."""
+    if str(_REVIT_MCP_STDIO_REPO) not in sys.path:
+        sys.path.insert(0, str(_REVIT_MCP_STDIO_REPO))
+    from revit_mcp.pipe.estimastruct_tools import (
+        dump_audit_json, dump_full_json, set_marks_master,
+    )
+    return {
+        "dump":         dump_audit_json,
+        "dump-full":    dump_full_json,
+        "marks_master": set_marks_master,
+    }
+
+
+def _pipe_normalize(resp: dict) -> dict:
+    """Normaliza el dict crudo del pipe ({v,id,ok,result|error}) al shape {ok,output}
+    que ya renderiza rmcpRunScript en el frontend — así la card pipe usa el mismo
+    camino de log que /inject sin ramas nuevas. Nunca pierde info: cae a json.dumps."""
+    if not isinstance(resp, dict):
+        return {"ok": False, "output": str(resp)}
+    ok = bool(resp.get("ok", False))
+    result = resp.get("result", {})
+    text = None
+    if isinstance(result, dict):
+        for k in ("output", "stdout", "message", "text"):
+            if result.get(k):
+                text = result[k]
+                break
+        if text is None and isinstance(result.get("content"), list):
+            parts = [c.get("text", "") for c in result["content"]
+                     if isinstance(c, dict) and c.get("text")]
+            text = "\n".join(parts) if parts else None
+    err = resp.get("error")
+    if text is None and err and not ok:
+        text = err.get("message") if isinstance(err, dict) else str(err)
+    if text is None:
+        text = json.dumps(result or resp, ensure_ascii=False)
+    out = {"ok": ok, "output": text}
+    if not ok and err:
+        out["error"] = err.get("message") if isinstance(err, dict) else str(err)
+    return out
+
+
 def _run_cmd_blocking(cmd: list[str], cwd: str) -> dict:
     """Corre el comando de forma síncrona (subprocess.run clásico).
 
@@ -214,13 +275,17 @@ def list_scripts():
              "marks_legacy": "Set Marks (Legacy)",
          }.get(k, k),
          "desc": {
-             "dump":         "Vuelca keynotes, compuestos y schedules al JSON de auditoría (rápido).",
-             "dump-full":    "Dump completo: project_info, levels, grids, views, sheets, rooms, all_instances, materials_full + secciones del dump de auditoría. Fuente de verdad para el Viewer 3D.",
-             "marks_master": "Asigna TypeMark/Mark a materiales, tipos, floors y doors/windows desde csi_to_codigo.json.",
+             "dump":         "Vuelca keynotes, compuestos y schedules al JSON de auditoría (rápido). Vía PipeClient — no requiere Levantar MCP, solo Revit abierto.",
+             "dump-full":    "Dump completo: project_info, levels, grids, views, sheets, rooms, all_instances, materials_full + secciones del dump de auditoría. Fuente de verdad para el Viewer 3D. Vía PipeClient — no requiere Levantar MCP.",
+             "marks_master": "Asigna TypeMark/Mark a materiales, tipos, floors y doors/windows desde csi_to_codigo.json. Vía PipeClient — no requiere Levantar MCP.",
              "keynote_path": "Retorna la ruta del archivo .txt de keynotes cargado en el proyecto activo.",
              "marks_legacy": "⚠️ Deprecado — usa DB.Transaction. NO inyectar via execute_revit_code.",
          }.get(k, ""),
          "deprecated": k == "marks_legacy",
+         # goal-20188: dump/dump-full/marks_master se sirven por PipeClient (/pipe/{key},
+         # transporte verificado 2026-08-02) en vez de /inject (MCP HTTP :8001). El
+         # frontend usa este flag para rutear la card y NO exigir MCP online.
+         "transport": "pipe" if k in _PIPE_KEYS else "mcp",
         }
         for k, v in _IRONPYTHON_SCRIPTS.items()
     ]
@@ -250,6 +315,31 @@ async def inject_script(name: str, body: InjectRequest = None):
         raise HTTPException(500, str(e))
     result = await mcp_http.execute_ironpython(code)
     return result
+
+
+# ──────────────────────────────────────────────
+# PIPECLIENT INJECTION  (goal-20188 — acción de usuario, transporte verificado)
+# ──────────────────────────────────────────────
+@router.post("/pipe/{name}")
+async def run_pipe_action(name: str):
+    """Corre dump/dump-full/marks_master vía PipeClient (Named Pipe), el transporte
+    verificado en vivo 2026-08-02 (goal-20178). A diferencia de /inject/{name} (MCP
+    HTTP :8001), NO requiere 'Levantar MCP' — solo Revit abierto con el modelo activo.
+    Bloqueante (socket I/O), así que va a un thread (asyncio.to_thread) para no
+    tapar el event loop de uvicorn — mismo motivo que _run_cmd_blocking."""
+    funcs = _pipe_funcs()
+    fn = funcs.get(name)
+    if fn is None:
+        raise HTTPException(404, f"Acción pipe '{name}' no existe. Válidas: {list(funcs.keys())}")
+    try:
+        resp = await asyncio.to_thread(fn)
+    except Exception as e:
+        return {
+            "ok": False,
+            "error": f"PipeClient falló ({type(e).__name__}): {e}",
+            "output": f"PipeClient falló ({type(e).__name__}): {e}. ¿Revit abierto con el modelo activo y revit-mcp-stdio instalado?",
+        }
+    return _pipe_normalize(resp)
 
 
 # ──────────────────────────────────────────────
