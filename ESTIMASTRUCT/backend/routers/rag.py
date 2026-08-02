@@ -11,6 +11,7 @@ motor que consuconstruct), esto deja el semantic search funcionando ya.
 """
 import json
 import os
+import re
 import sqlite3
 import urllib.request
 from pathlib import Path
@@ -52,13 +53,30 @@ def _embed(text: str) -> list[float] | None:
         return None
 
 
+def _fts5_safe_query(q: str) -> str:
+    """Escapa la query de usuario para FTS5 MATCH.
+
+    FTS5 interpreta '-', '"', '*', '(', ')', ':' y las keywords AND/OR/NOT/NEAR
+    como sintaxis de operadores, no como texto literal -- un guion en la query
+    ("dibujar-desde-DB") ya tiraba 'fts5: syntax error near "-"' (500 real,
+    encontrado 2026-08-02 probando estima_rag_search). Se envuelve cada token
+    en comillas dobles (escapando comillas internas) para forzar match literal
+    de frase, sin interpretacion de operadores.
+    """
+    tokens = re.findall(r"\w+", q, re.UNICODE)
+    if not tokens:
+        return '""'
+    return " ".join(f'"{t}"' for t in tokens)
+
+
 @router.get("/search")
 def rag_search(q: str, top_k: int = 5):
     """Busqueda hibrida: FTS5 (BM25 keyword) + vec0 (coseno), score compuesto.
 
     Sin dependencia dura de Ollama: si el embedding falla, degrada a solo
     keyword en vez de tirar 500 -- mismo criterio best-effort que
-    fast_search.py del lado ConsuConstruct.
+    fast_search.py del lado ConsuConstruct. Igual si FTS5 revienta por sintaxis
+    (ver _fts5_safe_query): degrada a solo vector en vez de 500.
     """
     if not RAG_DB_PATH.exists():
         return {"error": f"rag.sqlite no existe en {RAG_DB_PATH}. "
@@ -69,16 +87,19 @@ def rag_search(q: str, top_k: int = 5):
     try:
         # FTS5: candidatos por keyword, normalizamos bm25 (mas negativo = mejor)
         # a un score positivo 0..1 para poder combinarlo con similarity.
-        fts_rows = conn.execute(
-            """
-            SELECT rowid, bm25(rag_chunks_fts) AS score
-            FROM rag_chunks_fts
-            WHERE rag_chunks_fts MATCH ?
-            ORDER BY score
-            LIMIT 20
-            """,
-            (q,),
-        ).fetchall()
+        try:
+            fts_rows = conn.execute(
+                """
+                SELECT rowid, bm25(rag_chunks_fts) AS score
+                FROM rag_chunks_fts
+                WHERE rag_chunks_fts MATCH ?
+                ORDER BY score
+                LIMIT 20
+                """,
+                (_fts5_safe_query(q),),
+            ).fetchall()
+        except sqlite3.OperationalError:
+            fts_rows = []
         fts_scores: dict[int, float] = {}
         if fts_rows:
             worst = min(r[1] for r in fts_rows)  # bm25 mas negativo del set

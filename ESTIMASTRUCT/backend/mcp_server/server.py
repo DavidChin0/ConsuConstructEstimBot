@@ -201,6 +201,21 @@ async def insumos_de_obra(pid: str) -> Any:
                        headers={"Accept": "application/json"})
 
 
+# ---------------------------------------------------------------------------
+# RAG semantico (conocimiento propio de EstimaStruct)
+# ---------------------------------------------------------------------------
+@mcp.tool()
+async def estima_rag_search(query: str, top_k: int = 5) -> Any:
+    """Busca en el conocimiento propio de EstimaStruct: motor de calculo,
+    fichas de costeo, arquitectura del sistema (no datos de una obra especifica).
+
+    Hibrido keyword+semantico sobre rag.sqlite. Util para preguntas de "como
+    funciona X" o "donde esta implementado Y", no para consultar una obra real
+    (para eso usar las demas tools sobre /presupuestos).
+    """
+    return await _call("GET", "/rag/search", params={"q": query, "top_k": top_k})
+
+
 def main() -> None:
     """Arranca el servidor MCP sobre STDIO."""
     mcp.run(transport="stdio")
