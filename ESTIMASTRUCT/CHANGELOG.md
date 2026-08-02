@@ -5,6 +5,10 @@
 
 # CHANGELOG - EstimaStruct
 
+## 2026-08-02 — Paso 2 (Auditoría CSI) automatizado: dump de Revit ya no requiere paso manual
+
+- [2026-08-02] [Synarch]: `revit_dump_snippet.py`, `revit_full_dump_snippet.py`, `revit_marks_master.py` movidos a `D:\GitHub\revit-mcp-stdio\revit_mcp\pipe\estimastruct_tools.py` (CODE sin cambios, solo transporte: PipeClient directo vía `helpers.execute_code()` en vez de paste manual). `routers/scripts.py::run_auditoria()` ahora dispara `dump_audit_json()` automáticamente antes de `run_audit_pipeline()` — antes exigía correr el snippet a mano en Revit primero. Fallback best-effort: si el pipe falla, loguea warning y sigue con el JSON existente. `routers/revit_mcp.py` (`_IRONPYTHON_SCRIPTS`/`_read_ironpython_code`, endpoint manual `/inject/{name}`) actualizado a la nueva ubicación, transporte sin cambios (`mcp_http` HTTP :8001). ADR-012 en `docs/architecture.md` corregida al implementar (el borrador original pedía registrar en `tool_manifest.py`, que no aplica a snippets de texto — ver ADR). `add_scripts_tab_to_canon.py` actualizado a la nueva ruta. goal-20178 cerrado. | Verificar en vivo: click "Auditoría" con Revit abierto, confirmar que dispara el dump solo sin correr nada a mano.
+
 ## 2026-08-02 — UX: Export keynotes permite elegir carpeta destino + versionado automático
 
 - [2026-08-02] [Synarch]: `generate_keynotes.py` acepta parámetro `output_dir` opcional (default `CONFIG.KEYNOTES_DIR`). Router `POST /presupuestos/{pid}/scripts/keynotes` propaga `output_dir` en body JSON. Filenaming automático con timestamp + contador de versión (`RevitKeynotes_obra_YYYY-MM-DD_v2.txt` si ya existe `v1`) — usuario no pierde exports anteriores. Scope: solo `generate_keynotes.py` (script aislado, 204 líneas). No afecta `export_pdf.py`/`export.py` (ya son browser-side download) ni `revit_full_dump_snippet.py` (bloqueado, requiere MCP interface). ADR-011 registrada en `docs/architecture.md`. | Verificar en vivo generando 2 keynotes para la misma obra en la misma sesión, confirmar que no pisó el primero.

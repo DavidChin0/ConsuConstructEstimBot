@@ -19,9 +19,9 @@ SHEET_NAME = "Scripts & Skills"
 ENTRIES = [
     # ── IronPython snippets (inyectados via execute_revit_code MCP) ──────────
     (
-        "revit_dump_snippet.py",
+        "revit_dump_snippet.py (DUMP_AUDIT_CODE)",
         "IronPython MCP",
-        r"D:\GitHub\EstimBot\ConsuConstructEstimBot\ESTIMASTRUCT\backend\scripts_runner\revit_dump_snippet.py",
+        r"D:\GitHub\revit-mcp-stdio\revit_mcp\pipe\estimastruct_tools.py",
         "Vuelca modelo Revit completo: ElementTypes, Materials, compound layers, keynote_table, "
         "schedule_quantities (T04/T02/T01). Escribe model_audit_raw.json.",
         "FASE 1: siempre al inicio del pipeline. Antes de auditoría o set marks.",
@@ -29,9 +29,9 @@ ENTRIES = [
         r"D:\OneDrive\Bots\Estimbot\EXPORTS\model_audit_raw.json",
     ),
     (
-        "revit_marks_master.py",
+        "revit_marks_master.py (SET_MARKS_CODE)",
         "IronPython MCP",
-        r"D:\GitHub\EstimBot\ConsuConstructEstimBot\ESTIMASTRUCT\backend\scripts_runner\revit_marks_master.py",
+        r"D:\GitHub\revit-mcp-stdio\revit_mcp\pipe\estimastruct_tools.py",
         "Asigna TypeMark/Marca desde csi_to_codigo.json. Cubre: Materials (ALL_MODEL_MARK), "
         "ElementTypes no-compuestos (ALL_MODEL_TYPE_MARK), FloorType (TypeMark + rename Name), "
         "Door/Window instancias (inst mark = type TypeMark), Floor instancias (inst mark sync). "

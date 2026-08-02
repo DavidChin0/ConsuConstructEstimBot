@@ -34,14 +34,19 @@ _S1_DIR       = Path(r"D:\OneDrive\Bots\Estimbot\EXPORTS\S1_keynotes")
 PYTHON        = r"D:\LLM\python\python.exe"
 
 # ──────────────────────────────────────────────
-# IronPython snippets (have CODE = r'''...''' pattern)
+# IronPython snippets (have CODE = r'''...''' / VAR = r'''...''' pattern)
 # ──────────────────────────────────────────────
+# ADR-012 (2026-08-02): dump/dump-full/marks_master viven consolidados en
+# revit-mcp-stdio (D:\GitHub\revit-mcp-stdio\revit_mcp\pipe\estimastruct_tools.py)
+# como DUMP_AUDIT_CODE/DUMP_FULL_CODE/SET_MARKS_CODE — ya no en scripts_runner/.
+_ESTIMASTRUCT_TOOLS_PATH = Path(r"D:\GitHub\revit-mcp-stdio\revit_mcp\pipe\estimastruct_tools.py")
+
 _IRONPYTHON_SCRIPTS = {
-    "dump":          "revit_dump_snippet.py",
-    "dump-full":     "revit_full_dump_snippet.py",
-    "marks_master":  "revit_marks_master.py",
-    "keynote_path":  "revit_get_keynote_path.py",
-    "marks_legacy":  "revit_set_marks_snippet.py",
+    "dump":          (_ESTIMASTRUCT_TOOLS_PATH, "DUMP_AUDIT_CODE"),
+    "dump-full":     (_ESTIMASTRUCT_TOOLS_PATH, "DUMP_FULL_CODE"),
+    "marks_master":  (_ESTIMASTRUCT_TOOLS_PATH, "SET_MARKS_CODE"),
+    "keynote_path":  (_SCRIPTS_DIR / "revit_get_keynote_path.py", "CODE"),
+    "marks_legacy":  (_SCRIPTS_DIR / "revit_set_marks_snippet.py", "CODE"),
 }
 
 # ──────────────────────────────────────────────
@@ -100,12 +105,11 @@ _PYTHON_SCRIPTS = {
 }
 
 
-def _read_ironpython_code(script_filename: str) -> str:
-    path = _SCRIPTS_DIR / script_filename
+def _read_ironpython_code(path: Path, var_name: str = "CODE") -> str:
     src = path.read_text(encoding="utf-8")
-    m = re.search(r"CODE = r'''(.*?)'''", src, re.DOTALL)
+    m = re.search(var_name + r" = r'''(.*?)'''", src, re.DOTALL)
     if not m:
-        raise ValueError(f"No CODE block found in {script_filename}")
+        raise ValueError(f"No {var_name} block found in {path}")
     return m.group(1)
 
 
@@ -201,7 +205,7 @@ def stop_mcp():
 @router.get("/scripts")
 def list_scripts():
     ironpy = [
-        {"key": k, "file": v, "type": "ironpython",
+        {"key": k, "file": v[0].name, "type": "ironpython",
          "label": {
              "dump":         "Dump Modelo (audit)",
              "dump-full":    "Full Dump (viewer)",
@@ -241,7 +245,7 @@ async def inject_script(name: str, body: InjectRequest = None):
     if name == "marks_legacy":
         raise HTTPException(400, "revit_set_marks_snippet usa DB.Transaction — NO inyectar via execute_revit_code. Usar revit_marks_master.")
     try:
-        code = _read_ironpython_code(_IRONPYTHON_SCRIPTS[name])
+        code = _read_ironpython_code(*_IRONPYTHON_SCRIPTS[name])
     except Exception as e:
         raise HTTPException(500, str(e))
     result = await mcp_http.execute_ironpython(code)

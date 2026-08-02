@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from typing import Optional
-import os, sys, copy
+import logging, os, sys, copy
 
 from backend.db import get_db, SessionLocal
 from backend.config import CONFIG
@@ -14,6 +14,20 @@ from backend.scripts_runner.import_quantities import import_quantities, _build_i
 from backend.scripts_runner.run_audit_pipeline import run_audit_pipeline
 
 router = APIRouter(tags=["scripts"])
+logger = logging.getLogger(__name__)
+
+_REVIT_MCP_STDIO_REPO = r"D:\GitHub\revit-mcp-stdio"
+
+
+def _trigger_revit_dump() -> dict:
+    """Dispara revit_dump_snippet (ADR-012) via PipeClient directo — reemplaza
+    el paso manual que antes exigia correr el snippet a mano en Revit ANTES de
+    clickear "Auditoria". Best-effort: si el pipe falla (Revit cerrado/ocupado),
+    el caller sigue con el model_audit_raw.json que ya exista, no hard-fail."""
+    if _REVIT_MCP_STDIO_REPO not in sys.path:
+        sys.path.insert(0, _REVIT_MCP_STDIO_REPO)
+    from revit_mcp.pipe.estimastruct_tools import dump_audit_json
+    return dump_audit_json()
 
 S5_SCHEDULES_DIR = CONFIG.SCHEDULES_DIR
 SCHEDULES_PREFIX = "schedules_"
@@ -48,16 +62,23 @@ def run_keynotes(pid: str, data: Optional[KeynotesIn] = None, db: Session = Depe
 
 @router.post("/presupuestos/{pid}/scripts/auditoria")
 def run_auditoria(pid: str, db: Session = Depends(get_db)):
-    """Paso 2: audita Revit vs catálogo V1.2 (audit_keynotes → xlsx → colores).
+    """Paso 2: audita Revit vs catálogo V1.2 (dump -> audit_keynotes -> xlsx -> colores).
 
-    Requiere que el dump de Revit (`EXPORTS\\model_audit_raw.json`) ya esté
-    fresco — se genera vía MCP `execute_revit_code` con `revit_dump_snippet.py`
-    dentro de una sesión con Revit abierto, ANTES de llamar este endpoint.
-    Este endpoint no puede disparar ese paso (necesita Revit vivo).
+    Dispara el dump de Revit (`EXPORTS\\model_audit_raw.json`) automáticamente
+    vía PipeClient (ADR-012, `revit_mcp.pipe.estimastruct_tools.dump_audit_json`)
+    antes de orquestar el resto — ya NO requiere correr `revit_dump_snippet` a
+    mano en Revit antes de este endpoint. Si el pipe falla (Revit cerrado u
+    ocupado), loguea warning y sigue con el JSON que ya exista en disco.
     """
     obra = db.query(Presupuesto).filter(Presupuesto.id == pid).first()
     if not obra:
         raise HTTPException(404, "Obra no encontrada")
+    try:
+        dump_res = _trigger_revit_dump()
+        if not dump_res.get("ok", True):
+            logger.warning("dump_audit_json no-ok, sigo con JSON existente: %s", dump_res)
+    except Exception as ex:
+        logger.warning("dump_audit_json fallo (Revit cerrado/pipe no disponible?), sigo con JSON existente: %s", ex)
     res = run_audit_pipeline(pid)
     if not res.get("ok"):
         step = res.get("step_failed", "desconocido")
