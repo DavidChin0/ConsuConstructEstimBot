@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-EstimBot - Sync Marks + Autotag + Export
-CASE-MARKS-001 | 2026-07-19
+EstimBot - Sync Marks
+CASE-MARKS-001 | 2026-07-19, dividido 2026-08-02 (goal-20149 rework)
 
 Fase 1 - Sync TypeMarks desde csi_to_codigo.json:
   Materials        : ALL_MODEL_MARK = codigo
@@ -13,7 +13,11 @@ Fase 1 - Sync TypeMarks desde csi_to_codigo.json:
   RoofType/Ceiling    : ALL_MODEL_TYPE_MARK = codigo (TM persists)
 
 Fase 2 - Autotag keynotes en vista activa.
-Fase 3 - Export schedules 01-99 / T01-T99 a CSV de cantidades.
+
+2026-08-02: Fase 3 (export schedules) y Fase 4 (import a EstimaStruct) se
+sacaron de este botón — ya viven en "Exportar e Importar Schedules.pushbutton"
+(Export.panel), que las cubre completas. Este botón queda solo Sync Marks +
+Autotag, sin duplicar responsabilidad.
 
 GOTCHAS:
   - No nested DB.Transaction — usar revit.Transaction de pyRevit
@@ -33,38 +37,11 @@ import json
 import os
 import re
 from datetime import datetime
-from System.IO import StreamWriter
-from System.Text import UTF8Encoding
-from System.Net import WebClient
 
 # ── Constants ────────────────────────────────────────────────────────────────
 CSI_TO_CODIGO_PATH = r"D:\OneDrive\Bots\Estimbot\EXPORTS\csi_to_codigo.json"
 KEYNOTE_EXPORT_DIR = r"D:\OneDrive\Bots\Estimbot\EXPORTS\S1_keynotes"
-SCHEDULES_EXPORT_DIR = r"D:\OneDrive\Bots\Estimbot\EXPORTS\S5_schedules"
 
-# EstimaStruct backend (FastAPI) — misma maquina que Revit
-ESTIMASTRUCT_API = "http://127.0.0.1:8002"
-
-
-# ── HTTP helpers (IronPython 2.7 — sin requests, WebClient .NET nativo) ────────
-def _http_get_json(url):
-    wc = WebClient()
-    try:
-        raw = wc.DownloadString(url)
-    finally:
-        wc.Dispose()
-    return json.loads(raw)
-
-
-def _http_post_json(url, payload_dict):
-    wc = WebClient()
-    wc.Headers.Add("Content-Type", "application/json")
-    body = json.dumps(payload_dict)
-    try:
-        raw = wc.UploadString(url, "POST", body)
-    finally:
-        wc.Dispose()
-    return json.loads(raw)
 
 KEY_PARAM  = DB.BuiltInParameter.KEYNOTE_PARAM
 TYPE_MARK  = DB.BuiltInParameter.ALL_MODEL_TYPE_MARK
@@ -88,7 +65,7 @@ ALLOWED_VIEW_TYPES = {
 
 doc    = revit.doc
 output = script.get_output()
-output.set_title("EstimBot - Sync Marks + Autotag + Export")
+output.set_title("EstimBot - Sync Marks")
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
 def clean(value):
@@ -423,229 +400,13 @@ def fase2_autotag(kmap):
     return created
 
 
-# ── FASE 3: Export schedules to CSV ──────────────────────────────────────────
-def should_export(name):
-    n = (name or "").strip()
-    return bool(re.match(r"^\d{2}", n) or re.match(r"^T\d{2}", n, re.IGNORECASE))
-
-
-def csv_escape(v):
-    text = str(v) if v is not None else ""
-    text = text.replace("\r\n", "\n").replace("\r", "\n")
-    if "," in text or '"' in text or "\n" in text:
-        return '"' + text.replace('"', '""') + '"'
-    return text
-
-
-def csv_row(vals):
-    return ",".join(csv_escape(v) for v in vals)
-
-
-def read_schedule(vs):
-    rows = []
-    try:
-        sec = vs.GetTableData().GetSectionData(DB.SectionType.Body)
-        for r in range(sec.NumberOfRows):
-            rows.append([
-                vs.GetCellText(DB.SectionType.Body, r, c) or ""
-                for c in range(sec.NumberOfColumns)
-            ])
-    except Exception as ex:
-        rows.append(["ERROR: {}".format(ex)])
-    return rows
-
-
-def _to_m(feet):
-    try:
-        return DB.UnitUtils.ConvertFromInternalUnits(feet, DB.UnitTypeId.Meters)
-    except Exception:
-        return feet * 0.3048
-
-
-def api_length_blocks():
-    from collections import defaultdict
-    out = []
-    for title, bic in [("18Cable Schedule", DB.BuiltInCategory.OST_Wire),
-                        ("19Conduit Schedule", DB.BuiltInCategory.OST_Conduit)]:
-        try:
-            elems = DB.FilteredElementCollector(doc).OfCategory(bic)\
-                .WhereElementIsNotElementType().ToElements()
-        except Exception:
-            continue
-        agg = defaultdict(lambda: [0.0, ""])
-        for e in elems:
-            et = doc.GetElement(e.GetTypeId())
-            key = gp(et, KEY_PARAM) or gp(e, KEY_PARAM)
-            if not key:
-                continue
-            lp = e.get_Parameter(DB.BuiltInParameter.CURVE_ELEM_LENGTH)
-            agg[key][0] += _to_m(lp.AsDouble() if lp else 0.0)
-            agg[key][1] = safe_name(et)
-        if not agg:
-            continue
-        rows = [["Keynote", "Type", "Length"]]
-        for k in sorted(agg.keys()):
-            rows.append([k, agg[k][1], round(agg[k][0], 2)])
-        out.append((title, rows))
-    return out
-
-
-def fase3_export_schedules():
-    output.print_md("## Fase 3 - Export Schedules")
-    if not os.path.isdir(SCHEDULES_EXPORT_DIR):
-        os.makedirs(SCHEDULES_EXPORT_DIR)
-
-    out_path = os.path.join(
-        SCHEDULES_EXPORT_DIR,
-        "schedules_{}.csv".format(datetime.now().strftime("%Y%m%d_%H%M%S"))
-    )
-
-    all_vs = DB.FilteredElementCollector(doc).OfClass(DB.ViewSchedule).ToElements()
-    schedules = sorted(
-        [vs for vs in all_vs if should_export(safe_name(vs))],
-        key=lambda vs: safe_name(vs)
-    )
-
-    exported = []
-    writer = StreamWriter(out_path, False, UTF8Encoding(True))
-    try:
-        for vs in schedules:
-            name = safe_name(vs)
-            rows = read_schedule(vs)
-            if len(rows) < 2:
-                continue
-            writer.WriteLine(csv_row(["### {} ###".format(name)]))
-            for row in rows:
-                writer.WriteLine(csv_row(row))
-            writer.WriteLine("")
-            exported.append(name)
-        for title, rows in api_length_blocks():
-            writer.WriteLine(csv_row(["### {} ###".format(title)]))
-            for row in rows:
-                writer.WriteLine(csv_row(row))
-            writer.WriteLine("")
-            exported.append(title + " (API)")
-    finally:
-        writer.Close()
-
-    output.print_md("- Schedules exportados: **{}**".format(len(exported)))
-    output.print_md("- Archivo: `{}`".format(out_path))
-    return out_path, exported
-
-
-# ── FASE 4: Importar cantidades a una obra de EstimaStruct ────────────────────
-def fase4_import_estimastruct(csv_path):
-    """Ofrece importar el CSV recien generado a una obra de EstimaStruct via el
-    backend FastAPI (:8002). No crashea si el backend no responde."""
-    output.print_md("## Fase 4 - Importar a EstimaStruct")
-
-    if not csv_path or not os.path.isfile(csv_path):
-        output.print_md("- SKIP: no hay CSV valido para importar.")
-        return
-
-    # 1. Preguntar si quiere importar ahora
-    quiere = forms.alert(
-        "¿Importar estas cantidades a una obra de EstimaStruct ahora?\n\n"
-        "El CSV ya quedo guardado en disco:\n{}".format(csv_path),
-        title="EstimBot - Importar a EstimaStruct",
-        yes=True, no=True
-    )
-    if not quiere:
-        output.print_md("- Usuario eligio NO importar. CSV guardado en disco.")
-        return
-
-    # 2. Listar obras del backend
-    try:
-        obras = _http_get_json(ESTIMASTRUCT_API + "/presupuestos")
-    except Exception as e:
-        forms.alert(
-            "No se pudo conectar a EstimaStruct (:8002). "
-            "¿Esta corriendo el backend? Podes importar manualmente desde la web.\n\n"
-            "Detalle: {}".format(str(e)),
-            title="EstimBot - Error de conexion"
-        )
-        output.print_md("- ERROR conexion: {}".format(str(e)))
-        return
-
-    # Mapear nombre -> id (filtrar templates)
-    nombre_a_id = {}
-    for o in (obras or []):
-        try:
-            if o.get("es_template"):
-                continue
-            nombre = clean(o.get("nombre")) or "(sin nombre)"
-            oid = o.get("id")
-            if oid is None:
-                continue
-            # Evitar colisiones de nombre duplicado
-            label = nombre
-            n = 2
-            while label in nombre_a_id:
-                label = "{} ({})".format(nombre, n)
-                n += 1
-            nombre_a_id[label] = oid
-        except Exception:
-            continue
-
-    if not nombre_a_id:
-        forms.alert(
-            "El backend respondio pero no hay obras disponibles para importar.",
-            title="EstimBot - Sin obras"
-        )
-        output.print_md("- Backend sin obras (o todas son templates).")
-        return
-
-    # 3. Picker de obra
-    seleccion = forms.SelectFromList.show(
-        sorted(nombre_a_id.keys()),
-        title="Selecciona la obra EstimaStruct",
-        button_name="Importar cantidades",
-        multiselect=False
-    )
-    if not seleccion:
-        output.print_md("- Usuario cancelo el picker. Nada importado.")
-        return
-
-    pid = nombre_a_id.get(seleccion)
-    if pid is None:
-        output.print_md("- Seleccion invalida. Nada importado.")
-        return
-
-    # 4. POST import-quantities
-    url = "{}/revit-mcp/obras/{}/import-quantities".format(ESTIMASTRUCT_API, pid)
-    try:
-        resp = _http_post_json(url, {"csv_path": csv_path})
-    except Exception as e:
-        forms.alert(
-            "No se pudo importar a EstimaStruct (:8002). "
-            "¿Esta corriendo el backend? Podes importar manualmente desde la web.\n\n"
-            "Obra: {}\nDetalle: {}".format(seleccion, str(e)),
-            title="EstimBot - Error de importacion"
-        )
-        output.print_md("- ERROR import: {}".format(str(e)))
-        return
-
-    # 5. Mostrar resultado
-    salida = ""
-    try:
-        salida = resp.get("output") or ""
-    except Exception:
-        salida = str(resp)
-    forms.alert(
-        "Importacion a '{}' completada.\n\n{}".format(seleccion, salida),
-        title="EstimBot - Importacion EstimaStruct"
-    )
-    output.print_md("- Importado a obra: **{}**".format(seleccion))
-    output.print_md("```\n{}\n```".format(salida))
-
-
 # ── Main ──────────────────────────────────────────────────────────────────────
 def main():
     if doc is None:
         forms.alert("No hay documento activo.", title="EstimBot")
         return
 
-    output.print_md("# EstimBot — Sync Marks + Autotag + Export")
+    output.print_md("# EstimBot — Sync Marks")
     output.print_md("CASE-MARKS-001 | {}".format(
         datetime.now().strftime("%Y-%m-%d %H:%M")))
 
@@ -672,30 +433,12 @@ def main():
     else:
         output.print_md("**SKIP Fase 2** — keynote TXT no encontrado.")
 
-    # --- Fase 3 ---
-    out_path, exported = fase3_export_schedules()
-
     # --- Summary alert ---
     forms.alert(
         "Marks sync: materiales={mat} muros={wall} pisos={floor_tm} "
-        "puertas/vent={door_win_type}\n"
-        "Schedules exportados: {n}\n{path}".format(
-            n=len(exported), path=out_path, **stats1),
-        title="EstimBot - Completado"
+        "puertas/vent={door_win_type}".format(**stats1),
+        title="EstimBot - Sync Marks Completado"
     )
-
-    # --- Fase 4: importar a EstimaStruct (solo si fase3 genero out_path) ---
-    if out_path:
-        try:
-            fase4_import_estimastruct(out_path)
-        except Exception as e:
-            # Nunca perder el resultado de fase1-3 por un fallo en fase4
-            forms.alert(
-                "Fase 4 (importar a EstimaStruct) fallo, pero el CSV ya quedo "
-                "guardado en disco. Podes importar manualmente desde la web.\n\n"
-                "Detalle: {}".format(str(e)),
-                title="EstimBot - Fase 4 error"
-            )
 
 
 if __name__ == "__main__":

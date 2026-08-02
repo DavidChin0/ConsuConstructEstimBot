@@ -1,0 +1,3 @@
+title: Sync Marks
+tooltip: Sync TypeMarks desde csi_to_codigo.json (materiales/muros/pisos/puertas/ventanas/estructural-MEP) + autotag de keynotes en la vista activa. Export/import a EstimaStruct viven en "Exportar e Importar Schedules".
+author: EstimBot
