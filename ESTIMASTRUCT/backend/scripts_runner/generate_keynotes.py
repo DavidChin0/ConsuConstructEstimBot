@@ -91,7 +91,7 @@ def _csi_natural_key(s: str):
     return parts
 
 
-def generate(obra_id: str) -> dict:
+def generate(obra_id: str, output_dir: str = None) -> dict:
     db = SessionLocal()
     try:
         obra = db.query(Presupuesto).filter(Presupuesto.id == obra_id).first()
@@ -121,11 +121,20 @@ def generate(obra_id: str) -> dict:
                     continue
                 lines.append(f"{csi}\t{desc}\t{parent}")
 
-        os.makedirs(OUT_DIR, exist_ok=True)
+        target_dir = output_dir or OUT_DIR
+        os.makedirs(target_dir, exist_ok=True)
         nombre_safe = re.sub(r"[^\w\-]+", "_", (obra.nombre or "obra")).strip("_") or "obra"
         date_tag = datetime.datetime.now().strftime("%Y-%m-%d")
-        filename = f"RevitKeynotes_{nombre_safe}_{date_tag}.txt"
-        out_path = os.path.join(OUT_DIR, filename)
+
+        # Versioning: si el archivo ya existe hoy, incrementar contador
+        base_filename = f"RevitKeynotes_{nombre_safe}_{date_tag}"
+        filename = f"{base_filename}.txt"
+        out_path = os.path.join(target_dir, filename)
+        v = 2
+        while os.path.isfile(out_path):
+            filename = f"{base_filename}_v{v}.txt"
+            out_path = os.path.join(target_dir, filename)
+            v += 1
 
         content = "\r\n".join(lines) + "\r\n"
 

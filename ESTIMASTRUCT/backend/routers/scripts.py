@@ -24,13 +24,23 @@ def _is_schedules_export(name: str) -> bool:
     return lower.startswith(SCHEDULES_PREFIX) and lower.endswith(".csv")
 
 
+class KeynotesIn(BaseModel):
+    output_dir: Optional[str] = None
+
+
 @router.post("/presupuestos/{pid}/scripts/keynotes")
-def run_keynotes(pid: str, db: Session = Depends(get_db)):
-    """Paso 1: genera RevitKeynotes_<Obra>_<Fecha>.txt desde la obra activa."""
+def run_keynotes(pid: str, data: Optional[KeynotesIn] = None, db: Session = Depends(get_db)):
+    """Paso 1: genera RevitKeynotes_<Obra>_<Fecha>.txt desde la obra activa.
+
+    Parámetro opcional 'output_dir' en body JSON permite elegir ubicación destino.
+    Si no viene, usa CONFIG.KEYNOTES_DIR (default).
+    Filenaming con timestamp + contador de versión para no pisar archivos anteriores.
+    """
     obra = db.query(Presupuesto).filter(Presupuesto.id == pid).first()
     if not obra:
         raise HTTPException(404, "Obra no encontrada")
-    res = generate_keynotes(pid)
+    output_dir = data.output_dir if data else None
+    res = generate_keynotes(pid, output_dir=output_dir)
     if not res.get("ok"):
         raise HTTPException(500, res.get("error", "Error generando keynotes"))
     return res

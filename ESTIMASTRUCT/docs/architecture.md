@@ -27,7 +27,9 @@ EstimaStruct es una app web local para elaborar presupuestos de construcción (H
                        │       │     │
               ┌────────▼─┐ ┌───▼──┐ ┌▼────────────┐
               │ Revit MCP │ │ ETABS│ │ Supabase    │
-              │ :8100     │ │ CSV  │ │ Portal      │
+              │ HTTP :8001│ │ CSV  │ │ Portal      │
+              │→ NamedPipe│ │      │ │             │
+              │ →Revit    │ │      │ │             │
               └───────────┘ └──────┘ └─────────────┘
 ```
 
@@ -43,8 +45,9 @@ Browser (Chromium)
                                           │
                      ┌────────────────────┼──────────────────┐
                      ▼                    ▼                  ▼
-              [Postgres :5432]     [Template2_Updated]  [MCP HTTP :8100]
-              estimastruct DB      fichas_v1.3.json     Revit / ETABS
+              [Postgres :5432]     [Template2_Updated]  [revit-mcp-stdio HTTP :8001
+              estimastruct DB      fichas_v1.3.json      → NamedPipe \\.\pipe\revit-mcp
+                                                          → pyRevit / Revit] · ETABS
                      ▲
                      │ export ZIP / import ZIP
               [SQLite legacy]
@@ -314,7 +317,7 @@ Ninguna. Backend escucha solo en `127.0.0.1:8002`, frontend Flask en `127.0.0.1:
 | PostgreSQL | 5432 | Windows service `postgresql-x64-16` |
 | FastAPI backend | 8002 | `uvicorn backend.main:app` |
 | Flask UI | 5000 | `python ESTIMASTRUCT/app.py` |
-| Revit MCP (opcional) | 8100 | `POST /revit-mcp/start` |
+| Revit MCP (opcional) | HTTP :8001 (externo) → Named Pipe `\\.\pipe\revit-mcp` (interno, sin puerto, hacia Revit) | `revit-mcp-stdio` `main_pipe.py --http`, `D:\GitHub\revit-mcp-stdio`, arranque via `POST /revit-mcp/start` |
 | Brain (opcional, orquestación agentes) | 8200 | fuera de este repo |
 
 ### 8.2 Secuencia de arranque
@@ -357,6 +360,12 @@ Alembic en `backend/alembic/`; `alembic upgrade head` requerido en Postgres (sch
 
 `GET /db/export-zip` produce dump portable (Postgres → SQLite `estimacion.db` snapshot dentro de ZIP); `POST /db/import-zip` restaura al destino primario. Config en `CONFIG.SQLITE_EXPORT_NAME`.
 
+**ADR-011: Output directory selector para export keynotes (2026-08-02).**
+- Decisión: `POST /presupuestos/{pid}/scripts/keynotes` acepta parámetro opcional `output_dir` (JSON body). Si no viene, usa default `CONFIG.KEYNOTES_DIR`. Filenaming automático: `RevitKeynotes_<obra>_<fecha>_v<contador>.txt` (timestamp + contador de versión para no pisar archivos anteriores).
+- Scope real: solo `generate_keynotes.py` afectado (204 líneas, script aislado). No toca `export_pdf.py`/`export.py` (ya son browser-side, no backend-side) ni `revit_full_dump_snippet.py` (IronPython hardcodeado, bloqueado, requiere MCP interface futura).
+- Rationale: usuario debe elegir dónde guardar los keynotes generados, no recibir una ruta fija del servidor. Timestamp + contador garantiza **idempotencia** (no pisar exports anteriores, historial de cambios in situ).
+- Trade-offs: parámetro de router nuevo; nombrado en OUTPUT con timestamp para ser predecible en test; versioning local (no versionamiento en BD), candidato a persistencia futura en tabla de auditoría si se unifica todo bajo control de presupuesto.
+
 ---
 
 ## 9. Known Limitations & Future
@@ -369,12 +378,15 @@ Alembic en `backend/alembic/`; `alembic upgrade head` requerido en Postgres (sch
 - Fichas JSON no propagan cambios a presupuestos ya instanciados (by-copy).
 - Alembic history debe auditarse vs `Base.metadata` — riesgo drift si `AUTO_CREATE_SCHEMA=true` en Postgres.
 - **Cero tests automatizados en el repo** (ni unitarios ni de integración): no existe `tests/`, `pytest.ini` ni CI. Toda validación es manual o por auditoría de snapshots. Es el bloqueo F0 del roadmap CASE-SAAS-001 §scope v2.
+- **3/58 assemblies del pipeline dibujar-desde-DB fallan `CompoundStructure not valid` sin causa raíz completa aislada** (`goal-20147`, 2026-08-01): las 2 variantes "Bloque de 4"/6" + Cerámica Baño 2.10m" (Muros) y `ENC-01` (Suelos, con capa `StructuralDeck`). Diagnóstico parcial: al menos una capa `Finish2` traía `espesor_mm=0.0` (Revit exige >0 en cualquier función salvo `Membrane`) — corregido a un mínimo defensivo, pero **incluso a 0.1mm sigue fallando** (confirmado con `IsLayerValid`, aunque la comparación quedó contaminada porque se probó contra el `CompoundStructure` viejo del shell, no concluyente). Hipótesis sin confirmar: el mínimo real de Revit es mayor a 0.1mm (probar 1mm+), o la capa `CC-none` (placeholder de vacío, normalmente excluida del pipeline de auditoría, ver `revit_marks_master.py` `SKIP_NAMES`) no debería llegar como material real a una capa con espesor. Próxima sesión: recrear estos 3 tipos desde cero (no reusar el shell existente, que ya quedó en estado inconsistente) probando MIN_WIDTH_MM=1.0 y excluyendo/fusionando capas `CC-none`.
+- **El pipeline dibujar-desde-DB nunca carga `keynotes.txt` en el template nuevo → auditoría sale 0% GREEN aunque el modelo esté bien** (`goal-20147`, 2026-08-01, hallazgo más grave de los tres). Verificado en vivo: `estimastruct_blank_template.rvt` tiene 102 compound elements con CSI correcto seteado directo en `KEYNOTE_PARAM` de cada Type, pero la `KeynoteTable` del proyecto (Manage → Keynoting Settings → archivo .txt) solo trae **8 entradas** — nunca se le apuntó al `.txt` que genera `generate_keynotes.py`. Resultado real corriendo `audit_keynotes.py`: **0 GREEN / 600 RED** de 600 filas — el audit compara TEXTO de keynote (viene de `KeynoteTable`, no del código CSI crudo) contra la descripción del catálogo, y sin tabla cargada no hay texto que comparar. Fix: correr `generate_keynotes.py` para el catálogo activo, y cargar el `.txt` resultante en Keynoting Settings del template ANTES de correr cualquier auditoría — falta un paso explícito en el pipeline (candidato a nuevo paso 5.5 en el flujo, o automatizarlo vía `execute_revit_code` seteando `KeynoteTable.GetKeynoteTable(doc).LoadFrom(path)` o equivalente).
+- **`elementos_puntuales` (puertas/ventanas/MEP, 243 tipos) del pipeline dibujar-desde-DB nunca reciben su CSI/marca en el Type real** (2026-08-01): el paso de creación de familias (Fase 1) solo marca `assemblies` (muro/losa/techo/cielo falso) vía `KEYNOTE_PARAM`/`ALL_MODEL_TYPE_MARK`; las familias sueltas cargadas (`LoadFamily`) quedan con el keynote vacío de fábrica (vienen de librería Autodesk/vendor genérica). `revit_marks_master.py` no puede ayudarlas porque solo actúa sobre keynote YA existente — no hay paso que empuje el CSI/marca de `generic_element_schema.json::elementos_puntuales` a los Type reales. Gap real, no falso positivo (confirmado corriendo `revit_marks_master.py` contra `estimastruct_blank_template.rvt`: `door_win: 0`, `type: 0` — nada que marcar porque nada tiene keynote de origen).
 - ✔ **[RESUELTO 2026-07-30, commit `0a7cbae`] Doble aplicación de sobrecosto en `/reporte`.** El hallazgo original (2026-07-27, vía `GET /auditoria/calculos/{pid}/memoria`): `/calcular` y `/reporte` llamaban "costo_directo" a dos cosas distintas — `/reporte` sumaba `partida.total` (que YA lleva sobrecosto) y volvía a multiplicar por `factor`. En "Casa StoneRaise" (sc=20%) daba Δ = L.328,435.49 (factor 1.44 = 1.2²). Corregido en `routers/calculos.py:75-92`: `reporte()` calcula `costo_directo` con `calc_base` (misma definición que `/calcular`) y devuelve `total_con_indirectos = Σ partida.total` sin re-aplicar el factor. **Re-verificado en vivo 2026-07-31** contra Postgres: Casa StoneRaise Δ = L.0.01 · CC132 Camilo (sc=25%) Δ = L.0.01 — residuo de redondeo, no doble aplicación.
 
 **Roadmap (CASE-SAAS-001 P0, ADR-007/008/009):**
 1. MCP STDIO `estimastruct-mcp` + Skill EstimaStruct full-system (Frente 1, prioridad inmediata).
 2. LLM Anthropic API + CAG en `backend/cag/`.
-3. MCP STDIO Revit `revit-mcp-stdio` (46+ tools) — reemplaza MCP HTTP.
+3. ✔ **[RESUELTO 2026-07-30]** MCP Revit `revit-mcp-stdio` (46+ tools, `D:\GitHub\revit-mcp-stdio`) — reemplazó MCP HTTP :8100. Transporte real de dos saltos: EstimaStruct → FastMCP HTTP :8001 (`main_pipe.py --http`) → Windows Named Pipe `\\.\pipe\revit-mcp` (sin puerto TCP, `revit_mcp/pipe/listener.py` + `client.py`, Win32 API) → pyRevit dentro de Revit.exe. `backend/services/mcp_http.py` verificado en vivo contra Revit real.
 4. MCP STDIO ETABS `etabs-mcp-stdio`.
 5. IronPython scripts en `pyrevit/scripts/`.
 6. FastAPI en AWS ECS/Lambda + RDS PG, auth JWT/OAuth2, feature flags multi-tenant.
