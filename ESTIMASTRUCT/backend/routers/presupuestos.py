@@ -262,6 +262,11 @@ def crear(data: PresupuestoIn, db: Session = Depends(get_db)):
     cfg_data = data.config or ConfigIn()
     cfg = ConfigPresupuesto(presupuesto_id=p.id, **cfg_data.model_dump())
     db.add(cfg)
+    # Cédula financiera: siembra Administración/Utilidad/Imprevistos default
+    # (porcentaje=0, activo=True). Seguros/Fianzas quedan sin sembrar — no
+    # toda obra lleva póliza. Ver backend/routers/financiero.py.
+    from backend.routers.financiero import sembrar_items_default
+    sembrar_items_default(p.id, db)
     db.commit()
     db.refresh(p)
     return {"id": p.id, "nombre": p.nombre}
@@ -278,6 +283,8 @@ def crear_desde_template(data: FromTemplateIn, db: Session = Depends(get_db)):
 
     cfg = ConfigPresupuesto(presupuesto_id=nuevo.id, template_version=template_version, **cfg_data.model_dump())
     db.add(cfg)
+    from backend.routers.financiero import sembrar_items_default
+    sembrar_items_default(nuevo.id, db)
     db.flush()
 
     sobrecosto = cfg_data.sobrecosto

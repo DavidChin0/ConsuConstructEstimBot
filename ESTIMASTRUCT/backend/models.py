@@ -25,6 +25,10 @@ class Presupuesto(Base):
 
     config    = relationship("ConfigPresupuesto", back_populates="presupuesto", uselist=False, cascade="all, delete-orphan")
     capitulos = relationship("Capitulo", back_populates="presupuesto", cascade="all, delete-orphan", order_by="Capitulo.orden")
+    financiero_items     = relationship("FinancieroItem", back_populates="presupuesto",
+                                        cascade="all, delete-orphan", order_by="FinancieroItem.orden")
+    financiero_calculos   = relationship("FinancieroCalculo", back_populates="presupuesto",
+                                        cascade="all, delete-orphan", order_by="FinancieroCalculo.generado_at.desc()")
 
 
 class ConfigPresupuesto(Base):
@@ -105,7 +109,7 @@ class Partida(Base):
     revit_q          = Column(Numeric(14, 4), default=0)    # Casilla editable (valor bruto de Revit)
     factor_e         = Column(Numeric(14, 6), default=1)    # Factor col E del Excel
     factor_f         = Column(Numeric(14, 6), default=1)    # Factor col F del Excel
-    color_tipo       = Column(Text, default='blanco')       # amarillo|verde|azul|rosa|blanco
+    color_tipo       = Column(Text, default='rosa')          # verde=asignado Revit OK | rojo=conflicto Revit | rosa=no asignado en Revit (default) | amarillo=manual/labor | azul=manual/otro (semantica 2026-08-01, ver sync_audit_colors.py)
 
     # Metadata de la BD origen
     es_formula       = Column(Boolean, default=False)   # Celda amarilla en BaseDatosOpus
@@ -464,3 +468,87 @@ class CronogramaOverride(Base):
     n_ay           = Column(SmallInteger, default=3)   # ayudantes en paralelo (>=1)
 
     updated_at     = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# FINANCIERO — cédula de indirectos auditable (imprevistos, seguros, fianzas,
+# administración, utilidad, escalamiento, IVA). ADITIVO — 2 tablas NUEVAS,
+# create_all las crea solas (no ALTER de config_presupuesto/partida/presupuesto).
+#
+# Por qué existe: auditoría del catálogo v1.3 (1145 partidas vs RICS ICMS 3rd
+# ed.) encontró config_presupuesto.imprevistos/administracion en 0.00 en las
+# 6 obras reales, con todo el margen metido en un solo campo `sobrecosto`
+# (15-25% sin desglosar) y CERO partidas de seguros/fianzas. Este módulo NO
+# reemplaza sobrecosto/config_presupuesto (otros routers los leen, se dejan
+# intactos) — es la cédula financiera trazable que un auditor fiscal exigiría
+# encima: cada indirecto con su base de cálculo, su orden de aplicación
+# (interés compuesto, no aditivo plano), su evidencia (póliza/afianzadora) y
+# snapshots INMUTABLES por cálculo (financiero_calculo nunca se actualiza,
+# solo se crea uno nuevo — como una cédula de ejercicio fiscal cerrado).
+# ─────────────────────────────────────────────────────────────────────────────
+
+TIPOS_FINANCIERO_ITEM = (
+    "IMPREVISTO", "SEGURO", "FIANZA", "ADMINISTRACION",
+    "UTILIDAD", "IMPUESTO", "ESCALAMIENTO", "OTRO",
+)
+BASES_CALCULO_FINANCIERO = ("COSTO_DIRECTO", "SUBTOTAL_ACUMULADO", "MONTO_FIJO")
+
+
+class FinancieroItem(Base):
+    """Catálogo de indirectos por presupuesto — editable, nunca se borra
+    duro (auditoría: un % ya usado en un cálculo histórico no puede
+    desaparecer sin dejar rastro; se desactiva con `activo=False`)."""
+    __tablename__ = "financiero_item"
+
+    id             = Column(String(36), primary_key=True, default=new_uuid)
+    presupuesto_id = Column(String(36), ForeignKey("presupuesto.id", ondelete="CASCADE"),
+                            nullable=False, index=True)
+
+    # Ancla de auditoría: código ICMS Group.SubGroup (RICS ICMS 3rd ed.)
+    categoria_icms = Column(Text, default="")   # "09.020", "08.110", ...
+    tipo           = Column(Text, nullable=False, default="OTRO")
+    nombre         = Column(Text, nullable=False)
+
+    base_calculo   = Column(Text, nullable=False, default="COSTO_DIRECTO")
+    porcentaje     = Column(Numeric(7, 4), nullable=True)    # solo si base_calculo != MONTO_FIJO
+    monto_fijo     = Column(Numeric(14, 4), nullable=True)   # solo si base_calculo == MONTO_FIJO
+
+    orden          = Column(SmallInteger, nullable=False, default=0)
+    obligatorio    = Column(Boolean, default=False)   # ICMS lo trata como reporte obligatorio
+    evidencia      = Column(Text, default="")         # póliza/afianzadora/aseguradora/vigencia
+    activo         = Column(Boolean, default=True)
+
+    created_at     = Column(DateTime, default=datetime.utcnow)
+    updated_at     = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    __table_args__ = (
+        CheckConstraint(f"tipo IN {TIPOS_FINANCIERO_ITEM}", name="ck_financiero_item_tipo"),
+        CheckConstraint(f"base_calculo IN {BASES_CALCULO_FINANCIERO}", name="ck_financiero_item_base"),
+    )
+
+    presupuesto    = relationship("Presupuesto", back_populates="financiero_items")
+
+
+class FinancieroCalculo(Base):
+    """Snapshot INMUTABLE de una cédula financiera calculada. Nunca se
+    actualiza — cada POST /calcular crea una fila nueva. `items_json`
+    congela cada financiero_item aplicado CON su monto_calculado y la base
+    sobre la que se aplicó, para que el snapshot siga siendo auditable
+    aunque el financiero_item se edite o desactive después."""
+    __tablename__ = "financiero_calculo"
+
+    id                  = Column(String(36), primary_key=True, default=new_uuid)
+    presupuesto_id      = Column(String(36), ForeignKey("presupuesto.id", ondelete="CASCADE"),
+                                 nullable=False, index=True)
+
+    costo_directo       = Column(Numeric(14, 4), default=0)
+    iva_pct             = Column(Numeric(7, 4), default=15)
+    items_json          = Column(Text, default="[]")
+    subtotal_antes_iva  = Column(Numeric(14, 4), default=0)
+    iva_monto           = Column(Numeric(14, 4), default=0)
+    total_general       = Column(Numeric(14, 4), default=0)
+
+    generado_at         = Column(DateTime, default=datetime.utcnow)
+    nota                = Column(Text, default="")
+
+    presupuesto         = relationship("Presupuesto", back_populates="financiero_calculos")

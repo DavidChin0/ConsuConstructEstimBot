@@ -565,13 +565,397 @@ async function audRenderCalculos() {
   const titulo = `<b>${esc(meta.nombre || "")}</b> <span style="color:var(--text-dim);font-size:11px">· ${meta.n_partidas || 0} partidas · ${meta.n_capitulos || 0} capítulos</span>`;
   renderMemoriaGenerica(dev, m, { titulo });
 
-  c.innerHTML = `<div style="padding:14px 16px;max-width:980px">
+  c.innerHTML = `<div style="padding:14px 16px;max-width:1180px">
     <div style="font-size:11px;color:var(--text-dim);margin-bottom:12px;line-height:1.5">
-      Narra <code>routers/calculos.py</code> read-only: reproduce la aritmética de <code>/calcular</code> (Vista A) y de <code>/reporte</code> (Vista B) sobre este presupuesto SIN escribir nada en la BD.
+      Narra <code>routers/calculos.py</code> read-only: reproduce la aritmética de <code>/calcular</code> (Vista A) y de <code>/reporte</code> (Vista B) sobre este presupuesto SIN escribir nada en la BD. El <code>sobrecosto</code> plano de abajo es el flujo VIEJO (documentación, no se edita aquí).
     </div>
     ${banner}
+    <div id="aud-fin-wrap"></div>
   </div>`;
-  c.querySelector("div[style*='max-width:980px']").appendChild(dev);
+  c.querySelector("div[style*='max-width:1180px']").appendChild(dev);
+
+  // ── Cédula financiera editable (financiero_item / financiero_calculo) ──────
+  // Vive DENTRO de esta misma vista "calculos" — no es un panel nuevo. Es el
+  // reemplazo AUDITABLE del sobrecosto plano: cada indirecto (administración,
+  // utilidad, imprevistos, seguros, fianzas) es una línea editable con orden
+  // de aplicación explícito + IVA al final, y "Calcular y guardar" congela un
+  // snapshot inmutable (backend/calculo_financiero.py, /financiero/*).
+  await audRenderFinanciero();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CÉDULA FINANCIERA — financiero_item (editable) + financiero_calculo (snapshot)
+// Vive dentro de la vista "calculos" de Auditoría (fusión pedida por el
+// Director: la misma pantalla explica la fórmula Y edita los valores reales,
+// no un panel nuevo separado). Backend: backend/routers/financiero.py +
+// backend/calculo_financiero.py. Contrato de auditoría: cada indirecto es una
+// línea trazable (categoría ICMS + evidencia), el orden de aplicación es
+// explícito (compounding real, no aditivo plano), y "Calcular y guardar"
+// congela un snapshot INMUTABLE — nunca se recalcula en silencio.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const TIPOS_FIN = ["ADMINISTRACION", "UTILIDAD", "IMPREVISTO", "SEGURO", "FIANZA", "IMPUESTO", "ESCALAMIENTO", "OTRO"];
+const BASES_FIN = ["COSTO_DIRECTO", "SUBTOTAL_ACUMULADO", "MONTO_FIJO"];
+const BASES_FIN_LABEL = { COSTO_DIRECTO: "% Costo directo", SUBTOTAL_ACUMULADO: "% Subtotal acum.", MONTO_FIJO: "Monto fijo L." };
+
+function audFinDefaults() {
+  return {
+    pid: null, items: null, catalogo: null, memoria: null, memoriaError: null,
+    historial: null, historialAbierto: false, timer: null, nuevo: null,
+  };
+}
+if (!auditoriaState.financiero) auditoriaState.financiero = audFinDefaults();
+
+async function audRenderFinanciero() {
+  const wrap = document.getElementById("aud-fin-wrap");
+  if (!wrap) return;
+  if (typeof state === "undefined" || !state.activeId) return;
+  const st = auditoriaState.financiero;
+
+  if (st.pid !== state.activeId) {
+    Object.assign(st, audFinDefaults());
+    st.pid = state.activeId;
+  }
+
+  wrap.innerHTML = `<div style="margin-top:18px;padding-top:14px;border-top:2px solid var(--accent)">
+    <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:4px">💰 Cédula de indirectos (editable)</div>
+    <div style="font-size:11px;color:var(--text-dim);margin-bottom:10px;line-height:1.5">
+      Reemplaza el <code>sobrecosto</code> plano por líneas trazables: administración, utilidad, imprevistos, seguros, fianzas — cada una con su <b>orden de aplicación</b> (interés compuesto: admin sobre directo, utilidad sobre directo+admin, imprevistos sobre lo anterior…), su <b>evidencia</b> (póliza/afianzadora) cuando aplica, y su <b>categoría ICMS</b> (RICS ICMS 3rd ed.) como ancla de auditoría. IVA siempre es el último paso. Cargando…
+    </div>
+  </div>`;
+
+  try {
+    if (!st.catalogo) st.catalogo = (await api("GET", "/financiero/catalogo-icms")).catalogo;
+    const data = await api("GET", `/financiero/${st.pid}/items`);
+    st.items = data.items;
+  } catch (err) {
+    wrap.innerHTML = `<div style="margin-top:18px;padding:12px;color:#e74c3c;font-size:12px">Error cargando cédula financiera: ${esc(err.message)}</div>`;
+    return;
+  }
+
+  audRenderFinancieroPanel();
+  await audRecalcFinanciero();
+}
+
+function audFinItemsActivosParaMotor() {
+  return (auditoriaState.financiero.items || []).filter(i => i.activo).map(i => ({
+    id: i.id, nombre: i.nombre, tipo: i.tipo, categoria_icms: i.categoria_icms,
+    base_calculo: i.base_calculo, porcentaje: i.porcentaje, monto_fijo: i.monto_fijo,
+    orden: i.orden, obligatorio: i.obligatorio, evidencia: i.evidencia,
+  }));
+}
+
+async function audRecalcFinanciero() {
+  const st = auditoriaState.financiero;
+  if (!st.pid) return;
+  try {
+    st.memoria = await api("POST", `/financiero/${st.pid}/memoria-rapida`, { items: audFinItemsActivosParaMotor() });
+    st.memoriaError = null;
+  } catch (err) {
+    st.memoriaError = err.message;
+  }
+  audRenderFinancieroCedula();
+}
+
+function audScheduleRecalcFinanciero() {
+  clearTimeout(auditoriaState.financiero.timer);
+  auditoriaState.financiero.timer = setTimeout(audRecalcFinanciero, 250);
+}
+
+function audFinIcmsOpts(selected) {
+  const st = auditoriaState.financiero;
+  const cat = st.catalogo || {};
+  let opts = `<option value="" ${!selected ? "selected" : ""}>—</option>`;
+  for (const [k, v] of Object.entries(cat)) {
+    opts += `<option value="${esc(k)}" title="${esc(v)}" ${k === selected ? "selected" : ""}>${esc(k)} — ${esc(v.slice(0, 38))}${v.length > 38 ? "…" : ""}</option>`;
+  }
+  return opts;
+}
+
+function audFinRowHtml(item, idx) {
+  const inputStyle = "width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:3px 5px;border-radius:3px;font-size:11px";
+  const selStyle = inputStyle + ";cursor:pointer";
+  const esBloqueado = item.base_calculo === "MONTO_FIJO";
+  const rowFalla = item.obligatorio && (!item.activo || (esBloqueado ? !(item.monto_fijo > 0) : !(item.porcentaje > 0)));
+  return `<tr data-fin-idx="${idx}" data-fin-id="${esc(item.id)}" style="${rowFalla ? "background:#e74c3c14" : ""}${!item.activo ? ";opacity:0.45" : ""}">
+    <td style="padding:3px 4px"><input type="number" class="fin-in" data-f="orden" value="${item.orden}" style="${inputStyle};width:44px"/></td>
+    <td style="padding:3px 4px"><input type="text" class="fin-in" data-f="nombre" value="${esc(item.nombre)}" style="${inputStyle};min-width:150px"/></td>
+    <td style="padding:3px 4px">
+      <select class="fin-in" data-f="tipo" style="${selStyle}">
+        ${TIPOS_FIN.map(t => `<option value="${t}" ${t === item.tipo ? "selected" : ""}>${t}</option>`).join("")}
+      </select>
+    </td>
+    <td style="padding:3px 4px"><select class="fin-in" data-f="categoria_icms" style="${selStyle};min-width:130px">${audFinIcmsOpts(item.categoria_icms)}</select></td>
+    <td style="padding:3px 4px">
+      <select class="fin-in" data-f="base_calculo" style="${selStyle}">
+        ${BASES_FIN.map(b => `<option value="${b}" ${b === item.base_calculo ? "selected" : ""}>${BASES_FIN_LABEL[b]}</option>`).join("")}
+      </select>
+    </td>
+    <td style="padding:3px 4px">
+      ${esBloqueado
+        ? `<input type="number" class="fin-in" data-f="monto_fijo" value="${item.monto_fijo ?? ""}" step="0.01" placeholder="L." style="${inputStyle};width:90px"/>`
+        : `<input type="number" class="fin-in" data-f="porcentaje" value="${item.porcentaje ?? ""}" step="0.01" placeholder="%" style="${inputStyle};width:70px"/>`}
+    </td>
+    <td style="padding:3px 4px"><input type="text" class="fin-in" data-f="evidencia" value="${esc(item.evidencia)}" placeholder="póliza / afianzadora / vigencia" style="${inputStyle};min-width:150px"/></td>
+    <td style="padding:3px 4px;text-align:center"><input type="checkbox" class="fin-in" data-f="obligatorio" ${item.obligatorio ? "checked" : ""}/></td>
+    <td style="padding:3px 4px;text-align:center"><input type="checkbox" class="fin-in" data-f="activo" ${item.activo ? "checked" : ""}/></td>
+    <td style="padding:3px 4px;white-space:nowrap">
+      <button class="fin-save btn-primary" style="font-size:10px;padding:2px 7px" title="Guardar cambios de esta fila">💾</button>
+      ${item.activo ? `<button class="fin-off btn-cancel" style="font-size:10px;padding:2px 7px" title="Desactivar (nunca se borra duro)">🚫</button>` : ""}
+    </td>
+  </tr>`;
+}
+
+function audRenderFinancieroPanel() {
+  const wrap = document.getElementById("aud-fin-wrap");
+  if (!wrap) return;
+  const st = auditoriaState.financiero;
+  const items = st.items || [];
+
+  wrap.innerHTML = `<div style="margin-top:18px;padding-top:14px;border-top:2px solid var(--accent)">
+    <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:4px">💰 Cédula de indirectos (editable)</div>
+    <div style="font-size:11px;color:var(--text-dim);margin-bottom:10px;line-height:1.5">
+      Reemplaza el <code>sobrecosto</code> plano por líneas trazables: administración, utilidad, imprevistos, seguros, fianzas — cada una con su <b>orden de aplicación</b> (interés compuesto: admin sobre directo, utilidad sobre directo+admin, imprevistos sobre lo anterior…), su <b>evidencia</b> (póliza/afianzadora) cuando aplica, y su <b>categoría ICMS</b> (RICS ICMS 3rd ed.) como ancla de auditoría. IVA siempre es el último paso. Fila roja = <code>obligatorio=True</code> pero inactivo o en 0 — exactamente el hallazgo que este módulo existe para dejar de esconder.
+    </div>
+    <div style="overflow-x:auto">
+      <table style="border-collapse:collapse;width:100%;font-size:11px">
+        <thead><tr style="color:var(--text-dim);text-align:left;border-bottom:1px solid var(--border)">
+          <th style="padding:3px 4px">Orden</th><th style="padding:3px 4px">Nombre</th><th style="padding:3px 4px">Tipo</th>
+          <th style="padding:3px 4px">Categoría ICMS</th><th style="padding:3px 4px">Base</th><th style="padding:3px 4px">%/Monto</th>
+          <th style="padding:3px 4px">Evidencia</th><th style="padding:3px 4px" title="ICMS trata este renglón como reporte obligatorio">Oblig.</th>
+          <th style="padding:3px 4px">Activo</th><th style="padding:3px 4px">Acciones</th>
+        </tr></thead>
+        <tbody id="fin-tbody">${items.map((it, i) => audFinRowHtml(it, i)).join("") || `<tr><td colspan="10" style="padding:10px;color:var(--text-dim)">Sin indirectos aún.</td></tr>`}</tbody>
+      </table>
+    </div>
+    <div style="margin-top:8px">
+      <button id="fin-btn-nuevo" class="btn-primary" style="font-size:11px;padding:4px 10px">+ Agregar indirecto</button>
+    </div>
+    <div id="fin-nuevo-form" style="display:none;margin-top:8px;background:var(--surface2);border:1px solid var(--accent);border-radius:4px;padding:8px"></div>
+
+    <div id="fin-cedula" style="margin-top:16px"></div>
+
+    <div style="margin-top:14px">
+      <button id="fin-btn-toggle-hist" style="font-size:11px;padding:4px 10px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:3px;cursor:pointer">📖 Historial (solo lectura) ${st.historialAbierto ? "▾" : "▸"}</button>
+      <div id="fin-historial" style="margin-top:8px">${st.historialAbierto ? "" : ""}</div>
+    </div>
+  </div>`;
+
+  audBindFinancieroInputs();
+  audRenderFinancieroCedula();
+  if (st.historialAbierto) audRenderFinancieroHistorial();
+}
+
+function audFinRowFalla(paso) {
+  return paso.obligatorio && (!(paso.monto > 0));
+}
+
+function audRenderFinancieroCedula() {
+  const el = document.getElementById("fin-cedula");
+  if (!el) return;
+  const st = auditoriaState.financiero;
+
+  if (st.memoriaError) {
+    el.innerHTML = `<div style="color:#e74c3c;font-size:12px">Error calculando cédula en vivo: ${esc(st.memoriaError)}</div>`;
+    return;
+  }
+  const m = st.memoria;
+  if (!m) { el.innerHTML = `<div style="color:var(--text-dim);font-size:12px">Calculando…</div>`; return; }
+
+  const filas = (m.memoria || []).map(p => `<tr style="${audFinRowFalla(p) ? "background:#e74c3c14" : ""}">
+      <td style="padding:3px 6px;color:var(--text-dim)">${p.orden}</td>
+      <td style="padding:3px 6px">${esc(p.nombre)}${p.categoria_icms ? ` <span style="color:var(--text-dim);font-size:10px">[${esc(p.categoria_icms)}]</span>` : ""}</td>
+      <td style="padding:3px 6px;font-family:monospace;color:var(--text-dim);font-size:10px">${esc(p.formula)}</td>
+      <td style="padding:3px 6px;font-family:monospace;font-size:10px">${esc(p.sustitucion)}</td>
+      <td style="padding:3px 6px;text-align:right;font-family:monospace">L. ${fmt(p.monto)}</td>
+      <td style="padding:3px 6px;text-align:right;font-family:monospace;font-weight:700">L. ${fmt(p.subtotal_acumulado)}</td>
+    </tr>`).join("");
+
+  const advs = (m.advertencias || []).map(a => `<div style="color:#e74c3c;font-size:11px">⚠ ${esc(a)}</div>`).join("");
+
+  el.innerHTML = `
+    <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:6px">🧮 Cédula en vivo — costo directo real: <span style="font-family:monospace">L. ${fmt(m.costo_directo)}</span></div>
+    <div style="overflow-x:auto">
+      <table style="border-collapse:collapse;width:100%;font-size:11px">
+        <thead><tr style="color:var(--text-dim);text-align:left;border-bottom:1px solid var(--border)">
+          <th style="padding:3px 6px">#</th><th style="padding:3px 6px">Indirecto</th><th style="padding:3px 6px">Fórmula</th>
+          <th style="padding:3px 6px">Sustitución</th><th style="padding:3px 6px;text-align:right">Monto</th><th style="padding:3px 6px;text-align:right">Acumulado</th>
+        </tr></thead>
+        <tbody>${filas}</tbody>
+      </table>
+    </div>
+    <div style="margin-top:6px;font-size:12px">
+      <div>Subtotal antes de IVA: <b style="font-family:monospace">L. ${fmt(m.subtotal_antes_iva)}</b></div>
+      <div>IVA (${fmt(m.iva_pct, 2)}%): <b style="font-family:monospace">L. ${fmt(m.iva_monto)}</b></div>
+      <div style="font-size:14px;margin-top:4px">TOTAL GENERAL: <b style="font-family:monospace;color:var(--accent)">L. ${fmt(m.total_general)}</b> ${m.cuadra ? `<span style="color:#27ae60;font-size:11px">✓ cuadra</span>` : `<span style="color:#e74c3c;font-size:11px">✗ NO cuadra</span>`}</div>
+    </div>
+    ${advs ? `<div style="margin-top:8px">${advs}</div>` : ""}
+    <div style="margin-top:10px">
+      <button id="fin-btn-calcular" class="btn-primary" style="font-size:12px;padding:6px 14px">📦 Calcular y guardar cédula</button>
+      <span style="font-size:10px;color:var(--text-dim);margin-left:8px">Congela un snapshot inmutable con los items ACTIVOS reales (no simulados).</span>
+    </div>`;
+
+  document.getElementById("fin-btn-calcular")?.addEventListener("click", audCalcularYGuardarFinanciero);
+}
+
+async function audCalcularYGuardarFinanciero() {
+  const st = auditoriaState.financiero;
+  const btn = document.getElementById("fin-btn-calcular");
+  if (btn) { btn.disabled = true; btn.textContent = "Calculando…"; }
+  try {
+    const r = await api("POST", `/financiero/${st.pid}/calcular`, {});
+    alert(`Cédula guardada. TOTAL GENERAL = L. ${fmt(r.total_general)}${r.cuadra ? "" : "\n⚠ EL CHECKSUM NO CUADRA — revisar."}`);
+    if (st.historialAbierto) await audRenderFinancieroHistorial();
+  } catch (err) {
+    alert(`Error: ${err.message}`);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = "📦 Calcular y guardar cédula"; }
+  }
+}
+
+async function audRenderFinancieroHistorial() {
+  const el = document.getElementById("fin-historial");
+  if (!el) return;
+  const st = auditoriaState.financiero;
+  el.innerHTML = `<div style="color:var(--text-dim);font-size:11px">Cargando historial…</div>`;
+  try {
+    const data = await api("GET", `/financiero/${st.pid}/historial`);
+    st.historial = data.historial;
+  } catch (err) {
+    el.innerHTML = `<div style="color:#e74c3c;font-size:11px">Error: ${esc(err.message)}</div>`;
+    return;
+  }
+  if (!st.historial.length) {
+    el.innerHTML = `<div style="color:var(--text-dim);font-size:11px">Sin cédulas calculadas todavía. Usa "Calcular y guardar cédula" arriba.</div>`;
+    return;
+  }
+  el.innerHTML = `<table style="border-collapse:collapse;width:100%;font-size:11px">
+    <thead><tr style="color:var(--text-dim);text-align:left;border-bottom:1px solid var(--border)">
+      <th style="padding:3px 6px">Fecha</th><th style="padding:3px 6px;text-align:right">Costo directo</th>
+      <th style="padding:3px 6px;text-align:right">Total general</th><th style="padding:3px 6px">Nota</th>
+    </tr></thead>
+    <tbody>${st.historial.map(h => `<tr style="border-bottom:1px solid var(--border)">
+        <td style="padding:3px 6px;font-family:monospace">${esc((h.generado_at || "").replace("T", " ").slice(0, 19))}</td>
+        <td style="padding:3px 6px;text-align:right;font-family:monospace">L. ${fmt(h.costo_directo)}</td>
+        <td style="padding:3px 6px;text-align:right;font-family:monospace;font-weight:700">L. ${fmt(h.total_general)}</td>
+        <td style="padding:3px 6px">${esc(h.nota || "")}</td>
+      </tr>`).join("")}</tbody>
+  </table>
+  <div style="font-size:10px;color:var(--text-dim);margin-top:4px">Solo lectura — nunca se edita ni se borra, como un libro de auditoría.</div>`;
+}
+
+function audFinReadRow(tr) {
+  const idx = parseInt(tr.dataset.finIdx, 10);
+  const st = auditoriaState.financiero;
+  const item = st.items[idx];
+  tr.querySelectorAll(".fin-in").forEach(inp => {
+    const f = inp.dataset.f;
+    if (inp.type === "checkbox") item[f] = inp.checked;
+    else if (f === "porcentaje" || f === "monto_fijo") item[f] = inp.value === "" ? null : parseFloat(inp.value);
+    else if (f === "orden") item[f] = parseInt(inp.value, 10) || 0;
+    else item[f] = inp.value;
+  });
+  return item;
+}
+
+function audBindFinancieroInputs() {
+  const tbody = document.getElementById("fin-tbody");
+  if (!tbody) return;
+
+  tbody.querySelectorAll("tr[data-fin-idx]").forEach(tr => {
+    tr.querySelectorAll(".fin-in").forEach(inp => {
+      inp.addEventListener("input", () => {
+        audFinReadRow(tr);
+        // base_calculo cambia qué input se muestra (%/monto) → re-render de esta fila
+        if (inp.dataset.f === "base_calculo") audRenderFinancieroPanel();
+        else audScheduleRecalcFinanciero();
+      });
+    });
+    tr.querySelector(".fin-save")?.addEventListener("click", async () => {
+      const item = audFinReadRow(tr);
+      try {
+        const payload = {
+          categoria_icms: item.categoria_icms, tipo: item.tipo, nombre: item.nombre,
+          base_calculo: item.base_calculo,
+          porcentaje: item.base_calculo === "MONTO_FIJO" ? null : item.porcentaje,
+          monto_fijo: item.base_calculo === "MONTO_FIJO" ? item.monto_fijo : null,
+          orden: item.orden, obligatorio: item.obligatorio, evidencia: item.evidencia,
+        };
+        const saved = await api("PUT", `/financiero/items/${item.id}`, payload);
+        Object.assign(item, saved);
+        audRenderFinancieroPanel();
+      } catch (err) {
+        alert(`Error guardando: ${err.message}`);
+      }
+    });
+    tr.querySelector(".fin-off")?.addEventListener("click", async () => {
+      const item = auditoriaState.financiero.items[parseInt(tr.dataset.finIdx, 10)];
+      if (!confirm(`Desactivar "${item.nombre}"? No se borra (auditoría) — solo deja de aplicarse.`)) return;
+      try {
+        await api("DELETE", `/financiero/items/${item.id}`);
+        item.activo = false;
+        audRenderFinancieroPanel();
+        audScheduleRecalcFinanciero();
+      } catch (err) {
+        alert(`Error: ${err.message}`);
+      }
+    });
+  });
+
+  document.getElementById("fin-btn-nuevo")?.addEventListener("click", audFinToggleNuevoForm);
+  document.getElementById("fin-btn-toggle-hist")?.addEventListener("click", async () => {
+    const st = auditoriaState.financiero;
+    st.historialAbierto = !st.historialAbierto;
+    audRenderFinancieroPanel();
+    if (st.historialAbierto) await audRenderFinancieroHistorial();
+  });
+}
+
+function audFinToggleNuevoForm() {
+  const box = document.getElementById("fin-nuevo-form");
+  if (!box) return;
+  const abierto = box.style.display !== "none";
+  if (abierto) { box.style.display = "none"; return; }
+  const inputStyle = "width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:4px 6px;border-radius:3px;font-size:11px";
+  box.style.display = "block";
+  box.innerHTML = `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;font-size:11px">
+    <div><label style="color:var(--text-dim)">Nombre</label><input id="fn-nombre" type="text" placeholder="Póliza Todo Riesgo (CAR)" style="${inputStyle}"/></div>
+    <div><label style="color:var(--text-dim)">Tipo</label><select id="fn-tipo" style="${inputStyle}">${TIPOS_FIN.map(t => `<option value="${t}">${t}</option>`).join("")}</select></div>
+    <div><label style="color:var(--text-dim)">Categoría ICMS</label><select id="fn-icms" style="${inputStyle}">${audFinIcmsOpts("")}</select></div>
+    <div><label style="color:var(--text-dim)">Base</label><select id="fn-base" style="${inputStyle}">${BASES_FIN.map(b => `<option value="${b}">${BASES_FIN_LABEL[b]}</option>`).join("")}</select></div>
+    <div><label style="color:var(--text-dim)">%/Monto</label><input id="fn-val" type="number" step="0.01" value="0" style="${inputStyle}"/></div>
+    <div><label style="color:var(--text-dim)">Orden</label><input id="fn-orden" type="number" value="${(auditoriaState.financiero.items || []).length + 1}" style="${inputStyle}"/></div>
+    <div style="grid-column:1/4"><label style="color:var(--text-dim)">Evidencia (póliza/afianzadora/vigencia)</label><input id="fn-evid" type="text" style="${inputStyle}"/></div>
+  </div>
+  <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
+    <label style="font-size:11px;color:var(--text-dim)"><input id="fn-oblig" type="checkbox"/> Obligatorio (ICMS)</label>
+    <button id="fn-crear" class="btn-primary" style="font-size:11px;padding:4px 10px;margin-left:auto">Crear</button>
+    <button id="fn-cancelar" class="btn-cancel" style="font-size:11px;padding:4px 10px">Cancelar</button>
+  </div>`;
+
+  document.getElementById("fn-cancelar").addEventListener("click", () => { box.style.display = "none"; });
+  document.getElementById("fn-crear").addEventListener("click", async () => {
+    const base = document.getElementById("fn-base").value;
+    const val = parseFloat(document.getElementById("fn-val").value) || 0;
+    const payload = {
+      nombre: document.getElementById("fn-nombre").value.trim() || "(sin nombre)",
+      tipo: document.getElementById("fn-tipo").value,
+      categoria_icms: document.getElementById("fn-icms").value,
+      base_calculo: base,
+      porcentaje: base === "MONTO_FIJO" ? null : val,
+      monto_fijo: base === "MONTO_FIJO" ? val : null,
+      orden: parseInt(document.getElementById("fn-orden").value, 10) || 0,
+      obligatorio: document.getElementById("fn-oblig").checked,
+      evidencia: document.getElementById("fn-evid").value.trim(),
+    };
+    try {
+      await api("POST", `/financiero/${auditoriaState.financiero.pid}/items`, payload);
+      box.style.display = "none";
+      await audRenderFinanciero();
+    } catch (err) {
+      alert(`Error creando: ${err.message}`);
+    }
+  });
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
