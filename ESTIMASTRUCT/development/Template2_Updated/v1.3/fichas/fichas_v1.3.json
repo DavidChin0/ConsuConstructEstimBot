@@ -254,8 +254,8 @@
     "unidad": "m2",
     "precio_unitario": 99.996,
     "costo_mo": 0.0,
-    "costo_ma": 83.33,
-    "unitario_matriz": 0.0,
+    "costo_ma": 0.0,
+    "unitario_matriz": 83.33,
     "insumos": [
       {
         "clave": "DIS-00",
@@ -276,8 +276,8 @@
     "unidad": "m2",
     "precio_unitario": 99.996,
     "costo_mo": 0.0,
-    "costo_ma": 83.33,
-    "unitario_matriz": 0.0,
+    "costo_ma": 0.0,
+    "unitario_matriz": 83.33,
     "insumos": [
       {
         "clave": "DIS-00",
@@ -298,8 +298,8 @@
     "unidad": "m2",
     "precio_unitario": 99.996,
     "costo_mo": 0.0,
-    "costo_ma": 83.33,
-    "unitario_matriz": 0.0,
+    "costo_ma": 0.0,
+    "unitario_matriz": 83.33,
     "insumos": [
       {
         "clave": "DIS-00",
@@ -320,8 +320,8 @@
     "unidad": "mes",
     "precio_unitario": 33600.0,
     "costo_mo": 0.0,
-    "costo_ma": 28000.0,
-    "unitario_matriz": 0.0,
+    "costo_ma": 0.0,
+    "unitario_matriz": 28000.0,
     "insumos": [
       {
         "clave": "SC-004",
@@ -342,8 +342,8 @@
     "unidad": "mes",
     "precio_unitario": 20160.0,
     "costo_mo": 0.0,
-    "costo_ma": 16800.0,
-    "unitario_matriz": 0.0,
+    "costo_ma": 0.0,
+    "unitario_matriz": 16800.0,
     "insumos": [
       {
         "clave": "SC-006",
@@ -386,8 +386,8 @@
     "unidad": "pza",
     "precio_unitario": 19200.0,
     "costo_mo": 0.0,
-    "costo_ma": 16000.0,
-    "unitario_matriz": 0.0,
+    "costo_ma": 0.0,
+    "unitario_matriz": 16000.0,
     "insumos": [
       {
         "clave": "DIS-01",
@@ -408,8 +408,8 @@
     "unidad": "unidad",
     "precio_unitario": 11760.0,
     "costo_mo": 0.0,
-    "costo_ma": 9800.0,
-    "unitario_matriz": 0.0,
+    "costo_ma": 0.0,
+    "unitario_matriz": 9800.0,
     "insumos": [
       {
         "clave": "SC-005",
@@ -430,8 +430,8 @@
     "unidad": "global",
     "precio_unitario": 4200.0,
     "costo_mo": 0.0,
-    "costo_ma": 3500.0,
-    "unitario_matriz": 0.0,
+    "costo_ma": 0.0,
+    "unitario_matriz": 3500.0,
     "insumos": [
       {
         "clave": "SC-03",
@@ -452,8 +452,8 @@
     "unidad": "global",
     "precio_unitario": 2547.408,
     "costo_mo": 0.0,
-    "costo_ma": 2122.84,
-    "unitario_matriz": 0.0,
+    "costo_ma": 1800.0,
+    "unitario_matriz": 322.84,
     "insumos": [
       {
         "clave": "SC-04",
@@ -490,10 +490,10 @@
     "codigo": "GRL-08",
     "descripcion": "Compra, Entrega e Instalación de Andamios",
     "unidad": "m2",
-    "precio_unitario": 394.3315,
+    "precio_unitario": 394.3308,
     "costo_mo": 90.0,
     "costo_ma": 0.0,
-    "unitario_matriz": 225.4652,
+    "unitario_matriz": 225.4646,
     "insumos": [
       {
         "clave": "MO-GLOBAL",
@@ -520,7 +520,7 @@
         "tipo": "FLETE",
         "cantidad": 0.006937,
         "costo_unit": 1500.0,
-        "total": 10.4061
+        "total": 10.4055
       }
     ],
     "color_tipo": "blanco"
@@ -599,8 +599,8 @@
     "unidad": "m2",
     "precio_unitario": 15.6,
     "costo_mo": 0.0,
-    "costo_ma": 13.0,
-    "unitario_matriz": 0.0,
+    "costo_ma": 0.0,
+    "unitario_matriz": 13.0,
     "insumos": [
       {
         "clave": "DIS-02",
@@ -746,8 +746,8 @@
     "unidad": "m3",
     "precio_unitario": 720.6,
     "costo_mo": 100.0,
-    "costo_ma": 500.5,
-    "unitario_matriz": 0.0,
+    "costo_ma": 0.5,
+    "unitario_matriz": 500.0,
     "insumos": [
       {
         "clave": "MO-006",
@@ -875,13 +875,31 @@
     "unitario_matriz": 0.0,
     "insumos": [
       {
-        "clave": "MO-GLOBAL",
-        "descripcion": "Mano de obra (global)",
-        "unidad": "global",
+        "clave": "MO-006",
+        "descripcion": "Ayudante",
+        "unidad": "jor",
         "tipo": "MANO_OBRA",
-        "cantidad": 1.0,
-        "costo_unit": 87.32,
+        "cantidad": 0.17464,
+        "costo_unit": 500.0,
         "total": 87.32
+      },
+      {
+        "clave": "EQ-001",
+        "descripcion": "Volqueta 5 m3",
+        "unidad": "m3",
+        "tipo": "EQUIPO",
+        "cantidad": 0.0,
+        "costo_unit": 500.0,
+        "total": 0.0
+      },
+      {
+        "clave": "HER-00",
+        "descripcion": "Herramienta Manual (Menor)",
+        "unidad": "(%)mo",
+        "tipo": "HERRAMIENTA",
+        "cantidad": 0.0,
+        "costo_unit": 15.0,
+        "total": 0.0
       }
     ],
     "color_tipo": "blanco"
@@ -1088,8 +1106,8 @@
     "unidad": "m",
     "precio_unitario": 45.8652,
     "costo_mo": 22.5,
-    "costo_ma": 15.721,
-    "unitario_matriz": 0.0,
+    "costo_ma": 13.321,
+    "unitario_matriz": 2.4,
     "insumos": [
       {
         "clave": "MA-276",
@@ -1274,8 +1292,8 @@
     "codigo": "",
     "descripcion": "Suministro e Instalación de Niveletas de Madera",
     "unidad": "m2",
-    "precio_unitario": 201.8926,
-    "costo_mo": 95.0,
+    "precio_unitario": 201.8928,
+    "costo_mo": 95.0001,
     "costo_ma": 66.0905,
     "unitario_matriz": 0.4236,
     "insumos": [
@@ -1286,7 +1304,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.073077,
         "costo_unit": 800.0,
-        "total": 58.4615
+        "total": 58.4616
       },
       {
         "clave": "MO-006.1",
@@ -1372,7 +1390,7 @@
     "codigo": "PRM04",
     "descripcion": "Demolición de Edificaciones Existentes",
     "unidad": "m2",
-    "precio_unitario": 200.9897,
+    "precio_unitario": 200.9898,
     "costo_mo": 149.9999,
     "costo_ma": 0.0,
     "unitario_matriz": 10.7919,
@@ -1401,7 +1419,7 @@
   {
     "csi": "03 10 00",
     "codigo": "",
-    "descripcion": "Encofrado COLUMNA C1 [ETABS-ACERO:C1]",
+    "descripcion": "Encofrado VIGA_SIMPLE V1 [ETABS-ACERO:V1]",
     "unidad": "m2",
     "precio_unitario": 0.0,
     "costo_mo": 0.0,
@@ -1549,10 +1567,10 @@
     "codigo": "",
     "descripcion": "Instalación de encofrado perimetral en losa de cimentación",
     "unidad": "m",
-    "precio_unitario": 488.451,
-    "costo_mo": 194.25,
+    "precio_unitario": 488.4541,
+    "costo_mo": 194.2502,
     "costo_ma": 114.0765,
-    "unitario_matriz": 82.4343,
+    "unitario_matriz": 82.4366,
     "insumos": [
       {
         "clave": "MO-008",
@@ -1561,7 +1579,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.176591,
         "costo_unit": 700.0,
-        "total": 123.6136
+        "total": 123.6137
       },
       {
         "clave": "MO-006.1",
@@ -1570,7 +1588,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.141273,
         "costo_unit": 500.0,
-        "total": 70.6364
+        "total": 70.6365
       },
       {
         "clave": "FL-001",
@@ -1579,7 +1597,7 @@
         "tipo": "FLETE",
         "cantidad": 0.016438,
         "costo_unit": 1500.0,
-        "total": 24.6563
+        "total": 24.657
       },
       {
         "clave": "MA-004",
@@ -1624,7 +1642,7 @@
         "tipo": "HERRAMIENTA",
         "cantidad": 0.016438,
         "costo_unit": 3500.0,
-        "total": 57.5314
+        "total": 57.533
       }
     ],
     "color_tipo": "blanco"
@@ -2165,10 +2183,10 @@
     "codigo": "",
     "descripcion": "Armado, Encofrado y Fundido de Castillo R1 15x15cm, Ref 4#3 + N2@5cm F032002",
     "unidad": "m2",
-    "precio_unitario": 805.1322,
-    "costo_mo": 360.0,
-    "costo_ma": 144.2154,
-    "unitario_matriz": 139.8904,
+    "precio_unitario": 805.1325,
+    "costo_mo": 360.0001,
+    "costo_ma": 144.2159,
+    "unitario_matriz": 139.89,
     "insumos": [
       {
         "clave": "MO-005",
@@ -2177,7 +2195,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.230769,
         "costo_unit": 750.0,
-        "total": 173.0769
+        "total": 173.0768
       },
       {
         "clave": "MO-008",
@@ -2186,7 +2204,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.092308,
         "costo_unit": 700.0,
-        "total": 64.6154
+        "total": 64.6156
       },
       {
         "clave": "MO-007",
@@ -2195,7 +2213,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.080769,
         "costo_unit": 800.0,
-        "total": 64.6154
+        "total": 64.6152
       },
       {
         "clave": "MO-006.1",
@@ -2204,7 +2222,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.115385,
         "costo_unit": 500.0,
-        "total": 57.6923
+        "total": 57.6925
       },
       {
         "clave": "MA-005",
@@ -2222,7 +2240,7 @@
         "tipo": "FLETE",
         "cantidad": 0.092796,
         "costo_unit": 1500.0,
-        "total": 139.1944
+        "total": 139.194
       },
       {
         "clave": "MA-183",
@@ -2231,7 +2249,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.092796,
         "costo_unit": 65.0,
-        "total": 6.0318
+        "total": 6.0317
       },
       {
         "clave": "MA-238",
@@ -2258,7 +2276,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.208792,
         "costo_unit": 185.0,
-        "total": 38.6264
+        "total": 38.6265
       },
       {
         "clave": "MA-001",
@@ -2276,7 +2294,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.005568,
         "costo_unit": 910.0,
-        "total": 5.0667
+        "total": 5.0669
       },
       {
         "clave": "MA-010",
@@ -2285,7 +2303,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.00696,
         "costo_unit": 1020.0,
-        "total": 7.0989
+        "total": 7.0992
       },
       {
         "clave": "MA-125",
@@ -2331,10 +2349,10 @@
     "codigo": "",
     "descripcion": "Armado, Encofrado y Fundido de Zapata Z1 de 80x80cm",
     "unidad": "m2",
-    "precio_unitario": 1035.915,
-    "costo_mo": 425.0,
-    "costo_ma": 373.1771,
-    "unitario_matriz": 30.5549,
+    "precio_unitario": 1035.9151,
+    "costo_mo": 424.9996,
+    "costo_ma": 373.1775,
+    "unitario_matriz": 30.555,
     "insumos": [
       {
         "clave": "MO-005",
@@ -2343,7 +2361,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.145714,
         "costo_unit": 750.0,
-        "total": 109.2857
+        "total": 109.2855
       },
       {
         "clave": "MO-007",
@@ -2352,7 +2370,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.242857,
         "costo_unit": 800.0,
-        "total": 194.2857
+        "total": 194.2856
       },
       {
         "clave": "MO-006.1",
@@ -2361,7 +2379,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.242857,
         "costo_unit": 500.0,
-        "total": 121.4286
+        "total": 121.4285
       },
       {
         "clave": "MA-006",
@@ -2379,7 +2397,7 @@
         "tipo": "FLETE",
         "cantidad": 0.02037,
         "costo_unit": 1500.0,
-        "total": 30.5549
+        "total": 30.555
       },
       {
         "clave": "MA-011",
@@ -2415,7 +2433,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.06111,
         "costo_unit": 910.0,
-        "total": 55.6099
+        "total": 55.6101
       },
       {
         "clave": "MA-010",
@@ -2424,7 +2442,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.06111,
         "costo_unit": 1020.0,
-        "total": 62.332
+        "total": 62.3322
       }
     ],
     "color_tipo": "blanco"
@@ -2434,10 +2452,10 @@
     "codigo": "",
     "descripcion": "Armado, Encofrado y Fundido de Columna R2 17.5x20cm, 4Nº3, Nº2 @ 0.20, F034003",
     "unidad": "mL",
-    "precio_unitario": 1308.2822,
-    "costo_mo": 528.0,
-    "costo_ma": 456.2805,
-    "unitario_matriz": 62.3453,
+    "precio_unitario": 1308.2824,
+    "costo_mo": 527.9995,
+    "costo_ma": 456.2807,
+    "unitario_matriz": 62.3457,
     "insumos": [
       {
         "clave": "MO-005",
@@ -2446,7 +2464,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.116658,
         "costo_unit": 750.0,
-        "total": 87.4937
+        "total": 87.4935
       },
       {
         "clave": "MO-006",
@@ -2455,7 +2473,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.097215,
         "costo_unit": 500.0,
-        "total": 48.6076
+        "total": 48.6075
       },
       {
         "clave": "MO-007.1",
@@ -2464,7 +2482,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.097215,
         "costo_unit": 750.0,
-        "total": 72.9114
+        "total": 72.9113
       },
       {
         "clave": "MO-008",
@@ -2473,7 +2491,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.455696,
         "costo_unit": 700.0,
-        "total": 318.9873
+        "total": 318.9872
       },
       {
         "clave": "MA-001",
@@ -2482,7 +2500,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.244005,
         "costo_unit": 230.0,
-        "total": 56.1211
+        "total": 56.1212
       },
       {
         "clave": "FL-001",
@@ -2491,7 +2509,7 @@
         "tipo": "FLETE",
         "cantidad": 0.041357,
         "costo_unit": 1500.0,
-        "total": 62.0351
+        "total": 62.0355
       },
       {
         "clave": "MA-183",
@@ -2536,7 +2554,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.012407,
         "costo_unit": 1020.0,
-        "total": 12.6552
+        "total": 12.6551
       },
       {
         "clave": "MA-004",
@@ -2572,7 +2590,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.206784,
         "costo_unit": 190.0,
-        "total": 39.2889
+        "total": 39.289
       },
       {
         "clave": "MA-011",
@@ -2581,7 +2599,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.006204,
         "costo_unit": 70.0,
-        "total": 0.4342
+        "total": 0.4343
       },
       {
         "clave": "MA-121",
@@ -2600,9 +2618,9 @@
     "codigo": "",
     "descripcion": "Armado de Refuerzos en Sillares de Ventanas 2#7.2",
     "unidad": "m",
-    "precio_unitario": 106.9586,
-    "costo_mo": 37.5,
-    "costo_ma": 47.9448,
+    "precio_unitario": 106.9623,
+    "costo_mo": 37.5005,
+    "costo_ma": 47.9472,
     "unitario_matriz": 0.1221,
     "insumos": [
       {
@@ -2621,7 +2639,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.009885,
         "costo_unit": 700.0,
-        "total": 6.9193
+        "total": 6.9195
       },
       {
         "clave": "MO-005",
@@ -2630,7 +2648,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.024712,
         "costo_unit": 750.0,
-        "total": 18.5338
+        "total": 18.534
       },
       {
         "clave": "MO-011",
@@ -2639,7 +2657,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.012356,
         "costo_unit": 450.0,
-        "total": 5.5601
+        "total": 5.5602
       },
       {
         "clave": "HER-00",
@@ -2657,7 +2675,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.000733,
         "costo_unit": 910.0,
-        "total": 0.6669
+        "total": 0.667
       },
       {
         "clave": "MA-010",
@@ -2711,7 +2729,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.036155,
         "costo_unit": 190.0,
-        "total": 6.8694
+        "total": 6.8695
       },
       {
         "clave": "MA-238",
@@ -2729,7 +2747,7 @@
         "tipo": "MATERIAL",
         "cantidad": 4.1e-05,
         "costo_unit": 7600.0,
-        "total": 0.3094
+        "total": 0.3116
       }
     ],
     "color_tipo": "blanco"
@@ -2739,8 +2757,8 @@
     "codigo": "",
     "descripcion": "Armado de Refuerzos a 45° en Ventanas 2#7.2",
     "unidad": "pza",
-    "precio_unitario": 189.8305,
-    "costo_mo": 39.38,
+    "precio_unitario": 189.8309,
+    "costo_mo": 39.3803,
     "costo_ma": 111.7479,
     "unitario_matriz": 0.7365,
     "insumos": [
@@ -2751,7 +2769,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.052507,
         "costo_unit": 750.0,
-        "total": 39.38
+        "total": 39.3803
       },
       {
         "clave": "MA-003",
@@ -2788,8 +2806,8 @@
     "codigo": "",
     "descripcion": "Armado de Refuerzos en Dintel de Puertas 3#7.2",
     "unidad": "pza",
-    "precio_unitario": 342.4014,
-    "costo_mo": 39.38,
+    "precio_unitario": 342.4018,
+    "costo_mo": 39.3803,
     "costo_ma": 233.7834,
     "unitario_matriz": 0.7577,
     "insumos": [
@@ -2800,7 +2818,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.052507,
         "costo_unit": 750.0,
-        "total": 39.38
+        "total": 39.3803
       },
       {
         "clave": "MA-003",
@@ -2837,8 +2855,8 @@
     "codigo": "",
     "descripcion": "Armado de Refuerzos a 45° en Puertas 2#7.2",
     "unidad": "pza",
-    "precio_unitario": 126.5321,
-    "costo_mo": 39.38,
+    "precio_unitario": 126.5325,
+    "costo_mo": 39.3803,
     "costo_ma": 61.1402,
     "unitario_matriz": 0.7055,
     "insumos": [
@@ -2849,7 +2867,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.052507,
         "costo_unit": 750.0,
-        "total": 39.38
+        "total": 39.3803
       },
       {
         "clave": "MA-003",
@@ -2953,9 +2971,9 @@
     "codigo": "",
     "descripcion": "Armado de Losa de Cimentación con Electromalla 6\" x 6\" 4/4",
     "unidad": "m2",
-    "precio_unitario": 232.2986,
+    "precio_unitario": 232.2976,
     "costo_mo": 47.25,
-    "costo_ma": 138.2544,
+    "costo_ma": 138.2536,
     "unitario_matriz": 0.3345,
     "insumos": [
       {
@@ -2983,7 +3001,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.041922,
         "costo_unit": 2500.0,
-        "total": 104.8058
+        "total": 104.805
       },
       {
         "clave": "HER-00",
@@ -7604,8 +7622,8 @@
     "unidad": "m2",
     "precio_unitario": 908.172,
     "costo_mo": 247.25,
-    "costo_ma": 509.56,
-    "unitario_matriz": 0.0,
+    "costo_ma": 458.56,
+    "unitario_matriz": 51.0,
     "insumos": [
       {
         "clave": "MA-004",
@@ -7732,10 +7750,10 @@
     "codigo": "",
     "descripcion": "Concreto Premezclado 3,000 Psi, Agregado 3/4\", Revenimiento 6\" (Losa de Cimentación)",
     "unidad": "m3",
-    "precio_unitario": 8139.9959,
+    "precio_unitario": 8139.9971,
     "costo_mo": 803.25,
-    "costo_ma": 5564.7324,
-    "unitario_matriz": 144.0143,
+    "costo_ma": 5564.7332,
+    "unitario_matriz": 144.0145,
     "insumos": [
       {
         "clave": "MO-001",
@@ -7762,7 +7780,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.955319,
         "costo_unit": 5700.0,
-        "total": 5445.3175
+        "total": 5445.3183
       },
       {
         "clave": "FL-001",
@@ -7771,7 +7789,7 @@
         "tipo": "FLETE",
         "cantidad": 0.095532,
         "costo_unit": 1500.0,
-        "total": 143.2978
+        "total": 143.298
       },
       {
         "clave": "MA-241",
@@ -7799,10 +7817,10 @@
     "codigo": "",
     "descripcion": "Fundido de Losa de Concreto sobre armado 3000 Psi e=8cm con jornaleros y mezcladora",
     "unidad": "m2",
-    "precio_unitario": 1027.6372,
+    "precio_unitario": 1027.6385,
     "costo_mo": 397.25,
-    "costo_ma": 369.2325,
-    "unitario_matriz": 55.6273,
+    "costo_ma": 369.2338,
+    "unitario_matriz": 55.627,
     "insumos": [
       {
         "clave": "MO-008",
@@ -7811,7 +7829,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.321335,
         "costo_unit": 700.0,
-        "total": 224.9343
+        "total": 224.9345
       },
       {
         "clave": "MO-007.1",
@@ -7820,7 +7838,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.229754,
         "costo_unit": 750.0,
-        "total": 172.3157
+        "total": 172.3155
       },
       {
         "clave": "MA-004",
@@ -7838,7 +7856,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.017501,
         "costo_unit": 1020.0,
-        "total": 17.8508
+        "total": 17.851
       },
       {
         "clave": "MA-207",
@@ -7847,7 +7865,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.004167,
         "costo_unit": 7600.0,
-        "total": 31.668
+        "total": 31.6692
       },
       {
         "clave": "FL-001",
@@ -7856,7 +7874,7 @@
         "tipo": "FLETE",
         "cantidad": 0.008334,
         "costo_unit": 1500.0,
-        "total": 12.5005
+        "total": 12.501
       },
       {
         "clave": "HER-00",
@@ -7874,7 +7892,7 @@
         "tipo": "EQUIPO",
         "cantidad": 0.014167,
         "costo_unit": 3000.0,
-        "total": 42.5018
+        "total": 42.501
       },
       {
         "clave": "MA-021",
@@ -7901,7 +7919,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.045835,
         "costo_unit": 910.0,
-        "total": 41.7101
+        "total": 41.7099
       },
       {
         "clave": "MA-011",
@@ -7910,7 +7928,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.024168,
         "costo_unit": 70.0,
-        "total": 1.6917
+        "total": 1.6918
       },
       {
         "clave": "MA-006",
@@ -8030,10 +8048,10 @@
     "codigo": "",
     "descripcion": "Pulido con Supercapa 2.5mm",
     "unidad": "m2",
-    "precio_unitario": 272.5005,
-    "costo_mo": 126.0,
-    "costo_ma": 84.602,
-    "unitario_matriz": 7.3984,
+    "precio_unitario": 272.4999,
+    "costo_mo": 125.9999,
+    "costo_ma": 84.6022,
+    "unitario_matriz": 7.3978,
     "insumos": [
       {
         "clave": "MO-006",
@@ -8051,7 +8069,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.096923,
         "costo_unit": 800.0,
-        "total": 77.5385
+        "total": 77.5384
       },
       {
         "clave": "MA-130",
@@ -8060,7 +8078,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.422764,
         "costo_unit": 200.0,
-        "total": 84.5527
+        "total": 84.5528
       },
       {
         "clave": "FL-001",
@@ -8069,7 +8087,7 @@
         "tipo": "FLETE",
         "cantidad": 0.004697,
         "costo_unit": 1500.0,
-        "total": 7.0461
+        "total": 7.0455
       },
       {
         "clave": "HER-00",
@@ -8087,7 +8105,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.000705,
         "costo_unit": 70.0,
-        "total": 0.0493
+        "total": 0.0494
       }
     ],
     "color_tipo": "blanco"
@@ -8097,10 +8115,10 @@
     "codigo": "GAP-04",
     "descripcion": "Suministro e instalación Repello 1:4 (Cemento-Arena) e=1.5cm.",
     "unidad": "m2",
-    "precio_unitario": 269.7531,
-    "costo_mo": 157.5,
-    "costo_ma": 56.7763,
-    "unitario_matriz": 1.5262,
+    "precio_unitario": 269.7526,
+    "costo_mo": 157.5002,
+    "costo_ma": 56.7764,
+    "unitario_matriz": 1.5255,
     "insumos": [
       {
         "clave": "MO-007",
@@ -8109,7 +8127,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.121154,
         "costo_unit": 800.0,
-        "total": 96.9231
+        "total": 96.9232
       },
       {
         "clave": "MO-006",
@@ -8118,7 +8136,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.121154,
         "costo_unit": 500.0,
-        "total": 60.5769
+        "total": 60.577
       },
       {
         "clave": "MA-001",
@@ -8127,7 +8145,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.203499,
         "costo_unit": 230.0,
-        "total": 46.8049
+        "total": 46.8048
       },
       {
         "clave": "MA-002",
@@ -8136,7 +8154,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.010175,
         "costo_unit": 910.0,
-        "total": 9.2592
+        "total": 9.2593
       },
       {
         "clave": "MA-011",
@@ -8145,7 +8163,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.010175,
         "costo_unit": 70.0,
-        "total": 0.7122
+        "total": 0.7123
       },
       {
         "clave": "FL-001",
@@ -8154,7 +8172,7 @@
         "tipo": "FLETE",
         "cantidad": 0.001017,
         "costo_unit": 1500.0,
-        "total": 1.5262
+        "total": 1.5255
       }
     ],
     "color_tipo": "verde"
@@ -8410,10 +8428,10 @@
     "codigo": "",
     "descripcion": "Repello y Pulido de Mochetas, Ventanas y Columnas",
     "unidad": "mL",
-    "precio_unitario": 109.2325,
-    "costo_mo": 60.0,
-    "costo_ma": 21.8014,
-    "unitario_matriz": 5.5846,
+    "precio_unitario": 109.2329,
+    "costo_mo": 60.0002,
+    "costo_ma": 21.8012,
+    "unitario_matriz": 5.5849,
     "insumos": [
       {
         "clave": "MO-006",
@@ -8422,7 +8440,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.046154,
         "costo_unit": 500.0,
-        "total": 23.0769
+        "total": 23.077
       },
       {
         "clave": "MO-007",
@@ -8431,7 +8449,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.046154,
         "costo_unit": 800.0,
-        "total": 36.9231
+        "total": 36.9232
       },
       {
         "clave": "MA-130",
@@ -8440,7 +8458,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.028367,
         "costo_unit": 200.0,
-        "total": 5.6733
+        "total": 5.6734
       },
       {
         "clave": "FL-001",
@@ -8449,7 +8467,7 @@
         "tipo": "FLETE",
         "cantidad": 0.003546,
         "costo_unit": 1500.0,
-        "total": 5.3187
+        "total": 5.319
       },
       {
         "clave": "HER-00",
@@ -8476,7 +8494,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.014183,
         "costo_unit": 910.0,
-        "total": 12.9068
+        "total": 12.9065
       },
       {
         "clave": "MA-011",
@@ -8858,10 +8876,10 @@
     "codigo": "",
     "descripcion": "Armado, Encofrado y Fundido de V-1 Viga De Concreto de 20x20cm,2#4+2#3; #2@15cm, con 1:2:2 F037003",
     "unidad": "mL",
-    "precio_unitario": 1165.5531,
-    "costo_mo": 496.35,
-    "costo_ma": 426.8895,
-    "unitario_matriz": 9.203,
+    "precio_unitario": 1165.554,
+    "costo_mo": 496.3501,
+    "costo_ma": 426.8904,
+    "unitario_matriz": 9.2027,
     "insumos": [
       {
         "clave": "MO-005",
@@ -8870,7 +8888,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.098768,
         "costo_unit": 750.0,
-        "total": 74.0762
+        "total": 74.076
       },
       {
         "clave": "MO-006",
@@ -8879,7 +8897,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.109743,
         "costo_unit": 500.0,
-        "total": 54.8713
+        "total": 54.8715
       },
       {
         "clave": "MO-008",
@@ -8888,7 +8906,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.412319,
         "costo_unit": 700.0,
-        "total": 288.623
+        "total": 288.6233
       },
       {
         "clave": "MO-007.1",
@@ -8897,7 +8915,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.105039,
         "costo_unit": 750.0,
-        "total": 78.7795
+        "total": 78.7793
       },
       {
         "clave": "MA-006",
@@ -8915,7 +8933,7 @@
         "tipo": "FLETE",
         "cantidad": 0.005843,
         "costo_unit": 1500.0,
-        "total": 8.7648
+        "total": 8.7645
       },
       {
         "clave": "MA-012",
@@ -8924,7 +8942,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.134394,
         "costo_unit": 550.2,
-        "total": 73.9435
+        "total": 73.9436
       },
       {
         "clave": "MA-238",
@@ -8969,7 +8987,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.175296,
         "costo_unit": 190.0,
-        "total": 33.3063
+        "total": 33.3062
       },
       {
         "clave": "MA-011",
@@ -8978,7 +8996,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.032138,
         "costo_unit": 70.0,
-        "total": 2.2496
+        "total": 2.2497
       },
       {
         "clave": "MA-001",
@@ -8987,7 +9005,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.287486,
         "costo_unit": 230.0,
-        "total": 66.1217
+        "total": 66.1218
       },
       {
         "clave": "MA-002",
@@ -8996,7 +9014,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.01753,
         "costo_unit": 910.0,
-        "total": 15.952
+        "total": 15.9523
       },
       {
         "clave": "MA-010",
@@ -9005,7 +9023,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.01753,
         "costo_unit": 1020.0,
-        "total": 17.8802
+        "total": 17.8806
       }
     ],
     "color_tipo": "blanco"
@@ -9387,9 +9405,9 @@
     "codigo": "",
     "descripcion": "Bordillo de concreto de ducha de ladrillo rafón",
     "unidad": "mL",
-    "precio_unitario": 945.4316,
-    "costo_mo": 125.0,
-    "costo_ma": 631.3453,
+    "precio_unitario": 945.4326,
+    "costo_mo": 125.0005,
+    "costo_ma": 631.3456,
     "unitario_matriz": 0.0,
     "insumos": [
       {
@@ -9399,7 +9417,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.104167,
         "costo_unit": 750.0,
-        "total": 78.125
+        "total": 78.1253
       },
       {
         "clave": "MO-011",
@@ -9408,7 +9426,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.104167,
         "costo_unit": 450.0,
-        "total": 46.875
+        "total": 46.8752
       },
       {
         "clave": "MA-001",
@@ -9417,7 +9435,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.235728,
         "costo_unit": 230.0,
-        "total": 54.2175
+        "total": 54.2174
       },
       {
         "clave": "MA-162",
@@ -9444,7 +9462,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.002227,
         "costo_unit": 910.0,
-        "total": 2.0263
+        "total": 2.0266
       },
       {
         "clave": "MA-011",
@@ -9453,7 +9471,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.012235,
         "costo_unit": 70.0,
-        "total": 0.8564
+        "total": 0.8565
       },
       {
         "clave": "MA-022",
@@ -9499,10 +9517,10 @@
     "codigo": "",
     "descripcion": "Armado, Encofrado y Fundido de Solera S2 de 20x20cm,  4#3 Y #2 @0.20 CM",
     "unidad": "ML",
-    "precio_unitario": 908.5632,
+    "precio_unitario": 908.5613,
     "costo_mo": 310.75,
-    "costo_ma": 400.473,
-    "unitario_matriz": 15.6276,
+    "costo_ma": 400.472,
+    "unitario_matriz": 15.627,
     "insumos": [
       {
         "clave": "MO-005",
@@ -9547,7 +9565,7 @@
         "tipo": "FLETE",
         "cantidad": 0.010418,
         "costo_unit": 1500.0,
-        "total": 15.6276
+        "total": 15.627
       },
       {
         "clave": "MA-021",
@@ -9583,7 +9601,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.409443,
         "costo_unit": 230.0,
-        "total": 94.172
+        "total": 94.1719
       },
       {
         "clave": "MA-002",
@@ -9592,7 +9610,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.02292,
         "costo_unit": 910.0,
-        "total": 20.8576
+        "total": 20.8572
       },
       {
         "clave": "MA-010",
@@ -9601,7 +9619,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.02292,
         "costo_unit": 1020.0,
-        "total": 23.3789
+        "total": 23.3784
       },
       {
         "clave": "MA-238",
@@ -9953,8 +9971,8 @@
     "unidad": "lance",
     "precio_unitario": 14532.0,
     "costo_mo": 1080.0,
-    "costo_ma": 11030.0,
-    "unitario_matriz": 0.0,
+    "costo_ma": 9830.0,
+    "unitario_matriz": 1200.0,
     "insumos": [
       {
         "clave": "MO-013",
@@ -10083,8 +10101,8 @@
     "unidad": "lance",
     "precio_unitario": 15966.6,
     "costo_mo": 985.0,
-    "costo_ma": 12320.5,
-    "unitario_matriz": 0.0,
+    "costo_ma": 11120.5,
+    "unitario_matriz": 1200.0,
     "insumos": [
       {
         "clave": "MO-013",
@@ -10222,8 +10240,8 @@
     "unidad": "lance",
     "precio_unitario": 19675.8,
     "costo_mo": 1365.0,
-    "costo_ma": 15031.5,
-    "unitario_matriz": 0.0,
+    "costo_ma": 13031.5,
+    "unitario_matriz": 2000.0,
     "insumos": [
       {
         "clave": "MO-013",
@@ -10549,7 +10567,7 @@
         "total": 0.5
       }
     ],
-    "color_tipo": "blanco"
+    "color_tipo": "rosa"
   },
   {
     "csi": "05 12 00.2",
@@ -10634,7 +10652,7 @@
         "total": 0.5
       }
     ],
-    "color_tipo": "blanco"
+    "color_tipo": "rosa"
   },
   {
     "csi": "05 12 00.3",
@@ -10719,7 +10737,7 @@
         "total": 0.5
       }
     ],
-    "color_tipo": "blanco"
+    "color_tipo": "rosa"
   },
   {
     "csi": "05 12 23",
@@ -10943,8 +10961,8 @@
     "unidad": "pza",
     "precio_unitario": 7236.12,
     "costo_mo": 430.0,
-    "costo_ma": 5600.1,
-    "unitario_matriz": 0.0,
+    "costo_ma": 5569.6,
+    "unitario_matriz": 30.5,
     "insumos": [
       {
         "clave": "MO-013",
@@ -11467,8 +11485,8 @@
     "unidad": "mL",
     "precio_unitario": 2302.1411,
     "costo_mo": 92.0,
-    "costo_ma": 1826.4509,
-    "unitario_matriz": 0.0,
+    "costo_ma": 1706.4509,
+    "unitario_matriz": 120.0,
     "insumos": [
       {
         "clave": "MA-324",
@@ -11579,8 +11597,8 @@
     "unidad": "mL",
     "precio_unitario": 5282.8872,
     "costo_mo": 115.0,
-    "costo_ma": 4287.406,
-    "unitario_matriz": 0.0,
+    "costo_ma": 3087.406,
+    "unitario_matriz": 1200.0,
     "insumos": [
       {
         "clave": "MO-013",
@@ -11830,8 +11848,8 @@
     "unidad": "mL",
     "precio_unitario": 1502.7778,
     "costo_mo": 71.84,
-    "costo_ma": 1180.4748,
-    "unitario_matriz": 0.0,
+    "costo_ma": 1084.4748,
+    "unitario_matriz": 96.0,
     "insumos": [
       {
         "clave": "MA-361",
@@ -11933,8 +11951,8 @@
     "unidad": "mL",
     "precio_unitario": 2297.2154,
     "costo_mo": 141.34,
-    "costo_ma": 1773.0062,
-    "unitario_matriz": 0.0,
+    "costo_ma": 1637.0062,
+    "unitario_matriz": 136.0,
     "insumos": [
       {
         "clave": "MA-185",
@@ -12036,8 +12054,8 @@
     "unidad": "mL",
     "precio_unitario": 3818.0405,
     "costo_mo": 141.34,
-    "costo_ma": 3040.3604,
-    "unitario_matriz": 0.0,
+    "costo_ma": 2840.3604,
+    "unitario_matriz": 200.0,
     "insumos": [
       {
         "clave": "MA-185",
@@ -12139,8 +12157,8 @@
     "unidad": "mL",
     "precio_unitario": 2765.6868,
     "costo_mo": 162.94,
-    "costo_ma": 2141.799,
-    "unitario_matriz": 0.0,
+    "costo_ma": 1981.799,
+    "unitario_matriz": 160.0,
     "insumos": [
       {
         "clave": "MA-185",
@@ -12242,8 +12260,8 @@
     "unidad": "mL",
     "precio_unitario": 4996.5856,
     "costo_mo": 215.4,
-    "costo_ma": 3948.4213,
-    "unitario_matriz": 0.0,
+    "costo_ma": 3748.4213,
+    "unitario_matriz": 200.0,
     "insumos": [
       {
         "clave": "MA-185",
@@ -12345,8 +12363,8 @@
     "unidad": "conexion",
     "precio_unitario": 6323.7,
     "costo_mo": 3325.0,
-    "costo_ma": 1944.75,
-    "unitario_matriz": 0.0,
+    "costo_ma": 1394.75,
+    "unitario_matriz": 550.0,
     "insumos": [
       {
         "clave": "MA-182",
@@ -12430,8 +12448,8 @@
     "unidad": "conexion",
     "precio_unitario": 6770.46,
     "costo_mo": 3575.0,
-    "costo_ma": 2067.05,
-    "unitario_matriz": 0.0,
+    "costo_ma": 1492.05,
+    "unitario_matriz": 575.0,
     "insumos": [
       {
         "clave": "MA-182",
@@ -12515,8 +12533,8 @@
     "unidad": "conexion",
     "precio_unitario": 6607.2,
     "costo_mo": 3500.0,
-    "costo_ma": 2006.0,
-    "unitario_matriz": 0.0,
+    "costo_ma": 1456.0,
+    "unitario_matriz": 550.0,
     "insumos": [
       {
         "clave": "MA-182",
@@ -12600,8 +12618,8 @@
     "unidad": "conexion",
     "precio_unitario": 7356.72,
     "costo_mo": 3900.0,
-    "costo_ma": 2230.6,
-    "unitario_matriz": 0.0,
+    "costo_ma": 1630.6,
+    "unitario_matriz": 600.0,
     "insumos": [
       {
         "clave": "MA-182",
@@ -12685,8 +12703,8 @@
     "unidad": "conexion",
     "precio_unitario": 6988.32,
     "costo_mo": 3700.0,
-    "costo_ma": 2123.6,
-    "unitario_matriz": 0.0,
+    "costo_ma": 1548.6,
+    "unitario_matriz": 575.0,
     "insumos": [
       {
         "clave": "MA-182",
@@ -12770,8 +12788,8 @@
     "unidad": "nivel",
     "precio_unitario": 17214.6,
     "costo_mo": 1130.0,
-    "costo_ma": 13215.5,
-    "unitario_matriz": 0.0,
+    "costo_ma": 11775.5,
+    "unitario_matriz": 1440.0,
     "insumos": [
       {
         "clave": "MO-013",
@@ -12909,8 +12927,8 @@
     "unidad": "conexion",
     "precio_unitario": 7098.42,
     "costo_mo": 3750.0,
-    "costo_ma": 2165.35,
-    "unitario_matriz": 0.0,
+    "costo_ma": 1565.35,
+    "unitario_matriz": 600.0,
     "insumos": [
       {
         "clave": "MA-182",
@@ -12994,8 +13012,8 @@
     "unidad": "nivel",
     "precio_unitario": 24715.8,
     "costo_mo": 1395.0,
-    "costo_ma": 19201.5,
-    "unitario_matriz": 0.0,
+    "costo_ma": 17441.5,
+    "unitario_matriz": 1760.0,
     "insumos": [
       {
         "clave": "MO-013",
@@ -13133,8 +13151,8 @@
     "unidad": "mL",
     "precio_unitario": 1343.1982,
     "costo_mo": 94.337,
-    "costo_ma": 1024.9948,
-    "unitario_matriz": 0.0,
+    "costo_ma": 928.9948,
+    "unitario_matriz": 96.0,
     "insumos": [
       {
         "clave": "MA-361",
@@ -13303,8 +13321,8 @@
     "unidad": "mL",
     "precio_unitario": 3817.5413,
     "costo_mo": 204.92,
-    "costo_ma": 2976.3644,
-    "unitario_matriz": 0.0,
+    "costo_ma": 2776.3644,
+    "unitario_matriz": 200.0,
     "insumos": [
       {
         "clave": "MA-185",
@@ -13388,8 +13406,8 @@
     "unidad": "mL",
     "precio_unitario": 460.776,
     "costo_mo": 160.52,
-    "costo_ma": 223.46,
-    "unitario_matriz": 0.0,
+    "costo_ma": 23.46,
+    "unitario_matriz": 200.0,
     "insumos": [
       {
         "clave": "MA-185",
@@ -13473,8 +13491,8 @@
     "unidad": "mL",
     "precio_unitario": 3971.0992,
     "costo_mo": 196.82,
-    "costo_ma": 3112.4293,
-    "unitario_matriz": 0.0,
+    "costo_ma": 2912.4293,
+    "unitario_matriz": 200.0,
     "insumos": [
       {
         "clave": "MA-185",
@@ -13710,8 +13728,8 @@
     "unidad": "m2",
     "precio_unitario": 3020.5224,
     "costo_mo": 910.0,
-    "costo_ma": 1607.102,
-    "unitario_matriz": 0.0,
+    "costo_ma": 807.102,
+    "unitario_matriz": 800.0,
     "insumos": [
       {
         "clave": "MA-710",
@@ -13917,10 +13935,10 @@
     "codigo": "STR-15-2",
     "descripcion": "Suministro e instalación de Estructura de Canaleta Galvanizada 2\"x6\" GHT G72",
     "unidad": "m2",
-    "precio_unitario": 781.1543,
+    "precio_unitario": 781.1536,
     "costo_mo": 290.0,
-    "costo_ma": 304.1022,
-    "unitario_matriz": 30.8212,
+    "costo_ma": 304.1024,
+    "unitario_matriz": 30.8205,
     "insumos": [
       {
         "clave": "MO-006",
@@ -13956,7 +13974,7 @@
         "tipo": "FLETE",
         "cantidad": 0.020547,
         "costo_unit": 1500.0,
-        "total": 30.8212
+        "total": 30.8205
       },
       {
         "clave": "MA-178",
@@ -13965,7 +13983,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.349307,
         "costo_unit": 500.0,
-        "total": 174.6533
+        "total": 174.6535
       }
     ],
     "color_tipo": "blanco"
@@ -14340,8 +14358,8 @@
     "unidad": "mL",
     "precio_unitario": 6480.0,
     "costo_mo": 0.0,
-    "costo_ma": 5400.0,
-    "unitario_matriz": 0.0,
+    "costo_ma": 3840.0,
+    "unitario_matriz": 1560.0,
     "insumos": [
       {
         "clave": "MA-350",
@@ -15074,9 +15092,9 @@
     "codigo": "AT-04",
     "descripcion": "Encofrado y Fundición de Batiente 10x15 2#3 #2@15cm  F035002",
     "unidad": "mL",
-    "precio_unitario": 352.8741,
+    "precio_unitario": 352.8734,
     "costo_mo": 134.4503,
-    "costo_ma": 147.849,
+    "costo_ma": 147.8484,
     "unitario_matriz": 0.0,
     "insumos": [
       {
@@ -15086,7 +15104,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.021173,
         "costo_unit": 750.0,
-        "total": 15.88
+        "total": 15.8798
       },
       {
         "clave": "MO-007",
@@ -15095,7 +15113,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.079047,
         "costo_unit": 800.0,
-        "total": 63.2375
+        "total": 63.2376
       },
       {
         "clave": "MO-008",
@@ -15104,7 +15122,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.079047,
         "costo_unit": 700.0,
-        "total": 55.3328
+        "total": 55.3329
       },
       {
         "clave": "MA-001",
@@ -15122,7 +15140,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.007977,
         "costo_unit": 910.0,
-        "total": 7.2593
+        "total": 7.2591
       },
       {
         "clave": "MA-010",
@@ -15131,7 +15149,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.007977,
         "costo_unit": 1020.0,
-        "total": 8.1368
+        "total": 8.1365
       },
       {
         "clave": "MA-011",
@@ -15167,7 +15185,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.398864,
         "costo_unit": 110.0,
-        "total": 43.8751
+        "total": 43.875
       },
       {
         "clave": "MA-022",
@@ -15402,8 +15420,8 @@
     "unidad": "pza",
     "precio_unitario": 10200.0,
     "costo_mo": 0.0,
-    "costo_ma": 8500.0,
-    "unitario_matriz": 0.0,
+    "costo_ma": 0.0,
+    "unitario_matriz": 8500.0,
     "insumos": [
       {
         "clave": "SC-045",
@@ -15424,8 +15442,8 @@
     "unidad": "pza",
     "precio_unitario": 4080.0,
     "costo_mo": 0.0,
-    "costo_ma": 3400.0,
-    "unitario_matriz": 0.0,
+    "costo_ma": 2600.0,
+    "unitario_matriz": 800.0,
     "insumos": [
       {
         "clave": "MA-266",
@@ -15455,8 +15473,8 @@
     "unidad": "pza",
     "precio_unitario": 5760.0,
     "costo_mo": 0.0,
-    "costo_ma": 4800.0,
-    "unitario_matriz": 0.0,
+    "costo_ma": 4000.0,
+    "unitario_matriz": 800.0,
     "insumos": [
       {
         "clave": "MA-347",
@@ -15484,10 +15502,10 @@
     "codigo": "",
     "descripcion": "Puerta Termoformada Sencilla 0.90 m x 2.10 m",
     "unidad": "pza",
-    "precio_unitario": 4388.7005,
+    "precio_unitario": 4388.7015,
     "costo_mo": 1000.0,
-    "costo_ma": 1920.1462,
-    "unitario_matriz": 590.8142,
+    "costo_ma": 1920.1468,
+    "unitario_matriz": 590.8144,
     "insumos": [
       {
         "clave": "MO-GLOBAL",
@@ -15505,7 +15523,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.738518,
         "costo_unit": 2600.0,
-        "total": 1920.1462
+        "total": 1920.1468
       },
       {
         "clave": "SC-041",
@@ -15514,7 +15532,7 @@
         "tipo": "SUBCONTRATO",
         "cantidad": 0.738518,
         "costo_unit": 800.0,
-        "total": 590.8142
+        "total": 590.8144
       }
     ],
     "color_tipo": "blanco"
@@ -15562,16 +15580,16 @@
         "total": 0.5
       }
     ],
-    "color_tipo": "blanco"
+    "color_tipo": "rosa"
   },
   {
     "csi": "08 14 23.20",
     "codigo": "",
     "descripcion": "Reinstalacion de puerta",
     "unidad": "global",
-    "precio_unitario": 1390.7038,
+    "precio_unitario": 1390.7036,
     "costo_mo": 0.0,
-    "costo_ma": 1112.563,
+    "costo_ma": 1112.5629,
     "unitario_matriz": 0.0,
     "insumos": [
       {
@@ -15581,7 +15599,7 @@
         "tipo": "MATERIAL",
         "cantidad": 1.069772,
         "costo_unit": 1040.0,
-        "total": 1112.563
+        "total": 1112.5629
       }
     ],
     "color_tipo": "blanco"
@@ -15593,8 +15611,8 @@
     "unidad": "pza",
     "precio_unitario": 6360.0,
     "costo_mo": 0.0,
-    "costo_ma": 5300.0,
-    "unitario_matriz": 0.0,
+    "costo_ma": 4500.0,
+    "unitario_matriz": 800.0,
     "insumos": [
       {
         "clave": "MA-348",
@@ -15887,9 +15905,9 @@
     "codigo": "",
     "descripcion": "Ventanas proyectables de 1m x 0.30m",
     "unidad": "global",
-    "precio_unitario": 2113.7305,
+    "precio_unitario": 2113.73,
     "costo_mo": 0.0,
-    "costo_ma": 1690.9844,
+    "costo_ma": 1690.984,
     "unitario_matriz": 0.0,
     "insumos": [
       {
@@ -15899,7 +15917,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.422746,
         "costo_unit": 4000.0,
-        "total": 1690.9844
+        "total": 1690.984
       }
     ],
     "color_tipo": "blanco"
@@ -15977,8 +15995,8 @@
     "unidad": "pza",
     "precio_unitario": 14048.4,
     "costo_mo": 0.0,
-    "costo_ma": 11707.0,
-    "unitario_matriz": 0.0,
+    "costo_ma": 0.0,
+    "unitario_matriz": 11707.0,
     "insumos": [
       {
         "clave": "SC-046",
@@ -16265,9 +16283,9 @@
     "codigo": "",
     "descripcion": "Canal Furring de Metal para Soporte de Cielo Falso",
     "unidad": "m2",
-    "precio_unitario": 186.8287,
+    "precio_unitario": 186.8289,
     "costo_mo": 102.5,
-    "costo_ma": 46.963,
+    "costo_ma": 46.9631,
     "unitario_matriz": 0.0,
     "insumos": [
       {
@@ -16304,7 +16322,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.08394,
         "costo_unit": 140.0,
-        "total": 11.7515
+        "total": 11.7516
       },
       {
         "clave": "MA-088",
@@ -16936,10 +16954,10 @@
     "codigo": "CER-01",
     "descripcion": "Ceramica Piso 43x43 Tipo Brasiliia 222 gris, Centro de Cerámicas (Area Construida)",
     "unidad": "m2",
-    "precio_unitario": 1045.2354,
-    "costo_mo": 219.9997,
-    "costo_ma": 615.4141,
-    "unitario_matriz": 0.7745,
+    "precio_unitario": 1045.2358,
+    "costo_mo": 219.9998,
+    "costo_ma": 615.4142,
+    "unitario_matriz": 0.7746,
     "insumos": [
       {
         "clave": "MO-006.1",
@@ -16948,7 +16966,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.170874,
         "costo_unit": 500.0,
-        "total": 85.4368
+        "total": 85.437
       },
       {
         "clave": "MO-007.1",
@@ -16957,7 +16975,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.179417,
         "costo_unit": 750.0,
-        "total": 134.5629
+        "total": 134.5628
       },
       {
         "clave": "MA-102",
@@ -16975,7 +16993,7 @@
         "tipo": "HERRAMIENTA",
         "cantidad": 0.051637,
         "costo_unit": 15.0,
-        "total": 0.7745
+        "total": 0.7746
       },
       {
         "clave": "MA-265",
@@ -16993,7 +17011,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.227201,
         "costo_unit": 320.0,
-        "total": 72.7042
+        "total": 72.7043
       },
       {
         "clave": "MA-272",
@@ -17136,7 +17154,7 @@
         "tipo": "MATERIAL",
         "cantidad": 1.097743,
         "costo_unit": 300.0,
-        "total": 329.3228
+        "total": 329.3229
       },
       {
         "clave": "MA-011",
@@ -17154,7 +17172,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.219549,
         "costo_unit": 95.0,
-        "total": 20.8571
+        "total": 20.8572
       },
       {
         "clave": "HER-00",
@@ -17181,7 +17199,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.241503,
         "costo_unit": 320.0,
-        "total": 77.2811
+        "total": 77.281
       },
       {
         "clave": "MA-272",
@@ -17190,7 +17208,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.548871,
         "costo_unit": 265.0,
-        "total": 145.4509
+        "total": 145.4508
       }
     ],
     "color_tipo": "blanco"
@@ -17354,8 +17372,8 @@
     "unidad": "m2",
     "precio_unitario": 530.94,
     "costo_mo": 350.0,
-    "costo_ma": 92.45,
-    "unitario_matriz": 0.0,
+    "costo_ma": 48.5,
+    "unitario_matriz": 43.95,
     "insumos": [
       {
         "clave": "MO-006",
@@ -17446,9 +17464,9 @@
     "codigo": "CER-08",
     "descripcion": "Cerámica de Pared de Baño \"Optima Ivory\" 25x75",
     "unidad": "m2",
-    "precio_unitario": 1365.6536,
+    "precio_unitario": 1365.6543,
     "costo_mo": 240.0,
-    "costo_ma": 851.7169,
+    "costo_ma": 851.7174,
     "unitario_matriz": 0.806,
     "insumos": [
       {
@@ -17476,7 +17494,7 @@
         "tipo": "MATERIAL",
         "cantidad": 1.074722,
         "costo_unit": 586.59,
-        "total": 630.421
+        "total": 630.4212
       },
       {
         "clave": "MA-011",
@@ -17485,7 +17503,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.008598,
         "costo_unit": 70.0,
-        "total": 0.6018
+        "total": 0.6019
       },
       {
         "clave": "HER-00",
@@ -17512,7 +17530,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.236439,
         "costo_unit": 320.0,
-        "total": 75.6604
+        "total": 75.6605
       },
       {
         "clave": "MA-272",
@@ -17521,7 +17539,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.537361,
         "costo_unit": 265.0,
-        "total": 142.4006
+        "total": 142.4007
       }
     ],
     "color_tipo": "blanco"
@@ -18685,8 +18703,8 @@
     "unidad": "mL",
     "precio_unitario": 5030.4,
     "costo_mo": 625.0,
-    "costo_ma": 3567.0,
-    "unitario_matriz": 0.0,
+    "costo_ma": 1817.0,
+    "unitario_matriz": 1750.0,
     "insumos": [
       {
         "clave": "SC-051",
@@ -19209,9 +19227,9 @@
     "codigo": "PB01",
     "descripcion": "Suministro e Instalación de Tubería de PVC de 3/4\" SDR 17",
     "unidad": "m",
-    "precio_unitario": 72.4574,
+    "precio_unitario": 72.4584,
     "costo_mo": 37.5,
-    "costo_ma": 19.6892,
+    "costo_ma": 19.69,
     "unitario_matriz": 0.7767,
     "insumos": [
       {
@@ -19266,7 +19284,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.001036,
         "costo_unit": 1948.86,
-        "total": 2.0182
+        "total": 2.019
       }
     ],
     "color_tipo": "blanco"
@@ -19392,9 +19410,9 @@
     "codigo": "PB02",
     "descripcion": "Suministro e Instalación de Codo de PVC de 3/4\" a 90°",
     "unidad": "pza",
-    "precio_unitario": 32.776,
+    "precio_unitario": 32.7768,
     "costo_mo": 13.5,
-    "costo_ma": 11.9733,
+    "costo_ma": 11.9739,
     "unitario_matriz": 0.7475,
     "insumos": [
       {
@@ -19431,7 +19449,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.000997,
         "costo_unit": 1948.86,
-        "total": 1.9424
+        "total": 1.943
       },
       {
         "clave": "HER-00",
@@ -19450,9 +19468,9 @@
     "codigo": "PB-03",
     "descripcion": "Suministro e Instalación de Tee de PVC de 3/4\"",
     "unidad": "pza",
-    "precio_unitario": 32.776,
+    "precio_unitario": 32.7768,
     "costo_mo": 13.5,
-    "costo_ma": 11.9733,
+    "costo_ma": 11.9739,
     "unitario_matriz": 0.7475,
     "insumos": [
       {
@@ -19489,7 +19507,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.000997,
         "costo_unit": 1948.86,
-        "total": 1.9424
+        "total": 1.943
       },
       {
         "clave": "HER-00",
@@ -19508,9 +19526,9 @@
     "codigo": "PB-04",
     "descripcion": "Suministro e Instalación de Tubería de PVC de 1/2\" SDR 13.5",
     "unidad": "m",
-    "precio_unitario": 68.5752,
+    "precio_unitario": 68.5749,
     "costo_mo": 37.5,
-    "costo_ma": 16.1938,
+    "costo_ma": 16.1935,
     "unitario_matriz": 1.1664,
     "insumos": [
       {
@@ -19565,7 +19583,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.001555,
         "costo_unit": 1948.86,
-        "total": 3.0308
+        "total": 3.0305
       }
     ],
     "color_tipo": "blanco"
@@ -19575,9 +19593,9 @@
     "codigo": "PB-05",
     "descripcion": "Suministro e Instalación de Codo de PVC de 1/2\" a 90°",
     "unidad": "pza",
-    "precio_unitario": 23.6944,
+    "precio_unitario": 23.6953,
     "costo_mo": 13.5,
-    "costo_ma": 4.7455,
+    "costo_ma": 4.7462,
     "unitario_matriz": 0.71,
     "insumos": [
       {
@@ -19614,7 +19632,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.000947,
         "costo_unit": 1948.86,
-        "total": 1.8449
+        "total": 1.8456
       },
       {
         "clave": "HER-00",
@@ -19633,9 +19651,9 @@
     "codigo": "PB-06",
     "descripcion": "Suministro e Instalación de Tee de PVC de 1/2\"",
     "unidad": "pza",
-    "precio_unitario": 23.6944,
+    "precio_unitario": 23.6953,
     "costo_mo": 13.5,
-    "costo_ma": 4.7455,
+    "costo_ma": 4.7462,
     "unitario_matriz": 0.71,
     "insumos": [
       {
@@ -19672,7 +19690,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.000947,
         "costo_unit": 1948.86,
-        "total": 1.8449
+        "total": 1.8456
       },
       {
         "clave": "HER-00",
@@ -19879,8 +19897,8 @@
     "unidad": "global",
     "precio_unitario": 51000.0,
     "costo_mo": 0.0,
-    "costo_ma": 42500.0,
-    "unitario_matriz": 0.0,
+    "costo_ma": 40000.0,
+    "unitario_matriz": 2500.0,
     "insumos": [
       {
         "clave": "MA-070",
@@ -19930,9 +19948,9 @@
     "codigo": "SN-03",
     "descripcion": "Cisterna subterranea de 4m3 de Capacidad, Con Bomba",
     "unidad": "global",
-    "precio_unitario": 33208.2276,
+    "precio_unitario": 33208.225,
     "costo_mo": 6000.0,
-    "costo_ma": 20566.5821,
+    "costo_ma": 20566.58,
     "unitario_matriz": 0.0,
     "insumos": [
       {
@@ -19951,7 +19969,7 @@
         "tipo": "MATERIAL",
         "cantidad": 1.028329,
         "costo_unit": 20000.0,
-        "total": 20566.5821
+        "total": 20566.58
       }
     ],
     "color_tipo": "blanco"
@@ -20188,9 +20206,9 @@
     "codigo": "PB-12",
     "descripcion": "Suministro e Instalación de Tubería de PVC de 2\" SDR 21",
     "unidad": "m",
-    "precio_unitario": 86.7076,
+    "precio_unitario": 86.7079,
     "costo_mo": 32.0,
-    "costo_ma": 36.3567,
+    "costo_ma": 36.3569,
     "unitario_matriz": 1.0094,
     "insumos": [
       {
@@ -20245,7 +20263,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.001346,
         "costo_unit": 1948.86,
-        "total": 2.623
+        "total": 2.6232
       }
     ],
     "color_tipo": "blanco"
@@ -20255,9 +20273,9 @@
     "codigo": "PB-20",
     "descripcion": "Suministro e Instalación de Reductor de PVC de 3\" a 2\"",
     "unidad": "pza",
-    "precio_unitario": 61.0775,
+    "precio_unitario": 61.077,
     "costo_mo": 10.0,
-    "costo_ma": 37.9724,
+    "costo_ma": 37.972,
     "unitario_matriz": 0.8896,
     "insumos": [
       {
@@ -20294,7 +20312,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.001186,
         "costo_unit": 1948.86,
-        "total": 2.3117
+        "total": 2.3113
       },
       {
         "clave": "HER-00",
@@ -20313,9 +20331,9 @@
     "codigo": "PB-21",
     "descripcion": "Suministro e Instalación de Tubería de PVC de 4\" SDR 41",
     "unidad": "m",
-    "precio_unitario": 172.3205,
+    "precio_unitario": 172.3214,
     "costo_mo": 38.0,
-    "costo_ma": 98.9882,
+    "costo_ma": 98.9889,
     "unitario_matriz": 0.8682,
     "insumos": [
       {
@@ -20343,7 +20361,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.193316,
         "costo_unit": 500.0,
-        "total": 96.6581
+        "total": 96.658
       },
       {
         "clave": "MA-279",
@@ -20361,7 +20379,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.001158,
         "costo_unit": 1948.86,
-        "total": 2.256
+        "total": 2.2568
       },
       {
         "clave": "HER-00",
@@ -20438,9 +20456,9 @@
     "codigo": "PB-23",
     "descripcion": "Suministro e Instalación de Yee de PVC de 4\"",
     "unidad": "pza",
-    "precio_unitario": 197.2926,
+    "precio_unitario": 197.2924,
     "costo_mo": 10.0,
-    "costo_ma": 147.0293,
+    "costo_ma": 147.0291,
     "unitario_matriz": 0.8048,
     "insumos": [
       {
@@ -20486,7 +20504,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.001073,
         "costo_unit": 1948.86,
-        "total": 2.0913
+        "total": 2.0911
       }
     ],
     "color_tipo": "blanco"
@@ -20496,10 +20514,10 @@
     "codigo": "PB-24",
     "descripcion": "Suministro e Instalación de Reductor de PVC de 4\" a 3\"",
     "unidad": "pza",
-    "precio_unitario": 48.1031,
+    "precio_unitario": 48.1024,
     "costo_mo": 10.0,
-    "costo_ma": 27.544,
-    "unitario_matriz": 0.9385,
+    "costo_ma": 27.5435,
+    "unitario_matriz": 0.9384,
     "insumos": [
       {
         "clave": "MO-012",
@@ -20526,7 +20544,7 @@
         "tipo": "HERRAMIENTA",
         "cantidad": 0.062563,
         "costo_unit": 15.0,
-        "total": 0.9385
+        "total": 0.9384
       },
       {
         "clave": "MA-279",
@@ -20544,7 +20562,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.001251,
         "costo_unit": 1948.86,
-        "total": 2.4385
+        "total": 2.438
       }
     ],
     "color_tipo": "blanco"
@@ -20554,10 +20572,10 @@
     "codigo": "PB-25",
     "descripcion": "Suministro e Instalación de Reductor de PVC de 4\" a 2\"",
     "unidad": "pza",
-    "precio_unitario": 48.1031,
+    "precio_unitario": 48.1024,
     "costo_mo": 10.0,
-    "costo_ma": 27.544,
-    "unitario_matriz": 0.9385,
+    "costo_ma": 27.5435,
+    "unitario_matriz": 0.9384,
     "insumos": [
       {
         "clave": "MO-012",
@@ -20593,7 +20611,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.001251,
         "costo_unit": 1948.86,
-        "total": 2.4385
+        "total": 2.438
       },
       {
         "clave": "HER-00",
@@ -20602,7 +20620,7 @@
         "tipo": "HERRAMIENTA",
         "cantidad": 0.062563,
         "costo_unit": 15.0,
-        "total": 0.9385
+        "total": 0.9384
       }
     ],
     "color_tipo": "blanco"
@@ -20612,9 +20630,9 @@
     "codigo": "PB-13",
     "descripcion": "Suministro e Instalación de Codo de PVC de 2\" a 45°",
     "unidad": "pza",
-    "precio_unitario": 44.2075,
+    "precio_unitario": 44.2088,
     "costo_mo": 10.0,
-    "costo_ma": 24.4034,
+    "costo_ma": 24.4044,
     "unitario_matriz": 0.9626,
     "insumos": [
       {
@@ -20642,7 +20660,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.006418,
         "costo_unit": 12.8,
-        "total": 0.0821
+        "total": 0.0822
       },
       {
         "clave": "MA-271",
@@ -20651,7 +20669,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.001284,
         "costo_unit": 1948.86,
-        "total": 2.5014
+        "total": 2.5023
       },
       {
         "clave": "HER-00",
@@ -20670,9 +20688,9 @@
     "codigo": "PB-14",
     "descripcion": "Suministro e Instalación de Codo de PVC de 2\" a 90°",
     "unidad": "pza",
-    "precio_unitario": 44.2075,
+    "precio_unitario": 44.2088,
     "costo_mo": 10.0,
-    "costo_ma": 24.4034,
+    "costo_ma": 24.4044,
     "unitario_matriz": 0.9626,
     "insumos": [
       {
@@ -20700,7 +20718,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.006418,
         "costo_unit": 12.8,
-        "total": 0.0821
+        "total": 0.0822
       },
       {
         "clave": "MA-271",
@@ -20709,7 +20727,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.001284,
         "costo_unit": 1948.86,
-        "total": 2.5014
+        "total": 2.5023
       },
       {
         "clave": "HER-00",
@@ -20728,9 +20746,9 @@
     "codigo": "PB-15",
     "descripcion": "Suministro e Instalación de Tee de PVC de 2\"",
     "unidad": "pza",
-    "precio_unitario": 54.5851,
+    "precio_unitario": 54.5859,
     "costo_mo": 10.0,
-    "costo_ma": 32.7586,
+    "costo_ma": 32.7592,
     "unitario_matriz": 0.9095,
     "insumos": [
       {
@@ -20767,7 +20785,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.001213,
         "costo_unit": 1948.86,
-        "total": 2.3634
+        "total": 2.364
       },
       {
         "clave": "HER-00",
@@ -20786,9 +20804,9 @@
     "codigo": "PB-16",
     "descripcion": "Suministro e Instalación de Sifón de PVC de 2\"",
     "unidad": "pza",
-    "precio_unitario": 53.2915,
+    "precio_unitario": 53.2908,
     "costo_mo": 10.0,
-    "costo_ma": 31.7187,
+    "costo_ma": 31.7181,
     "unitario_matriz": 0.9145,
     "insumos": [
       {
@@ -20825,7 +20843,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.001219,
         "costo_unit": 1948.86,
-        "total": 2.3763
+        "total": 2.3757
       },
       {
         "clave": "HER-00",
@@ -20844,9 +20862,9 @@
     "codigo": "PB-17",
     "descripcion": "Suministro e Instalación de Tubería de PVC de 3\" SDR 41",
     "unidad": "m",
-    "precio_unitario": 450.2434,
+    "precio_unitario": 450.2433,
     "costo_mo": 100.0,
-    "costo_ma": 254.6708,
+    "costo_ma": 254.6707,
     "unitario_matriz": 5.5239,
     "insumos": [
       {
@@ -20856,7 +20874,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.181818,
         "costo_unit": 500.0,
-        "total": 90.9091
+        "total": 90.909
       },
       {
         "clave": "MO-006.1",
@@ -20865,7 +20883,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.018182,
         "costo_unit": 500.0,
-        "total": 9.0909
+        "total": 9.091
       },
       {
         "clave": "MA-038",
@@ -20874,7 +20892,7 @@
         "tipo": "MATERIAL",
         "cantidad": 1.229979,
         "costo_unit": 195.0,
-        "total": 239.8458
+        "total": 239.8459
       },
       {
         "clave": "MA-279",
@@ -20892,7 +20910,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.007365,
         "costo_unit": 1948.86,
-        "total": 14.3536
+        "total": 14.3534
       },
       {
         "clave": "HER-00",
@@ -20911,9 +20929,9 @@
     "codigo": "PB-18",
     "descripcion": "Suministro e Instalación de Codo de PVC de 3\" a 45°",
     "unidad": "pza",
-    "precio_unitario": 54.5851,
+    "precio_unitario": 54.5859,
     "costo_mo": 10.0,
-    "costo_ma": 32.7586,
+    "costo_ma": 32.7592,
     "unitario_matriz": 0.9095,
     "insumos": [
       {
@@ -20950,7 +20968,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.001213,
         "costo_unit": 1948.86,
-        "total": 2.3634
+        "total": 2.364
       },
       {
         "clave": "HER-00",
@@ -20969,9 +20987,9 @@
     "codigo": "PB-19",
     "descripcion": "Suministro e Instalación de Tee de PVC de 3\"",
     "unidad": "pza",
-    "precio_unitario": 61.0775,
+    "precio_unitario": 61.077,
     "costo_mo": 10.0,
-    "costo_ma": 37.9724,
+    "costo_ma": 37.972,
     "unitario_matriz": 0.8896,
     "insumos": [
       {
@@ -21008,7 +21026,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.001186,
         "costo_unit": 1948.86,
-        "total": 2.3117
+        "total": 2.3113
       },
       {
         "clave": "HER-00",
@@ -21129,9 +21147,9 @@
     "codigo": "SN-13",
     "descripcion": "Caja de Registro para Agua Residual de 50 x 50 x 50 cms",
     "unidad": "pza",
-    "precio_unitario": 3465.4871,
-    "costo_mo": 1000.0003,
-    "costo_ma": 1771.6028,
+    "precio_unitario": 3465.4865,
+    "costo_mo": 1000.0004,
+    "costo_ma": 1771.6022,
     "unitario_matriz": 0.7866,
     "insumos": [
       {
@@ -21141,7 +21159,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 1.215933,
         "costo_unit": 450.0,
-        "total": 547.17
+        "total": 547.1699
       },
       {
         "clave": "MO-007.1",
@@ -21150,7 +21168,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.603774,
         "costo_unit": 750.0,
-        "total": 452.8303
+        "total": 452.8305
       },
       {
         "clave": "HER-00",
@@ -21177,7 +21195,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.062925,
         "costo_unit": 1020.0,
-        "total": 64.1839
+        "total": 64.1835
       },
       {
         "clave": "MA-002",
@@ -21186,7 +21204,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.183532,
         "costo_unit": 910.0,
-        "total": 167.0144
+        "total": 167.0141
       },
       {
         "clave": "MA-243",
@@ -21240,7 +21258,7 @@
         "tipo": "MATERIAL",
         "cantidad": 2.692157,
         "costo_unit": 230.0,
-        "total": 619.196
+        "total": 619.1961
       }
     ],
     "color_tipo": "blanco"
@@ -21350,8 +21368,8 @@
     "unidad": "global",
     "precio_unitario": 40989.7896,
     "costo_mo": 10550.0,
-    "costo_ma": 23608.158,
-    "unitario_matriz": 0.0,
+    "costo_ma": 17608.158,
+    "unitario_matriz": 6000.0,
     "insumos": [
       {
         "clave": "MA-018",
@@ -21498,8 +21516,8 @@
     "unidad": "global",
     "precio_unitario": 54865.8,
     "costo_mo": 7000.0,
-    "costo_ma": 38721.5,
-    "unitario_matriz": 0.0,
+    "costo_ma": 25121.5,
+    "unitario_matriz": 13600.0,
     "insumos": [
       {
         "clave": "MA-020",
@@ -21939,7 +21957,7 @@
         "total": 67.5
       }
     ],
-    "color_tipo": "blanco"
+    "color_tipo": "verde"
   },
   {
     "csi": "22 41 13 13.2",
@@ -22331,9 +22349,9 @@
     "codigo": "SN-19",
     "descripcion": "Suministro e Instalacion de Lavamanos Empotrado LAVABO STD. ECOLINE BLANCO PIEZA",
     "unidad": "pza",
-    "precio_unitario": 8345.0765,
+    "precio_unitario": 8345.0739,
     "costo_mo": 400.0,
-    "costo_ma": 6275.3056,
+    "costo_ma": 6275.3035,
     "unitario_matriz": 0.7556,
     "insumos": [
       {
@@ -22370,7 +22388,7 @@
         "tipo": "MATERIAL",
         "cantidad": 1.00749,
         "costo_unit": 2000.0,
-        "total": 2014.9805
+        "total": 2014.98
       },
       {
         "clave": "MA-107",
@@ -22379,7 +22397,7 @@
         "tipo": "MATERIAL",
         "cantidad": 1.00749,
         "costo_unit": 3800.0,
-        "total": 3828.4629
+        "total": 3828.462
       },
       {
         "clave": "MA-271",
@@ -22388,7 +22406,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.025187,
         "costo_unit": 1948.86,
-        "total": 49.0864
+        "total": 49.0859
       },
       {
         "clave": "MA-173",
@@ -22397,7 +22415,7 @@
         "tipo": "MATERIAL",
         "cantidad": 1.00749,
         "costo_unit": 257.0,
-        "total": 258.925
+        "total": 258.9249
       },
       {
         "clave": "HER-00",
@@ -22424,7 +22442,7 @@
         "tipo": "MATERIAL",
         "cantidad": 1.00749,
         "costo_unit": 114.33,
-        "total": 115.1864
+        "total": 115.1863
       }
     ],
     "color_tipo": "blanco"
@@ -22528,9 +22546,9 @@
     "codigo": "SN-21",
     "descripcion": "Suministro e Instalación de Lavatrasta Empotrado (Dos Fosas)",
     "unidad": "pza",
-    "precio_unitario": 10096.3515,
+    "precio_unitario": 10096.3506,
     "costo_mo": 750.0,
-    "costo_ma": 7327.0812,
+    "costo_ma": 7327.0805,
     "unitario_matriz": 0.0,
     "insumos": [
       {
@@ -22558,7 +22576,7 @@
         "tipo": "MATERIAL",
         "cantidad": 1.451272,
         "costo_unit": 2500.0,
-        "total": 3628.1804
+        "total": 3628.18
       },
       {
         "clave": "MA-258",
@@ -22567,7 +22585,7 @@
         "tipo": "MATERIAL",
         "cantidad": 1.451272,
         "costo_unit": 2200.0,
-        "total": 3192.7988
+        "total": 3192.7984
       },
       {
         "clave": "MA-051",
@@ -22630,7 +22648,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.004354,
         "costo_unit": 300.0,
-        "total": 1.3061
+        "total": 1.3062
       }
     ],
     "color_tipo": "blanco"
@@ -22846,9 +22864,9 @@
     "codigo": "SN-24",
     "descripcion": "Suministro e Instalación de Maxi Ducha Lorenzetti - Basica",
     "unidad": "pza",
-    "precio_unitario": 1626.4688,
+    "precio_unitario": 1626.4694,
     "costo_mo": 399.9999,
-    "costo_ma": 900.0954,
+    "costo_ma": 900.0959,
     "unitario_matriz": 1.0797,
     "insumos": [
       {
@@ -22858,7 +22876,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.5,
         "costo_unit": 500.0,
-        "total": 249.9999
+        "total": 250.0
       },
       {
         "clave": "MO-011",
@@ -22867,7 +22885,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.333333,
         "costo_unit": 450.0,
-        "total": 150.0
+        "total": 149.9999
       },
       {
         "clave": "HER-00",
@@ -22894,7 +22912,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.00144,
         "costo_unit": 1948.86,
-        "total": 2.8057
+        "total": 2.8064
       },
       {
         "clave": "MA-174",
@@ -22921,7 +22939,7 @@
         "tipo": "MATERIAL",
         "cantidad": 1.439662,
         "costo_unit": 600.0,
-        "total": 863.7974
+        "total": 863.7972
       },
       {
         "clave": "MA-093",
@@ -22949,9 +22967,9 @@
     "codigo": "",
     "descripcion": "Suministro e instalacion de Tina de 0.70x1.70m",
     "unidad": "pza",
-    "precio_unitario": 20129.8438,
+    "precio_unitario": 20129.8425,
     "costo_mo": 2000.0,
-    "costo_ma": 14103.875,
+    "costo_ma": 14103.874,
     "unitario_matriz": 0.0,
     "insumos": [
       {
@@ -22970,7 +22988,7 @@
         "tipo": "MATERIAL",
         "cantidad": 1.069772,
         "costo_unit": 13184.0,
-        "total": 14103.875
+        "total": 14103.874
       }
     ],
     "color_tipo": "blanco"
@@ -23370,7 +23388,7 @@
         "tipo": "MATERIAL"
       }
     ],
-    "color_tipo": "blanco"
+    "color_tipo": "rosa"
   },
   {
     "csi": "25 15 00",
@@ -23899,9 +23917,9 @@
     "codigo": "EL-06",
     "descripcion": "Tubería de Poliducto de 3/4\"",
     "unidad": "m",
-    "precio_unitario": 30.727,
+    "precio_unitario": 30.7273,
     "costo_mo": 10.9998,
-    "costo_ma": 13.5603,
+    "costo_ma": 13.5605,
     "unitario_matriz": 0.0215,
     "insumos": [
       {
@@ -23929,7 +23947,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.030053,
         "costo_unit": 450.0,
-        "total": 13.5237
+        "total": 13.5239
       },
       {
         "clave": "MA-255",
@@ -23957,7 +23975,7 @@
     "codigo": "EL-07",
     "descripcion": "Tubería de Poliducto de 1/2\"",
     "unidad": "m",
-    "precio_unitario": 27.5077,
+    "precio_unitario": 27.5078,
     "costo_mo": 11.0004,
     "costo_ma": 10.1123,
     "unitario_matriz": 0.8935,
@@ -24015,10 +24033,10 @@
     "codigo": "EL-08",
     "descripcion": "Caja Metálica de 2\" x 4\"",
     "unidad": "pza",
-    "precio_unitario": 58.7551,
+    "precio_unitario": 58.755,
     "costo_mo": 10.9998,
     "costo_ma": 35.1261,
-    "unitario_matriz": 0.8782,
+    "unitario_matriz": 0.8781,
     "insumos": [
       {
         "clave": "MO-014",
@@ -24027,7 +24045,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.011379,
         "costo_unit": 700.0,
-        "total": 7.9654
+        "total": 7.9653
       },
       {
         "clave": "MO-006",
@@ -24036,7 +24054,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.006069,
         "costo_unit": 500.0,
-        "total": 3.0344
+        "total": 3.0345
       },
       {
         "clave": "MA-270",
@@ -24054,7 +24072,7 @@
         "tipo": "HERRAMIENTA",
         "cantidad": 0.058543,
         "costo_unit": 15.0,
-        "total": 0.8782
+        "total": 0.8781
       }
     ],
     "color_tipo": "blanco"
@@ -24180,9 +24198,9 @@
     "codigo": "ILU01",
     "descripcion": "ENERLITES Interruptor Sencilo",
     "unidad": "pza",
-    "precio_unitario": 247.3184,
+    "precio_unitario": 247.3183,
     "costo_mo": 21.0,
-    "costo_ma": 176.0779,
+    "costo_ma": 176.0778,
     "unitario_matriz": 0.7768,
     "insumos": [
       {
@@ -24210,7 +24228,7 @@
         "tipo": "MATERIAL",
         "cantidad": 1.035752,
         "costo_unit": 170.0,
-        "total": 176.0779
+        "total": 176.0778
       },
       {
         "clave": "HER-00",
@@ -24278,9 +24296,9 @@
     "codigo": "ILU04",
     "descripcion": "TP-LINK Dimmer Smart WiFi Switch Control Iluminación desde cualquier lugar, HS220",
     "unidad": "pza",
-    "precio_unitario": 836.2706,
+    "precio_unitario": 836.2704,
     "costo_mo": 21.0,
-    "costo_ma": 648.0165,
+    "costo_ma": 648.0163,
     "unitario_matriz": 0.0,
     "insumos": [
       {
@@ -24308,7 +24326,7 @@
         "tipo": "MATERIAL",
         "cantidad": 1.036826,
         "costo_unit": 625.0,
-        "total": 648.0165
+        "total": 648.0163
       }
     ],
     "color_tipo": "blanco"
@@ -24367,9 +24385,9 @@
     "codigo": "ILU05",
     "descripcion": "Centro de Carga de 16 Espacios NEMA 1, Empotrado en Pared, 16 polos, 125amp",
     "unidad": "pza",
-    "precio_unitario": 2990.6334,
+    "precio_unitario": 2990.6335,
     "costo_mo": 399.9996,
-    "costo_ma": 1991.8604,
+    "costo_ma": 1991.8605,
     "unitario_matriz": 0.6467,
     "insumos": [
       {
@@ -24397,7 +24415,7 @@
         "tipo": "MATERIAL",
         "cantidad": 0.948505,
         "costo_unit": 2100.0,
-        "total": 1991.8604
+        "total": 1991.8605
       },
       {
         "clave": "HER-00",
@@ -24461,9 +24479,9 @@
     "codigo": "EL-11",
     "descripcion": "Gorra o Mufa de 2\"",
     "unidad": "pza",
-    "precio_unitario": 221.3764,
+    "precio_unitario": 221.3765,
     "costo_mo": 21.0,
-    "costo_ma": 155.3245,
+    "costo_ma": 155.3246,
     "unitario_matriz": 0.7766,
     "insumos": [
       {
@@ -24491,7 +24509,7 @@
         "tipo": "MATERIAL",
         "cantidad": 1.035497,
         "costo_unit": 150.0,
-        "total": 155.3245
+        "total": 155.3246
       },
       {
         "clave": "HER-00",
@@ -24559,9 +24577,9 @@
     "codigo": "TOM03",
     "descripcion": "Tomacorriente ESPECIAL 50A 250v Sencillo (Calentador, Estufa, Secadora, Porton)",
     "unidad": "pza",
-    "precio_unitario": 456.7815,
+    "precio_unitario": 456.7814,
     "costo_mo": 53.0003,
-    "costo_ma": 311.6458,
+    "costo_ma": 311.6457,
     "unitario_matriz": 0.7791,
     "insumos": [
       {
@@ -24571,7 +24589,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.061154,
         "costo_unit": 700.0,
-        "total": 42.8079
+        "total": 42.8078
       },
       {
         "clave": "MO-006",
@@ -24580,7 +24598,7 @@
         "tipo": "MANO_OBRA",
         "cantidad": 0.020385,
         "costo_unit": 500.0,
-        "total": 10.1924
+        "total": 10.1925
       },
       {
         "clave": "MA-148",
@@ -24589,7 +24607,7 @@
         "tipo": "MATERIAL",
         "cantidad": 1.038819,
         "costo_unit": 300.0,
-        "total": 311.6458
+        "total": 311.6457
       },
       {
         "clave": "HER-00",
@@ -24737,9 +24755,9 @@
     "codigo": "EL-13",
     "descripcion": "Breaker de 20 amperios de 110 v",
     "unidad": "pza",
-    "precio_unitario": 234.342,
+    "precio_unitario": 234.3421,
     "costo_mo": 21.0,
-    "costo_ma": 165.6969,
+    "costo_ma": 165.697,
     "unitario_matriz": 0.7767,
     "insumos": [
       {
@@ -24767,7 +24785,7 @@
         "tipo": "MATERIAL",
         "cantidad": 1.035606,
         "costo_unit": 160.0,
-        "total": 165.6969
+        "total": 165.697
       },
       {
         "clave": "HER-00",
@@ -24835,9 +24853,9 @@
     "codigo": "EL-14",
     "descripcion": "Breaker de 40 amperios de 220 v",
     "unidad": "pza",
-    "precio_unitario": 493.8156,
+    "precio_unitario": 493.8154,
     "costo_mo": 21.0,
-    "costo_ma": 373.2748,
+    "costo_ma": 373.2746,
     "unitario_matriz": 0.7777,
     "insumos": [
       {
@@ -24865,7 +24883,7 @@
         "tipo": "MATERIAL",
         "cantidad": 1.036874,
         "costo_unit": 360.0,
-        "total": 373.2748
+        "total": 373.2746
       },
       {
         "clave": "HER-00",
@@ -24886,8 +24904,8 @@
     "unidad": "global",
     "precio_unitario": 7674.216,
     "costo_mo": 3800.0,
-    "costo_ma": 2595.18,
-    "unitario_matriz": 0.0,
+    "costo_ma": 2095.18,
+    "unitario_matriz": 500.0,
     "insumos": [
       {
         "clave": "MA-520",
@@ -25130,9 +25148,9 @@
     "codigo": "ILU07",
     "descripcion": "Lámpara de techo empotrada LED de 6\" delgada regulable 12 W (equivalente a 100 W)",
     "unidad": "pza",
-    "precio_unitario": 894.1112,
+    "precio_unitario": 894.1111,
     "costo_mo": 42.0,
-    "costo_ma": 673.289,
+    "costo_ma": 673.2889,
     "unitario_matriz": 0.0,
     "insumos": [
       {
@@ -25160,7 +25178,7 @@
         "tipo": "MATERIAL",
         "cantidad": 1.035829,
         "costo_unit": 650.0,
-        "total": 673.289
+        "total": 673.2889
       }
     ],
     "color_tipo": "blanco"
@@ -25246,9 +25264,9 @@
     "codigo": "ILU09",
     "descripcion": "Lámpara de Cocinas - Colgantes",
     "unidad": "pza",
-    "precio_unitario": 4928.0344,
+    "precio_unitario": 4928.0345,
     "costo_mo": 320.0001,
-    "costo_ma": 3622.4274,
+    "costo_ma": 3622.4275,
     "unitario_matriz": 0.0,
     "insumos": [
       {
@@ -25267,7 +25285,7 @@
         "tipo": "MATERIAL",
         "cantidad": 1.448971,
         "costo_unit": 2500.0,
-        "total": 3622.4274
+        "total": 3622.4275
       }
     ],
     "color_tipo": "blanco"
@@ -25277,7 +25295,7 @@
     "codigo": "ILU10",
     "descripcion": "Lámpara de Cuarto Tipo LED Circular de 15cm de diametro",
     "unidad": "pza",
-    "precio_unitario": 148.1377,
+    "precio_unitario": 148.1378,
     "costo_mo": 42.0,
     "costo_ma": 76.5102,
     "unitario_matriz": 0.0,
@@ -25960,8 +25978,8 @@
     "unidad": "m3",
     "precio_unitario": 450.0,
     "costo_mo": 0.0,
-    "costo_ma": 375.0,
-    "unitario_matriz": 0.0,
+    "costo_ma": 0.0,
+    "unitario_matriz": 375.0,
     "insumos": [
       {
         "clave": "EQ-001",
@@ -25991,8 +26009,8 @@
     "unidad": "m3",
     "precio_unitario": 1044.0,
     "costo_mo": 0.0,
-    "costo_ma": 870.0,
-    "unitario_matriz": 0.0,
+    "costo_ma": 0.0,
+    "unitario_matriz": 870.0,
     "insumos": [
       {
         "clave": "EQ-001",
@@ -26088,8 +26106,8 @@
     "unidad": "m3",
     "precio_unitario": 681.6,
     "costo_mo": 0.0,
-    "costo_ma": 568.0,
-    "unitario_matriz": 0.0,
+    "costo_ma": 0.0,
+    "unitario_matriz": 568.0,
     "insumos": [
       {
         "clave": "EQ-008",
@@ -26175,9 +26193,9 @@
     "codigo": "EXT-10",
     "descripcion": "Relleno Compactado de Material Selecto e = 0.10 m",
     "unidad": "m3",
-    "precio_unitario": 1437.845,
+    "precio_unitario": 1437.8455,
     "costo_mo": 99.9999,
-    "costo_ma": 1049.2924,
+    "costo_ma": 1049.2928,
     "unitario_matriz": 0.9837,
     "insumos": [
       {
@@ -26196,7 +26214,7 @@
         "tipo": "MATERIAL",
         "cantidad": 1.311616,
         "costo_unit": 800.0,
-        "total": 1049.2924
+        "total": 1049.2928
       },
       {
         "clave": "HER-00",
@@ -26552,8 +26570,8 @@
     "unidad": "global",
     "precio_unitario": 60000.0,
     "costo_mo": 0.0,
-    "costo_ma": 50000.0,
-    "unitario_matriz": 0.0,
+    "costo_ma": 0.0,
+    "unitario_matriz": 50000.0,
     "insumos": [
       {
         "clave": "SC-088",
@@ -27221,7 +27239,7 @@
     "costo_ma": 0.0,
     "unitario_matriz": 0.0,
     "insumos": [],
-    "color_tipo": "blanco"
+    "color_tipo": "verde"
   },
   {
     "csi": "Reference ONLY",
@@ -27233,6 +27251,6 @@
     "costo_ma": 0.0,
     "unitario_matriz": 0.0,
     "insumos": [],
-    "color_tipo": "blanco"
+    "color_tipo": "verde"
   }
 ]
