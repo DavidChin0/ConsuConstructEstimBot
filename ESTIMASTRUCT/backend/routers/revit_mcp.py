@@ -107,7 +107,11 @@ _PYTHON_SCRIPTS = {
 
 def _read_ironpython_code(path: Path, var_name: str = "CODE") -> str:
     src = path.read_text(encoding="utf-8")
-    m = re.search(var_name + r" = r'''(.*?)'''", src, re.DOTALL)
+    # Ancla ^ + MULTILINE: sin esto, un docstring que documente el patron de
+    # extraccion (ej. `CODE = r'''(.*?)'''` como texto de ejemplo) se auto-matchea
+    # antes que el bloque real, porque no esta al inicio de linea (bug real
+    # encontrado 2026-08-02 en revit_get_keynote_path.py via goal-20191).
+    m = re.search(r"^" + var_name + r" = r'''(.*?)'''", src, re.DOTALL | re.MULTILINE)
     if not m:
         raise ValueError(f"No {var_name} block found in {path}")
     return m.group(1)
