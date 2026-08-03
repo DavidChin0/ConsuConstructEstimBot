@@ -22,18 +22,19 @@ import datetime
 
 from backend.scripts_runner.audit_keynotes import audit as run_audit_keynotes
 from backend.scripts_runner.generate_audit_xlsx import build as build_xlsx
-from backend.scripts_runner.sync_audit_colors import sync as sync_colors, FICHA_PATH, LIVE_PATH
+from backend.scripts_runner.sync_audit_colors import sync as sync_colors, _fichas_paths
 
 DB_PATH = r"C:\EstimaStruct\data\estimacion.db"
 
 
-def _backup_before_color_sync():
+def _backup_before_color_sync(catalog_version="v1.2"):
     """sync_audit_colors pisa color_tipo (destructivo de la semántica previa
     de ese campo) — respaldar catálogo + BD antes de cada corrida, mismo
     patrón manual que se venía haciendo a mano en cada sesión."""
     ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    fichas_path, live_path = _fichas_paths(catalog_version)
     backed_up = []
-    for path in (FICHA_PATH, LIVE_PATH, DB_PATH):
+    for path in (fichas_path, live_path, DB_PATH):
         if os.path.exists(path):
             dest = f"{path}.bak_auditcolor_{ts}"
             shutil.copy2(path, dest)
@@ -41,13 +42,16 @@ def _backup_before_color_sync():
     return backed_up
 
 
-def run_audit_pipeline(obra_id: str) -> dict:
+def run_audit_pipeline(obra_id: str, catalog_version: str = "v1.2") -> dict:
     """Orquesta el Paso 2 completo. Devuelve un dict con el resultado de
-    cada sub-paso y la ruta del xlsx final."""
+    cada sub-paso y la ruta del xlsx final. catalog_version selecciona el
+    catalogo fichas (v1.2 legacy / v1.3 vigente) usado como fallback del
+    audit y como target del color sync -- variable expuesta en el frontend
+    (goal-20193)."""
     steps = {}
 
     try:
-        run_audit_keynotes()
+        run_audit_keynotes(catalog_version)
         steps["audit_keynotes"] = {"ok": True}
     except Exception as ex:
         steps["audit_keynotes"] = {"ok": False, "error": str(ex)}
@@ -61,8 +65,8 @@ def run_audit_pipeline(obra_id: str) -> dict:
         return {"ok": False, "step_failed": "generate_audit_xlsx", "steps": steps}
 
     try:
-        backups = _backup_before_color_sync()
-        sync_colors(obra_id)
+        backups = _backup_before_color_sync(catalog_version)
+        sync_colors(obra_id, catalog_version)
         steps["sync_audit_colors"] = {"ok": True, "backups": backups}
     except Exception as ex:
         steps["sync_audit_colors"] = {"ok": False, "error": str(ex)}
@@ -78,8 +82,9 @@ def run_audit_pipeline(obra_id: str) -> dict:
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Uso: python run_audit_pipeline.py <obra_id>")
+        print("Uso: python run_audit_pipeline.py <obra_id> [catalog_version]")
         sys.exit(1)
-    res = run_audit_pipeline(sys.argv[1])
+    catalog_version = sys.argv[2] if len(sys.argv) > 2 else "v1.2"
+    res = run_audit_pipeline(sys.argv[1], catalog_version)
     print(res.get("message") or res.get("step_failed"))
     sys.exit(0 if res.get("ok") else 1)

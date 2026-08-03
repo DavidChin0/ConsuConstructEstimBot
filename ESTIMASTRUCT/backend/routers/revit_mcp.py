@@ -412,14 +412,16 @@ async def generate_keynotes(pid: str):
 
 
 @router.post("/obras/{pid}/audit-pipeline")
-async def audit_pipeline(pid: str):
+async def audit_pipeline(pid: str, catalog_version: str = "v1.2"):
     # goal-20192: vivia en _PYTHON_SCRIPTS como script "generico" (sin args),
     # pero run_audit_pipeline.py necesita obra_id para su ultimo paso
     # (sync_audit_colors) -- /python/{script} no pasa params dinamicos. Movido
     # a ruta obra-scoped, mismo patron que generate-keynotes/import-quantities.
+    # catalog_version (v1.2/v1.3, goal-20193): variable de script expuesta
+    # como query param, seteable desde el frontend.
     return await _run_python_module(
         "backend.scripts_runner.run_audit_pipeline",
-        [pid]
+        [pid, catalog_version]
     )
 
 

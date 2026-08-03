@@ -39,7 +39,8 @@ from difflib import SequenceMatcher
 from collections import defaultdict
 
 MODEL_DUMP = r"D:\OneDrive\Bots\Estimbot\EXPORTS\model_audit_raw.json"
-FICHAS_DIR = r"D:\GitHub\EstimBot\ConsuConstructEstimBot\ESTIMASTRUCT\development\Template2_Updated\v1.2\fichas"
+_TEMPLATE_BASE = r"D:\GitHub\EstimBot\ConsuConstructEstimBot\ESTIMASTRUCT\development\Template2_Updated"
+FICHAS_DIR = os.path.join(_TEMPLATE_BASE, "v1.2", "fichas")
 OUT_CSV  = r"D:\OneDrive\Bots\Estimbot\auditorias Revit MCP\audit_keynotes_report.csv"
 OUT_XLSX = r"D:\OneDrive\Bots\Estimbot\auditorias Revit MCP\audit_keynotes_report.xlsx"
 
@@ -99,11 +100,10 @@ def text_ratio(a, b):
     return SequenceMatcher(None, na, nb).ratio()
 
 
-def load_codigo_map() -> dict:
+def load_codigo_map(catalog_version="v1.2") -> dict:
     """Returns {normalized_csi: codigo} from fichas JSON. Separate from catalog (PG doesn't have codigo)."""
-    fichas_path = os.path.join(os.path.dirname(__file__), "..", "..",
-                               "development", "Template2_Updated", "v1.2",
-                               "fichas", "fichas_v1.2.live.json")
+    fichas_path = os.path.join(_TEMPLATE_BASE, catalog_version,
+                               "fichas", "fichas_{}.live.json".format(catalog_version))
     try:
         with open(fichas_path, encoding="utf-8") as f:
             fichas = json.load(f)
@@ -164,10 +164,11 @@ def load_catalog_pg():
         return None, 0
 
 
-def load_catalog_json():
-    """Load CSI catalog from fichas JSON (v1.2 fallback source)."""
-    live = os.path.join(FICHAS_DIR, "fichas_v1.2.live.json")
-    canon = os.path.join(FICHAS_DIR, "fichas_v1.2.json")
+def load_catalog_json(catalog_version="v1.2"):
+    """Load CSI catalog from fichas JSON (version-selectable fallback source)."""
+    fichas_dir = os.path.join(_TEMPLATE_BASE, catalog_version, "fichas")
+    live = os.path.join(fichas_dir, "fichas_{}.live.json".format(catalog_version))
+    canon = os.path.join(fichas_dir, "fichas_{}.json".format(catalog_version))
     candidates = [p for p in (live, canon) if os.path.exists(p)]
     path = max(candidates, key=os.path.getmtime)
     with open(path, encoding="utf-8") as f:
@@ -186,7 +187,7 @@ def load_catalog_json():
     return by_csi, path, len(fichas)
 
 
-def load_catalog():
+def load_catalog(catalog_version="v1.2"):
     """Load catalog: Postgres primary, fichas JSON fallback.
 
     Returns (by_csi, catalog_path, total_count).
@@ -194,7 +195,7 @@ def load_catalog():
     precio_unitario, unidad.
     """
     pg_catalog, pg_count = load_catalog_pg()
-    json_catalog, json_path, json_count = load_catalog_json()
+    json_catalog, json_path, json_count = load_catalog_json(catalog_version)
 
     if pg_catalog is None:
         # Postgres unavailable — use JSON only
@@ -530,7 +531,7 @@ def _write_xlsx(rows_out, fieldnames, stats, catalog_path, catalog_count, kt_cou
     return True
 
 
-def audit():
+def audit(catalog_version="v1.2"):
     with open(MODEL_DUMP, encoding="utf-8") as f:
         model = json.load(f)
 
@@ -542,8 +543,8 @@ def audit():
             continue
         ktab[normalize_csi_key(k)] = v
 
-    catalog, catalog_path, catalog_count = load_catalog()
-    codigo_map = load_codigo_map()
+    catalog, catalog_path, catalog_count = load_catalog(catalog_version)
+    codigo_map = load_codigo_map(catalog_version)
 
     # aggregate schedule quantities: normalized_csi -> total area_m2
     qty_by_csi = defaultdict(float)

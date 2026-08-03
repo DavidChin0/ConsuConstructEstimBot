@@ -518,6 +518,15 @@
                 <button type="button" class="rmcp-mini-btn rmcp-mini-btn-icon" onclick="rmcpLoadCsvs()" title="Recargar lista de CSVs">↺</button>
               </div>
             </label>
+            <label class="rmcp-field">
+              <span data-es="Catálogo (audit-pipeline)" data-en="Catalog (audit-pipeline)">Catálogo (audit-pipeline)</span>
+              <div class="rmcp-field-row">
+                <select id="rmcp-catalog-version-select">
+                  <option value="v1.2">v1.2 (legacy)</option>
+                  <option value="v1.3" selected>v1.3 (vigente)</option>
+                </select>
+              </div>
+            </label>
           </div>
           <div class="rmcp-hint" data-es="Los scripts usan la obra y el CSV seleccionados como fuente/destino. Cambia aquí antes de ejecutar." data-en="Scripts use the selected project and CSV as source/target. Change these before running.">Los scripts usan la obra y el CSV seleccionados como fuente/destino. Cambia aquí antes de ejecutar.</div>
         </div>

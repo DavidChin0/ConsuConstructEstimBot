@@ -2375,6 +2375,7 @@ async function rmcpLoadCsvs() {
 
 function rmcpGetObra() { return document.getElementById('rmcp-obra-select')?.value || ''; }
 function rmcpGetCsv()  { return document.getElementById('rmcp-csv-select')?.value || ''; }
+function rmcpGetCatalogVersion() { return document.getElementById('rmcp-catalog-version-select')?.value || 'v1.2'; }
 
 function _rmcpResultEl(btnEl) { return btnEl.closest('.rmcp-card')?.querySelector('.rmcp-result') || null; }
 
@@ -2412,7 +2413,8 @@ async function rmcpRunScript(key, type, btnEl) {
       url = `${API}/obras/${obra}/generate-keynotes`;
     } else if (key === 'audit-pipeline') {
       if (!obra) { rmcpLog('Selecciona una obra.', 'rmcp-err'); _rmcpSetResult(btnEl, false, 'Falta obra activa'); _rmcpReset(btnEl); return; }
-      url = `${API}/obras/${obra}/audit-pipeline`;
+      const ver = rmcpGetCatalogVersion();
+      url = `${API}/obras/${obra}/audit-pipeline?catalog_version=${encodeURIComponent(ver)}`;
     } else {
       url = `${API}/python/${key}`;
     }

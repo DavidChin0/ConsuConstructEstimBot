@@ -40,10 +40,20 @@ from collections import defaultdict
 from backend.db import SessionLocal
 from backend.models import Presupuesto, Capitulo, Partida
 
-FICHAS_DIR = r"D:\GitHub\EstimBot\ConsuConstructEstimBot\ESTIMASTRUCT\development\Template2_Updated\v1.2\fichas"
-FICHA_PATH = os.path.join(FICHAS_DIR, "fichas_v1.2.json")
+_TEMPLATE_BASE = r"D:\GitHub\EstimBot\ConsuConstructEstimBot\ESTIMASTRUCT\development\Template2_Updated"
+FICHAS_DIR = os.path.join(_TEMPLATE_BASE, "v1.2", "fichas")
+FICHA_PATH = os.path.join(FICHAS_DIR, "fichas_v1.2.json")   # default v1.2, mantenido por compat (import en run_audit_pipeline.py para el backup)
 LIVE_PATH = os.path.join(FICHAS_DIR, "fichas_v1.2.live.json")
 AUDIT_CSV = r"D:\OneDrive\Bots\Estimbot\auditorias Revit MCP\audit_keynotes_report.csv"
+
+
+def _fichas_paths(catalog_version="v1.2"):
+    """Rutas canon/live para la version de catalogo pedida (v1.2, v1.3, ...)."""
+    d = os.path.join(_TEMPLATE_BASE, catalog_version, "fichas")
+    return (
+        os.path.join(d, "fichas_{}.json".format(catalog_version)),
+        os.path.join(d, "fichas_{}.live.json".format(catalog_version)),
+    )
 
 
 def normalize_csi_key(key):
@@ -92,13 +102,15 @@ def _classify(key, green_csi, red_csi):
     return "rosa"
 
 
-def sync(obra_id):
+def sync(obra_id, catalog_version="v1.2"):
+    fichas_path, live_path = _fichas_paths(catalog_version)
+
     green_csi, red_csi = load_audit_status()
     print("CSI confirmados verde (>=1 instancia OK): {}".format(len(green_csi)))
     print("CSI con conflicto (visto en Revit, 0 GREEN): {}".format(len(red_csi)))
 
     # --- Catalog fichas ---
-    with open(FICHA_PATH, encoding="utf-8") as f:
+    with open(fichas_path, encoding="utf-8") as f:
         fichas = json.load(f)
 
     AUDIT_COLORS = {"verde", "rojo", "rosa", "blanco", None, ""}
@@ -118,12 +130,12 @@ def sync(obra_id):
         ficha["color_tipo"] = color
         counts[color] += 1
 
-    for target in (FICHA_PATH, LIVE_PATH):
+    for target in (fichas_path, live_path):
         with open(target, "w", encoding="utf-8") as f:
             json.dump(fichas, f, ensure_ascii=False, indent=2)
 
-    print("Catálogo V1.2: {} verde, {} rojo, {} rosa, {} manual preservado (de {} fichas)".format(
-        counts["verde"], counts["rojo"], counts["rosa"], preserved_manual, len(fichas)))
+    print("Catálogo {}: {} verde, {} rojo, {} rosa, {} manual preservado (de {} fichas)".format(
+        catalog_version, counts["verde"], counts["rojo"], counts["rosa"], preserved_manual, len(fichas)))
 
     # --- Obra Partida (Postgres) ---
     db = SessionLocal()
