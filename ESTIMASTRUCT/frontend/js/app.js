@@ -2410,6 +2410,9 @@ async function rmcpRunScript(key, type, btnEl) {
     } else if (key === 'generate-keynotes') {
       if (!obra) { rmcpLog('Selecciona una obra.', 'rmcp-err'); _rmcpSetResult(btnEl, false, 'Falta obra activa'); _rmcpReset(btnEl); return; }
       url = `${API}/obras/${obra}/generate-keynotes`;
+    } else if (key === 'audit-pipeline') {
+      if (!obra) { rmcpLog('Selecciona una obra.', 'rmcp-err'); _rmcpSetResult(btnEl, false, 'Falta obra activa'); _rmcpReset(btnEl); return; }
+      url = `${API}/obras/${obra}/audit-pipeline`;
     } else {
       url = `${API}/python/${key}`;
     }
@@ -2450,6 +2453,7 @@ function _rmcpPyReq(key) {
   if (key === 'import-quantities') return 'obra,csv';
   if (key === 'validate-units')    return 'csv';
   if (key === 'generate-keynotes') return 'obra';
+  if (key === 'audit-pipeline')    return 'obra';
   return '';
 }
 
@@ -2459,6 +2463,7 @@ async function rmcpBuildCards() {
     { key:'import-quantities', type:'python', label:'Importar Cantidades', desc:'Lee schedules CSV → actualiza revit_q + cantidad en la obra activa. Recalcula totales.' },
     { key:'validate-units',    type:'python', label:'Validar Unidades',    desc:'Cruza unidades del schedule CSV vs PG catálogo v1.3. WARN "m"≈"ml" no es error real.' },
     { key:'generate-keynotes', type:'python', label:'Keynotes Obra',       desc:'Genera RevitKeynotes_<Obra>_<Fecha>.txt desde partidas de la obra activa.' },
+    { key:'audit-pipeline',    type:'python', label:'Pipeline Auditoría',  desc:'audit_keynotes → generate_audit_xlsx → sync_audit_colors de la obra activa. Requiere model_audit_raw.json fresco.' },
   ];
   const allPy = [...data.python, ...pyExtra];
 

@@ -11,6 +11,7 @@ Endpoints:
   POST /revit-mcp/obras/{pid}/import-quantities
   POST /revit-mcp/obras/{pid}/validate-units
   POST /revit-mcp/obras/{pid}/generate-keynotes
+  POST /revit-mcp/obras/{pid}/audit-pipeline
 """
 from __future__ import annotations
 
@@ -63,12 +64,6 @@ _PYTHON_SCRIPTS = {
         "module": "backend.scripts_runner.generate_keynotes_catalog",
         "label":  "Keynotes Catálogo",
         "desc":   "Genera RevitKeynotes_CATALOG_v1.3_<Fecha>.txt con los 375 CSI del catálogo.",
-        "args":   [],
-    },
-    "audit-pipeline": {
-        "module": "backend.scripts_runner.run_audit_pipeline",
-        "label":  "Pipeline Auditoría",
-        "desc":   "audit_keynotes → generate_audit_xlsx → sync_audit_colors. Requiere model_audit_raw.json fresco.",
         "args":   [],
     },
     "suggest-keynotes": {
@@ -412,6 +407,18 @@ async def validate_units(pid: str, body: ImportQtyRequest):
 async def generate_keynotes(pid: str):
     return await _run_python_module(
         "backend.scripts_runner.generate_keynotes",
+        [pid]
+    )
+
+
+@router.post("/obras/{pid}/audit-pipeline")
+async def audit_pipeline(pid: str):
+    # goal-20192: vivia en _PYTHON_SCRIPTS como script "generico" (sin args),
+    # pero run_audit_pipeline.py necesita obra_id para su ultimo paso
+    # (sync_audit_colors) -- /python/{script} no pasa params dinamicos. Movido
+    # a ruta obra-scoped, mismo patron que generate-keynotes/import-quantities.
+    return await _run_python_module(
+        "backend.scripts_runner.run_audit_pipeline",
         [pid]
     )
 
