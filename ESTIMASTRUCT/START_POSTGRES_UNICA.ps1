@@ -2,6 +2,7 @@
 # sin romper la UI ni perder compatibilidad de export/import SQLite.
 
 $ErrorActionPreference = 'Stop'
+try { $PSNativeCommandUseErrorActionPreference = $false } catch {}
 $Project = $PSScriptRoot
 $RepoRoot = Split-Path $Project -Parent
 $SecretFile = 'D:\Secrets\postgres_credentials.txt'
