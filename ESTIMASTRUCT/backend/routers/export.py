@@ -25,7 +25,7 @@ MAIN_HEADERS = [
     "Unidad", "Mano de Obra", "INSUMOS",
     "PRECIO UNITARIO", "Total"
 ]
-PROPOSAL_HEADERS = ["CSI", "Descripción", "Unidad", "Cantidad", "PRECIO UNITARIO", "Total"]
+RESUMEN_HEADERS = ["CSI", "Descripción", "Unidad", "Cantidad", "PRECIO UNITARIO", "Total"]
 INSUMOS_DETAIL_HEADERS = ["Clave", "Descripción", "Unidad", "Rendimiento", "Costo Unit.", "Total"]
 INSUMOS_GLOBAL_HEADERS = ["Tipo", "Clave", "Descripción", "Unidad", "Rendimiento", "Total Agrupado"]
 INSUMOS_GLOBAL_FINAL_HEADERS = ["Tipo", "Clave", "Descripción", "Unidad", "Rendimiento", "Total Agrupado", "Rendimiento x Total Agrupado"]
@@ -88,7 +88,7 @@ def exportar(pid: str, db: Session = Depends(get_db)):
     wb = Workbook()
     ws_main = wb.active
     ws_main.title = "presupuesto"
-    ws_proposal = wb.create_sheet("resumen")
+    ws_resumen = wb.create_sheet("resumen")
 
     thin = Side(style="thin", color="CCCCCC")
     border = Border(left=thin, right=thin, top=thin, bottom=thin)
@@ -210,8 +210,8 @@ def exportar(pid: str, db: Session = Depends(get_db)):
 
     ws_main.freeze_panes = "A5"
 
-    # ===================== PROPOSAL =====================
-    ws_proposal.sheet_view.showGridLines = False
+    # ===================== RESUMEN =====================
+    ws_resumen.sheet_view.showGridLines = False
 
     header_rows = [
         ("Consultorías de Construcción S. de R.L.", True, 16, HDR_FILL, 24),
@@ -222,44 +222,44 @@ def exportar(pid: str, db: Session = Depends(get_db)):
         ("https://consuconstruct.com", False, 10, None, 18),
     ]
     for i, (txt, bold, size, fill_color, height) in enumerate(header_rows, 1):
-        ws_proposal.merge_cells(start_row=i, start_column=1, end_row=i, end_column=7)
-        c = ws_proposal.cell(row=i, column=1, value=txt)
+        ws_resumen.merge_cells(start_row=i, start_column=1, end_row=i, end_column=7)
+        c = ws_resumen.cell(row=i, column=1, value=txt)
         c.font = Font(bold=bold, size=size, color=HDR_TEXT)
         c.alignment = Alignment(horizontal="center", vertical="center")
         c.fill = PatternFill("solid", fgColor=fill_color) if fill_color else PatternFill(fill_type=None)
-        ws_proposal.row_dimensions[i].height = height
+        ws_resumen.row_dimensions[i].height = height
 
     title_row = 8
-    ws_proposal.merge_cells(start_row=title_row, start_column=1, end_row=title_row, end_column=7)
-    tc = ws_proposal.cell(row=title_row, column=1, value=f"ESTIMACION DE OBRA — {p.nombre}")
+    ws_resumen.merge_cells(start_row=title_row, start_column=1, end_row=title_row, end_column=7)
+    tc = ws_resumen.cell(row=title_row, column=1, value=f"ESTIMACION DE OBRA — {p.nombre}")
     tc.font = Font(bold=True, size=13, color=HDR_TEXT)
     tc.fill = PatternFill("solid", fgColor=HDR_FILL)
     tc.alignment = Alignment(horizontal="center", vertical="center")
-    ws_proposal.row_dimensions[title_row].height = 24
+    ws_resumen.row_dimensions[title_row].height = 24
 
     meta_row = title_row + 1
-    ws_proposal.merge_cells(start_row=meta_row, start_column=1, end_row=meta_row, end_column=7)
-    meta_cliente = ws_proposal.cell(row=meta_row, column=1, value=f"CLIENTE: {p.cliente or '—'}   |   MONEDA: {p.moneda}")
+    ws_resumen.merge_cells(start_row=meta_row, start_column=1, end_row=meta_row, end_column=7)
+    meta_cliente = ws_resumen.cell(row=meta_row, column=1, value=f"CLIENTE: {p.cliente or '—'}   |   MONEDA: {p.moneda}")
     meta_cliente.font = Font(bold=True, size=10, color=HDR_TEXT)
     meta_cliente.fill = PatternFill("solid", fgColor="FFF8E58A")
     meta_cliente.alignment = Alignment(horizontal="center", vertical="center")
     meta_cliente.border = border
 
     meta_row += 1
-    ws_proposal.merge_cells(start_row=meta_row, start_column=1, end_row=meta_row, end_column=7)
-    meta_fecha = ws_proposal.cell(row=meta_row, column=1, value=f"OBRA ACTUAL: {p.nombre}  |  FECHA: {p.fecha.strftime('%d/%m/%Y') if p.fecha else '—'}")
+    ws_resumen.merge_cells(start_row=meta_row, start_column=1, end_row=meta_row, end_column=7)
+    meta_fecha = ws_resumen.cell(row=meta_row, column=1, value=f"OBRA ACTUAL: {p.nombre}  |  FECHA: {p.fecha.strftime('%d/%m/%Y') if p.fecha else '—'}")
     meta_fecha.font = Font(size=10, italic=True, color="666666")
     meta_fecha.alignment = Alignment(horizontal="center", vertical="center")
 
     # Headers de tabla
     tbl_hdr_row = meta_row + 2
-    for ci, txt in enumerate(PROPOSAL_HEADERS, 1):
-        c = ws_proposal.cell(row=tbl_hdr_row, column=ci, value=txt)
+    for ci, txt in enumerate(RESUMEN_HEADERS, 1):
+        c = ws_resumen.cell(row=tbl_hdr_row, column=ci, value=txt)
         c.font = Font(bold=True, color=HDR_TEXT, size=10)
         c.fill = PatternFill("solid", fgColor=HDR_FILL)
         c.alignment = Alignment(horizontal="center", vertical="center")
         c.border = border
-    ws_proposal.row_dimensions[tbl_hdr_row].height = 24
+    ws_resumen.row_dimensions[tbl_hdr_row].height = 24
 
     # Filas: una por capítulo + sus partidas
     pr = tbl_hdr_row + 1
@@ -272,43 +272,43 @@ def exportar(pid: str, db: Session = Depends(get_db)):
         if not cap_rows:
             continue
 
-        ws_proposal.merge_cells(start_row=pr, start_column=1, end_row=pr, end_column=6)
-        hc = ws_proposal.cell(row=pr, column=1, value=f"{cap.clave} — {cap.nombre}")
+        ws_resumen.merge_cells(start_row=pr, start_column=1, end_row=pr, end_column=6)
+        hc = ws_resumen.cell(row=pr, column=1, value=f"{cap.clave} — {cap.nombre}")
         hc.font = Font(bold=True, color=DIV_TEXT, size=11)
         hc.fill = PatternFill("solid", fgColor=DIV_FILL)
         hc.alignment = Alignment(horizontal="left", indent=1)
         pr += 1
 
         for pa, cantidad, precio_unitario, total in cap_rows:
-            ws_proposal.cell(row=pr, column=1, value=pa.clave_csi).font = Font(size=10, color="666666")
-            ws_proposal.cell(row=pr, column=2, value=pa.descripcion).font = Font(size=10)
-            ws_proposal.cell(row=pr, column=3, value=pa.unidad or "")
-            ws_proposal.cell(row=pr, column=4, value=cantidad)
-            ws_proposal.cell(row=pr, column=5, value=precio_unitario)
-            ws_proposal.cell(row=pr, column=6, value=total)
+            ws_resumen.cell(row=pr, column=1, value=pa.clave_csi).font = Font(size=10, color="666666")
+            ws_resumen.cell(row=pr, column=2, value=pa.descripcion).font = Font(size=10)
+            ws_resumen.cell(row=pr, column=3, value=pa.unidad or "")
+            ws_resumen.cell(row=pr, column=4, value=cantidad)
+            ws_resumen.cell(row=pr, column=5, value=precio_unitario)
+            ws_resumen.cell(row=pr, column=6, value=total)
             for ci in (4, 5, 6):
-                cc = ws_proposal.cell(row=pr, column=ci)
+                cc = ws_resumen.cell(row=pr, column=ci)
                 cc.alignment = Alignment(horizontal="right")
                 cc.number_format = '#,##0.00'
             for ci in range(1, 7):
-                ws_proposal.cell(row=pr, column=ci).border = border
+                ws_resumen.cell(row=pr, column=ci).border = border
             pr += 1
 
-    # Total final en proposal
+    # Total final en resumen
     pr += 1
-    ws_proposal.cell(row=pr, column=5, value="TOTAL GLOBAL DE LA OBRA").font = Font(bold=True, size=12, color=TOT_TEXT)
-    ws_proposal.cell(row=pr, column=5).alignment = Alignment(horizontal="right")
-    ws_proposal.cell(row=pr, column=6, value=sum(float(ws_proposal.cell(row=r, column=6).value or 0) for r in range(tbl_hdr_row + 1, pr)))
-    ws_proposal.cell(row=pr, column=6).font = Font(bold=True, size=12, color=TOT_TEXT)
-    ws_proposal.cell(row=pr, column=6).number_format = '#,##0.00'
+    ws_resumen.cell(row=pr, column=5, value="TOTAL GLOBAL DE LA OBRA").font = Font(bold=True, size=12, color=TOT_TEXT)
+    ws_resumen.cell(row=pr, column=5).alignment = Alignment(horizontal="right")
+    ws_resumen.cell(row=pr, column=6, value=sum(float(ws_resumen.cell(row=r, column=6).value or 0) for r in range(tbl_hdr_row + 1, pr)))
+    ws_resumen.cell(row=pr, column=6).font = Font(bold=True, size=12, color=TOT_TEXT)
+    ws_resumen.cell(row=pr, column=6).number_format = '#,##0.00'
 
     widths_prop = [13, 50, 9, 12, 14, 16]
     for ci, w in enumerate(widths_prop, 1):
-        ws_proposal.column_dimensions[get_column_letter(ci)].width = w
-    ws_proposal.column_dimensions["F"].width = 2
-    ws_proposal.column_dimensions["G"].width = 2
+        ws_resumen.column_dimensions[get_column_letter(ci)].width = w
+    ws_resumen.column_dimensions["F"].width = 2
+    ws_resumen.column_dimensions["G"].width = 2
 
-    ws_proposal.freeze_panes = f"A{tbl_hdr_row+1}"
+    ws_resumen.freeze_panes = f"A{tbl_hdr_row+1}"
 
     # ===================== Output =====================
     buf = io.BytesIO()
