@@ -1,6 +1,6 @@
 # Architecture — EstimaStruct
 
-> **Estado:** production local (Postgres primario desde 2026-07-20) · migración SaaS declarada (CASE-SAAS-001).
+> **Estado:** production local · **BD canónica = PostgreSQL `estimastruct` (127.0.0.1:5432), ver ADR-014 (2026-08-15) que revierte ADR-013** · la SQLite versionada `estimacion.db` conserva hoy los precios v1.3 reales; su reconciliación hacia Postgres está *diseñada, no ejecutada* (goal-21070/21071, gateada a OK David) · migración SaaS declarada (CASE-SAAS-001).
 > **Regla:** este archivo manda. CHANGELOG = historial temporal.
 
 ---
@@ -242,8 +242,9 @@ Ninguna. Backend escucha solo en `127.0.0.1:8002`, frontend Flask en `127.0.0.1:
 | Backend | Python 3.x, FastAPI 0.111, Uvicorn 0.29 (standard) |
 | ORM | SQLAlchemy 2.0.30, Alembic 1.18 (migraciones) |
 | Validación | Pydantic 2.7.1 |
-| DB primaria | PostgreSQL 16, driver `psycopg[binary]>=3.2` |
-| DB legacy | SQLite (compat export/import, dashboard UI viejo) |
+| DB canónica (fuente de verdad) | PostgreSQL 16 `estimastruct` (127.0.0.1:5432), driver `psycopg[binary]>=3.2` — catálogo/precios/recursos (ADR-014, 2026-08-15, revierte ADR-013) |
+| DB SQLite versionada (v1.3) | `estimacion.db` — hoy tiene los precios v1.3 reales; reconciliación hacia Postgres *diseñada, no ejecutada* (goal-21070/21071, gate OK David) |
+| DB legacy | SQLite `estimastruct.db` (dashboard UI viejo) |
 | Frontend UI | Flask 3.1.3 (Jinja2), JS vanilla modular (`core.js`, `app.js`, `tabla-render.js`, `bases-drawer.js`, `calculo-estructural.js`, `db-backup.js`) |
 | Fórmulas | KaTeX vendorizado en `frontend/vendor/` |
 | 3D Viewer | Babylon.js (`frontend/viewer/`) — GLB desde Revit |
@@ -256,7 +257,7 @@ Ninguna. Backend escucha solo en `127.0.0.1:8002`, frontend Flask en `127.0.0.1:
 
 ## 7. ADRs
 
-**ADR-001: Postgres primario, SQLite compat.**
+**ADR-001: Postgres primario, SQLite compat.** — ✅ **VIGENTE.** (Fue revertida por ADR-013 el 2026-08-15 07:22; ADR-014 el mismo día 08:42 revirtió esa reversión y restauró Postgres como BD canónica de EstimaStruct v1.3+.)
 - Decisión: `postgresql+psycopg://postgres@127.0.0.1:5432/estimastruct` primario desde 2026-07-20; SQLite `C:\EstimaStruct\data\estimacion.db` queda como formato de export/import ZIP y para dashboard UI legacy.
 - Rationale: concurrencia real (Flask + FastAPI + MCP + scripts), integridad transaccional, migraciones Alembic, path a RDS en SaaS.
 - Trade-offs: sysreq extra (servicio pg local), setup credenciales (`D:\Secrets\postgres_credentials.txt`), doble código path (`DB_IS_SQLITE`).
@@ -305,6 +306,26 @@ Ninguna. Backend escucha solo en `127.0.0.1:8002`, frontend Flask en `127.0.0.1:
   - **Costo variable nuevo**: Meshy cobra por generación y el LLM por token — ambos requieren cuota/rate-limiting por tenant (F1/F8), no son costo fijo.
   - **Timeline realista**: cadena crítica del SaaS vendible (F0→F1→F2→F4) = 14-19 semanas; scope completo de las 9 fases = 7-9 meses para un operador. Los ítems nuevos (2) y (3) son features desde cero, no gaps a cerrar.
 - Correcciones al estado documentado, verificadas contra código 2026-07-27: `§5.1` dice "11 endpoints puente Revit MCP" — hay **17** rutas en `routers/revit_mcp.py`. El import ETABS no es "solo combos de concreto" — son **5 endpoints** (concreto, acero ×2, conexiones, sismo); el gap real es que todos son upload de archivo unidireccional, sin conexión viva ni escritura de vuelta.
+
+**ADR-013: Reversión de ADR-001 — la SQLite versionada en el repo es la BD canónica, no Postgres (2026-08-15).** — ⚠ **REVERTIDA por ADR-014 (2026-08-15 08:42 CST, goal-21069).** Esta decisión quedó SIN EFECTO: la migración de datos nunca se ejecutó (el director estaba apagado), aunque este ADR sí alcanzó a escribirse en el doc. Se conserva el texto abajo por trazabilidad; el canon vigente lo manda ADR-014.
+- Decisión (David, 2026-08-15 07:22 CST): **Postgres NO es ni será la base de datos canónica de EstimaStruct.** La fuente de verdad de datos (catálogo de fichas, precios, recursos) es la **SQLite versionada en el repo** — v1.3 actual, próxima v1.4. Se consolida v1.3 como canónica. Esto **revierte ADR-001** (Postgres primario desde 2026-07-20) y el `source_of_truth_estimastruct_20260719` que lo declaraba "BD primaria verificada".
+- Contexto que forzó la reversión — split-brain real (ver `memory/estimastruct-split-brain-sqlite-postgres`): los updates de precios v1.3 (goal-21062, 16 recursos) se escribieron **solo** en la SQLite `estimacion.db`; la BD Postgres `estimastruct` quedó stale desde abril 2026. Con Postgres declarado "primario" pero SQLite recibiendo los cambios reales, la fuente que el backend servía dependía del launcher (`START_POSTGRES_UNICA.ps1` vs arranque directo), no de una decisión explícita — dos tablas `recurso` divergentes sin dueño claro. Versionar la SQLite en git le da lo mismo que ADR-005 ya da a las fichas JSON: auditable por git, diffeable entre versiones, reproducible.
+- Implicaciones:
+  - Todo cambio de datos canónicos (precios, recursos, catálogo) se hace **sobre la SQLite versionada** y se commitea a git. **Nunca directo a Postgres.**
+  - Postgres pasa de "fuente de verdad" a rol de runtime/deployment (copia de trabajo). El rationale original de ADR-001 (concurrencia transaccional, path a RDS) sigue siendo válido *como motor de ejecución*, no como canon de datos.
+  - **Pendiente de reconciliación (NO cubierto por este ADR — requiere OK David):** decidir si el deployment sigue levantando Postgres hidratado desde la SQLite canónica, o si se colapsa a SQLite directo. Hasta resolverlo, §8 sigue describiendo el arranque Postgres real vigente; ese Postgres es copia, no canon.
+  - §2.2 (diagrama container, "SQLite legacy / no primario"), §6 (tabla "DB primaria = PostgreSQL") y §8.3 (`ESTIMASTRUCT_DATABASE_URL`) quedan como descripción del **runtime**, no del canon. La jerarquía de verdad la manda este ADR.
+- Trade-offs: la SQLite versionada no da concurrencia transaccional real; mientras el runtime siga en Postgres se mantiene el doble code-path `DB_IS_SQLITE`. La ganancia — datos canónicos auditables por git y fin del split-brain silencioso — pesa más para un producto de un solo operador con catálogo versionado por diseño.
+- **Gate operativo:** este ADR queda documentado ANTES de escribir la v1.4. Ninguna escritura de datos canónicos ocurre sin pasar primero por la SQLite versionada.
+
+**ADR-014: Reversión de ADR-013 — Postgres SÍ es la BD canónica de EstimaStruct v1.3+ (2026-08-15 08:42 CST, goal-21069).**
+- Decisión final (David, 2026-08-15 08:42 CST): **ADR-013 (SQLite-canónica) queda sin efecto.** La base de datos canónica de EstimaStruct v1.3+ es **PostgreSQL `estimastruct` (127.0.0.1:5432)**. Se restaura ADR-001 como decisión vigente. El rationale de ADR-013 (auditar por git, evitar split-brain silencioso) se atiende de otra forma: versionando la SQLite como *export/snapshot* y migrando su contenido a Postgres, no invirtiendo la jerarquía de canon.
+- Por qué la reversión fue limpia: la migración de datos de ADR-013 **nunca corrió** — el director estaba apagado cuando se aprobó, así que no se movió ningún dato ni se escribió la v1.4 sobre SQLite. Lo único que quedó fue el texto del ADR en este doc (header §6, tabla §6, footer §9), corregido por este ADR-014. No hay estado de datos que deshacer.
+- Estado real de los datos (lo que este ADR NO resuelve): hoy la SQLite `estimacion.db` tiene los precios v1.3 reales (16 recursos promovidos 31-jul, goal-21062) y la Postgres `estimastruct` sigue **stale desde abril 2026** — el split-brain de goal-21062 sigue vivo. Declarar Postgres canónico **no lo sincroniza solo**.
+- Trabajo pendiente (delegado, NO ejecutado aquí):
+  - **goal-21070/21071 — diseño de migración SQLite v1.3 → Postgres canónica:** verificar el split-brain real (¿tiene Postgres MA-038=480 o sigue en precios de abril?), diseñar schema propio + migración controlada sin tocar `rag.chunks` ni datos de otros proyectos (regla 32). Entregable = **solo diseño + ADR para revisión de David**. La migración real a producción está gateada a un **segundo OK explícito de David** (goal-21071). Categoría de riesgo real: no ejecutarla sin ese OK.
+  - **Reconciliación de deployment:** decidir si el runtime sigue en Postgres (ya es el canon) o cómo se hidrata — hoy `START_POSTGRES_UNICA.ps1` ya levanta Postgres, que ahora sí es la fuente de verdad, no una copia.
+- Gate operativo: mientras Postgres siga stale, **cualquier escritura de datos canónicos (precios/recursos/catálogo) debe ir a Postgres**, y la SQLite v1.3 se trata como snapshot a migrar — no como una segunda fuente de verdad viva. No escribir en dos lados a la vez (eso es lo que creó el split-brain original).
 
 ---
 
@@ -382,7 +403,8 @@ Alembic en `backend/alembic/`; `alembic upgrade head` requerido en Postgres (sch
 - Sin autenticación ni multi-tenant — solo `127.0.0.1`.
 - CORS `allow_origins=["*"]` — aceptable local, no SaaS.
 - Respuestas no usan `response_model` Pydantic (dicts manuales) — sin contrato OpenAPI fuerte.
-- SQLite legacy `estimastruct.db` aún sirve dashboard UI viejo; consolidar en Postgres pendiente.
+- SQLite legacy `estimastruct.db` aún sirve dashboard UI viejo (distinta de `estimacion.db`, la SQLite v1.3 versionada); consolidarla/retirarla pendiente.
+- **Split-brain SQLite v1.3 ↔ Postgres sin resolver (ADR-014, 2026-08-15):** el canon es ahora Postgres `estimastruct` (ADR-014 revierte ADR-013), pero hoy la SQLite `estimacion.db` tiene los precios v1.3 reales (goal-21062) y Postgres sigue stale desde abril 2026. La migración controlada SQLite v1.3 → Postgres está **diseñada, no ejecutada** en goal-21070/21071 y gateada a un segundo OK explícito de David. Hasta migrar: escribir datos canónicos **solo en Postgres** y tratar la SQLite v1.3 como snapshot a migrar (no como segunda fuente viva).
 - Fichas JSON no propagan cambios a presupuestos ya instanciados (by-copy).
 - Alembic history debe auditarse vs `Base.metadata` — riesgo drift si `AUTO_CREATE_SCHEMA=true` en Postgres.
 - **Cero tests automatizados en el repo** (ni unitarios ni de integración): no existe `tests/`, `pytest.ini` ni CI. Toda validación es manual o por auditoría de snapshots. Es el bloqueo F0 del roadmap CASE-SAAS-001 §scope v2.
@@ -407,4 +429,4 @@ Alembic en `backend/alembic/`; `alembic upgrade head` requerido en Postgres (sch
 
 ---
 
-*Última actualización: 2026-07-27 (Auditoría de Fórmulas — pricing/calculos narrados). Próxima revisión: al cerrar Frente 1 de CASE-SAAS-001.*
+*Última actualización: 2026-08-15 (ADR-014 — reversión de ADR-013: Postgres `estimastruct` restaurado como BD canónica de v1.3+; ADR-001 vigente. Migración SQLite v1.3 → Postgres diseñada-no-ejecutada en goal-21070/21071, gate OK David). Próxima revisión: al aprobar David la migración de goal-21070/21071, o al cerrar Frente 1 de CASE-SAAS-001.*
