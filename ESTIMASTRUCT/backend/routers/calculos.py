@@ -17,6 +17,8 @@ def _recalcular_todo(p: Presupuesto, db: Session):
     for cap in p.capitulos:
         for partida in cap.partidas:
             for ins in partida.insumos:
+                if ins.recurso_id and ins.recurso and float(ins.costo_unit or 0) != float(ins.recurso.precio_unitario or 0):
+                    ins.costo_unit = ins.recurso.precio_unitario
                 cant = float(ins.cantidad or 0)
                 cu = float(ins.costo_unit or 0)
                 nuevo = quantize_money(Decimal(str(cant)) * Decimal(str(cu)))
@@ -45,7 +47,8 @@ def _factor_indirectos(cfg: ConfigPresupuesto) -> float:
 def recalcular(pid: str, db: Session = Depends(get_db)):
     p = db.query(Presupuesto).options(
         joinedload(Presupuesto.config),
-        joinedload(Presupuesto.capitulos).joinedload(Capitulo.partidas).joinedload(Partida.insumos)
+        joinedload(Presupuesto.capitulos).joinedload(Capitulo.partidas)
+            .joinedload(Partida.insumos).joinedload(InsumoPartida.recurso)
     ).filter(Presupuesto.id == pid).first()
     if not p:
         raise HTTPException(404, "Presupuesto no encontrado")
