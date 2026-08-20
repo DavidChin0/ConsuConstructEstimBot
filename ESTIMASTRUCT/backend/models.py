@@ -6,10 +6,26 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship
 from backend.db import Base
+from backend.config import CONFIG
 
 
 def new_uuid():
     return str(uuid.uuid4())
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SCHEMA del MÓDULO FINANCIERO — aislado del schema default (public en Postgres).
+# Decisión David (goal-21080): las tablas financiero_item/financiero_calculo
+# viven en un schema propio `financiero`, NO en public — así la migración no
+# toca el resto de la BD y `alembic autogenerate` (que dropearía arch_chunks,
+# assistant_*, csi_*, schema rag — existen en la BD pero no en models.py) queda
+# fuera del camino: este módulo se aplica con una migración escrita a mano.
+#
+# En SQLite (backend dev, AUTO_CREATE_SCHEMA=true) no existen schemas nombrados
+# → schema=None mantiene el comportamiento actual de create_all intacto. Solo
+# Postgres (canónico v1.3+) usa el schema `financiero`.
+# ─────────────────────────────────────────────────────────────────────────────
+_FIN_SCHEMA = None if CONFIG.DB_IS_SQLITE else "financiero"
 
 
 class Presupuesto(Base):
@@ -524,6 +540,7 @@ class FinancieroItem(Base):
     __table_args__ = (
         CheckConstraint(f"tipo IN {TIPOS_FINANCIERO_ITEM}", name="ck_financiero_item_tipo"),
         CheckConstraint(f"base_calculo IN {BASES_CALCULO_FINANCIERO}", name="ck_financiero_item_base"),
+        {"schema": _FIN_SCHEMA},
     )
 
     presupuesto    = relationship("Presupuesto", back_populates="financiero_items")
@@ -550,5 +567,7 @@ class FinancieroCalculo(Base):
 
     generado_at         = Column(DateTime, default=datetime.utcnow)
     nota                = Column(Text, default="")
+
+    __table_args__ = ({"schema": _FIN_SCHEMA},)
 
     presupuesto         = relationship("Presupuesto", back_populates="financiero_calculos")

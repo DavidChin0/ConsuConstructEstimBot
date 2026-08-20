@@ -1,0 +1,35 @@
+capitulo_fhis,capitulo_nombre,n_actividades,n_activas,csi_div_primaria,csi_div_nombre,csi_div_secundarias,confianza,nota
+F01,"Limpieza, demolicion, trazado y movimiento de tierra menor",114,108,02,Existing Conditions / Demolicion,31,media,Limpieza/demolicion (02) + corte/conformacion/acarreo (31 Earthwork)
+F02,"Cimentacion (mamposteria, zapatas, pedestales, dados)",139,136,03,Concrete,31,media,Cimentacion de concreto (03 substructure); excavacion asociada -> 31
+F03,"Estructura de concreto (solera, castillo, columna, viga)",350,316,03,Concrete,,alta,Solera/castillo/columna/viga/losa = estructura de concreto
+F04,"Paredes (ladrillo, bloque, adobe, concreto)",57,50,04,Masonry,03,media,Paredes de bloque/ladrillo/adobe (04); pared de concreto reforzado -> 03
+F05,Concreto y acero de refuerzo,12,11,03,Concrete,,alta,Concreto y acero de refuerzo genericos
+F06,"Acabados (afinado, azulejo, curado, jardin)",39,32,09,Finishes,,alta,Afinado/azulejo/curado = acabados
+F07,Pisos,42,42,09,Finishes,,alta,Pisos = acabados
+F08,"Techos, cielo falso y canaletas",80,79,07,Thermal & Moisture Protection,09,media,Techos/canaletas (07 Moisture); cielo falso -> 09 Finishes
+F09,Losas,13,10,03,Concrete,,alta,Losas de concreto = estructura
+F10,Tuberia de agua potable (PVC/concreto),189,189,22,Plumbing,33,media,Tuberia agua potable interior (22); redes de sitio -> 33 Utilities
+F11,"Saneamiento (cajas, tanque septico, letrina, pozo)",70,68,22,Plumbing,33,media,Cajas/tanque septico/letrina/pozo = saneamiento (22/33)
+F12,"Ventaneria, contramarcos, divisiones y balcones",81,78,08,Openings,10,media,Contramarcos/ventaneria/balcones (08 Openings); divisiones -> 10 Specialties
+F13,Apoyos estructurales (neopreno),60,60,05,Metals,03,media,Apoyos de neopreno = accesorio estructural (05/03)
+F14,"Cercos, malla ciclon y postes",33,28,32,Exterior Improvements,,alta,Cercos/malla ciclon/postes = obra exterior
+F15,"Pavimentos, adoquin, bordillo y sellos",28,28,32,Exterior Improvements,33,media,Pavimentos/adoquin/bordillo (32); base vial -> 33
+F16,"Alcantarillado sanitario (pozos, PVC, pruebas)",48,45,33,Utilities,,alta,Alcantarillado sanitario = utilities
+F17,Pinturas,12,12,09,Finishes,,alta,Pinturas = acabados
+F18,Direccion tecnica de obra,3,3,01,General Requirements,,alta,Direccion de obra = requisitos generales/indirectos
+F19,Cunetas y rejillas,38,38,32,Exterior Improvements,33,media,Cunetas (32 exterior) y rejillas de drenaje (33)
+F20,Aparatos sanitarios,38,36,22,Plumbing,,alta,Aparatos sanitarios = plomeria
+F21,Instalacion electrica e iluminacion,383,377,26,Electrical,,alta,Instalacion electrica e iluminacion
+F22,"Drenaje pluvial (tragantes, bajantes)",8,8,22,Plumbing,33,media,Drenaje pluvial: bajantes (22) y tragantes de sitio (33)
+F23,"Valvulas, impermeabilizacion y obra de concreto hidraulica",85,84,22,Plumbing,"07,33",media,Valvulas/obra hidraulica (22/33); impermeabilizacion -> 07
+F25,"Horas maquina (tractor, equipo pesado)",11,11,31,Earthwork,,alta,Horas maquina pesada = movimiento de tierra
+F26,Remocion y carga con maquinaria,28,26,31,Earthwork,,alta,Remocion/carga con maquinaria = earthwork
+F27,Bajantes PVC,47,39,22,Plumbing,,alta,Bajantes PVC = plomeria pluvial
+F28,"Gradas, pasamanos y asta de bandera",63,61,05,Metals,03,media,Pasamanos/asta HG (05 Metals); gradas de concreto -> 03
+F30,Puentes colgantes peatonales,38,35,32,Exterior Improvements,05,media,Puentes colgantes peatonales = obra especial exterior/metalica
+F50,Mobiliario escolar,61,40,12,Furnishings,,alta,Mobiliario escolar = furnishings
+F51,Material didactico y alimentacion (programa social),13,13,01,General Requirements,12,media,Material didactico/alimentacion = suministro social (fuera de obra fisica)
+F52,"Ensayos de suelos (Proctor, densidad)",2,2,02,Existing Conditions / Demolicion,31,media,Ensayos de suelos = existing conditions/testing
+F53,Alquiler de maquinaria (excavadora),3,3,31,Earthwork,,alta,Alquiler de maquinaria = earthwork
+F54,Juegos infantiles y mobiliario de sitio,9,9,32,Exterior Improvements,12,media,Juegos infantiles/mobiliario de sitio = exterior/furnishings
+F55,"Mobiliario urbano (bancas, faroles)",7,7,32,Exterior Improvements,12,media,Mobiliario urbano (bancas/faroles) = exterior/furnishings

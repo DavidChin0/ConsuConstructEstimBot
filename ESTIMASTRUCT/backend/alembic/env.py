@@ -30,6 +30,22 @@ config.set_main_option("sqlalchemy.url", CONFIG.DATABASE_URL)
 # for 'autogenerate' support
 target_metadata = Base.metadata
 
+
+def include_object(object_, name, type_, reflected, compare_to):
+    """Red de seguridad contra el footgun de `alembic revision --autogenerate`
+    (goal-21080): la BD Postgres de EstimaStruct tiene tablas y un schema que
+    NO están en models.py (arch_chunks, assistant_sessions, assistant_messages,
+    csi_codes, csi_embeddings y el schema `rag`). Sin este filtro, autogenerate
+    los ve como "sobrantes" y emite DROP TABLE / DROP SCHEMA por ellos.
+
+    Regla: una tabla REFLEJADA de la BD que el ORM no declara (compare_to is
+    None) nunca se toca — se excluye del diff. El ORM sólo administra lo que
+    modela; todo lo demás es intocable para las migraciones autogeneradas.
+    """
+    if type_ == "table" and reflected and compare_to is None:
+        return False
+    return True
+
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
@@ -54,6 +70,8 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        include_object=include_object,
+        include_schemas=True,
     )
 
     with context.begin_transaction():
@@ -75,7 +93,10 @@ def run_migrations_online() -> None:
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, target_metadata=target_metadata
+            connection=connection,
+            target_metadata=target_metadata,
+            include_object=include_object,
+            include_schemas=True,
         )
 
         with context.begin_transaction():

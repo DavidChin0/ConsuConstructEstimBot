@@ -19,7 +19,9 @@ class CONFIG:
     CANONICAL_ROOT = os.getenv("ESTIMASTRUCT_CANONICAL_ROOT", str(PROJECT_ROOT))
 
     # BD viva FUERA de OneDrive (FASE 0). Local NTFS => WAL seguro.
-    DB_PATH     = os.getenv("ESTIMA_DB_PATH",     r"C:\EstimaStruct\data\estimacion.db")
+    # FASE 0b (2026-08-17): movida de C:\EstimaStruct a D:\EstimaStruct para
+    # sobrevivir la reinstalacion minimalista de Windows (C: se wipea, D: no).
+    DB_PATH     = os.getenv("ESTIMA_DB_PATH",     r"D:\EstimaStruct\data\estimacion.db")
     DATABASE_URL = os.getenv(
         "ESTIMASTRUCT_DATABASE_URL",
         "sqlite:///" + DB_PATH.replace("\\", "/"),
@@ -30,14 +32,14 @@ class CONFIG:
         "ESTIMASTRUCT_AUTO_CREATE_SCHEMA",
         "true" if DB_IS_SQLITE else "false",
     ).strip().lower() in {"1", "true", "yes", "on"}
-    UI_COMPAT_DB_PATH = os.getenv("ESTIMASTRUCT_UI_DB", r"C:\EstimaStruct\data\estimastruct.db")
+    UI_COMPAT_DB_PATH = os.getenv("ESTIMASTRUCT_UI_DB", r"D:\EstimaStruct\data\estimastruct.db")
     SQLITE_EXPORT_NAME = os.getenv("ESTIMASTRUCT_SQLITE_EXPORT_NAME", "estimacion.db")
 
     # Valor "para el Banco" por obra (info hardcodeada de EstimaStruct; se
     # persiste al generar el PDF banco y luego migrara al Supabase del cliente).
     VALORES_BANCO_JSON = os.getenv(
         "ESTIMA_VALORES_BANCO_JSON",
-        os.path.join(os.path.dirname(os.getenv("ESTIMA_DB_PATH", r"C:\EstimaStruct\data\estimacion.db")),
+        os.path.join(os.path.dirname(os.getenv("ESTIMA_DB_PATH", r"D:\EstimaStruct\data\estimacion.db")),
                      "valores_banco.json"))
 
     # Catalogos / archivos maestros (migracion de routers => FASE 1)

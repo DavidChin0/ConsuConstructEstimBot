@@ -1,42 +1,54 @@
 """
-Endpoint de busqueda semantica sobre rag.sqlite (conocimiento propio de
-EstimaStruct: motor de calculo, fichas de costeo, arquitectura).
+Endpoint de busqueda semantica sobre estima_rag.* (conocimiento propio de
+EstimaStruct: motor de calculo, fichas de costeo, arquitectura, logs de
+automation CC002-estimastruct).
 
-rag.sqlite es un artefacto de build separado de estimacion.db (transaccional):
-se reconstruye con backend/scripts/build_rag_sqlite.py cuando cambia el corpus,
-no vive dentro del ORM de SQLAlchemy porque no es dato de negocio del tenant.
-
-Fase intermedia hacia el SaaS -- el target final del RAG es Postgres (mismo
-motor que consuconstruct), esto deja el semantic search funcionando ya.
+Postgres (DB "estimastruct", schema estima_rag) -- goal-20833, migracion de
+rag.sqlite completada 2026-08-17 (decision David: todo el RAG propio en
+Postgres, worker de Brain escribe ahi directo). No es rag.chunks (historico
+de presupuestos) ni arch_chunks (architecture.md) -- schema separado a
+proposito, ver sql/estima_rag_schema.sql.
 """
 import json
 import os
-import re
-import sqlite3
 import urllib.request
 from pathlib import Path
 
-import sqlite_vec
+import psycopg
 from fastapi import APIRouter
 
 router = APIRouter(prefix="/rag", tags=["rag"])
 
-RAG_DB_PATH = Path(os.environ.get("ESTIMASTRUCT_RAG_DB", r"C:\EstimaStruct\data\rag.sqlite"))
+DB_HOST = os.environ.get("ESTIMASTRUCT_RAG_DB_HOST", "127.0.0.1")
+DB_PORT = int(os.environ.get("ESTIMASTRUCT_RAG_DB_PORT", "5432"))
+DB_NAME = os.environ.get("ESTIMASTRUCT_RAG_DB_NAME", "estimastruct")
+DB_USER = os.environ.get("ESTIMASTRUCT_RAG_DB_USER", "postgres")
+PG_CREDS_FILE = Path(r"D:\Secrets\postgres_credentials.txt")
+
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://127.0.0.1:11434")
 EMBED_MODEL = "nomic-embed-text"
 EMBED_TIMEOUT = 30
 
 
-def _get_conn() -> sqlite3.Connection:
-    conn = sqlite3.connect(str(RAG_DB_PATH))
-    conn.enable_load_extension(True)
-    sqlite_vec.load(conn)
-    conn.enable_load_extension(False)
-    return conn
+def _read_pg_password() -> str:
+    pw = os.environ.get("ESTIMASTRUCT_RAG_DB_PASSWORD")
+    if pw:
+        return pw
+    for line in PG_CREDS_FILE.read_text().splitlines():
+        if line.startswith("password="):
+            return line.split("=", 1)[1].strip()
+    raise RuntimeError(f"No se encontro password= en {PG_CREDS_FILE}")
+
+
+def _get_conn():
+    return psycopg.connect(
+        host=DB_HOST, port=DB_PORT, dbname=DB_NAME, user=DB_USER,
+        password=_read_pg_password(),
+    )
 
 
 def _embed(text: str) -> list[float] | None:
-    """Best-effort: si Ollama no responde, la busqueda cae a solo FTS5 (keyword)."""
+    """Best-effort: si Ollama no responde, la busqueda cae a solo keyword (FTS)."""
     payload = {"model": EMBED_MODEL, "input": text[:2000], "keep_alive": "5m"}
     req = urllib.request.Request(
         f"{OLLAMA_URL}/api/embed",
@@ -53,74 +65,63 @@ def _embed(text: str) -> list[float] | None:
         return None
 
 
-def _fts5_safe_query(q: str) -> str:
-    """Escapa la query de usuario para FTS5 MATCH.
-
-    FTS5 interpreta '-', '"', '*', '(', ')', ':' y las keywords AND/OR/NOT/NEAR
-    como sintaxis de operadores, no como texto literal -- un guion en la query
-    ("dibujar-desde-DB") ya tiraba 'fts5: syntax error near "-"' (500 real,
-    encontrado 2026-08-02 probando estima_rag_search). Se envuelve cada token
-    en comillas dobles (escapando comillas internas) para forzar match literal
-    de frase, sin interpretacion de operadores.
-    """
-    tokens = re.findall(r"\w+", q, re.UNICODE)
-    if not tokens:
-        return '""'
-    return " ".join(f'"{t}"' for t in tokens)
+def _vec_literal(vec: list[float]) -> str:
+    return "[" + ",".join(f"{x:.7f}" for x in vec) + "]"
 
 
 @router.get("/search")
 def rag_search(q: str, top_k: int = 5):
-    """Busqueda hibrida: FTS5 (BM25 keyword) + vec0 (coseno), score compuesto.
+    """Busqueda hibrida: tsvector/GIN (keyword) + pgvector ivfflat (coseno),
+    score compuesto 0.4/0.6 -- mismo criterio que tenia FTS5+vec0 en rag.sqlite.
 
     Sin dependencia dura de Ollama: si el embedding falla, degrada a solo
-    keyword en vez de tirar 500 -- mismo criterio best-effort que
-    fast_search.py del lado ConsuConstruct. Igual si FTS5 revienta por sintaxis
-    (ver _fts5_safe_query): degrada a solo vector en vez de 500.
+    keyword en vez de tirar 500. Si Postgres no responde, error explicito
+    (a diferencia de rag.sqlite ya no hay fallback de archivo local).
     """
-    if not RAG_DB_PATH.exists():
-        return {"error": f"rag.sqlite no existe en {RAG_DB_PATH}. "
-                          f"Correr backend/scripts/build_rag_sqlite.py primero."}
-
     top_k = max(1, min(int(top_k), 20))
-    conn = _get_conn()
+
     try:
-        # FTS5: candidatos por keyword, normalizamos bm25 (mas negativo = mejor)
-        # a un score positivo 0..1 para poder combinarlo con similarity.
-        try:
-            fts_rows = conn.execute(
-                """
-                SELECT rowid, bm25(rag_chunks_fts) AS score
-                FROM rag_chunks_fts
-                WHERE rag_chunks_fts MATCH ?
-                ORDER BY score
-                LIMIT 20
-                """,
-                (_fts5_safe_query(q),),
-            ).fetchall()
-        except sqlite3.OperationalError:
-            fts_rows = []
+        conn = _get_conn()
+    except Exception as exc:
+        return {"error": f"No se pudo conectar a estima_rag (Postgres): {exc}"}
+
+    try:
+        cur = conn.cursor()
+
+        # Keyword: candidatos por ts_rank sobre content_tsv (config 'simple',
+        # mismo criterio no-stemming que tenia FTS5 con tokens literales).
+        cur.execute(
+            """
+            SELECT chunk_id, ts_rank(content_tsv, plainto_tsquery('simple', %s)) AS score
+            FROM estima_rag.chunks
+            WHERE content_tsv @@ plainto_tsquery('simple', %s)
+            ORDER BY score DESC
+            LIMIT 20
+            """,
+            (q, q),
+        )
+        fts_rows = cur.fetchall()
         fts_scores: dict[int, float] = {}
         if fts_rows:
-            worst = min(r[1] for r in fts_rows)  # bm25 mas negativo del set
+            best = max(r[1] for r in fts_rows) or 1.0
             for chunk_id, score in fts_rows:
-                fts_scores[chunk_id] = score / worst if worst else 0.0  # 0..1
+                fts_scores[chunk_id] = (score / best) if best else 0.0  # 0..1
 
-        # vec0: candidatos por coseno, solo si el embedding de la query salio bien.
+        # Vector: candidatos por coseno, solo si el embedding de la query salio bien.
         vec_scores: dict[int, float] = {}
         vec = _embed(q)
         if vec is not None:
-            vec_lit = "[" + ",".join(f"{x:.7f}" for x in vec) + "]"
-            vec_rows = conn.execute(
+            cur.execute(
                 """
-                SELECT chunk_id, distance FROM rag_chunks_vec
-                WHERE embedding MATCH ? AND k = 20
-                ORDER BY distance
+                SELECT chunk_id, 1 - (embedding <=> %s::vector) AS similarity
+                FROM estima_rag.chunks
+                ORDER BY embedding <=> %s::vector
+                LIMIT 20
                 """,
-                (vec_lit,),
-            ).fetchall()
-            for chunk_id, distance in vec_rows:
-                vec_scores[chunk_id] = 1 - distance  # cosine similarity
+                (_vec_literal(vec), _vec_literal(vec)),
+            )
+            for chunk_id, similarity in cur.fetchall():
+                vec_scores[chunk_id] = float(similarity)
 
         candidates = set(fts_scores) | set(vec_scores)
         if not candidates:
@@ -134,11 +135,12 @@ def rag_search(q: str, top_k: int = 5):
 
         results = []
         for chunk_id in ranked:
-            row = conn.execute(
+            cur.execute(
                 "SELECT content, source_path, semantic_route, descriptor_300 "
-                "FROM rag_chunks WHERE chunk_id = ?",
+                "FROM estima_rag.chunks WHERE chunk_id = %s",
                 (chunk_id,),
-            ).fetchone()
+            )
+            row = cur.fetchone()
             if row is None:
                 continue
             content, source_path, semantic_route, descriptor_300 = row

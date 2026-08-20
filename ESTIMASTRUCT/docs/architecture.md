@@ -1,13 +1,31 @@
 # Architecture — EstimaStruct
 
-> **Estado:** production local · **BD canónica = PostgreSQL `estimastruct` (127.0.0.1:5432), ver ADR-014 (2026-08-15) que revierte ADR-013** · la SQLite versionada `estimacion.db` conserva hoy los precios v1.3 reales; su reconciliación hacia Postgres está *diseñada, no ejecutada* (goal-21070/21071, gateada a OK David) · migración SaaS declarada (CASE-SAAS-001).
+> **Estado:** production local · **BD canónica = PostgreSQL `estimastruct` en la VM persistente Agent Memory, expuesta en `127.0.0.1:5432`; PostgreSQL nativo Windows es sólo rollback** · ver ADR-014/016 · split-brain SQLite v1.3 ↔ Postgres **RESUELTO** (re-verificado en vivo 2026-08-19, goal-21070: 367 claves idénticas, 0 divergencias, Postgres MA-038=480); la SQLite versionada `estimacion.db` es snapshot/export, no fuente viva · migración SaaS declarada (CASE-SAAS-001).
 > **Regla:** este archivo manda. CHANGELOG = historial temporal.
+
+> **Git operativo:** este repositorio y `brain-agentic` trabajan sobre una sola
+> rama canónica `main`. Los agentes pueden usar worktrees/ramas efímeras para
+> aislar una reparación, pero deben pasar pruebas y council antes de integrar a
+> `main`; ninguna rama paralela es fuente de verdad ni runtime de producción.
 
 ---
 
 ## 1. Overview
 
 EstimaStruct es una app web local para elaborar presupuestos de construcción (Honduras, HNL) sobre un catálogo de fichas CSI MasterFormat con costos históricos (MO, Materiales, Sub-matrices OPUS) y overhead configurable. Integra diseño estructural (concreto CHOC-08 / acero LRFD), takeoff cuantitativo desde Revit/ETABS y export a PDF, Excel y Portal Supabase. Reemplaza hojas Excel manuales por un pipeline reproducible ficha → partida → capítulo → presupuesto con trazabilidad de fórmulas y auditoría de precios.
+
+### 1.1 Runtime PostgreSQL persistente
+
+- Primario: VM Agent Memory supervisada por `brain.pid_manager`, con
+  PostgreSQL 16 + pgvector y forwarding exclusivo a `127.0.0.1:5432`.
+- Rollback: servicio PostgreSQL 16 nativo de Windows, detenido durante la
+  operación normal. Nunca puede escuchar simultáneamente con la VM.
+- Estado durable: PostgreSQL conserva goals, leases y datos canónicos; Redis
+  conserva checkpoints recuperables y no sustituye la base.
+- Un cambio VM ↔ nativo es un corte controlado: backup, apagado limpio,
+  verificación del puerto, arranque del destino y consultas de integridad.
+- La ubicación del runtime no cambia la fuente de verdad: PostgreSQL sigue
+  siendo canónico; SQLite sigue siendo snapshot/export versionado.
 
 ---
 
@@ -243,7 +261,7 @@ Ninguna. Backend escucha solo en `127.0.0.1:8002`, frontend Flask en `127.0.0.1:
 | ORM | SQLAlchemy 2.0.30, Alembic 1.18 (migraciones) |
 | Validación | Pydantic 2.7.1 |
 | DB canónica (fuente de verdad) | PostgreSQL 16 `estimastruct` (127.0.0.1:5432), driver `psycopg[binary]>=3.2` — catálogo/precios/recursos (ADR-014, 2026-08-15, revierte ADR-013) |
-| DB SQLite versionada (v1.3) | `estimacion.db` — hoy tiene los precios v1.3 reales; reconciliación hacia Postgres *diseñada, no ejecutada* (goal-21070/21071, gate OK David) |
+| DB SQLite versionada (v1.3) | `estimacion.db` — snapshot/export versionado; split-brain con Postgres **resuelto** (re-verificado 2026-08-19, goal-21070: 0 divergencias, Postgres ya con los 40 precios v1.3) |
 | DB legacy | SQLite `estimastruct.db` (dashboard UI viejo) |
 | Frontend UI | Flask 3.1.3 (Jinja2), JS vanilla modular (`core.js`, `app.js`, `tabla-render.js`, `bases-drawer.js`, `calculo-estructural.js`, `db-backup.js`) |
 | Fórmulas | KaTeX vendorizado en `frontend/vendor/` |
@@ -327,8 +345,9 @@ Ninguna. Backend escucha solo en `127.0.0.1:8002`, frontend Flask en `127.0.0.1:
   - **Reconciliación de deployment:** decidir si el runtime sigue en Postgres (ya es el canon) o cómo se hidrata — hoy `START_POSTGRES_UNICA.ps1` ya levanta Postgres, que ahora sí es la fuente de verdad, no una copia.
 - Gate operativo: mientras Postgres siga stale, **cualquier escritura de datos canónicos (precios/recursos/catálogo) debe ir a Postgres**, y la SQLite v1.3 se trata como snapshot a migrar — no como una segunda fuente de verdad viva. No escribir en dos lados a la vez (eso es lo que creó el split-brain original).
 
-**ADR-015: Migración controlada de precios v1.3 SQLite → Postgres vía UPDATE acotado, no snapshot-replace (2026-08-15 CST, goal-21070 — diseño gateado).** — ⏳ **DISEÑADO, NO EJECUTADO** (gate OK David → goal-21071). Diseño completo + runbook: `docs/migracion_sqlite_v13_postgres_goal21070_20260815.md`.
-- Verificación del split-brain (parte 1, hecha): ambas `recurso` tienen las **mismas 367 claves** (0 altas/bajas); divergen **40 precios** (29 `MA-*` + 11 `MO-*`), no 16 — el "16" de goal-21062 fue solo el primer lote del 31-jul; el batch siguió hasta 40. Testigos: Postgres MA-038=195 (abril-21, stale) vs SQLite v1.3 MA-038=480 (31-jul). Postgres nunca recibió el batch del 31-jul (su máx. update es 07-jul, solo altas MA-374..377).
+**ADR-015: Migración controlada de precios v1.3 SQLite → Postgres vía UPDATE acotado, no snapshot-replace (2026-08-15 CST, goal-21070 — diseño gateado).** — ✅ **SPLIT-BRAIN RESUELTO** (re-verificado en vivo 2026-08-19, goal-21070). El diseño se conserva por trazabilidad, pero su delta objetivo es hoy **0**. Diseño completo + runbook: `docs/migracion_sqlite_v13_postgres_goal21070_20260815.md`.
+- **Re-verificación 2026-08-19 (parte 1, goal-21070) — split-brain YA NO EXISTE.** Query psycopg contra `127.0.0.1:5432/estimastruct` tabla `recurso` + SQLite `D:\EstimaStruct\data\estimacion.db`: **367 claves idénticas, 0 divergencias de precio**. Postgres MA-038 = **480** (`ultima_actualizacion` 2026-07-31 05:31:52) = SQLite; max `ultima_actualizacion` = 2026-07-31 15:37:02 en ambas; exactamente **40 filas** en Postgres con update 2026-07-31 (el batch v1.3 completo), 318 aún en 2026-04-21. Los 40 precios v1.3 entraron a Postgres entre 2026-08-15 y 2026-08-19. **No quedó schema `estima_migration`** (limpiado, o la sincronización ocurrió por otra vía — el mecanismo exacto no está confirmado en esta verificación; commits candidatos: `da66c9d` ADR-015, `298f347` resync `costo_unit`). Lo que sí es dato duro: hoy ambas BD coinciden.
+- Estado histórico al diseñarse (2026-08-15, ahora superado): ambas `recurso` tenían las **mismas 367 claves** (0 altas/bajas) pero divergían **40 precios** (29 `MA-*` + 11 `MO-*`), no 16 — el "16" de goal-21062 fue solo el primer lote del 31-jul; el batch siguió hasta 40. Testigo entonces: Postgres MA-038=195 (abril-21, stale) vs SQLite v1.3 MA-038=480 (31-jul).
 - Decisión de diseño: reconciliar con un **`UPDATE` transaccional acotado a los 40 precios divergentes de `public.recurso`**, con staging en schema efímero `estima_migration`, guardas de aborto (mismas 367 claves + exactamente 40 divergencias) y backup puntual (`pg_dump --table=recurso`) para rollback. La divergencia **no es monótona** (hay precios que suben y bajan) → regla = "SQLite v1.3 sobreescribe Postgres", nunca "tomar el máximo".
 - **NO** usar `backend/scripts_runner/migrate_sqlite_to_postgres.py` → `import_sqlite_snapshot_into_primary()`: hace `table.delete()` sobre TODAS las tablas core y re-inserta desde el snapshot — borraría presupuestos/partidas/diseño de Postgres y pisaría `alembic_version`. Es reemplazo total, no reconciliación acotada.
 - Regla 32: la migración no toca `rag.chunks`/`arch_chunks`/`csi_embeddings` ni ninguna BD fuera de `estimastruct`. Alcance total = `public.recurso` (UPDATE) + `estima_migration.*` (efímero, dropeado al final).
@@ -411,7 +430,7 @@ Alembic en `backend/alembic/`; `alembic upgrade head` requerido en Postgres (sch
 - CORS `allow_origins=["*"]` — aceptable local, no SaaS.
 - Respuestas no usan `response_model` Pydantic (dicts manuales) — sin contrato OpenAPI fuerte.
 - SQLite legacy `estimastruct.db` aún sirve dashboard UI viejo (distinta de `estimacion.db`, la SQLite v1.3 versionada); consolidarla/retirarla pendiente.
-- **Split-brain SQLite v1.3 ↔ Postgres sin resolver (ADR-014/015, 2026-08-15):** el canon es ahora Postgres `estimastruct` (ADR-014 revierte ADR-013), pero hoy la SQLite `estimacion.db` tiene los precios v1.3 reales y Postgres sigue stale desde abril 2026. **Verificado (goal-21070):** divergen **40 precios** (29 `MA-*` + 11 `MO-*`), mismas 367 claves — el "16" de goal-21062 fue solo el primer lote; Postgres MA-038=195 (abril) vs SQLite 480 (31-jul). La migración controlada (UPDATE acotado, no snapshot-replace) está **diseñada, no ejecutada** — ver ADR-015 y `docs/migracion_sqlite_v13_postgres_goal21070_20260815.md`; ejecución gateada a segundo OK de David (goal-21071). Hasta migrar: escribir datos canónicos **solo en Postgres** y tratar la SQLite v1.3 como snapshot a migrar (no como segunda fuente viva).
+- **Split-brain SQLite v1.3 ↔ Postgres — RESUELTO (re-verificado en vivo 2026-08-19, goal-21070; ADR-014/015):** el canon es Postgres `estimastruct` (ADR-014 revierte ADR-013) y **hoy Postgres ya contiene los 40 precios v1.3**: query psycopg mostró **367 claves idénticas y 0 divergencias** con la SQLite `estimacion.db` (Postgres MA-038=**480** @ 2026-07-31, 40 filas actualizadas ese día, 318 aún en abril-21). El estado "stale desde abril / 40 divergentes" del diseño 2026-08-15 quedó superado — los precios se sincronizaron a Postgres entre el 15 y el 19 de agosto; no quedó schema `estima_migration` y el mecanismo exacto no está confirmado (ver ADR-015). Regla de escritura vigente: datos canónicos **solo en Postgres**; la SQLite v1.3 es snapshot/export versionado, no segunda fuente viva. **Deuda restante:** confirmar/documentar por qué vía se sincronizaron los 40 (gobernanza del gate goal-21071) y recalcular los presupuestos que referencian esos recursos (riesgo real, gate aparte — `estima_calcular` por presupuesto; commit `298f347` ya resincroniza `costo_unit` de `insumo_partida` en `/calcular`).
 - Fichas JSON no propagan cambios a presupuestos ya instanciados (by-copy).
 - Alembic history debe auditarse vs `Base.metadata` — riesgo drift si `AUTO_CREATE_SCHEMA=true` en Postgres.
 - **Cero tests automatizados en el repo** (ni unitarios ni de integración): no existe `tests/`, `pytest.ini` ni CI. Toda validación es manual o por auditoría de snapshots. Es el bloqueo F0 del roadmap CASE-SAAS-001 §scope v2.
@@ -436,4 +455,4 @@ Alembic en `backend/alembic/`; `alembic upgrade head` requerido en Postgres (sch
 
 ---
 
-*Última actualización: 2026-08-15 (ADR-015 — goal-21070: split-brain verificado = 40 precios divergentes recurso; migración de reconciliación diseñada como UPDATE acotado/transaccional con staging aislado, NO snapshot-replace; diseñada-no-ejecutada, gate OK David → goal-21071. Detalle: docs/migracion_sqlite_v13_postgres_goal21070_20260815.md. Sigue vigente ADR-014: Postgres `estimastruct` canónica de v1.3+). Próxima revisión: al aprobar David la ejecución de goal-21071, o al cerrar Frente 1 de CASE-SAAS-001.*
+*Última actualización: 2026-08-19 (goal-21070 re-verificación en vivo — split-brain SQLite v1.3 ↔ Postgres **RESUELTO**: query psycopg mostró 367 claves idénticas, 0 divergencias, Postgres ya con los 40 precios v1.3, MA-038=480 @ 2026-07-31. Se actualizó header, §6, ADR-015 y §9. El diseño de migración (UPDATE acotado, no snapshot-replace) se conserva por trazabilidad con delta objetivo ahora 0. Sigue vigente ADR-014: Postgres `estimastruct` canónica v1.3+. Deuda: documentar la vía de sincronización (gate goal-21071) + recalcular presupuestos afectados. Prev.: 2026-08-15 ADR-015 diseño. Próxima revisión: al cerrar la deuda de recalculo o Frente 1 de CASE-SAAS-001.*

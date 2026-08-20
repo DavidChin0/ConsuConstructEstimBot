@@ -1,6 +1,8 @@
 # Audit Precios V1.3 -- Materiales COMPLETO (321) vs Ferreterias HN (2026-07-31)
 
-Estado: **16 updates APLICADOS en copia PILOT** (`estimastruct_v1.3_pilot.db`, alembic 606c3f3a7b6b). BD viva `C:\EstimaStruct\data\estimacion.db` **sin tocar**. Requiere OK Director para promover pilot -> vivo.
+Estado: **16 updates PROMOVIDOS A LA BD VIVA SQLite** `C:\EstimaStruct\data\estimacion.db` el 2026-07-31T05:31:52 (batch unico, `ultima_actualizacion` identico en los 16). Verificado 2026-08-15 (goal-21062): los 16 claves estan en su precio "Despues" objetivo, incluido **MA-038 = 480** (David autorizo, decision 2026-08-15 06:32 sobre goal-19701). El header original ("copia PILOT / BD viva sin tocar") quedo stale — la promocion ya se aplico; la seccion "Ronda 2 (post-promocion)" mas abajo lo corrobora.
+
+> **DIVERGENCIA PENDIENTE (split-brain SQLite vs Postgres):** la promocion toco solo la SQLite viva. En Postgres `estimastruct` (declarado primario en `architecture.md` desde 2026-07-20) los 16 claves siguen en precio VIEJO (`ultima_actualizacion` 2026-04-21). Si el backend :8002 arranca con `START_POSTGRES_UNICA.ps1` (fuerza `ESTIMASTRUCT_DATABASE_URL=postgresql+...@estimastruct`), sirve Postgres y NO refleja estos precios; si arranca con `START_UNICA.ps1` sin esa variable, usa el default SQLite de `config.py` y SI los refleja. David autorizo "no forzar Postgres" (decision 4) para el export v1.3, no resolvio cual BD es la fuente de verdad de presupuestos vivos. Sincronizar Postgres es categoria-1 y queda fuera de alcance de goal-21062 hasta decision explicita.
 
 ## Updates aplicados en pilot (16, confianza Alta)
 
@@ -14,7 +16,7 @@ Estado: **16 updates APLICADOS en copia PILOT** (`estimastruct_v1.3_pilot.db`, a
 | MA-019 | Bloque #6 | 27.00 | 20.00 | -25.9% | Larach, precio alto TGU |
 | MA-126 | Bloque #8 | 33.00 | 26.00 | -21.2% | Larach, precio alto TGU |
 | MA-110 | PVC SDR13.5 1/2" | 42.00 | 58.00 | +38.1% | Larach |
-| MA-038 | PVC SDR41 3" | 195.00 | 480.00 | **+146.2%** | Larach -- delta grande, REVISAR antes de promover |
+| MA-038 | PVC SDR41 3" | 195.00 | 480.00 | **+146.2%** | Larach -- incremento real de mercado 2026, VERIFICADO por David (goal-21063), no outlier |
 | MA-059 | PVC SDR41 4" | 500.00 | 770.00 | +54.0% | Larach |
 | MA-052 | Centro Carga 16 espacios | 2100.00 | 2625.00 | +25.0% | Larach, sin tapa |
 | MA-054 | Breaker 30A 220v | 260.00 | 419.00 | +61.2% | Larach, 2P real |
@@ -23,7 +25,7 @@ Estado: **16 updates APLICADOS en copia PILOT** (`estimastruct_v1.3_pilot.db`, a
 | MA-250 | Cable THHN 12 | 20.00 | 21.00 | +5.0% | Larach, por metro |
 | MA-251 | Cable THHN 14 | 14.00 | 11.35 | -18.9% | Larach, por metro |
 
-**Hallazgo relevante:** mezcla real -- 6 materiales suben (electrico, PVC, cemento, CPVC), 4 bajan (varilla, bloque). No es un sesgo uniforme de inflacion ni de sobrevaloracion; es material por material. MA-038 (PVC 3" SDR41, +146%) es el unico delta que amerita doble-check manual antes de promover -- posible mismatch de spec (diametro/pared) entre BD y el producto Larach matcheado.
+**Hallazgo relevante:** mezcla real -- 6 materiales suben (electrico, PVC, cemento, CPVC), 4 bajan (varilla, bloque). No es un sesgo uniforme de inflacion ni de sobrevaloracion; es material por material. MA-038 (PVC 3" SDR41, +146%) fue el delta que se marco para doble-check manual; RESUELTO 2026-08-15 (goal-21063): David lo VERIFICO y confirma que refleja un incremento real de mercado del PVC en 2026 (golpe fuerte a precios de materiales este ano), NO un mismatch de spec ni un error de captura. Queda como precio de produccion valido.
 
 ## Metodologia final
 
@@ -58,10 +60,10 @@ Categorias barridas en ronda 2 sin match limpio (no es "no busque", es "busque y
 - **Grava y Material Selecto** (MA-010, MA-058): confirmado AUSENTE en catalogo Larach -- son agregados a granel (compra por camion/m3), fuera de un e-commerce de ferreteria. Requiere proveedor de agregados directo, canal distinto.
 - **Acero estructural pesado** (vigas W, HSS, placas A36, pernos A325 -- ~40 items de la serie MA-3xx): mismo caso, industrial/por pedido, no en ferreteria residencial online.
 
-## Siguiente paso (pendiente decision Director)
+## Siguiente paso
 
-- **Revisar MA-038** (PVC 3" SDR41, +146%) antes de promover -- verificar spec exacta.
-- **Promover pilot a vivo**: UPDATE dirigido de los 15 restantes (o 16 si MA-038 se confirma) sobre `C:\EstimaStruct\data\estimacion.db`.
+- ~~**Revisar MA-038** (PVC 3" SDR41, +146%) antes de promover~~ -- RESUELTO: David autorizo (2026-08-15, goal-21062 decision 2) avanzar con el precio actualizado sin bloquear, y ACLARO (2026-08-15 06:49, goal-21063) que el +146% es un incremento real de mercado 2026 VERIFICADO por el, no un error ni outlier. MA-038 = 480 confirmado en la BD viva SQLite; justificacion documentada en `promocion_precios_v13_goal21062_20260815.md`.
+- ~~**Promover pilot a vivo**~~ -- HECHO 2026-07-31 sobre `C:\EstimaStruct\data\estimacion.db`, verificado 2026-08-15 (los 16 en precio objetivo). Pendiente solo la divergencia Postgres (ver nota split-brain arriba), fuera de alcance hasta decision explicita de David.
 - **Siguiente ronda** para bajar los 300 sin dato: separar en 2 lotes -- (1) ferreteria residencial via larachycia.com por categoria completa (PVC fittings, ceramica, pintura, plomeria) escalable con el metodo ya probado; (2) acero estructural industrial requiere cotizacion directa con proveedor (Ferromax u otro), no esta en catalogo minorista online.
 
 ## Tabla completa (321 materiales)
@@ -103,7 +105,7 @@ Categorias barridas en ronda 2 sin match limpio (no es "no busque", es "busque y
 | MA-035 | Codo de CPVC de 1/2" | pza | 10.00 | -- | -- | Sin dato | No priorizado en esta ronda -- pendiente consulta directa en larachycia.com u otra fuente |
 | MA-036 | Pegamento Tangit Transparente para CPVC | gal | 2300.00 | -- | -- | Sin dato | No priorizado en esta ronda -- pendiente consulta directa en larachycia.com u otra fuente |
 | MA-037 | Tee de PVC de 2" | pza | 25.00 | -- | -- | Sin dato | No priorizado en esta ronda -- pendiente consulta directa en larachycia.com u otra fuente |
-| MA-038 | Tubo de PVC de 3" SDR 41 | lance | 195.00 | 480.00 | +146.2% | Alta | Larach y Cia (2026-07) -- PVC SDR41 3"x20pies -- delta grande (+146%), verificar antes de aplicar en vivo |
+| MA-038 | Tubo de PVC de 3" SDR 41 | lance | 195.00 | 480.00 | +146.2% | Alta | Larach y Cia (2026-07) -- PVC SDR41 3"x20pies -- +146% = incremento real de mercado 2026, VERIFICADO por David (goal-21063), no outlier ni mismatch de spec; vivo en estimacion.db |
 | MA-039 | Codo de PVC de 3" a 45° | pza | 25.00 | -- | -- | Sin dato | No priorizado en esta ronda -- pendiente consulta directa en larachycia.com u otra fuente |
 | MA-040 | Tee de PVC de 3" | pza | 30.00 | -- | -- | Sin dato | No priorizado en esta ronda -- pendiente consulta directa en larachycia.com u otra fuente |
 | MA-041 | Reductor de PVC de 3" a 2" | pza | 30.00 | -- | -- | Sin dato | No priorizado en esta ronda -- pendiente consulta directa en larachycia.com u otra fuente |
