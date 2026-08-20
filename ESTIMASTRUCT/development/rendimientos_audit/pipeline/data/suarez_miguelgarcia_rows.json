@@ -1,0 +1,356 @@
+[
+  [
+    "Limpieza y trazo",
+    "m2",
+    "50.000 m2 / Jor",
+    "0.020 Jor / m2"
+  ],
+  [
+    "Excavación en tierra hasta de 2.0 metros de profundidad",
+    "m3",
+    "4.000 m3 / Jor",
+    "0.250 Jor / m3"
+  ],
+  [
+    "Excavación en tepetate blando hasta 2.0 m de profundidad",
+    "m3",
+    "2.000 m3 / Jor",
+    "0.500 Jor / m3"
+  ],
+  [
+    "Traspaleo hasta 2m",
+    "m3",
+    "18.000 m3 / Jor",
+    "0.056 Jor / m3"
+  ],
+  [
+    "Habilitado y armado de fierro de refuerzo en cimentación",
+    "ton",
+    "0.170 ton / Jor",
+    "5.882 Jor / ton"
+  ],
+  [
+    "Habilitado y armado de fierro de refuerzo en estructura",
+    "ton",
+    "0.160 ton / Jor",
+    "6.250 Jor / ton"
+  ],
+  [
+    "Habilitado y armado de alambrón de 1/4\" y 5/16\"",
+    "ton",
+    "0.130 ton / Jor",
+    "7.692 Jor / ton"
+  ],
+  [
+    "En cimientos",
+    "m2",
+    "9.500 m2 / Jor",
+    "0.105 Jor / m2"
+  ],
+  [
+    "En columnas rectangulares",
+    "m2",
+    "7.500 m2 / Jor",
+    "0.133 Jor / m2"
+  ],
+  [
+    "En columnas circulares",
+    "m2",
+    "6.000 m2 / Jor",
+    "0.167 Jor / m2"
+  ],
+  [
+    "En trabes",
+    "m2",
+    "8.500 m2 / Jor",
+    "0.118 Jor / m2"
+  ],
+  [
+    "En cimientos",
+    "m2",
+    "17.000 m2 / Jor",
+    "0.059 Jor / m2"
+  ],
+  [
+    "En columnas rectangulares",
+    "m2",
+    "8.500 m2 / Jor",
+    "0.118 Jor / m2"
+  ],
+  [
+    "En columnas circulares",
+    "m2",
+    "4.000 m2 / Jor",
+    "0.250 Jor / m2"
+  ],
+  [
+    "En trabes",
+    "m2",
+    "10.000 m2 / Jor",
+    "0.100 Jor / m2"
+  ],
+  [
+    "Colocación block de 200 x 400 x 400 mm",
+    "caja",
+    "100.000 caja / Jor",
+    "0.010 Jor / caja"
+  ],
+  [
+    "Colocación de block hasta 350 x 600 x 600mm",
+    "caja",
+    "40.000 caja / Jor",
+    "0.025 Jor / caja"
+  ],
+  [
+    "Entrepiso reticular celulado línea menor",
+    "caja",
+    "40.000 caja / Jor",
+    "0.025 Jor / caja"
+  ],
+  [
+    "Entre piso reticular celulado lónea mayor",
+    "caja",
+    "30.000 caja / Jor",
+    "0.033 Jor / caja"
+  ],
+  [
+    "En cimientos",
+    "m3",
+    "1.500 m3 / Jor",
+    "0.667 Jor / m3"
+  ],
+  [
+    "En columnas y muros",
+    "m3",
+    "0.850 m3 / Jor",
+    "1.176 Jor / m3"
+  ],
+  [
+    "En trabes y losas",
+    "m3",
+    "0.950 m3 / Jor",
+    "1.053 Jor / m3"
+  ],
+  [
+    "En losas retículares",
+    "m3",
+    "0.800 m3 / Jor",
+    "1.250 Jor / m3"
+  ],
+  [
+    "Muro de tabique de 70mm de espesor",
+    "m2",
+    "11.000 m2 / Jor",
+    "0.091 Jor / m2"
+  ],
+  [
+    "Muro de tabique de 140mm de espesor",
+    "m2",
+    "10.000 m2 / Jor",
+    "0.100 Jor / m2"
+  ],
+  [
+    "Muro de tabique de 210mm de espesor",
+    "m2",
+    "8.000 m2 / Jor",
+    "0.125 Jor / m2"
+  ],
+  [
+    "Muro de tabique de 280mm de espesor",
+    "m2",
+    "6.000 m2 / Jor",
+    "0.167 Jor / m2"
+  ],
+  [
+    "Muro de tabique de 100mm de espesor",
+    "m2",
+    "10.000 m2 / Jor",
+    "0.100 Jor / m2"
+  ],
+  [
+    "Muro de tabique de 120mm de espesor",
+    "m2",
+    "9.500 m2 / Jor",
+    "0.105 Jor / m2"
+  ],
+  [
+    "Muro de tabique de 150mm de espesor",
+    "m2",
+    "9.000 m2 / Jor",
+    "0.111 Jor / m2"
+  ],
+  [
+    "Muro de tabique de 200mm de espesor",
+    "m2",
+    "8.500 m2 / Jor",
+    "0.118 Jor / m2"
+  ],
+  [
+    "Muro de block extruído de 50 x 100 x 150 mm en 100mm de espesor",
+    "m2",
+    "4.500 m2 / Jor",
+    "0.222 Jor / m2"
+  ],
+  [
+    "Muro de block extruído de 60 x 100 x 150 mm en 100mm de espesor",
+    "m2",
+    "5.000 m2 / Jor",
+    "0.200 Jor / m2"
+  ],
+  [
+    "Muro de block extruído de 100 x 100 x 150 mm en 100mm de espesor",
+    "m2",
+    "5.500 m2 / Jor",
+    "0.182 Jor / m2"
+  ],
+  [
+    "Muro de block extruído de 100 x 150 x 150 mm en 150mm de espesor",
+    "m2",
+    "5.500 m2 / Jor",
+    "0.182 Jor / m2"
+  ],
+  [
+    "Castillo centro de block: 1 v. 3/8\" (9.5mm)",
+    "m",
+    "30.000 m / Jor",
+    "0.033 Jor / m"
+  ],
+  [
+    "Castillos y cadenas de 150mm x 150mm con 4var. De 3/8\" (9.5mm)",
+    "m",
+    "10.000 m / Jor",
+    "0.100 Jor / m"
+  ],
+  [
+    "Castillos y cadenas de 150mm x 200mm con 4var. De 3/8\" (9.5mm)",
+    "m",
+    "9.500 m / Jor",
+    "0.105 Jor / m"
+  ],
+  [
+    "Castillos y cadenas de 150mm x 300mm con 4var. De 3/8\" (9.5mm)",
+    "m",
+    "8.000 m / Jor",
+    "0.125 Jor / m"
+  ],
+  [
+    "Repellados de mezcla",
+    "m2",
+    "19.000 m2 / Jor",
+    "0.053 Jor / m2"
+  ],
+  [
+    "Aplanados de mezcla (rostreados)",
+    "m2",
+    "14.000 m2 / Jor",
+    "0.053 Jor / m2"
+  ],
+  [
+    "Aplanados finos de mezcla",
+    "m2",
+    "11.000 m2 / Jor",
+    "0.091 Jor / m2"
+  ],
+  [
+    "Aplanados pulodos de cemento a llana",
+    "m2",
+    "10.000 m2 / Jor",
+    "0.100 Jor / m2"
+  ],
+  [
+    "Firmes de concreto para pisos, espesor de 80 a 100 mm",
+    "m2",
+    "10.000 m2 / Jor",
+    "0.100 Jor / m2"
+  ],
+  [
+    "Acabado escobillado integral sobre firmes",
+    "m2",
+    "35.000 m2 / Jor",
+    "0.029 Jor / m2"
+  ],
+  [
+    "Fino no integral acabado pulido",
+    "m2",
+    "18.000 m2 / Jor",
+    "0.056 Jor / m2"
+  ],
+  [
+    "Armado con malla en pisos",
+    "m2",
+    "50.000 m2 / Jor",
+    "0.020 Jor / m2"
+  ],
+  [
+    "Martelinado fino sobre pisos",
+    "m2",
+    "4.000 m2 / Jor",
+    "0.250 Jor / m2"
+  ],
+  [
+    "Materlinado fino sobre columnas",
+    "m2",
+    "2.000 m2 / Jor",
+    "0.500 Jor / m2"
+  ],
+  [
+    "Martelinado fino sobre muros",
+    "m2",
+    "3.000 m2 / Jor",
+    "0.333 Jor / m2"
+  ],
+  [
+    "Martelinado fino sobre trabes y losas",
+    "m2",
+    "2.000 m2 / Jor",
+    "0.500 Jor / m2"
+  ],
+  [
+    "Relleno de tezontle en azoteas",
+    "m3",
+    "2.000 m3 / Jor",
+    "0.500 Jor / m3"
+  ],
+  [
+    "Entortado sobre casco",
+    "m2",
+    "20.000 m2 / Jor",
+    "0.050 Jor / m2"
+  ],
+  [
+    "Enladrillado y escobillado",
+    "m2",
+    "11.000 m2 / Jor",
+    "0.091 Jor / m2"
+  ],
+  [
+    "Enladrillado aparente",
+    "m2",
+    "7.000 m2 / Jor",
+    "0.143 Jor / m2"
+  ],
+  [
+    "Hechura de tarimas de 500 x 1000 mm",
+    "pza",
+    "19.000 pza / Jor",
+    "0.053 Jor / pza"
+  ],
+  [
+    "Muro de block vidrio de 100 x 200 x 200mm incluyendo refuerzo en juntas",
+    "m2",
+    "3.500 m2 / Jor",
+    "0.286 Jor / m2"
+  ],
+  [
+    "Registros de 400 x 600 mm con profundidad promedio de 1250mm",
+    "pza",
+    "2.000 pza / Jor",
+    "0.500 Jor / pza"
+  ],
+  [
+    "Tapa de registro de 400 x 600 mm",
+    "pza",
+    "6.000 pza / Jor",
+    "0.167 Jor / pza"
+  ]
+]

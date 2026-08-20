@@ -1,0 +1,168 @@
+{
+ "db_path": "D:\\EstimaStruct\\data\\estimacion.db",
+ "generated_at": "2026-08-20T14:47:02",
+ "tool": "snapshot_precios.py goal-21170",
+ "tables": {
+  "alembic_version": {
+   "rows": 1,
+   "sha256": "ae9bbca3fbd31bbb99553d66f21d69a8b2dbe04620415876fcc8935cad6e7f52"
+  },
+  "capitulo": {
+   "rows": 88,
+   "sha256": "97cd9589832b031ffc357966434f8d57b5451b5a745257ced47a67779d3bb0fb"
+  },
+  "caso_diseno": {
+   "rows": 4,
+   "sha256": "b7bf3151d5d7e838e93a22dba5cb15309d6323296a10bb9ee1a07db6c90120af"
+  },
+  "conexion_acero": {
+   "rows": 0,
+   "sha256": "a9eeadf1c11e1636df8fc490a91bc7e6c9f896012bbd41feab9153b55c8742a3"
+  },
+  "conexion_caso": {
+   "rows": 0,
+   "sha256": "d91020905c94e360deb28faff4c1a1b26c2da61b0f0400c626f676e93ef6b1b0"
+  },
+  "conexion_resultado": {
+   "rows": 0,
+   "sha256": "8d13e4676022a2879f710a18c7c0950a8f33fccae36e7f09237f6edfc22a24b9"
+  },
+  "config_presupuesto": {
+   "rows": 6,
+   "sha256": "5955e7dbd18a8b2594f241c0dd9ac692b5e0d904dc592d90a07812240ccd2680"
+  },
+  "contexto_sismico": {
+   "rows": 1,
+   "sha256": "9ac5d5b44de9bfa08c86dcd3057aef166864ff2c6f43dcccfc96bd4e9d6d8bdc"
+  },
+  "cronograma_override": {
+   "rows": 0,
+   "sha256": "faecb3ed31d93b7eb03142c30962d96b092a16b3990bdf92cfbcee832639beb6"
+  },
+  "diseno_elemento": {
+   "rows": 58,
+   "sha256": "6f36c28dd117b8c42cef6cc97403bc4856b99599f004bee4210e091e09d5a043"
+  },
+  "financiero_calculo": {
+   "rows": 0,
+   "sha256": "220ffe876d9a340ea61bb41b794d7a3c8de84efaf40a7e3860f3ac475dbb9b18"
+  },
+  "financiero_item": {
+   "rows": 0,
+   "sha256": "4a3b6c68690f535fe17f186d4a231fce33971174e119d9f65a6b98e0edd2b4ac"
+  },
+  "insumo_partida": {
+   "rows": 7340,
+   "sha256": "b9a08d3048d73d7855c4ac7b4f26287dc57affac7ebd801eed6f93deb5eaa7c5"
+  },
+  "partida": {
+   "rows": 1137,
+   "sha256": "353c7ddb6240c61fe1fa2f8a90cd69995a3e9ba25dc9999dc0a54b47a3f4487f"
+  },
+  "presupuesto": {
+   "rows": 6,
+   "sha256": "1c9136c6a0c144710574e917ce6d74fc5952e8449496d62b213490b0d6110af6"
+  },
+  "recurso": {
+   "rows": 367,
+   "sha256": "8f3f606149ba2779957389b4361d3cd22e1df3dd383e885ac5b57e26aade747e"
+  },
+  "rendimiento_audit": {
+   "rows": 181,
+   "sha256": "49114fc9fe2ca1ab90e739480c29fb98711aa535d83db890f0b21b61731d2df3"
+  },
+  "resultado_diseno": {
+   "rows": 4,
+   "sha256": "74978331247a252e7097243762add63dc123ab43fad8092bad979a57771495d0"
+  }
+ },
+ "price_tables": {
+  "capitulo": {
+   "rows": 88,
+   "sha256": "97cd9589832b031ffc357966434f8d57b5451b5a745257ced47a67779d3bb0fb",
+   "columns": [
+    "id",
+    "presupuesto_id",
+    "clave",
+    "nombre",
+    "orden"
+   ]
+  },
+  "insumo_partida": {
+   "rows": 7340,
+   "sha256": "b9a08d3048d73d7855c4ac7b4f26287dc57affac7ebd801eed6f93deb5eaa7c5",
+   "columns": [
+    "id",
+    "partida_id",
+    "recurso_id",
+    "clave",
+    "descripcion",
+    "unidad",
+    "tipo",
+    "cantidad",
+    "costo_unit",
+    "total",
+    "orden"
+   ]
+  },
+  "partida": {
+   "rows": 1137,
+   "sha256": "353c7ddb6240c61fe1fa2f8a90cd69995a3e9ba25dc9999dc0a54b47a3f4487f",
+   "columns": [
+    "id",
+    "capitulo_id",
+    "clave_csi",
+    "descripcion",
+    "unidad",
+    "cantidad",
+    "costo_mo",
+    "costo_ma",
+    "unitario_matriz",
+    "costo_base",
+    "precio_unitario",
+    "total",
+    "revit_q",
+    "factor_e",
+    "factor_f",
+    "color_tipo",
+    "es_formula",
+    "formula_ref",
+    "type_mark",
+    "omniclass_num",
+    "assembly_num",
+    "orden"
+   ]
+  },
+  "presupuesto": {
+   "rows": 6,
+   "sha256": "1c9136c6a0c144710574e917ce6d74fc5952e8449496d62b213490b0d6110af6",
+   "columns": [
+    "id",
+    "nombre",
+    "cliente",
+    "fecha",
+    "moneda",
+    "es_template",
+    "created_at"
+   ]
+  },
+  "recurso": {
+   "rows": 367,
+   "sha256": "8f3f606149ba2779957389b4361d3cd22e1df3dd383e885ac5b57e26aade747e",
+   "columns": [
+    "id",
+    "clave",
+    "descripcion",
+    "unidad",
+    "tipo",
+    "precio_unitario",
+    "ultima_actualizacion"
+   ]
+  }
+ },
+ "total_tables": 18,
+ "price_invariant": {
+  "rows_sum": 8938,
+  "hash_concat": "ef3552d022f04e4781e1822e7615d0432a3f121faca62882728d38b00b8e3382"
+ }
+}

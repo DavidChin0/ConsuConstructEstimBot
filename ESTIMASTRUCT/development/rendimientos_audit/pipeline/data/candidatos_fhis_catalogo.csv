@@ -1,0 +1,396 @@
+﻿partida_id,clave_csi,capitulo,cap_nombre,partida_desc,partida_unidad,n_insumos_mo_eq,ficha,ficha_desc,ficha_unidad,ficha_pagina,score
+6902e4e4-6c1f-4892-a2df-b2e6239b199c,02 21 13,02,Condiciones Existentes,Suministro e Instalación de Niveletas de Madera para Trazado,M2,2,F013001,TRAZADO CON TEODOLITO,M.L.,62,0.5
+6902e4e4-6c1f-4892-a2df-b2e6239b199c,02 21 13,02,Condiciones Existentes,Suministro e Instalación de Niveletas de Madera para Trazado,M2,2,F013003,TRAZADO Y MARCADO,M.L.,64,0.5
+60b42893-f95d-482b-aed0-13e420eb5c2d,02 21 13.1,02,Condiciones Existentes,Trazado y Marcado de Obra,M,4,F013003,TRAZADO Y MARCADO,M.L.,64,1.0
+60b42893-f95d-482b-aed0-13e420eb5c2d,02 21 13.1,02,Condiciones Existentes,Trazado y Marcado de Obra,M,4,F013004,TRAZADO Y MARCADO CON NIVEL,M.L.,65,0.667
+60b42893-f95d-482b-aed0-13e420eb5c2d,02 21 13.1,02,Condiciones Existentes,Trazado y Marcado de Obra,M,4,F013001,TRAZADO CON TEODOLITO,M.L.,62,0.5
+a81c4d5b-09b2-48ea-868a-8b82222aba50,03 11 13,03,Concreto,Instalación de encofrado perimetral de madera para fundición de losa,M,2,F130006,ENCOFRADO DE LOSA SUPERIOR,M2,773,0.667
+a81c4d5b-09b2-48ea-868a-8b82222aba50,03 11 13,03,Concreto,Instalación de encofrado perimetral de madera para fundición de losa,M,2,F130003,CURADO DE LOSA,M2,770,0.5
+a81c4d5b-09b2-48ea-868a-8b82222aba50,03 11 13,03,Concreto,Instalación de encofrado perimetral de madera para fundición de losa,M,2,F130005,ENCOFRADO DE LOSA MONOLITICA PARA PUENTE,M2,772,0.5
+65c61f24-91c7-4c53-a029-5dfce403adb5,03 15 13,03,Concreto,Instalación de Anclajes de Columna (J-Bolts) Pernos tipo J de acero ASTM F1554 (Grado 36 ) de 3/4 de diámetro. Incluye tuercas hexagonales pesadas y arandelas endurecidas.,PZA,4,F034052,"COLUMNA 36 X 36, 8Nº6, Nº3 @ 20, CONCRETO 1:2:2",M.L.,300,0.4
+377c02ec-0675-44e9-8949-3a8b00e1e8bc,03 22 00,03,Concreto,"Armado de Losa de Cimentación con Electromalla 6"" x 6"" 4/4",M2,2,F130003,CURADO DE LOSA,M2,770,0.5
+d4ea10fb-1705-427a-a45e-63330662882a,03 31 00.1,03,Concreto,"Armado, Encofrado y Fundido de Castillo R1 15x15cm, Ref 4#3 + N2@5cm F032002",ML,4,F032003,CASTILLO 15X15 SOLO FUNDIDO CONCRETO 1:2:2,M.L.,231,0.4
+d4ea10fb-1705-427a-a45e-63330662882a,03 31 00.1,03,Concreto,"Armado, Encofrado y Fundido de Castillo R1 15x15cm, Ref 4#3 + N2@5cm F032002",ML,4,F032007,CASTILLO 15X30 SOLO FUNDIDO CONCRETO 1:2:2,M.L.,235,0.4
+d4ea10fb-1705-427a-a45e-63330662882a,03 31 00.1,03,Concreto,"Armado, Encofrado y Fundido de Castillo R1 15x15cm, Ref 4#3 + N2@5cm F032002",ML,4,F032013,CASTILLO 20X20 SOLO FUNDIDO CONCRETO 1:2:2,M.L.,241,0.4
+4d9220d7-375e-4d72-8269-7978a60b4a57,03 31 00.2,03,Concreto,"Armado, Encofrado y Fundido de Columna R2 20x20cm, 4Nº3, Nº2 @ 0.20, F034003",ML,4,F034002,"COLUMNA 20 X 20, 4Nº5, Nº3 @ 20, CONCRETO 1:2:2",M.L.,250,0.75
+4d9220d7-375e-4d72-8269-7978a60b4a57,03 31 00.2,03,Concreto,"Armado, Encofrado y Fundido de Columna R2 20x20cm, 4Nº3, Nº2 @ 0.20, F034003",ML,4,F034003,"COLUMNA 20 X 20, 4Nº3, Nº2 @ 0.20, CONC. 1:2:2",M.L.,251,0.75
+4d9220d7-375e-4d72-8269-7978a60b4a57,03 31 00.2,03,Concreto,"Armado, Encofrado y Fundido de Columna R2 20x20cm, 4Nº3, Nº2 @ 0.20, F034003",ML,4,F034004,"COLUMNA 20 X 20, 4Nº4, Nº3 @ 20, CONCRETO 1:2:2",M.L.,252,0.75
+4d9220d7-375e-4d72-8269-7978a60b4a57,03 31 00.2,03,Concreto,"Armado, Encofrado y Fundido de Columna R2 20x20cm, 4Nº3, Nº2 @ 0.20, F034003",ML,4,F034012,"COLUMNA 20 X 60 4Nº4, Nº2 @ 20, CONCRETO 1:2:2",UNID,260,0.6
+4d9220d7-375e-4d72-8269-7978a60b4a57,03 31 00.2,03,Concreto,"Armado, Encofrado y Fundido de Columna R2 20x20cm, 4Nº3, Nº2 @ 0.20, F034003",ML,4,F034013,"COLUMNA 20 x 15 4Nº4, Nº3 @ 20, CONCRETO 1:2:2",ML,261,0.6
+7ab92c35-12b1-4546-ba73-aef84188f98b,03 31 00.3,03,Concreto,"Armado, Encofrado y Fundido de Columna R3 20 X 30, 4#4 + 2#3, #3@20cm",ML,4,F034034,"COLUMNA 30 X 30, 4 Nº6, Nº3 @ 0.20, CONCRETO 1:2:2",M.L.,282,0.75
+7ab92c35-12b1-4546-ba73-aef84188f98b,03 31 00.3,03,Concreto,"Armado, Encofrado y Fundido de Columna R3 20 X 30, 4#4 + 2#3, #3@20cm",ML,4,F034039,"COLUMNA 30 X 30, 6 Nº4, Nº3 @ 0.20, CONCRETO 1:2:2",M.L.,287,0.75
+7ab92c35-12b1-4546-ba73-aef84188f98b,03 31 00.3,03,Concreto,"Armado, Encofrado y Fundido de Columna R3 20 X 30, 4#4 + 2#3, #3@20cm",ML,4,F034006,"COLUMNA 20 X 30, 6Nº4, Nº3 @ 0.20, CONCRETO 1:2:2",M.L.,254,0.6
+7ab92c35-12b1-4546-ba73-aef84188f98b,03 31 00.3,03,Concreto,"Armado, Encofrado y Fundido de Columna R3 20 X 30, 4#4 + 2#3, #3@20cm",ML,4,F034010,"COLUMNA 20 X 40, 6 Nº5, Nº3 @ 0.30, CONCRETO 1:2:2",M.L.,258,0.6
+7ab92c35-12b1-4546-ba73-aef84188f98b,03 31 00.3,03,Concreto,"Armado, Encofrado y Fundido de Columna R3 20 X 30, 4#4 + 2#3, #3@20cm",ML,4,F034023,"COLUMNA 25 X 30, 4 Nº5, Nº2 @ 0.20, CONCRETO 1:2:2",M.L.,271,0.6
+598289f7-ca26-409c-9c41-ecd498329b55,03 31 00.4,03,Concreto,"Armado, Encofrado y Fundido de Columna de R4 20x20 4#4 + 2#3, #3@20cm",ML,4,F032013,CASTILLO 20X20 SOLO FUNDIDO CONCRETO 1:2:2,M.L.,241,0.4
+70d220d0-354d-4379-bb1a-739878160601,03 31 00.5,03,Concreto,"Armado, Encofrado y Fundido de Columna R5 A 35 X 35, R2 20x20cm, 4Nº3, Nº2 @ 0.20,  4-#6+2-#5+2-#5,#3@150mm",ML,3,F034002,"COLUMNA 20 X 20, 4Nº5, Nº3 @ 20, CONCRETO 1:2:2",M.L.,250,0.75
+70d220d0-354d-4379-bb1a-739878160601,03 31 00.5,03,Concreto,"Armado, Encofrado y Fundido de Columna R5 A 35 X 35, R2 20x20cm, 4Nº3, Nº2 @ 0.20,  4-#6+2-#5+2-#5,#3@150mm",ML,3,F034003,"COLUMNA 20 X 20, 4Nº3, Nº2 @ 0.20, CONC. 1:2:2",M.L.,251,0.75
+70d220d0-354d-4379-bb1a-739878160601,03 31 00.5,03,Concreto,"Armado, Encofrado y Fundido de Columna R5 A 35 X 35, R2 20x20cm, 4Nº3, Nº2 @ 0.20,  4-#6+2-#5+2-#5,#3@150mm",ML,3,F034004,"COLUMNA 20 X 20, 4Nº4, Nº3 @ 20, CONCRETO 1:2:2",M.L.,252,0.75
+70d220d0-354d-4379-bb1a-739878160601,03 31 00.5,03,Concreto,"Armado, Encofrado y Fundido de Columna R5 A 35 X 35, R2 20x20cm, 4Nº3, Nº2 @ 0.20,  4-#6+2-#5+2-#5,#3@150mm",ML,3,F034012,"COLUMNA 20 X 60 4Nº4, Nº2 @ 20, CONCRETO 1:2:2",UNID,260,0.6
+70d220d0-354d-4379-bb1a-739878160601,03 31 00.5,03,Concreto,"Armado, Encofrado y Fundido de Columna R5 A 35 X 35, R2 20x20cm, 4Nº3, Nº2 @ 0.20,  4-#6+2-#5+2-#5,#3@150mm",ML,3,F034013,"COLUMNA 20 x 15 4Nº4, Nº3 @ 20, CONCRETO 1:2:2",ML,261,0.6
+075c64db-7b58-455d-b19e-5189b56e6c7c,03 31 00.6,03,Concreto,"Armado, Encofrado y Fundido Columna de R6 60 x 60, 8Nº6, Nº3 @ 30, CONCRETO 1:2:2",ML,4,F034044,"COLUMNA 30 X 30, 8Nº7, Nº3 @ 0.1.CONCRETO 1:2:2",M.L.,292,1.0
+075c64db-7b58-455d-b19e-5189b56e6c7c,03 31 00.6,03,Concreto,"Armado, Encofrado y Fundido Columna de R6 60 x 60, 8Nº6, Nº3 @ 30, CONCRETO 1:2:2",ML,4,F034065,"COLUMNA 60 x 60, 8Nº6, Nº3 @ 30, CONCRETO 1:2:2",ML.,313,1.0
+075c64db-7b58-455d-b19e-5189b56e6c7c,03 31 00.6,03,Concreto,"Armado, Encofrado y Fundido Columna de R6 60 x 60, 8Nº6, Nº3 @ 30, CONCRETO 1:2:2",ML,4,F034030,"COLUMNA 30 X 30 8Nº3, Nº2 @ 20, CONCRETO 1:2:2",M.L.,278,0.8
+075c64db-7b58-455d-b19e-5189b56e6c7c,03 31 00.6,03,Concreto,"Armado, Encofrado y Fundido Columna de R6 60 x 60, 8Nº6, Nº3 @ 30, CONCRETO 1:2:2",ML,4,F034033,"COLUMNA 30 X 30, 4 Nº6, Nº3 @ 0.05, CONCRETO 1:2:2",M.L.,281,0.75
+075c64db-7b58-455d-b19e-5189b56e6c7c,03 31 00.6,03,Concreto,"Armado, Encofrado y Fundido Columna de R6 60 x 60, 8Nº6, Nº3 @ 30, CONCRETO 1:2:2",ML,4,F034034,"COLUMNA 30 X 30, 4 Nº6, Nº3 @ 0.20, CONCRETO 1:2:2",M.L.,282,0.75
+5d6c7bb2-3710-4eda-832d-476432ad7d6c,03 31 00.7,03,Concreto,Creación de Gradas de hmax=0.18m wmin=1m pmax=0.27,PZA,2,F021003,MAMPOSTERIA EN GRADAS,M3,87,0.5
+65cc8446-a122-4d1e-82f4-68bf8bbab2f7,03 31 00.8,03,Concreto,"Armado, Encofrado y Fundido de Solera S1 de 35x35cm, 8#6 Y #4 @0.175 CM",ML,4,F031005,"SOLERA 10X15, 2 #3, #2 @ 25 CM,CONCRETO 1:2:2",M.L.,194,0.4
+65cc8446-a122-4d1e-82f4-68bf8bbab2f7,03 31 00.8,03,Concreto,"Armado, Encofrado y Fundido de Solera S1 de 35x35cm, 8#6 Y #4 @0.175 CM",ML,4,F031013,SOLERA 15X15 4#3 Y #2 @ 15 CM CONCRETO 1:2:2,M.L.,202,0.4
+65cc8446-a122-4d1e-82f4-68bf8bbab2f7,03 31 00.8,03,Concreto,"Armado, Encofrado y Fundido de Solera S1 de 35x35cm, 8#6 Y #4 @0.175 CM",ML,4,F031028,SOLERA 20X20 4#3 Y #2 @ 20 CM. CONCRETO 1:2:2,M.L.,217,0.4
+6ada3ee1-69fe-4f4d-bdd6-7208c1e1498c,03 31 00.10,03,Concreto,"Armado, Encofrado y Fundido de Solera S3 de 20x20cm,  4#3 Y #2 @0.20 CM (Cielo)",M2,4,F031027,SOLERA 20 X 20 4 #4 Y #2 @ 5 CONCRETO 1:2:2,M.L.,216,0.667
+6ada3ee1-69fe-4f4d-bdd6-7208c1e1498c,03 31 00.10,03,Concreto,"Armado, Encofrado y Fundido de Solera S3 de 20x20cm,  4#3 Y #2 @0.20 CM (Cielo)",M2,4,F031028,SOLERA 20X20 4#3 Y #2 @ 20 CM. CONCRETO 1:2:2,M.L.,217,0.6
+6ada3ee1-69fe-4f4d-bdd6-7208c1e1498c,03 31 00.10,03,Concreto,"Armado, Encofrado y Fundido de Solera S3 de 20x20cm,  4#3 Y #2 @0.20 CM (Cielo)",M2,4,F031008,"SOLERA 10X25 2 Nº3, Nº 2 @ 20 CONCRETO 1:2:2",M.L.,197,0.5
+6ada3ee1-69fe-4f4d-bdd6-7208c1e1498c,03 31 00.10,03,Concreto,"Armado, Encofrado y Fundido de Solera S3 de 20x20cm,  4#3 Y #2 @0.20 CM (Cielo)",M2,4,F031012,"SOLERA 15X15 4 Nº3, Nº2 A 20 @ 20 CONCRETO 1:2:2",M.L.,201,0.5
+6ada3ee1-69fe-4f4d-bdd6-7208c1e1498c,03 31 00.10,03,Concreto,"Armado, Encofrado y Fundido de Solera S3 de 20x20cm,  4#3 Y #2 @0.20 CM (Cielo)",M2,4,F031014,"SOLERA 15X15 4#4, #3@20 CONCRETO 1:2:2",ML,203,0.5
+634b7f2b-e14f-4966-bf3e-7504cabc0a88,03 31 00.11,03,Concreto,"Armado, Encofrado y Fundido de V1 Viga De Concreto de 20x25cm,2#5+2#3; #2@15cm, con 1:2:2 Para Entrepiso F037003",ML,4,F037038,"VIGA DE CONCRETO 30X50, 4#8, #3 @",M.L.,356,0.667
+634b7f2b-e14f-4966-bf3e-7504cabc0a88,03 31 00.11,03,Concreto,"Armado, Encofrado y Fundido de V1 Viga De Concreto de 20x25cm,2#5+2#3; #2@15cm, con 1:2:2 Para Entrepiso F037003",ML,4,F037045,"VIGA DE B=20, H=20 4#6; #2 @ 0.20 CONCRETO 1:2:2",ML,363,0.667
+634b7f2b-e14f-4966-bf3e-7504cabc0a88,03 31 00.11,03,Concreto,"Armado, Encofrado y Fundido de V1 Viga De Concreto de 20x25cm,2#5+2#3; #2@15cm, con 1:2:2 Para Entrepiso F037003",ML,4,F037058,"VIGA DE B=20,H=20 , 4#3; #2 @ 0.20 CONCRETO 1:2:2",M.L.,376,0.667
+634b7f2b-e14f-4966-bf3e-7504cabc0a88,03 31 00.11,03,Concreto,"Armado, Encofrado y Fundido de V1 Viga De Concreto de 20x25cm,2#5+2#3; #2@15cm, con 1:2:2 Para Entrepiso F037003",ML,4,F037059,"VIGA DE B=20,H=20 ,4#4 ;#2 @ 0.20 CONCRETO 1:2:2",M.L.,377,0.667
+634b7f2b-e14f-4966-bf3e-7504cabc0a88,03 31 00.11,03,Concreto,"Armado, Encofrado y Fundido de V1 Viga De Concreto de 20x25cm,2#5+2#3; #2@15cm, con 1:2:2 Para Entrepiso F037003",ML,4,F032009,"CASTILLO 20X20 4 Nº3, Nº2@15CM, CONCRETO 1:2:2",ML,237,0.5
+f2334650-a388-480a-bbc6-96767778d3f1,03 31 00.12,03,Concreto,"Armado, Encofrado y Fundido de V2 Viga de Concreto Armada de 0.15m x0.30m Ref 6#4 + 1#5 + #2@0.15m F037001",ML,4,F037038,"VIGA DE CONCRETO 30X50, 4#8, #3 @",M.L.,356,0.667
+f2334650-a388-480a-bbc6-96767778d3f1,03 31 00.12,03,Concreto,"Armado, Encofrado y Fundido de V2 Viga de Concreto Armada de 0.15m x0.30m Ref 6#4 + 1#5 + #2@0.15m F037001",ML,4,F037045,"VIGA DE B=20, H=20 4#6; #2 @ 0.20 CONCRETO 1:2:2",ML,363,0.667
+f2334650-a388-480a-bbc6-96767778d3f1,03 31 00.12,03,Concreto,"Armado, Encofrado y Fundido de V2 Viga de Concreto Armada de 0.15m x0.30m Ref 6#4 + 1#5 + #2@0.15m F037001",ML,4,F037058,"VIGA DE B=20,H=20 , 4#3; #2 @ 0.20 CONCRETO 1:2:2",M.L.,376,0.667
+f2334650-a388-480a-bbc6-96767778d3f1,03 31 00.12,03,Concreto,"Armado, Encofrado y Fundido de V2 Viga de Concreto Armada de 0.15m x0.30m Ref 6#4 + 1#5 + #2@0.15m F037001",ML,4,F037059,"VIGA DE B=20,H=20 ,4#4 ;#2 @ 0.20 CONCRETO 1:2:2",M.L.,377,0.667
+f2334650-a388-480a-bbc6-96767778d3f1,03 31 00.12,03,Concreto,"Armado, Encofrado y Fundido de V2 Viga de Concreto Armada de 0.15m x0.30m Ref 6#4 + 1#5 + #2@0.15m F037001",ML,4,F037012,"VIGA DE 20X20 4#4, #2@20, CONCRETO 1:2:2",ML,331,0.5
+5c338a1f-981f-419d-9850-bb80f76af7de,03 31 03.1,03,Concreto,"Concreto Premezclado 3,000 Psi, Agregado 3/4"", Revenimiento 6"" (Losa de Cimentación)",M3,2,F052001,CONCRETO CICLOPEO,M3,445,0.5
+5c338a1f-981f-419d-9850-bb80f76af7de,03 31 03.1,03,Concreto,"Concreto Premezclado 3,000 Psi, Agregado 3/4"", Revenimiento 6"" (Losa de Cimentación)",M3,2,F130003,CURADO DE LOSA,M2,770,0.5
+5c338a1f-981f-419d-9850-bb80f76af7de,03 31 03.1,03,Concreto,"Concreto Premezclado 3,000 Psi, Agregado 3/4"", Revenimiento 6"" (Losa de Cimentación)",M3,2,F130014,LOSA CONCRETO e=10 CMS Nº5 a/c 10 CMS a/s,M2,781,0.5
+5c338a1f-981f-419d-9850-bb80f76af7de,03 31 03.1,03,Concreto,"Concreto Premezclado 3,000 Psi, Agregado 3/4"", Revenimiento 6"" (Losa de Cimentación)",M3,2,F130018,LOSA CONCRETO e=15 CMS Nº4 a/c 15 CMS a/s,M2,785,0.5
+5c338a1f-981f-419d-9850-bb80f76af7de,03 31 03.1,03,Concreto,"Concreto Premezclado 3,000 Psi, Agregado 3/4"", Revenimiento 6"" (Losa de Cimentación)",M3,2,F130023,LOSA CONCRETO e=5 CMS Nº2 a/c 30 CMS a/s,M2,790,0.5
+50a3a022-9fec-4de4-be5d-0c47dac85eba,03 31 03.2,03,Concreto,Fundido de Losa de Concreto sobre armado 3000 Psi e=8cm con jornaleros y mezcladora,M2,3,F052001,CONCRETO CICLOPEO,M3,445,0.5
+50a3a022-9fec-4de4-be5d-0c47dac85eba,03 31 03.2,03,Concreto,Fundido de Losa de Concreto sobre armado 3000 Psi e=8cm con jornaleros y mezcladora,M2,3,F130003,CURADO DE LOSA,M2,770,0.5
+50a3a022-9fec-4de4-be5d-0c47dac85eba,03 31 03.2,03,Concreto,Fundido de Losa de Concreto sobre armado 3000 Psi e=8cm con jornaleros y mezcladora,M2,3,F130014,LOSA CONCRETO e=10 CMS Nº5 a/c 10 CMS a/s,M2,781,0.5
+50a3a022-9fec-4de4-be5d-0c47dac85eba,03 31 03.2,03,Concreto,Fundido de Losa de Concreto sobre armado 3000 Psi e=8cm con jornaleros y mezcladora,M2,3,F130018,LOSA CONCRETO e=15 CMS Nº4 a/c 15 CMS a/s,M2,785,0.5
+50a3a022-9fec-4de4-be5d-0c47dac85eba,03 31 03.2,03,Concreto,Fundido de Losa de Concreto sobre armado 3000 Psi e=8cm con jornaleros y mezcladora,M2,3,F130023,LOSA CONCRETO e=5 CMS Nº2 a/c 30 CMS a/s,M2,790,0.5
+4999ffd7-4196-401b-9f83-7bd396b08187,03 48 43,03,Concreto,Moldura de Cornisa de Concreto 0.10m x 0.10m,ML,2,F052001,CONCRETO CICLOPEO,M3,445,0.5
+57cb830d-0da4-4223-b462-b91980014393,03 39 23,03,Concreto,Curado de Losa de Concreto con Aditivo a base de Agua,M2,1,F130003,CURADO DE LOSA,M2,770,1.0
+57cb830d-0da4-4223-b462-b91980014393,03 39 23,03,Concreto,Curado de Losa de Concreto con Aditivo a base de Agua,M2,1,F052001,CONCRETO CICLOPEO,M3,445,0.5
+57cb830d-0da4-4223-b462-b91980014393,03 39 23,03,Concreto,Curado de Losa de Concreto con Aditivo a base de Agua,M2,1,F130014,LOSA CONCRETO e=10 CMS Nº5 a/c 10 CMS a/s,M2,781,0.5
+57cb830d-0da4-4223-b462-b91980014393,03 39 23,03,Concreto,Curado de Losa de Concreto con Aditivo a base de Agua,M2,1,F130018,LOSA CONCRETO e=15 CMS Nº4 a/c 15 CMS a/s,M2,785,0.5
+57cb830d-0da4-4223-b462-b91980014393,03 39 23,03,Concreto,Curado de Losa de Concreto con Aditivo a base de Agua,M2,1,F130023,LOSA CONCRETO e=5 CMS Nº2 a/c 30 CMS a/s,M2,790,0.5
+f134bfff-fc7f-4cb1-9143-c19878879951,04 05 13.3,04,Mampostería,"Repello y Pulido de Mochetas, Ventanas y Columnas",ML,2,F047001,ENTABICADO LADRILLO RAFON 15 CM ( REPELLO/ PULIDO),M.L.,438,0.4
+f134bfff-fc7f-4cb1-9143-c19878879951,04 05 13.3,04,Mampostería,"Repello y Pulido de Mochetas, Ventanas y Columnas",ML,2,F047003,ENTABICADO DE BLOQUE 30 CMS (REPELLO/PULIDO),M.L.,440,0.4
+a4f9821d-98fe-4492-8090-c234b89e57ad,04 26 00.1,04,Mampostería,"Pared de Bloque de Concreto de Partición de 4"" 1#3@2Hil",M2,3,F042012,PARED DE BLOQUE 15 CM RELLENO DE CONCRETO,M2,430,0.6
+a4f9821d-98fe-4492-8090-c234b89e57ad,04 26 00.1,04,Mampostería,"Pared de Bloque de Concreto de Partición de 4"" 1#3@2Hil",M2,3,F042001,PARED DE BLOQUE SIMPLE DE 10 CM,M2,419,0.4
+a4f9821d-98fe-4492-8090-c234b89e57ad,04 26 00.1,04,Mampostería,"Pared de Bloque de Concreto de Partición de 4"" 1#3@2Hil",M2,3,F042002,PARED DE BLOQUE SIMPLE SISADO DE 15 CM.,M2,420,0.4
+a4f9821d-98fe-4492-8090-c234b89e57ad,04 26 00.1,04,Mampostería,"Pared de Bloque de Concreto de Partición de 4"" 1#3@2Hil",M2,3,F042003,PARED DE BLOQUE SIMPLE DE 15 CM.,M2,421,0.4
+a4f9821d-98fe-4492-8090-c234b89e57ad,04 26 00.1,04,Mampostería,"Pared de Bloque de Concreto de Partición de 4"" 1#3@2Hil",M2,3,F042004,PARED DE BLOQUE SIMPLE DE 20 CM.,M2,422,0.4
+739f6351-d797-4c2f-9c20-b1a05d69a839,04 26 00.2,04,Mampostería,"Pared de Bloque de Concreto Reforzada de 6"" REF 1#3 @0.6+ 1#3@2Hil F042005",M2,3,F046003,"PARED DE CONCRETO REF. e=15 cm, #3 @ 15 a.s.",M2,437,0.6
+739f6351-d797-4c2f-9c20-b1a05d69a839,04 26 00.2,04,Mampostería,"Pared de Bloque de Concreto Reforzada de 6"" REF 1#3 @0.6+ 1#3@2Hil F042005",M2,3,F042005,PARED DE BLOQUE DE 20 RELLENO REF. H=1#3 @40,M2,423,0.5
+739f6351-d797-4c2f-9c20-b1a05d69a839,04 26 00.2,04,Mampostería,"Pared de Bloque de Concreto Reforzada de 6"" REF 1#3 @0.6+ 1#3@2Hil F042005",M2,3,F042009,PARED DE BLOQUE 20CM RELL. REF.1#4@20CM X BLOQ.,M2,427,0.5
+739f6351-d797-4c2f-9c20-b1a05d69a839,04 26 00.2,04,Mampostería,"Pared de Bloque de Concreto Reforzada de 6"" REF 1#3 @0.6+ 1#3@2Hil F042005",M2,3,F042012,PARED DE BLOQUE 15 CM RELLENO DE CONCRETO,M2,430,0.5
+739f6351-d797-4c2f-9c20-b1a05d69a839,04 26 00.2,04,Mampostería,"Pared de Bloque de Concreto Reforzada de 6"" REF 1#3 @0.6+ 1#3@2Hil F042005",M2,3,F046001,"PARED DE CONCRETO REF. e=12 cm, # 3 @ 20 a.s.",M2,435,0.5
+1d1afa34-63d8-4263-ae8f-4666470512af,04 26 00.3,04,Mampostería,"Pared de Bloque de Concreto Reforzada de 8"" Ref 1#3@0.6m+2#3@2Hil F022002",M2,3,F046003,"PARED DE CONCRETO REF. e=15 cm, #3 @ 15 a.s.",M2,437,0.6
+1d1afa34-63d8-4263-ae8f-4666470512af,04 26 00.3,04,Mampostería,"Pared de Bloque de Concreto Reforzada de 8"" Ref 1#3@0.6m+2#3@2Hil F022002",M2,3,F042005,PARED DE BLOQUE DE 20 RELLENO REF. H=1#3 @40,M2,423,0.5
+1d1afa34-63d8-4263-ae8f-4666470512af,04 26 00.3,04,Mampostería,"Pared de Bloque de Concreto Reforzada de 8"" Ref 1#3@0.6m+2#3@2Hil F022002",M2,3,F042009,PARED DE BLOQUE 20CM RELL. REF.1#4@20CM X BLOQ.,M2,427,0.5
+1d1afa34-63d8-4263-ae8f-4666470512af,04 26 00.3,04,Mampostería,"Pared de Bloque de Concreto Reforzada de 8"" Ref 1#3@0.6m+2#3@2Hil F022002",M2,3,F042012,PARED DE BLOQUE 15 CM RELLENO DE CONCRETO,M2,430,0.5
+1d1afa34-63d8-4263-ae8f-4666470512af,04 26 00.3,04,Mampostería,"Pared de Bloque de Concreto Reforzada de 8"" Ref 1#3@0.6m+2#3@2Hil F022002",M2,3,F046001,"PARED DE CONCRETO REF. e=12 cm, # 3 @ 20 a.s.",M2,435,0.5
+242a7e2b-3d52-4101-b159-e6a65047c5ec,04 26 00.13,04,Mampostería,Entabicado de Bloque 15 cm Con Repello y Pulido,ML,2,F047001,ENTABICADO LADRILLO RAFON 15 CM ( REPELLO/ PULIDO),M.L.,438,0.833
+242a7e2b-3d52-4101-b159-e6a65047c5ec,04 26 00.13,04,Mampostería,Entabicado de Bloque 15 cm Con Repello y Pulido,ML,2,F047002,ENTABICADO DE BLOQUE 15 CMS (INC. REPE./PULIDO),M.L.,439,0.667
+242a7e2b-3d52-4101-b159-e6a65047c5ec,04 26 00.13,04,Mampostería,Entabicado de Bloque 15 cm Con Repello y Pulido,ML,2,F047003,ENTABICADO DE BLOQUE 30 CMS (REPELLO/PULIDO),M.L.,440,0.667
+242a7e2b-3d52-4101-b159-e6a65047c5ec,04 26 00.13,04,Mampostería,Entabicado de Bloque 15 cm Con Repello y Pulido,ML,2,F042003,PARED DE BLOQUE SIMPLE DE 15 CM.,M2,421,0.6
+242a7e2b-3d52-4101-b159-e6a65047c5ec,04 26 00.13,04,Mampostería,Entabicado de Bloque 15 cm Con Repello y Pulido,ML,2,F042002,PARED DE BLOQUE SIMPLE SISADO DE 15 CM.,M2,420,0.5
+423d75be-d2d9-4790-97e2-58089bbf0dc1,04 21 13,04,Mampostería,Pared Arquitectónica de Ladrillo Rafón de 90mm 1#3@0.60cm Vertical,ML,2,F041001,PARED DE LADRILLO RAFON,M2,413,0.667
+423d75be-d2d9-4790-97e2-58089bbf0dc1,04 21 13,04,Mampostería,Pared Arquitectónica de Ladrillo Rafón de 90mm 1#3@0.60cm Vertical,ML,2,F041002,PARED DE LADRILLO RAFON A TEZON,M2,414,0.5
+423d75be-d2d9-4790-97e2-58089bbf0dc1,04 21 13,04,Mampostería,Pared Arquitectónica de Ladrillo Rafón de 90mm 1#3@0.60cm Vertical,ML,2,F041003,PARED DE LADRILLO RAFON PLANCHADO Y SISADO,M2,415,0.4
+06becc7e-611e-40da-8d88-6cf84950a574,05 05 23,05,Metales,"Soldadura por arco manual  de Cercha a Placa Electrodo E7018 (bajo hidrógeno). Soldadura de filete w=3/16"" (5mm) para unión de ángulos L 3x3x1/4",ML,2,F283003,PLACA Y AVISOS,PROY.,1114,0.5
+be61b25b-eb99-43af-989e-3dbcc83f746b,05 12 23,05,Metales,"Suministro e Instalación de 2 Placa de acero ASTM A36 de 35 x 35 cm con espesor de 1/2"" sujetada con Pernos A325 3/4""×80mm Grado 5",M2,2,F283003,PLACA Y AVISOS,PROY.,1114,0.5
+fc3913ac-4b2c-4d1d-9dcc-e002269cb29c,07 13 00,07,Protección Térmica e Impermeabilización,Suministro e Instalacion de Aislante con membrana flexible para losas y muros enterrados,M2,1,F085001,"SUMINISTRO E INSTALACION DE CANALETA 6"" PARA TECHO",M.L.,525,0.5
+5367b400-2b88-451d-a457-be38145f815b,07 61 13,07,Protección Térmica e Impermeabilización,Suministro e Instalación de Cubierta de Lamina Galvanizada de Aluzinc Cal. 28 Sin Color Legitimo,M2,1,F082018,"SUMIN. LAMINA ALUZINC 32""X6´ CAL. 26",UNID.,514,0.429
+5367b400-2b88-451d-a457-be38145f815b,07 61 13,07,Protección Térmica e Impermeabilización,Suministro e Instalación de Cubierta de Lamina Galvanizada de Aluzinc Cal. 28 Sin Color Legitimo,M2,1,F082019,"SUMIN. LAMINA ALUZINC 32""X8´ CAL. 26",UNID.,515,0.429
+5367b400-2b88-451d-a457-be38145f815b,07 61 13,07,Protección Térmica e Impermeabilización,Suministro e Instalación de Cubierta de Lamina Galvanizada de Aluzinc Cal. 28 Sin Color Legitimo,M2,1,F082022,"SUMIN. LAMINA ALUZINC 32""X4' CAL.26",UNID,518,0.429
+5367b400-2b88-451d-a457-be38145f815b,07 61 13,07,Protección Térmica e Impermeabilización,Suministro e Instalación de Cubierta de Lamina Galvanizada de Aluzinc Cal. 28 Sin Color Legitimo,M2,1,F082008,"TECHO DE CANALETA 6"" LAMINA ALUZINC APORTADA",M2,505,0.4
+87dc54cc-280f-4175-a15a-3cf81edba0e1,07 61 13.1,07,Protección Térmica e Impermeabilización,Suministro e Instalación de Cubierta de Lamina Galvanizada de Aluzinc Estructural Cal. 26 Sin Color Legitimo,M2,1,F082018,"SUMIN. LAMINA ALUZINC 32""X6´ CAL. 26",UNID.,514,0.571
+87dc54cc-280f-4175-a15a-3cf81edba0e1,07 61 13.1,07,Protección Térmica e Impermeabilización,Suministro e Instalación de Cubierta de Lamina Galvanizada de Aluzinc Estructural Cal. 26 Sin Color Legitimo,M2,1,F082019,"SUMIN. LAMINA ALUZINC 32""X8´ CAL. 26",UNID.,515,0.571
+87dc54cc-280f-4175-a15a-3cf81edba0e1,07 61 13.1,07,Protección Térmica e Impermeabilización,Suministro e Instalación de Cubierta de Lamina Galvanizada de Aluzinc Estructural Cal. 26 Sin Color Legitimo,M2,1,F082022,"SUMIN. LAMINA ALUZINC 32""X4' CAL.26",UNID,518,0.571
+87dc54cc-280f-4175-a15a-3cf81edba0e1,07 61 13.1,07,Protección Térmica e Impermeabilización,Suministro e Instalación de Cubierta de Lamina Galvanizada de Aluzinc Estructural Cal. 26 Sin Color Legitimo,M2,1,F082013,TECHO DE MADERA LAMINA ZINC CAL 26 PROHECO,M2,509,0.429
+87dc54cc-280f-4175-a15a-3cf81edba0e1,07 61 13.1,07,Protección Térmica e Impermeabilización,Suministro e Instalación de Cubierta de Lamina Galvanizada de Aluzinc Estructural Cal. 26 Sin Color Legitimo,M2,1,F082008,"TECHO DE CANALETA 6"" LAMINA ALUZINC APORTADA",M2,505,0.4
+c1131f2f-8088-4952-a6e6-1d1449bbdcda,07 61 13.3,07,Protección Térmica e Impermeabilización,"Flashing Metálico de Lámina Aluzinc cal. 26 Lisa en Intersección de pared con tornillos 2-1/2""",ML,1,F082018,"SUMIN. LAMINA ALUZINC 32""X6´ CAL. 26",UNID.,514,0.429
+c1131f2f-8088-4952-a6e6-1d1449bbdcda,07 61 13.3,07,Protección Térmica e Impermeabilización,"Flashing Metálico de Lámina Aluzinc cal. 26 Lisa en Intersección de pared con tornillos 2-1/2""",ML,1,F082019,"SUMIN. LAMINA ALUZINC 32""X8´ CAL. 26",UNID.,515,0.429
+c1131f2f-8088-4952-a6e6-1d1449bbdcda,07 61 13.3,07,Protección Térmica e Impermeabilización,"Flashing Metálico de Lámina Aluzinc cal. 26 Lisa en Intersección de pared con tornillos 2-1/2""",ML,1,F082022,"SUMIN. LAMINA ALUZINC 32""X4' CAL.26",UNID,518,0.429
+c36d8a2c-be3d-4e59-af7f-6687745ef04d,08 44 13,08,Puertas y Ventanas,Vidrio Fijo de PVC Blanco - Curtain Wall,M2,0,F122003,VENTANA DE ALUMINIO Y VIDRIO FIJO,M2,758,0.5
+52114858-8ff9-469e-8dd1-6da5e841cbee,08 13 13,08,Puertas y Ventanas,Puerta Metálica de 1.00m x 2.10m,PZA,0,F121004,PUERTA DE TABLERO P-1,UNID,741,0.5
+52114858-8ff9-469e-8dd1-6da5e841cbee,08 13 13,08,Puertas y Ventanas,Puerta Metálica de 1.00m x 2.10m,PZA,0,F121005,PUERTA DE TAMBOR P-4,UNID,742,0.5
+52114858-8ff9-469e-8dd1-6da5e841cbee,08 13 13,08,Puertas y Ventanas,Puerta Metálica de 1.00m x 2.10m,PZA,0,F121006,PUERTA DE TAMBOR P-5,UNID,743,0.5
+52114858-8ff9-469e-8dd1-6da5e841cbee,08 13 13,08,Puertas y Ventanas,Puerta Metálica de 1.00m x 2.10m,PZA,0,F121008,PUERTA DE TAMBOR P-2,UNID,745,0.5
+52114858-8ff9-469e-8dd1-6da5e841cbee,08 13 13,08,Puertas y Ventanas,Puerta Metálica de 1.00m x 2.10m,PZA,0,F121009,PUERTA DE TAMBOR P-3,UNID,746,0.5
+5554ea6f-1083-4910-b104-59f655ebeed4,08 14 23,08,Puertas y Ventanas,Puerta Termoformada Sencilla 0.90 m x 2.10 m,PZA,0,F121004,PUERTA DE TABLERO P-1,UNID,741,0.5
+5554ea6f-1083-4910-b104-59f655ebeed4,08 14 23,08,Puertas y Ventanas,Puerta Termoformada Sencilla 0.90 m x 2.10 m,PZA,0,F121005,PUERTA DE TAMBOR P-4,UNID,742,0.5
+5554ea6f-1083-4910-b104-59f655ebeed4,08 14 23,08,Puertas y Ventanas,Puerta Termoformada Sencilla 0.90 m x 2.10 m,PZA,0,F121006,PUERTA DE TAMBOR P-5,UNID,743,0.5
+5554ea6f-1083-4910-b104-59f655ebeed4,08 14 23,08,Puertas y Ventanas,Puerta Termoformada Sencilla 0.90 m x 2.10 m,PZA,0,F121008,PUERTA DE TAMBOR P-2,UNID,745,0.5
+5554ea6f-1083-4910-b104-59f655ebeed4,08 14 23,08,Puertas y Ventanas,Puerta Termoformada Sencilla 0.90 m x 2.10 m,PZA,0,F121009,PUERTA DE TAMBOR P-3,UNID,746,0.5
+4408a4b3-81ab-4c69-b399-c43823483f31,08 14 23.1,08,Puertas y Ventanas,Puerta Corrediza de Interior de 0.80x2.10 m por dentro de Steel Framing,PZA,0,F121004,PUERTA DE TABLERO P-1,UNID,741,0.5
+4408a4b3-81ab-4c69-b399-c43823483f31,08 14 23.1,08,Puertas y Ventanas,Puerta Corrediza de Interior de 0.80x2.10 m por dentro de Steel Framing,PZA,0,F121005,PUERTA DE TAMBOR P-4,UNID,742,0.5
+4408a4b3-81ab-4c69-b399-c43823483f31,08 14 23.1,08,Puertas y Ventanas,Puerta Corrediza de Interior de 0.80x2.10 m por dentro de Steel Framing,PZA,0,F121006,PUERTA DE TAMBOR P-5,UNID,743,0.5
+4408a4b3-81ab-4c69-b399-c43823483f31,08 14 23.1,08,Puertas y Ventanas,Puerta Corrediza de Interior de 0.80x2.10 m por dentro de Steel Framing,PZA,0,F121008,PUERTA DE TAMBOR P-2,UNID,745,0.5
+4408a4b3-81ab-4c69-b399-c43823483f31,08 14 23.1,08,Puertas y Ventanas,Puerta Corrediza de Interior de 0.80x2.10 m por dentro de Steel Framing,PZA,0,F121009,PUERTA DE TAMBOR P-3,UNID,746,0.5
+70f69a0d-1423-48f5-9a87-68705b3db953,08 14 23.3,08,Puertas y Ventanas,Puerta plegable (bifold) de interior de 0.80x2.10 m,PZA,0,F121004,PUERTA DE TABLERO P-1,UNID,741,0.5
+70f69a0d-1423-48f5-9a87-68705b3db953,08 14 23.3,08,Puertas y Ventanas,Puerta plegable (bifold) de interior de 0.80x2.10 m,PZA,0,F121005,PUERTA DE TAMBOR P-4,UNID,742,0.5
+70f69a0d-1423-48f5-9a87-68705b3db953,08 14 23.3,08,Puertas y Ventanas,Puerta plegable (bifold) de interior de 0.80x2.10 m,PZA,0,F121006,PUERTA DE TAMBOR P-5,UNID,743,0.5
+70f69a0d-1423-48f5-9a87-68705b3db953,08 14 23.3,08,Puertas y Ventanas,Puerta plegable (bifold) de interior de 0.80x2.10 m,PZA,0,F121008,PUERTA DE TAMBOR P-2,UNID,745,0.5
+70f69a0d-1423-48f5-9a87-68705b3db953,08 14 23.3,08,Puertas y Ventanas,Puerta plegable (bifold) de interior de 0.80x2.10 m,PZA,0,F121009,PUERTA DE TAMBOR P-3,UNID,746,0.5
+e52036e0-eadb-4bf8-9213-db67499b5cda,08 16 73,08,Puertas y Ventanas,Puerta Principal de Aluminio Con Sidelight de 1.30 x 2.10m,PZA,0,F121004,PUERTA DE TABLERO P-1,UNID,741,0.5
+e52036e0-eadb-4bf8-9213-db67499b5cda,08 16 73,08,Puertas y Ventanas,Puerta Principal de Aluminio Con Sidelight de 1.30 x 2.10m,PZA,0,F121005,PUERTA DE TAMBOR P-4,UNID,742,0.5
+e52036e0-eadb-4bf8-9213-db67499b5cda,08 16 73,08,Puertas y Ventanas,Puerta Principal de Aluminio Con Sidelight de 1.30 x 2.10m,PZA,0,F121006,PUERTA DE TAMBOR P-5,UNID,743,0.5
+e52036e0-eadb-4bf8-9213-db67499b5cda,08 16 73,08,Puertas y Ventanas,Puerta Principal de Aluminio Con Sidelight de 1.30 x 2.10m,PZA,0,F121008,PUERTA DE TAMBOR P-2,UNID,745,0.5
+e52036e0-eadb-4bf8-9213-db67499b5cda,08 16 73,08,Puertas y Ventanas,Puerta Principal de Aluminio Con Sidelight de 1.30 x 2.10m,PZA,0,F121009,PUERTA DE TAMBOR P-3,UNID,746,0.5
+efaa426c-a546-4f34-9772-3cb1f93509c7,08 16 73.1,08,Puertas y Ventanas,Puerta Principal con Acabado Metalico/Madera de 1.40x2.10m,GLOBAL,2,F121001,CONTRAMARCO DE MADERA,UNID,738,0.5
+efaa426c-a546-4f34-9772-3cb1f93509c7,08 16 73.1,08,Puertas y Ventanas,Puerta Principal con Acabado Metalico/Madera de 1.40x2.10m,GLOBAL,2,F121004,PUERTA DE TABLERO P-1,UNID,741,0.5
+efaa426c-a546-4f34-9772-3cb1f93509c7,08 16 73.1,08,Puertas y Ventanas,Puerta Principal con Acabado Metalico/Madera de 1.40x2.10m,GLOBAL,2,F121005,PUERTA DE TAMBOR P-4,UNID,742,0.5
+efaa426c-a546-4f34-9772-3cb1f93509c7,08 16 73.1,08,Puertas y Ventanas,Puerta Principal con Acabado Metalico/Madera de 1.40x2.10m,GLOBAL,2,F121006,PUERTA DE TAMBOR P-5,UNID,743,0.5
+efaa426c-a546-4f34-9772-3cb1f93509c7,08 16 73.1,08,Puertas y Ventanas,Puerta Principal con Acabado Metalico/Madera de 1.40x2.10m,GLOBAL,2,F121008,PUERTA DE TAMBOR P-2,UNID,745,0.5
+d2c4dee2-e547-4152-9225-d599fc86d50d,08 32 13,08,Puertas y Ventanas,"Puerta de Vidrio de 2 Hojas,1.80m x 2.10m Marco PVC",PZA,0,F121004,PUERTA DE TABLERO P-1,UNID,741,0.5
+d2c4dee2-e547-4152-9225-d599fc86d50d,08 32 13,08,Puertas y Ventanas,"Puerta de Vidrio de 2 Hojas,1.80m x 2.10m Marco PVC",PZA,0,F121005,PUERTA DE TAMBOR P-4,UNID,742,0.5
+d2c4dee2-e547-4152-9225-d599fc86d50d,08 32 13,08,Puertas y Ventanas,"Puerta de Vidrio de 2 Hojas,1.80m x 2.10m Marco PVC",PZA,0,F121006,PUERTA DE TAMBOR P-5,UNID,743,0.5
+d2c4dee2-e547-4152-9225-d599fc86d50d,08 32 13,08,Puertas y Ventanas,"Puerta de Vidrio de 2 Hojas,1.80m x 2.10m Marco PVC",PZA,0,F121008,PUERTA DE TAMBOR P-2,UNID,745,0.5
+d2c4dee2-e547-4152-9225-d599fc86d50d,08 32 13,08,Puertas y Ventanas,"Puerta de Vidrio de 2 Hojas,1.80m x 2.10m Marco PVC",PZA,0,F121009,PUERTA DE TAMBOR P-3,UNID,746,0.5
+adccf4a9-fa52-4609-8f7a-e0462e153f2b,08 53 13,08,Puertas y Ventanas,Ventana Corrediza 1.60 m x 1.30 m PVC Blanco,PZA,0,F122005,VENTANA DE TABLERO V-8,UNID,760,0.5
+e7c08140-a091-494c-8883-816d5b751935,08 32 16,08,Puertas y Ventanas,Puerta Abatible de Vidrio Marco de PVC de 0.9x2.10m,PZA,0,F121004,PUERTA DE TABLERO P-1,UNID,741,0.5
+e7c08140-a091-494c-8883-816d5b751935,08 32 16,08,Puertas y Ventanas,Puerta Abatible de Vidrio Marco de PVC de 0.9x2.10m,PZA,0,F121005,PUERTA DE TAMBOR P-4,UNID,742,0.5
+e7c08140-a091-494c-8883-816d5b751935,08 32 16,08,Puertas y Ventanas,Puerta Abatible de Vidrio Marco de PVC de 0.9x2.10m,PZA,0,F121006,PUERTA DE TAMBOR P-5,UNID,743,0.5
+e7c08140-a091-494c-8883-816d5b751935,08 32 16,08,Puertas y Ventanas,Puerta Abatible de Vidrio Marco de PVC de 0.9x2.10m,PZA,0,F121008,PUERTA DE TAMBOR P-2,UNID,745,0.5
+e7c08140-a091-494c-8883-816d5b751935,08 32 16,08,Puertas y Ventanas,Puerta Abatible de Vidrio Marco de PVC de 0.9x2.10m,PZA,0,F121009,PUERTA DE TAMBOR P-3,UNID,746,0.5
+21baad60-3de6-4474-9a92-dd56a945dcaa,08 53 13.1,08,Puertas y Ventanas,Ventana Guillotina de 0.60 m x 0.9m PVC Blanco,PZA,0,F122005,VENTANA DE TABLERO V-8,UNID,760,0.5
+981be90a-b221-4139-8d5e-7adf646cb948,08 53 13.2,08,Puertas y Ventanas,Ventana Proyectable de 0.6m x 0.6 m (Baños) PVC  Blanco,PZA,0,F122005,VENTANA DE TABLERO V-8,UNID,760,0.5
+748373fb-01a8-4d6c-abd8-aeb6ab04f392,08 53 13.3,08,Puertas y Ventanas,Ventana en L de 1.20m x 2.12m PVC Blanco,PZA,0,F122005,VENTANA DE TABLERO V-8,UNID,760,0.5
+95730439-7d05-4673-96cd-eb3e3a839150,08 51 13.1,08,Puertas y Ventanas,Ventana Guillotina de 0.60 m x 0.9m Aluminio Mate,PZA,0,F122003,VENTANA DE ALUMINIO Y VIDRIO FIJO,M2,758,0.5
+95730439-7d05-4673-96cd-eb3e3a839150,08 51 13.1,08,Puertas y Ventanas,Ventana Guillotina de 0.60 m x 0.9m Aluminio Mate,PZA,0,F122005,VENTANA DE TABLERO V-8,UNID,760,0.5
+95730439-7d05-4673-96cd-eb3e3a839150,08 51 13.1,08,Puertas y Ventanas,Ventana Guillotina de 0.60 m x 0.9m Aluminio Mate,PZA,0,F122008,VENTANA MARCO DE ALUMINIO Y CELOSIA ALUMINIO ANOD,M2,763,0.4
+9f1ca4e8-b542-4bb3-ac74-9d9488e300f3,08 51 13,08,Puertas y Ventanas,Ventana Corrediza 1.60 m x 1.30 m Aluminio Mate,PZA,0,F122003,VENTANA DE ALUMINIO Y VIDRIO FIJO,M2,758,0.5
+9f1ca4e8-b542-4bb3-ac74-9d9488e300f3,08 51 13,08,Puertas y Ventanas,Ventana Corrediza 1.60 m x 1.30 m Aluminio Mate,PZA,0,F122005,VENTANA DE TABLERO V-8,UNID,760,0.5
+9f1ca4e8-b542-4bb3-ac74-9d9488e300f3,08 51 13,08,Puertas y Ventanas,Ventana Corrediza 1.60 m x 1.30 m Aluminio Mate,PZA,0,F122008,VENTANA MARCO DE ALUMINIO Y CELOSIA ALUMINIO ANOD,M2,763,0.4
+34a4e3c9-b206-4521-a692-a8b3c1a57e1e,08 51 13.2,08,Puertas y Ventanas,Ventana Proyectable de 0.6m x 0.6 m (Baños) Aluminio Mate,PZA,0,F122003,VENTANA DE ALUMINIO Y VIDRIO FIJO,M2,758,0.5
+34a4e3c9-b206-4521-a692-a8b3c1a57e1e,08 51 13.2,08,Puertas y Ventanas,Ventana Proyectable de 0.6m x 0.6 m (Baños) Aluminio Mate,PZA,0,F122005,VENTANA DE TABLERO V-8,UNID,760,0.5
+34a4e3c9-b206-4521-a692-a8b3c1a57e1e,08 51 13.2,08,Puertas y Ventanas,Ventana Proyectable de 0.6m x 0.6 m (Baños) Aluminio Mate,PZA,0,F122008,VENTANA MARCO DE ALUMINIO Y CELOSIA ALUMINIO ANOD,M2,763,0.4
+d21cd88f-d66b-47db-b475-eabb8ac07846,09 22 13,09,Acabados,Canal Furring de Metal para Soporte de Cielo Falso,M2,2,F081002,INSTALACION DE MOLDURA EN CIELO FALSO,M.L.,486,0.5
+d21cd88f-d66b-47db-b475-eabb8ac07846,09 22 13,09,Acabados,Canal Furring de Metal para Soporte de Cielo Falso,M2,2,F084002,CIELO FALSO DE LAMINA PANELIT 2 X 4 X 5 mm,M2,521,0.4
+d21cd88f-d66b-47db-b475-eabb8ac07846,09 22 13,09,Acabados,Canal Furring de Metal para Soporte de Cielo Falso,M2,2,F084003,CIELO FALSO DE PANELIT FLEJE METALICO,M2,522,0.4
+d21cd88f-d66b-47db-b475-eabb8ac07846,09 22 13,09,Acabados,Canal Furring de Metal para Soporte de Cielo Falso,M2,2,F085003,MALLA ELECTROSOLDADA 6X6 - 2/2 EN CIELO FALSO,M2,527,0.4
+1fc5fdc3-ad2c-46fd-9cd5-3d8545c80f7e,09 29 00.4,09,Acabados,Instalación de Cerramiento Cielo Falso de Plafón de 45x45cm (Polaris),M2,2,F081002,INSTALACION DE MOLDURA EN CIELO FALSO,M.L.,486,0.5
+1fc5fdc3-ad2c-46fd-9cd5-3d8545c80f7e,09 29 00.4,09,Acabados,Instalación de Cerramiento Cielo Falso de Plafón de 45x45cm (Polaris),M2,2,F084002,CIELO FALSO DE LAMINA PANELIT 2 X 4 X 5 mm,M2,521,0.4
+1fc5fdc3-ad2c-46fd-9cd5-3d8545c80f7e,09 29 00.4,09,Acabados,Instalación de Cerramiento Cielo Falso de Plafón de 45x45cm (Polaris),M2,2,F084003,CIELO FALSO DE PANELIT FLEJE METALICO,M2,522,0.4
+1fc5fdc3-ad2c-46fd-9cd5-3d8545c80f7e,09 29 00.4,09,Acabados,Instalación de Cerramiento Cielo Falso de Plafón de 45x45cm (Polaris),M2,2,F085003,MALLA ELECTROSOLDADA 6X6 - 2/2 EN CIELO FALSO,M2,527,0.4
+8237be17-5833-40e4-8cea-63f0fb64b795,09 29 00.2,09,Acabados,Instalación de Cerramiento Cielo Falso de Laminas de PVC Vinilo,M2,2,F081002,INSTALACION DE MOLDURA EN CIELO FALSO,M.L.,486,0.5
+8237be17-5833-40e4-8cea-63f0fb64b795,09 29 00.2,09,Acabados,Instalación de Cerramiento Cielo Falso de Laminas de PVC Vinilo,M2,2,F084002,CIELO FALSO DE LAMINA PANELIT 2 X 4 X 5 mm,M2,521,0.4
+8237be17-5833-40e4-8cea-63f0fb64b795,09 29 00.2,09,Acabados,Instalación de Cerramiento Cielo Falso de Laminas de PVC Vinilo,M2,2,F084003,CIELO FALSO DE PANELIT FLEJE METALICO,M2,522,0.4
+8237be17-5833-40e4-8cea-63f0fb64b795,09 29 00.2,09,Acabados,Instalación de Cerramiento Cielo Falso de Laminas de PVC Vinilo,M2,2,F085003,MALLA ELECTROSOLDADA 6X6 - 2/2 EN CIELO FALSO,M2,527,0.4
+230f718c-78f7-448a-ace0-a8b2c5fae579,09 29 00.3,09,Acabados,Suministro e instalación de Moldura para Cielo Falso (Total),ML,2,F081002,INSTALACION DE MOLDURA EN CIELO FALSO,M.L.,486,0.75
+230f718c-78f7-448a-ace0-a8b2c5fae579,09 29 00.3,09,Acabados,Suministro e instalación de Moldura para Cielo Falso (Total),ML,2,F081001,INST./SUM. DE MOLDURA EN CIELO FALSO (PINT.ACEITE),M.L.,485,0.5
+230f718c-78f7-448a-ace0-a8b2c5fae579,09 29 00.3,09,Acabados,Suministro e instalación de Moldura para Cielo Falso (Total),ML,2,F084002,CIELO FALSO DE LAMINA PANELIT 2 X 4 X 5 mm,M2,521,0.4
+230f718c-78f7-448a-ace0-a8b2c5fae579,09 29 00.3,09,Acabados,Suministro e instalación de Moldura para Cielo Falso (Total),ML,2,F084003,CIELO FALSO DE PANELIT FLEJE METALICO,M2,522,0.4
+230f718c-78f7-448a-ace0-a8b2c5fae579,09 29 00.3,09,Acabados,Suministro e instalación de Moldura para Cielo Falso (Total),ML,2,F085003,MALLA ELECTROSOLDADA 6X6 - 2/2 EN CIELO FALSO,M2,527,0.4
+d39379d0-e671-404c-914b-a296aa1c7997,09 30 13.1,09,Acabados,Ceramica Piso 43x43 Tipo Brasiliia 222 gris,M2,2,F073001,CERAMICA EN PISO 30 X 30,M2,483,0.667
+d39379d0-e671-404c-914b-a296aa1c7997,09 30 13.1,09,Acabados,Ceramica Piso 43x43 Tipo Brasiliia 222 gris,M2,2,F072001,MOLDURA PARA PISO DE CERAMICA DE 0.30X0.30,M.L.,475,0.4
+e1d4a3a1-f5cb-43a9-bbe3-f49ddcbde9de,09 30 13.2,09,Acabados,Porcelanato Color Gris  60 cm x 60 cm (Centro de Ceramicas),M2,2,F061001,AFINADO e=0.5 CM,M2,450,0.5
+db6ca5f1-b9da-42b5-977e-047081c1d572,09 30 13.6,09,Acabados,Piso de Concreto Pulido o Tarrajeado con Mircrocemento,M2,3,F071001,PISO DE CONCRETO SIMPLE DE 5 CM.,M2,467,0.5
+db6ca5f1-b9da-42b5-977e-047081c1d572,09 30 13.6,09,Acabados,Piso de Concreto Pulido o Tarrajeado con Mircrocemento,M2,3,F071002,PISO DE CONCRETO SIMPLE DE 8 CM. CODALEADO FINO,M2,468,0.4
+db6ca5f1-b9da-42b5-977e-047081c1d572,09 30 13.6,09,Acabados,Piso de Concreto Pulido o Tarrajeado con Mircrocemento,M2,3,F071003,PISO DE CONCRETO SIMPLE 8 CM. P/ACERA,M2,469,0.4
+db6ca5f1-b9da-42b5-977e-047081c1d572,09 30 13.6,09,Acabados,Piso de Concreto Pulido o Tarrajeado con Mircrocemento,M2,3,F071004,PISO DE CONCRETO SIMPLE DE 10 CM. PARA ACERA,M2,470,0.4
+db6ca5f1-b9da-42b5-977e-047081c1d572,09 30 13.6,09,Acabados,Piso de Concreto Pulido o Tarrajeado con Mircrocemento,M2,3,F071005,PISO DE CONCRETO SIMPLE 15 Cms.,M2.,471,0.4
+3c2e3b16-7f93-4951-becc-e43b2160026e,09 30 13.4,09,Acabados,Cerámica Barcelona Beige Samboro 20 cm x 31 cm Fanasa,M2,2,F061001,AFINADO e=0.5 CM,M2,450,0.5
+0ee04fc5-9cdc-4639-a867-d6c968a32157,09 91 13.1,09,Acabados,Pintura Base - Sellador Primer Latex Peninsular Sherwin Williams,M2,2,F172001,PINTURA DE ACEITE,M2,875,0.5
+0ee04fc5-9cdc-4639-a867-d6c968a32157,09 91 13.1,09,Acabados,Pintura Base - Sellador Primer Latex Peninsular Sherwin Williams,M2,2,F174001,PINTURA PARA PIZARRON,M2,876,0.5
+da41f513-dda9-4e87-b98d-bf19648eac4f,09 91 13.2,09,Acabados,Pintura Base Covermore,M2,2,F172001,PINTURA DE ACEITE,M2,875,0.5
+da41f513-dda9-4e87-b98d-bf19648eac4f,09 91 13.2,09,Acabados,Pintura Base Covermore,M2,2,F174001,PINTURA PARA PIZARRON,M2,876,0.5
+b9be839e-6077-4031-9f18-4eadedd211b6,09 91 23.1,09,Acabados,Pintura Covermore Pro Cover Latex Lavable,M2,2,F172001,PINTURA DE ACEITE,M2,875,0.5
+b9be839e-6077-4031-9f18-4eadedd211b6,09 91 23.1,09,Acabados,Pintura Covermore Pro Cover Latex Lavable,M2,2,F174001,PINTURA PARA PIZARRON,M2,876,0.5
+e65d472e-734a-466c-b2bf-96b53d1dd094,09 91 23.2,09,Acabados,Pintura Mate Exterior/Interior Sherwin Williams,M2,2,F172001,PINTURA DE ACEITE,M2,875,0.5
+e65d472e-734a-466c-b2bf-96b53d1dd094,09 91 23.2,09,Acabados,Pintura Mate Exterior/Interior Sherwin Williams,M2,2,F174001,PINTURA PARA PIZARRON,M2,876,0.5
+adb1594f-90ed-4dcc-86a6-6f73b181c5b6,22 11 13.1,22,Plomería,"Suministro e Instalación de Tubería de PVC de 3/4"" SDR 17",M,2,F101002,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-17",M.L.,540,0.6
+adb1594f-90ed-4dcc-86a6-6f73b181c5b6,22 11 13.1,22,Plomería,"Suministro e Instalación de Tubería de PVC de 3/4"" SDR 17",M,2,F101006,"SUMINISTRO DE TUBERIA PVC DE 3/4"" RD-17",M.L.,544,0.6
+adb1594f-90ed-4dcc-86a6-6f73b181c5b6,22 11 13.1,22,Plomería,"Suministro e Instalación de Tubería de PVC de 3/4"" SDR 17",M,2,F101009,"SUMINISTRO DE TUBERIA PVC DE 1"" RD-17",M.L.,547,0.6
+adb1594f-90ed-4dcc-86a6-6f73b181c5b6,22 11 13.1,22,Plomería,"Suministro e Instalación de Tubería de PVC de 3/4"" SDR 17",M,2,F101014,"SUMINISTRO DE TUBERIA PVC DE 1-1/2"" RD-17",M.L.,552,0.6
+adb1594f-90ed-4dcc-86a6-6f73b181c5b6,22 11 13.1,22,Plomería,"Suministro e Instalación de Tubería de PVC de 3/4"" SDR 17",M,2,F101018,"SUMINISTRO DE TUBERIA PVC DE 2"" RD-17",M.L.,556,0.6
+985901f4-dda2-46ff-b948-cdd15fb99bea,22 11 13.2,22,Plomería,"Suministro e Instalación de Codo de PVC de 3/4"" a 90°",PZA,1,F270032,SUMINISTRO E INSTALACION DE CANAL DE PVC,ML,1107,0.5
+985901f4-dda2-46ff-b948-cdd15fb99bea,22 11 13.2,22,Plomería,"Suministro e Instalación de Codo de PVC de 3/4"" a 90°",PZA,1,F101001,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-13.5",M.L.,539,0.4
+985901f4-dda2-46ff-b948-cdd15fb99bea,22 11 13.2,22,Plomería,"Suministro e Instalación de Codo de PVC de 3/4"" a 90°",PZA,1,F101002,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-17",M.L.,540,0.4
+985901f4-dda2-46ff-b948-cdd15fb99bea,22 11 13.2,22,Plomería,"Suministro e Instalación de Codo de PVC de 3/4"" a 90°",PZA,1,F101003,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-26",M.L.,541,0.4
+985901f4-dda2-46ff-b948-cdd15fb99bea,22 11 13.2,22,Plomería,"Suministro e Instalación de Codo de PVC de 3/4"" a 90°",PZA,1,F101005,"SUMINISTRO DE TUBERIA PVC DE 3/4"" RD-13.5",M.L.,543,0.4
+265ac6af-0add-4591-b19b-ffe7efb6eb95,22 11 13.3,22,Plomería,"Suministro e Instalación de Tee de PVC de 3/4""",PZA,1,F101001,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-13.5",M.L.,539,0.5
+265ac6af-0add-4591-b19b-ffe7efb6eb95,22 11 13.3,22,Plomería,"Suministro e Instalación de Tee de PVC de 3/4""",PZA,1,F101002,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-17",M.L.,540,0.5
+265ac6af-0add-4591-b19b-ffe7efb6eb95,22 11 13.3,22,Plomería,"Suministro e Instalación de Tee de PVC de 3/4""",PZA,1,F101003,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-26",M.L.,541,0.5
+265ac6af-0add-4591-b19b-ffe7efb6eb95,22 11 13.3,22,Plomería,"Suministro e Instalación de Tee de PVC de 3/4""",PZA,1,F101005,"SUMINISTRO DE TUBERIA PVC DE 3/4"" RD-13.5",M.L.,543,0.5
+265ac6af-0add-4591-b19b-ffe7efb6eb95,22 11 13.3,22,Plomería,"Suministro e Instalación de Tee de PVC de 3/4""",PZA,1,F101006,"SUMINISTRO DE TUBERIA PVC DE 3/4"" RD-17",M.L.,544,0.5
+16fe20cb-4c25-4d97-af85-1bf8afc2eeac,22 11 13.4,22,Plomería,"Suministro e Instalación de Tubería de PVC de 1/2"" SDR 13.5",M,2,F101001,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-13.5",M.L.,539,0.6
+16fe20cb-4c25-4d97-af85-1bf8afc2eeac,22 11 13.4,22,Plomería,"Suministro e Instalación de Tubería de PVC de 1/2"" SDR 13.5",M,2,F101005,"SUMINISTRO DE TUBERIA PVC DE 3/4"" RD-13.5",M.L.,543,0.6
+16fe20cb-4c25-4d97-af85-1bf8afc2eeac,22 11 13.4,22,Plomería,"Suministro e Instalación de Tubería de PVC de 1/2"" SDR 13.5",M,2,F101013,"SUMINISTRO DE TUBERIA PVC DE 1-1/2"" RD-13.5",M.L.,551,0.6
+16fe20cb-4c25-4d97-af85-1bf8afc2eeac,22 11 13.4,22,Plomería,"Suministro e Instalación de Tubería de PVC de 1/2"" SDR 13.5",M,2,F101042,"SUMINISTRO DE TUBERIA PVC DE 6"" RD-13.5",M.L.,580,0.6
+16fe20cb-4c25-4d97-af85-1bf8afc2eeac,22 11 13.4,22,Plomería,"Suministro e Instalación de Tubería de PVC de 1/2"" SDR 13.5",M,2,F270032,SUMINISTRO E INSTALACION DE CANAL DE PVC,ML,1107,0.5
+4d3aa852-e61d-4a29-aed8-298bfd7a8691,22 11 13.5,22,Plomería,"Suministro e Instalación de Codo de PVC de 1/2"" a 90°",PZA,1,F270032,SUMINISTRO E INSTALACION DE CANAL DE PVC,ML,1107,0.5
+4d3aa852-e61d-4a29-aed8-298bfd7a8691,22 11 13.5,22,Plomería,"Suministro e Instalación de Codo de PVC de 1/2"" a 90°",PZA,1,F101001,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-13.5",M.L.,539,0.4
+4d3aa852-e61d-4a29-aed8-298bfd7a8691,22 11 13.5,22,Plomería,"Suministro e Instalación de Codo de PVC de 1/2"" a 90°",PZA,1,F101002,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-17",M.L.,540,0.4
+4d3aa852-e61d-4a29-aed8-298bfd7a8691,22 11 13.5,22,Plomería,"Suministro e Instalación de Codo de PVC de 1/2"" a 90°",PZA,1,F101003,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-26",M.L.,541,0.4
+4d3aa852-e61d-4a29-aed8-298bfd7a8691,22 11 13.5,22,Plomería,"Suministro e Instalación de Codo de PVC de 1/2"" a 90°",PZA,1,F101005,"SUMINISTRO DE TUBERIA PVC DE 3/4"" RD-13.5",M.L.,543,0.4
+631472c9-5109-453f-9936-6607eaa476a0,22 11 13.6,22,Plomería,"Suministro e Instalación de Tee de PVC de 1/2""",PZA,1,F101001,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-13.5",M.L.,539,0.5
+631472c9-5109-453f-9936-6607eaa476a0,22 11 13.6,22,Plomería,"Suministro e Instalación de Tee de PVC de 1/2""",PZA,1,F101002,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-17",M.L.,540,0.5
+631472c9-5109-453f-9936-6607eaa476a0,22 11 13.6,22,Plomería,"Suministro e Instalación de Tee de PVC de 1/2""",PZA,1,F101003,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-26",M.L.,541,0.5
+631472c9-5109-453f-9936-6607eaa476a0,22 11 13.6,22,Plomería,"Suministro e Instalación de Tee de PVC de 1/2""",PZA,1,F101005,"SUMINISTRO DE TUBERIA PVC DE 3/4"" RD-13.5",M.L.,543,0.5
+631472c9-5109-453f-9936-6607eaa476a0,22 11 13.6,22,Plomería,"Suministro e Instalación de Tee de PVC de 1/2""",PZA,1,F101006,"SUMINISTRO DE TUBERIA PVC DE 3/4"" RD-17",M.L.,544,0.5
+89751b61-1839-4454-9839-c720f6c14e0e,22 11 13.7,22,Plomería,"Suministro e Instalación de Reductor de PVC de 3/4"" a 1/2""",PZA,1,F101001,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-13.5",M.L.,539,0.5
+89751b61-1839-4454-9839-c720f6c14e0e,22 11 13.7,22,Plomería,"Suministro e Instalación de Reductor de PVC de 3/4"" a 1/2""",PZA,1,F101002,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-17",M.L.,540,0.5
+89751b61-1839-4454-9839-c720f6c14e0e,22 11 13.7,22,Plomería,"Suministro e Instalación de Reductor de PVC de 3/4"" a 1/2""",PZA,1,F101003,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-26",M.L.,541,0.5
+89751b61-1839-4454-9839-c720f6c14e0e,22 11 13.7,22,Plomería,"Suministro e Instalación de Reductor de PVC de 3/4"" a 1/2""",PZA,1,F101005,"SUMINISTRO DE TUBERIA PVC DE 3/4"" RD-13.5",M.L.,543,0.5
+89751b61-1839-4454-9839-c720f6c14e0e,22 11 13.7,22,Plomería,"Suministro e Instalación de Reductor de PVC de 3/4"" a 1/2""",PZA,1,F101006,"SUMINISTRO DE TUBERIA PVC DE 3/4"" RD-17",M.L.,544,0.5
+2f5a438c-d5b9-4ce8-ae09-ecdaac644eed,22 11 13.8,22,Plomería,"Suministro e Instalación de Tubería de CPVC de 1/2""",M,2,F101004,"SUMINISTRO DE TUBERIA CPVC DE 1/2"" AGUA CALIENTE",M.L.,542,0.5
+4b5ce898-4520-4f9c-8762-fca25ef796b6,22 11 13.9,22,Plomería,"Suministro e Instalación de Tee de CPVC de 1/2""",PZA,1,F101004,"SUMINISTRO DE TUBERIA CPVC DE 1/2"" AGUA CALIENTE",M.L.,542,0.5
+aecf694d-e6b2-4be1-9d1e-bd4a5504a338,22 11 13.10,22,Plomería,"Suministro e Instalación de Codo de CPVC de 1/2"" a 90°",PZA,1,F101004,"SUMINISTRO DE TUBERIA CPVC DE 1/2"" AGUA CALIENTE",M.L.,542,0.4
+f6ac47be-3dd1-4d5b-b5b2-8739f43f0f09,22 11 13.11,22,Plomería,"Suministro e Instalación de Reductor de CPVC de 3/4"" a 1/2""",PZA,1,F101004,"SUMINISTRO DE TUBERIA CPVC DE 1/2"" AGUA CALIENTE",M.L.,542,0.5
+7bb2b930-a2b7-4104-8770-de9cf9a6ce1c,22 12 19.4,22,Plomería,Tanque De Reserva Elevado (Sin Incluir Columna) de Capacidad de 750L + Losa Elevada,GLOBAL,1,F270010,TANQUE ELEVADO EMAS,UNID,1096,0.667
+7bb2b930-a2b7-4104-8770-de9cf9a6ce1c,22 12 19.4,22,Plomería,Tanque De Reserva Elevado (Sin Incluir Columna) de Capacidad de 750L + Losa Elevada,GLOBAL,1,F113018,LOSA DE LETRINA,M2,723,0.5
+d9b4e8f0-5a6d-4d76-b187-d4b1d14df5c7,22 12 19.5,22,Plomería,Tanque De Reserva Elevado (Sin Incluir Columna) de Capacidad de 1100L + Losa Elevada,GLOBAL,1,F270010,TANQUE ELEVADO EMAS,UNID,1096,0.667
+d9b4e8f0-5a6d-4d76-b187-d4b1d14df5c7,22 12 19.5,22,Plomería,Tanque De Reserva Elevado (Sin Incluir Columna) de Capacidad de 1100L + Losa Elevada,GLOBAL,1,F113018,LOSA DE LETRINA,M2,723,0.5
+d97c0ece-3164-43ab-9544-ad96d2e67268,22 12 19.6,22,Plomería,Tanque De Reserva Elevado (Sin Incluir Columna) de Capacidad de 1700L + Losa Elevada,GLOBAL,1,F270010,TANQUE ELEVADO EMAS,UNID,1096,0.667
+d97c0ece-3164-43ab-9544-ad96d2e67268,22 12 19.6,22,Plomería,Tanque De Reserva Elevado (Sin Incluir Columna) de Capacidad de 1700L + Losa Elevada,GLOBAL,1,F113018,LOSA DE LETRINA,M2,723,0.5
+302419e3-c196-4ec7-9ee8-6a6163362359,22 12 19.7,22,Plomería,"Tanque De Reserva Elevado (Sin Columna) de Capacidad de 5,000L + Losa Elevada y Columna R5",GLOBAL,0,F270010,TANQUE ELEVADO EMAS,UNID,1096,0.667
+302419e3-c196-4ec7-9ee8-6a6163362359,22 12 19.7,22,Plomería,"Tanque De Reserva Elevado (Sin Columna) de Capacidad de 5,000L + Losa Elevada y Columna R5",GLOBAL,0,F113018,LOSA DE LETRINA,M2,723,0.5
+45864814-5db3-40d4-ae42-5d7be8ab24ea,22 13 13.1,22,Plomería,"Suministro e Instalación de Tubería de PVC de 2"" SDR 21",M,2,F101007,"SUMINISTRO DE TUBERIA PVC DE 3/4"" RD-21",M.L.,545,0.6
+45864814-5db3-40d4-ae42-5d7be8ab24ea,22 13 13.1,22,Plomería,"Suministro e Instalación de Tubería de PVC de 2"" SDR 21",M,2,F101010,"SUMINISTRO DE TUBERIA PVC DE 1"" RD-21",M.L.,548,0.6
+45864814-5db3-40d4-ae42-5d7be8ab24ea,22 13 13.1,22,Plomería,"Suministro e Instalación de Tubería de PVC de 2"" SDR 21",M,2,F101015,"SUMINISTRO DE TUBERIA PVC DE 1-1/2"" RD-21",M.L.,553,0.6
+45864814-5db3-40d4-ae42-5d7be8ab24ea,22 13 13.1,22,Plomería,"Suministro e Instalación de Tubería de PVC de 2"" SDR 21",M,2,F101019,"SUMINISTRO DE TUBERIA PVC DE 2"" RD-21",M.L.,557,0.6
+45864814-5db3-40d4-ae42-5d7be8ab24ea,22 13 13.1,22,Plomería,"Suministro e Instalación de Tubería de PVC de 2"" SDR 21",M,2,F101025,"SUMINISTRO DE TUBERIA PVC DE 2-1/2"" RD-21",M.L.,563,0.6
+a3ae1e61-1f48-4cb2-a143-4172918cbc19,22 13 13.2,22,Plomería,"Suministro e Instalación de Codo de PVC de 2"" a 45°",PZA,1,F270032,SUMINISTRO E INSTALACION DE CANAL DE PVC,ML,1107,0.5
+a3ae1e61-1f48-4cb2-a143-4172918cbc19,22 13 13.2,22,Plomería,"Suministro e Instalación de Codo de PVC de 2"" a 45°",PZA,1,F101001,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-13.5",M.L.,539,0.4
+a3ae1e61-1f48-4cb2-a143-4172918cbc19,22 13 13.2,22,Plomería,"Suministro e Instalación de Codo de PVC de 2"" a 45°",PZA,1,F101002,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-17",M.L.,540,0.4
+a3ae1e61-1f48-4cb2-a143-4172918cbc19,22 13 13.2,22,Plomería,"Suministro e Instalación de Codo de PVC de 2"" a 45°",PZA,1,F101003,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-26",M.L.,541,0.4
+a3ae1e61-1f48-4cb2-a143-4172918cbc19,22 13 13.2,22,Plomería,"Suministro e Instalación de Codo de PVC de 2"" a 45°",PZA,1,F101005,"SUMINISTRO DE TUBERIA PVC DE 3/4"" RD-13.5",M.L.,543,0.4
+de8b63a1-ecb4-4f25-8e14-f8cdff73e05b,22 13 13.3,22,Plomería,"Suministro e Instalación de Codo de PVC de 2"" a 90°",PZA,1,F270032,SUMINISTRO E INSTALACION DE CANAL DE PVC,ML,1107,0.5
+de8b63a1-ecb4-4f25-8e14-f8cdff73e05b,22 13 13.3,22,Plomería,"Suministro e Instalación de Codo de PVC de 2"" a 90°",PZA,1,F101001,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-13.5",M.L.,539,0.4
+de8b63a1-ecb4-4f25-8e14-f8cdff73e05b,22 13 13.3,22,Plomería,"Suministro e Instalación de Codo de PVC de 2"" a 90°",PZA,1,F101002,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-17",M.L.,540,0.4
+de8b63a1-ecb4-4f25-8e14-f8cdff73e05b,22 13 13.3,22,Plomería,"Suministro e Instalación de Codo de PVC de 2"" a 90°",PZA,1,F101003,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-26",M.L.,541,0.4
+de8b63a1-ecb4-4f25-8e14-f8cdff73e05b,22 13 13.3,22,Plomería,"Suministro e Instalación de Codo de PVC de 2"" a 90°",PZA,1,F101005,"SUMINISTRO DE TUBERIA PVC DE 3/4"" RD-13.5",M.L.,543,0.4
+709e52cc-dabf-4d19-8609-0262c9287442,22 13 13.4,22,Plomería,"Suministro e Instalación de Tee de PVC de 2""",PZA,1,F101001,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-13.5",M.L.,539,0.5
+709e52cc-dabf-4d19-8609-0262c9287442,22 13 13.4,22,Plomería,"Suministro e Instalación de Tee de PVC de 2""",PZA,1,F101002,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-17",M.L.,540,0.5
+709e52cc-dabf-4d19-8609-0262c9287442,22 13 13.4,22,Plomería,"Suministro e Instalación de Tee de PVC de 2""",PZA,1,F101003,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-26",M.L.,541,0.5
+709e52cc-dabf-4d19-8609-0262c9287442,22 13 13.4,22,Plomería,"Suministro e Instalación de Tee de PVC de 2""",PZA,1,F101005,"SUMINISTRO DE TUBERIA PVC DE 3/4"" RD-13.5",M.L.,543,0.5
+709e52cc-dabf-4d19-8609-0262c9287442,22 13 13.4,22,Plomería,"Suministro e Instalación de Tee de PVC de 2""",PZA,1,F101006,"SUMINISTRO DE TUBERIA PVC DE 3/4"" RD-17",M.L.,544,0.5
+e695c407-37c2-4912-8230-147d53c31c22,22 13 13.5,22,Plomería,"Suministro e Instalación de Sifón de PVC de 2""",PZA,1,F101001,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-13.5",M.L.,539,0.5
+e695c407-37c2-4912-8230-147d53c31c22,22 13 13.5,22,Plomería,"Suministro e Instalación de Sifón de PVC de 2""",PZA,1,F101002,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-17",M.L.,540,0.5
+e695c407-37c2-4912-8230-147d53c31c22,22 13 13.5,22,Plomería,"Suministro e Instalación de Sifón de PVC de 2""",PZA,1,F101003,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-26",M.L.,541,0.5
+e695c407-37c2-4912-8230-147d53c31c22,22 13 13.5,22,Plomería,"Suministro e Instalación de Sifón de PVC de 2""",PZA,1,F101005,"SUMINISTRO DE TUBERIA PVC DE 3/4"" RD-13.5",M.L.,543,0.5
+e695c407-37c2-4912-8230-147d53c31c22,22 13 13.5,22,Plomería,"Suministro e Instalación de Sifón de PVC de 2""",PZA,1,F101006,"SUMINISTRO DE TUBERIA PVC DE 3/4"" RD-17",M.L.,544,0.5
+6c920343-e062-46c1-928a-f72000aefdf5,22 13 13.6,22,Plomería,"Suministro e Instalación de Tubería de PVC de 3"" SDR 41",M,2,F101022,"SUMINISTRO DE TUBERIA PVC DE 2"" RD-41",M.L.,560,0.6
+6c920343-e062-46c1-928a-f72000aefdf5,22 13 13.6,22,Plomería,"Suministro e Instalación de Tubería de PVC de 3"" SDR 41",M,2,F101032,"SUMINISTRO DE TUBERIA PVC DE 3"" RD-41",M.L.,570,0.6
+6c920343-e062-46c1-928a-f72000aefdf5,22 13 13.6,22,Plomería,"Suministro e Instalación de Tubería de PVC de 3"" SDR 41",M,2,F101040,"SUMINISTRO DE TUBERIA PVC DE 4"" RD-41",M.L.,578,0.6
+6c920343-e062-46c1-928a-f72000aefdf5,22 13 13.6,22,Plomería,"Suministro e Instalación de Tubería de PVC de 3"" SDR 41",M,2,F101047,"SUMINISTRO DE TUBERIA PVC DE 6"" RD-41",M.L.,585,0.6
+6c920343-e062-46c1-928a-f72000aefdf5,22 13 13.6,22,Plomería,"Suministro e Instalación de Tubería de PVC de 3"" SDR 41",M,2,F101053,"SUMINISTRO DE TUBERIA PVC DE 8"" RD-41",M.L.,591,0.6
+52860cd6-9388-4214-92b7-4f16970c429b,22 13 13.7,22,Plomería,"Suministro e Instalación de Codo de PVC de 3"" a 45°",PZA,1,F270032,SUMINISTRO E INSTALACION DE CANAL DE PVC,ML,1107,0.5
+52860cd6-9388-4214-92b7-4f16970c429b,22 13 13.7,22,Plomería,"Suministro e Instalación de Codo de PVC de 3"" a 45°",PZA,1,F101001,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-13.5",M.L.,539,0.4
+52860cd6-9388-4214-92b7-4f16970c429b,22 13 13.7,22,Plomería,"Suministro e Instalación de Codo de PVC de 3"" a 45°",PZA,1,F101002,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-17",M.L.,540,0.4
+52860cd6-9388-4214-92b7-4f16970c429b,22 13 13.7,22,Plomería,"Suministro e Instalación de Codo de PVC de 3"" a 45°",PZA,1,F101003,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-26",M.L.,541,0.4
+52860cd6-9388-4214-92b7-4f16970c429b,22 13 13.7,22,Plomería,"Suministro e Instalación de Codo de PVC de 3"" a 45°",PZA,1,F101005,"SUMINISTRO DE TUBERIA PVC DE 3/4"" RD-13.5",M.L.,543,0.4
+25439fd0-9473-437a-abb5-e75b6a42501e,22 13 13.9,22,Plomería,"Suministro e Instalación de Tee de PVC de 3""",PZA,1,F101001,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-13.5",M.L.,539,0.5
+25439fd0-9473-437a-abb5-e75b6a42501e,22 13 13.9,22,Plomería,"Suministro e Instalación de Tee de PVC de 3""",PZA,1,F101002,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-17",M.L.,540,0.5
+25439fd0-9473-437a-abb5-e75b6a42501e,22 13 13.9,22,Plomería,"Suministro e Instalación de Tee de PVC de 3""",PZA,1,F101003,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-26",M.L.,541,0.5
+25439fd0-9473-437a-abb5-e75b6a42501e,22 13 13.9,22,Plomería,"Suministro e Instalación de Tee de PVC de 3""",PZA,1,F101005,"SUMINISTRO DE TUBERIA PVC DE 3/4"" RD-13.5",M.L.,543,0.5
+25439fd0-9473-437a-abb5-e75b6a42501e,22 13 13.9,22,Plomería,"Suministro e Instalación de Tee de PVC de 3""",PZA,1,F101006,"SUMINISTRO DE TUBERIA PVC DE 3/4"" RD-17",M.L.,544,0.5
+a541e017-fb0f-476e-8ea4-8fd4266e65ca,22 13 13.10,22,Plomería,"Suministro e Instalación de Reductor de PVC de 3"" a 2""",PZA,1,F101001,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-13.5",M.L.,539,0.5
+a541e017-fb0f-476e-8ea4-8fd4266e65ca,22 13 13.10,22,Plomería,"Suministro e Instalación de Reductor de PVC de 3"" a 2""",PZA,1,F101002,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-17",M.L.,540,0.5
+a541e017-fb0f-476e-8ea4-8fd4266e65ca,22 13 13.10,22,Plomería,"Suministro e Instalación de Reductor de PVC de 3"" a 2""",PZA,1,F101003,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-26",M.L.,541,0.5
+a541e017-fb0f-476e-8ea4-8fd4266e65ca,22 13 13.10,22,Plomería,"Suministro e Instalación de Reductor de PVC de 3"" a 2""",PZA,1,F101005,"SUMINISTRO DE TUBERIA PVC DE 3/4"" RD-13.5",M.L.,543,0.5
+a541e017-fb0f-476e-8ea4-8fd4266e65ca,22 13 13.10,22,Plomería,"Suministro e Instalación de Reductor de PVC de 3"" a 2""",PZA,1,F101006,"SUMINISTRO DE TUBERIA PVC DE 3/4"" RD-17",M.L.,544,0.5
+490cff7c-f16b-4b05-b8be-d654be983822,22 13 13.11,22,Plomería,"Suministro e Instalación de Tubería de PVC de 4"" SDR 41",M,2,F101022,"SUMINISTRO DE TUBERIA PVC DE 2"" RD-41",M.L.,560,0.6
+490cff7c-f16b-4b05-b8be-d654be983822,22 13 13.11,22,Plomería,"Suministro e Instalación de Tubería de PVC de 4"" SDR 41",M,2,F101032,"SUMINISTRO DE TUBERIA PVC DE 3"" RD-41",M.L.,570,0.6
+490cff7c-f16b-4b05-b8be-d654be983822,22 13 13.11,22,Plomería,"Suministro e Instalación de Tubería de PVC de 4"" SDR 41",M,2,F101040,"SUMINISTRO DE TUBERIA PVC DE 4"" RD-41",M.L.,578,0.6
+490cff7c-f16b-4b05-b8be-d654be983822,22 13 13.11,22,Plomería,"Suministro e Instalación de Tubería de PVC de 4"" SDR 41",M,2,F101047,"SUMINISTRO DE TUBERIA PVC DE 6"" RD-41",M.L.,585,0.6
+490cff7c-f16b-4b05-b8be-d654be983822,22 13 13.11,22,Plomería,"Suministro e Instalación de Tubería de PVC de 4"" SDR 41",M,2,F101053,"SUMINISTRO DE TUBERIA PVC DE 8"" RD-41",M.L.,591,0.6
+615d92b0-56d1-4f4f-933e-93d8ed9b887e,22 13 13.12,22,Plomería,"Suministro e Instalación de Codo de PVC de 4"" a 45°",PZA,1,F270032,SUMINISTRO E INSTALACION DE CANAL DE PVC,ML,1107,0.5
+615d92b0-56d1-4f4f-933e-93d8ed9b887e,22 13 13.12,22,Plomería,"Suministro e Instalación de Codo de PVC de 4"" a 45°",PZA,1,F101001,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-13.5",M.L.,539,0.4
+615d92b0-56d1-4f4f-933e-93d8ed9b887e,22 13 13.12,22,Plomería,"Suministro e Instalación de Codo de PVC de 4"" a 45°",PZA,1,F101002,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-17",M.L.,540,0.4
+615d92b0-56d1-4f4f-933e-93d8ed9b887e,22 13 13.12,22,Plomería,"Suministro e Instalación de Codo de PVC de 4"" a 45°",PZA,1,F101003,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-26",M.L.,541,0.4
+615d92b0-56d1-4f4f-933e-93d8ed9b887e,22 13 13.12,22,Plomería,"Suministro e Instalación de Codo de PVC de 4"" a 45°",PZA,1,F101005,"SUMINISTRO DE TUBERIA PVC DE 3/4"" RD-13.5",M.L.,543,0.4
+ce865445-2a97-44b4-8b27-9a6f254854f6,22 13 13.13,22,Plomería,"Suministro e Instalación de Yee de PVC de 4""",PZA,1,F101001,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-13.5",M.L.,539,0.5
+ce865445-2a97-44b4-8b27-9a6f254854f6,22 13 13.13,22,Plomería,"Suministro e Instalación de Yee de PVC de 4""",PZA,1,F101002,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-17",M.L.,540,0.5
+ce865445-2a97-44b4-8b27-9a6f254854f6,22 13 13.13,22,Plomería,"Suministro e Instalación de Yee de PVC de 4""",PZA,1,F101003,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-26",M.L.,541,0.5
+ce865445-2a97-44b4-8b27-9a6f254854f6,22 13 13.13,22,Plomería,"Suministro e Instalación de Yee de PVC de 4""",PZA,1,F101005,"SUMINISTRO DE TUBERIA PVC DE 3/4"" RD-13.5",M.L.,543,0.5
+ce865445-2a97-44b4-8b27-9a6f254854f6,22 13 13.13,22,Plomería,"Suministro e Instalación de Yee de PVC de 4""",PZA,1,F101006,"SUMINISTRO DE TUBERIA PVC DE 3/4"" RD-17",M.L.,544,0.5
+40b09771-452e-4f92-b368-36a32fb120a0,22 13 13.14,22,Plomería,"Suministro e Instalación de Reductor de PVC de 4"" a 3""",PZA,1,F101001,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-13.5",M.L.,539,0.5
+40b09771-452e-4f92-b368-36a32fb120a0,22 13 13.14,22,Plomería,"Suministro e Instalación de Reductor de PVC de 4"" a 3""",PZA,1,F101002,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-17",M.L.,540,0.5
+40b09771-452e-4f92-b368-36a32fb120a0,22 13 13.14,22,Plomería,"Suministro e Instalación de Reductor de PVC de 4"" a 3""",PZA,1,F101003,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-26",M.L.,541,0.5
+40b09771-452e-4f92-b368-36a32fb120a0,22 13 13.14,22,Plomería,"Suministro e Instalación de Reductor de PVC de 4"" a 3""",PZA,1,F101005,"SUMINISTRO DE TUBERIA PVC DE 3/4"" RD-13.5",M.L.,543,0.5
+40b09771-452e-4f92-b368-36a32fb120a0,22 13 13.14,22,Plomería,"Suministro e Instalación de Reductor de PVC de 4"" a 3""",PZA,1,F101006,"SUMINISTRO DE TUBERIA PVC DE 3/4"" RD-17",M.L.,544,0.5
+9f946e23-0cd6-4f87-b289-b3ddf3e9332b,22 13 13.15,22,Plomería,"Suministro e Instalación de Reductor de PVC de 4"" a 2""",PZA,1,F101001,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-13.5",M.L.,539,0.5
+9f946e23-0cd6-4f87-b289-b3ddf3e9332b,22 13 13.15,22,Plomería,"Suministro e Instalación de Reductor de PVC de 4"" a 2""",PZA,1,F101002,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-17",M.L.,540,0.5
+9f946e23-0cd6-4f87-b289-b3ddf3e9332b,22 13 13.15,22,Plomería,"Suministro e Instalación de Reductor de PVC de 4"" a 2""",PZA,1,F101003,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-26",M.L.,541,0.5
+9f946e23-0cd6-4f87-b289-b3ddf3e9332b,22 13 13.15,22,Plomería,"Suministro e Instalación de Reductor de PVC de 4"" a 2""",PZA,1,F101005,"SUMINISTRO DE TUBERIA PVC DE 3/4"" RD-13.5",M.L.,543,0.5
+9f946e23-0cd6-4f87-b289-b3ddf3e9332b,22 13 13.15,22,Plomería,"Suministro e Instalación de Reductor de PVC de 4"" a 2""",PZA,1,F101006,"SUMINISTRO DE TUBERIA PVC DE 3/4"" RD-17",M.L.,544,0.5
+5c2bf9f9-12da-4a04-9664-68d2bab51ae4,22 13 53.4,22,Plomería,Fosa Séptica de Bloque de 1.50x1.50x1.50m = 3.375m3,GLOBAL,4,F113010,ADEMADO EN FOSA DE LETRINA (BLOQUE),M.L.,715,0.5
+55c81630-b162-4f81-918e-67c634321f18,22 13 53.1,22,Plomería,Caja de Registro para Agua Residual de 50 x 50 x 50 cms,PZA,2,F111003,CAJA DE REGISTRO DE 50X50X5,UNID.,689,0.667
+55c81630-b162-4f81-918e-67c634321f18,22 13 53.1,22,Plomería,Caja de Registro para Agua Residual de 50 x 50 x 50 cms,PZA,2,F111004,CAJA DE REGISTRO DE 85X85X65,UNID,690,0.667
+55c81630-b162-4f81-918e-67c634321f18,22 13 53.1,22,Plomería,Caja de Registro para Agua Residual de 50 x 50 x 50 cms,PZA,2,F111005,CAJA DE REGISTRO DE 90X90X80,UNID,691,0.667
+55c81630-b162-4f81-918e-67c634321f18,22 13 53.1,22,Plomería,Caja de Registro para Agua Residual de 50 x 50 x 50 cms,PZA,2,F111002,CAJA DE REGISTRO DE 40X40X60 CM.,UNID,688,0.5
+55c81630-b162-4f81-918e-67c634321f18,22 13 53.1,22,Plomería,Caja de Registro para Agua Residual de 50 x 50 x 50 cms,PZA,2,F232010,"CAJA DE REGISTRO, TOMA Y ZANJA FILTRANTE",UNID,994,0.4
+4e9d422a-421f-4023-aad1-97e9301e0b59,22 14 16.1,22,Plomería,"Suministro e Instalación de Tubería de PVC de 3""",M,2,F101001,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-13.5",M.L.,539,0.5
+4e9d422a-421f-4023-aad1-97e9301e0b59,22 14 16.1,22,Plomería,"Suministro e Instalación de Tubería de PVC de 3""",M,2,F101002,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-17",M.L.,540,0.5
+4e9d422a-421f-4023-aad1-97e9301e0b59,22 14 16.1,22,Plomería,"Suministro e Instalación de Tubería de PVC de 3""",M,2,F101003,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-26",M.L.,541,0.5
+4e9d422a-421f-4023-aad1-97e9301e0b59,22 14 16.1,22,Plomería,"Suministro e Instalación de Tubería de PVC de 3""",M,2,F101005,"SUMINISTRO DE TUBERIA PVC DE 3/4"" RD-13.5",M.L.,543,0.5
+4e9d422a-421f-4023-aad1-97e9301e0b59,22 14 16.1,22,Plomería,"Suministro e Instalación de Tubería de PVC de 3""",M,2,F101006,"SUMINISTRO DE TUBERIA PVC DE 3/4"" RD-17",M.L.,544,0.5
+2af31688-46f9-4608-851a-e39c5f8d00db,22 14 16.2,22,Plomería,"Suministro e Instalación de Codo de PVC de 3"" a 45°",PZA,1,F270032,SUMINISTRO E INSTALACION DE CANAL DE PVC,ML,1107,0.5
+2af31688-46f9-4608-851a-e39c5f8d00db,22 14 16.2,22,Plomería,"Suministro e Instalación de Codo de PVC de 3"" a 45°",PZA,1,F101001,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-13.5",M.L.,539,0.4
+2af31688-46f9-4608-851a-e39c5f8d00db,22 14 16.2,22,Plomería,"Suministro e Instalación de Codo de PVC de 3"" a 45°",PZA,1,F101002,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-17",M.L.,540,0.4
+2af31688-46f9-4608-851a-e39c5f8d00db,22 14 16.2,22,Plomería,"Suministro e Instalación de Codo de PVC de 3"" a 45°",PZA,1,F101003,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-26",M.L.,541,0.4
+2af31688-46f9-4608-851a-e39c5f8d00db,22 14 16.2,22,Plomería,"Suministro e Instalación de Codo de PVC de 3"" a 45°",PZA,1,F101005,"SUMINISTRO DE TUBERIA PVC DE 3/4"" RD-13.5",M.L.,543,0.4
+df9fb988-893d-4f98-a930-6277bd240d36,22 14 16.3,22,Plomería,"Suministro e Instalación de Codo de PVC de 3"" a 90°",PZA,1,F270032,SUMINISTRO E INSTALACION DE CANAL DE PVC,ML,1107,0.5
+df9fb988-893d-4f98-a930-6277bd240d36,22 14 16.3,22,Plomería,"Suministro e Instalación de Codo de PVC de 3"" a 90°",PZA,1,F101001,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-13.5",M.L.,539,0.4
+df9fb988-893d-4f98-a930-6277bd240d36,22 14 16.3,22,Plomería,"Suministro e Instalación de Codo de PVC de 3"" a 90°",PZA,1,F101002,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-17",M.L.,540,0.4
+df9fb988-893d-4f98-a930-6277bd240d36,22 14 16.3,22,Plomería,"Suministro e Instalación de Codo de PVC de 3"" a 90°",PZA,1,F101003,"SUMINISTRO DE TUBERIA PVC DE 1/2"" RD-26",M.L.,541,0.4
+df9fb988-893d-4f98-a930-6277bd240d36,22 14 16.3,22,Plomería,"Suministro e Instalación de Codo de PVC de 3"" a 90°",PZA,1,F101005,"SUMINISTRO DE TUBERIA PVC DE 3/4"" RD-13.5",M.L.,543,0.4
+8bc487f8-c2c6-4bef-9636-794d843a58f6,22 41 13.13,22,Plomería,Suministro e Instalacion de Pila de 0.90x0.90m,PZA,2,F270032,SUMINISTRO E INSTALACION DE CANAL DE PVC,ML,1107,0.5
+1afebb38-2648-4cb7-98f0-ec423b5d6b5c,22 41 16 13.3,22,Plomería,Suministro e Instalacion de Lavamanos Pedestal LAVABO STD. ECOLINE BLANCO PIEZA,PZA,2,F202003,LAVAMANOS DE CONCRETO (C.E.B.),ML,917,0.5
+1afebb38-2648-4cb7-98f0-ec423b5d6b5c,22 41 16 13.3,22,Plomería,Suministro e Instalacion de Lavamanos Pedestal LAVABO STD. ECOLINE BLANCO PIEZA,PZA,2,F270032,SUMINISTRO E INSTALACION DE CANAL DE PVC,ML,1107,0.5
+1afebb38-2648-4cb7-98f0-ec423b5d6b5c,22 41 16 13.3,22,Plomería,Suministro e Instalacion de Lavamanos Pedestal LAVABO STD. ECOLINE BLANCO PIEZA,PZA,2,F202004,SUM./INST. LAVABO COLOR BLANCO,UNID.,918,0.4
+807e9255-9a1c-4582-a714-c3a3b62b1f21,22 41 16 13.2,22,Plomería,Suministro e Instalación de Lavamanos de Bowl en losa en voladizo con porcelanato,M2,3,F113018,LOSA DE LETRINA,M2,723,0.5
+807e9255-9a1c-4582-a714-c3a3b62b1f21,22 41 16 13.2,22,Plomería,Suministro e Instalación de Lavamanos de Bowl en losa en voladizo con porcelanato,M2,3,F202003,LAVAMANOS DE CONCRETO (C.E.B.),ML,917,0.5
+f2501e14-1a10-4661-a1a5-30afddaac5cb,26 05 33.13.1,26,Eléctrico,"Tubería de Poliducto de 3/4""",M,2,F211001,"CIRCUITO DE ILUM. HASTA 20 AMP, POLIDUCTO ½",M.L.,938,0.5
+f2501e14-1a10-4661-a1a5-30afddaac5cb,26 05 33.13.1,26,Eléctrico,"Tubería de Poliducto de 3/4""",M,2,F212001,"CIRCUITO DE FUER. HASTA 20 AMP., POLIDUCTO ½",M.L.,941,0.5
+f2501e14-1a10-4661-a1a5-30afddaac5cb,26 05 33.13.1,26,Eléctrico,"Tubería de Poliducto de 3/4""",M,2,F212004,"CIRCUITO DE FUERZA HASTA 50 AMP, POLIDUCTO ¾",M.L.,944,0.5
+f2501e14-1a10-4661-a1a5-30afddaac5cb,26 05 33.13.1,26,Eléctrico,"Tubería de Poliducto de 3/4""",M,2,F212007,"CIRCUITO DE FUER. HASTA 65 AMP, POLIDUCTO 1""",M.L.,947,0.5
+f2501e14-1a10-4661-a1a5-30afddaac5cb,26 05 33.13.1,26,Eléctrico,"Tubería de Poliducto de 3/4""",M,2,F212012,CIRCUITO DE FUER. HASTA 35 AMP.POLIDUCTO 3/4,M.L.,952,0.5
+a1c4f275-3e57-4803-8ad6-be6db8cc04a7,26 05 33.13.2,26,Eléctrico,"Tubería de Poliducto de 1/2""",M,2,F211001,"CIRCUITO DE ILUM. HASTA 20 AMP, POLIDUCTO ½",M.L.,938,0.5
+a1c4f275-3e57-4803-8ad6-be6db8cc04a7,26 05 33.13.2,26,Eléctrico,"Tubería de Poliducto de 1/2""",M,2,F212001,"CIRCUITO DE FUER. HASTA 20 AMP., POLIDUCTO ½",M.L.,941,0.5
+a1c4f275-3e57-4803-8ad6-be6db8cc04a7,26 05 33.13.2,26,Eléctrico,"Tubería de Poliducto de 1/2""",M,2,F212004,"CIRCUITO DE FUERZA HASTA 50 AMP, POLIDUCTO ¾",M.L.,944,0.5
+a1c4f275-3e57-4803-8ad6-be6db8cc04a7,26 05 33.13.2,26,Eléctrico,"Tubería de Poliducto de 1/2""",M,2,F212007,"CIRCUITO DE FUER. HASTA 65 AMP, POLIDUCTO 1""",M.L.,947,0.5
+a1c4f275-3e57-4803-8ad6-be6db8cc04a7,26 05 33.13.2,26,Eléctrico,"Tubería de Poliducto de 1/2""",M,2,F212012,CIRCUITO DE FUER. HASTA 35 AMP.POLIDUCTO 3/4,M.L.,952,0.5
+fd9cd5f9-d873-4d44-9b64-2a2a1c8a15b9,26 09 23.1,26,Eléctrico,ENERLITES Interruptor Sencilo,PZA,2,F216001,INTERRUPTOR SENCILLO,UNID,966,0.5
+fd9cd5f9-d873-4d44-9b64-2a2a1c8a15b9,26 09 23.1,26,Eléctrico,ENERLITES Interruptor Sencilo,PZA,2,F216002,INTERRUPTOR DOBLE,M.L.,967,0.5
+5a411769-e50d-44a1-abbb-3d54601619d9,26 09 23.3,26,Eléctrico,ENERLITES Interrutor Doble,PZA,2,F216002,INTERRUPTOR DOBLE,M.L.,967,0.5
+6a976a19-6221-4a9b-8877-25dfd65275ce,26 09.23.5,26,Eléctrico,ENERLITES Interruptor Triple,PZA,2,F216001,INTERRUPTOR SENCILLO,UNID,966,0.5
+6a976a19-6221-4a9b-8877-25dfd65275ce,26 09.23.5,26,Eléctrico,ENERLITES Interruptor Triple,PZA,2,F216002,INTERRUPTOR DOBLE,M.L.,967,0.5
+cc6249ee-2de8-47e5-9c2d-c4ba3f2afa97,26 24 16.1,26,Eléctrico,"Centro de Carga de 16 Espacios NEMA 1, Empotrado en Pared, 16 polos, 125amp",PZA,2,F213001,CENTRO DE CARGA DE 4 ESPACIOS,M.L.,953,1.0
+cc6249ee-2de8-47e5-9c2d-c4ba3f2afa97,26 24 16.1,26,Eléctrico,"Centro de Carga de 16 Espacios NEMA 1, Empotrado en Pared, 16 polos, 125amp",PZA,2,F213002,CENTRO DE CARGA DE 6 ESPACIOS,M.L.,954,1.0
+cc6249ee-2de8-47e5-9c2d-c4ba3f2afa97,26 24 16.1,26,Eléctrico,"Centro de Carga de 16 Espacios NEMA 1, Empotrado en Pared, 16 polos, 125amp",PZA,2,F213003,CENTRO DE CARGA DE 8 ESPACIOS,M.L.,955,1.0
+cc6249ee-2de8-47e5-9c2d-c4ba3f2afa97,26 24 16.1,26,Eléctrico,"Centro de Carga de 16 Espacios NEMA 1, Empotrado en Pared, 16 polos, 125amp",PZA,2,F213004,CENTRO DE CARGA DE 12 ESPACIOS,M.L.,956,0.75
+cc6249ee-2de8-47e5-9c2d-c4ba3f2afa97,26 24 16.1,26,Eléctrico,"Centro de Carga de 16 Espacios NEMA 1, Empotrado en Pared, 16 polos, 125amp",PZA,2,F213005,CENTRO DE CARGA DE 24 ESPACIOS,M.L.,957,0.75
+a59aa8bf-1347-428a-ac92-1352d2099eb1,26 27 19.1,26,Eléctrico,Tomacorriente Doble ENERLITES 15A 120-277v Listado UL (Importado),PZA,2,F216002,INTERRUPTOR DOBLE,M.L.,967,0.5
+624d2806-42be-47f6-990c-fdde58729819,26 27 19.4,26,Eléctrico,Tomacorriente Doble Aguila 15A 120-277v 15A,PZA,2,F216002,INTERRUPTOR DOBLE,M.L.,967,0.5
+075f0bbf-5922-4561-b84e-be99f19db862,26 27 19.2,26,Eléctrico,"Tomacorriente ESPECIAL 50A 250v Sencillo (Bombar, Estufa)",PZA,2,F216001,INTERRUPTOR SENCILLO,UNID,966,0.5
+8b863a98-d3b9-4cb1-917c-aaa0d657acd7,31 11 00.1,31,Movimiento de Tierra,Limpieza y Remoción de Capa Vegetal (Manual),M2,1,F011006,LIMPIEZA DE POZO,UNID,7,0.5
+8b863a98-d3b9-4cb1-917c-aaa0d657acd7,31 11 00.1,31,Movimiento de Tierra,Limpieza y Remoción de Capa Vegetal (Manual),M2,1,F011010,"LIMPIEZA DE TUBERIA DE 8""",M.L.,11,0.5
+8b863a98-d3b9-4cb1-917c-aaa0d657acd7,31 11 00.1,31,Movimiento de Tierra,Limpieza y Remoción de Capa Vegetal (Manual),M2,1,F012045,REMOCION DE CAPA VEGETAL (INCL. ACARREO 20 MTS.),M3,61,0.4
+5b7f2ac0-48c7-4a57-bd0a-4d6b84e8d8dd,31 23 16 16.3,31,Movimiento de Tierra,Excavación Con Retroexcavadora en Terreno Tipo I Suave,M3,2,F260007,EXCAVACION CON RETROEXCAVADORA SUELO TIPO I,M3,1079,0.5
+7e8b71ea-cb7c-470d-b87d-b35636184369,31 23 16.16.2,31,Movimiento de Tierra,Excavación Estructural (Retroexcavadora) En Terreno Semi Duro- Tipo II,M3,2,F014006,EXCAVACION MATERIAL TIPO II (SEMI-DURO),M3,71,0.667
+7e8b71ea-cb7c-470d-b87d-b35636184369,31 23 16.16.2,31,Movimiento de Tierra,Excavación Estructural (Retroexcavadora) En Terreno Semi Duro- Tipo II,M3,2,F014002,EXCAVACION ESTRUCTURAL,M3,67,0.5
+7e8b71ea-cb7c-470d-b87d-b35636184369,31 23 16.16.2,31,Movimiento de Tierra,Excavación Estructural (Retroexcavadora) En Terreno Semi Duro- Tipo II,M3,2,F260007,EXCAVACION CON RETROEXCAVADORA SUELO TIPO I,M3,1079,0.5
+7e8b71ea-cb7c-470d-b87d-b35636184369,31 23 16.16.2,31,Movimiento de Tierra,Excavación Estructural (Retroexcavadora) En Terreno Semi Duro- Tipo II,M3,2,F260016,CORTE CON TRACTOR D-6 (TERRENO DURO),M3,1088,0.5
+21ac7ca3-1d76-45d7-8a40-7ed7d102c1f9,31 23 16 16.4,31,Movimiento de Tierra,Excavación Estructural (Retroexcavadora) En Terreno Duro- Tipo III,M3,2,F014002,EXCAVACION ESTRUCTURAL,M3,67,0.5
+21ac7ca3-1d76-45d7-8a40-7ed7d102c1f9,31 23 16 16.4,31,Movimiento de Tierra,Excavación Estructural (Retroexcavadora) En Terreno Duro- Tipo III,M3,2,F260007,EXCAVACION CON RETROEXCAVADORA SUELO TIPO I,M3,1079,0.5
+21ac7ca3-1d76-45d7-8a40-7ed7d102c1f9,31 23 16 16.4,31,Movimiento de Tierra,Excavación Estructural (Retroexcavadora) En Terreno Duro- Tipo III,M3,2,F260016,CORTE CON TRACTOR D-6 (TERRENO DURO),M3,1088,0.5
+21ac7ca3-1d76-45d7-8a40-7ed7d102c1f9,31 23 16 16.4,31,Movimiento de Tierra,Excavación Estructural (Retroexcavadora) En Terreno Duro- Tipo III,M3,2,F014008,EXCAVACION MATERIAL TIPO III (CON COMPRESOR),M3,73,0.4
+6645745d-e8a6-49f1-86db-b4bef9b55f6a,31 23 16 16.5,31,Movimiento de Tierra,Corte y Excavación de Terreno Manual Tipo I (Materia Orgánica),M2,1,F260016,CORTE CON TRACTOR D-6 (TERRENO DURO),M3,1088,0.5
+6645745d-e8a6-49f1-86db-b4bef9b55f6a,31 23 16 16.5,31,Movimiento de Tierra,Corte y Excavación de Terreno Manual Tipo I (Materia Orgánica),M2,1,F260015,CORTE Y CONFORM.CON TRACTOR D-6 (TERRENO ROCOSO),M2,1087,0.4
+03e5f580-b4a1-4d2f-b86d-d454464a9f60,31 23 16 16.6,31,Movimiento de Tierra,Corte y Excavación Manual de Terreno Tipo 2 (Terreno Semiduro),M2,1,F260016,CORTE CON TRACTOR D-6 (TERRENO DURO),M3,1088,0.5
+03e5f580-b4a1-4d2f-b86d-d454464a9f60,31 23 16 16.6,31,Movimiento de Tierra,Corte y Excavación Manual de Terreno Tipo 2 (Terreno Semiduro),M2,1,F260015,CORTE Y CONFORM.CON TRACTOR D-6 (TERRENO ROCOSO),M2,1087,0.4
+b77325cd-e3fe-425b-b699-65eefdceed7c,31 23 16 16.7,31,Movimiento de Tierra,Corte y Excavación Manual de Terreno Tipo 3 (Terreno Duro),M2,1,F260016,CORTE CON TRACTOR D-6 (TERRENO DURO),M3,1088,0.75
+b77325cd-e3fe-425b-b699-65eefdceed7c,31 23 16 16.7,31,Movimiento de Tierra,Corte y Excavación Manual de Terreno Tipo 3 (Terreno Duro),M2,1,F260015,CORTE Y CONFORM.CON TRACTOR D-6 (TERRENO ROCOSO),M2,1087,0.4
+d049b62f-ecc0-49a5-bed8-11ce8a121c4c,31 23 23.13.2,31,Movimiento de Tierra,Relleno Compactado de Material Selecto e = 0.10 m,M3,1,F015003,RELLENO COMP. CON MATERIAL SELECTO (INC. ACARREO),M3,76,0.6
+d049b62f-ecc0-49a5-bed8-11ce8a121c4c,31 23 23.13.2,31,Movimiento de Tierra,Relleno Compactado de Material Selecto e = 0.10 m,M3,1,F015009,RELLENO MATERIAL SELECTO /COMPAC. DE PLATO,M3,82,0.6
+d049b62f-ecc0-49a5-bed8-11ce8a121c4c,31 23 23.13.2,31,Movimiento de Tierra,Relleno Compactado de Material Selecto e = 0.10 m,M3,1,F015005,RELLENO COMPACTO CON MATERIAL DEL SITIO,M3,78,0.5
+d049b62f-ecc0-49a5-bed8-11ce8a121c4c,31 23 23.13.2,31,Movimiento de Tierra,Relleno Compactado de Material Selecto e = 0.10 m,M3,1,F260004,CORTE / RELLENO Y COMPACTADO EN TERRACERIA,M3,1076,0.5
+d049b62f-ecc0-49a5-bed8-11ce8a121c4c,31 23 23.13.2,31,Movimiento de Tierra,Relleno Compactado de Material Selecto e = 0.10 m,M3,1,F015004,RELLENO COMP. MATERIAL CERNIDO DEL SITIO,M3,77,0.4
+512d8a55-6e61-42a7-a627-9ed5ded79d50,31 23 23 13.3,31,Movimiento de Tierra,"Relleno y Compactado Con Arena Lavada, Para Tuberias Hidrosanitarias (De forma Manual)",M3,2,F260004,CORTE / RELLENO Y COMPACTADO EN TERRACERIA,M3,1076,0.5
+b775065f-b8c8-45d6-bd32-6089ecd27c1e,32 31 13.3,32,Obras Exteriores,"Porton de Malla Ciclón 6' x 3 m y Tubo HG de 1 1/2""",PZA,2,F144001,"PORTON MALLA CICLON 6'X3 M. LONG. Y TUBO HG 1-1/2""",UNID,825,0.8
+b775065f-b8c8-45d6-bd32-6089ecd27c1e,32 31 13.3,32,Obras Exteriores,"Porton de Malla Ciclón 6' x 3 m y Tubo HG de 1 1/2""",PZA,2,F144002,"PORTON MALLA CICLON 6' Y TUBO HG 1-1/2""",UNID,826,0.8
+b775065f-b8c8-45d6-bd32-6089ecd27c1e,32 31 13.3,32,Obras Exteriores,"Porton de Malla Ciclón 6' x 3 m y Tubo HG de 1 1/2""",PZA,2,F144003,"PORTON MALLA CICLON 5', 2X1.5 M. Y TUBO HG 1-1/2""",UNID,827,0.8
+b775065f-b8c8-45d6-bd32-6089ecd27c1e,32 31 13.3,32,Obras Exteriores,"Porton de Malla Ciclón 6' x 3 m y Tubo HG de 1 1/2""",PZA,2,F142003,"INST. DE MALLA CICLON DE 5´CON HG 1½""",M.L.,818,0.5
+b775065f-b8c8-45d6-bd32-6089ecd27c1e,32 31 13.3,32,Obras Exteriores,"Porton de Malla Ciclón 6' x 3 m y Tubo HG de 1 1/2""",PZA,2,F144004,"PORTON DE TUBO INDUSTRIAL Y LAMINA DE 1 / 32""",UNID,828,0.4
+658a31c8-66d0-43b3-b293-d3bbf4184ded,32 31 13.4,32,Obras Exteriores,Dado de Concreto Simple 60 x 30 x 30,PZA,2,F191019,CUNETA RECTAN. MAMPOSTERIA E= 25 A= 30 P= 60 EMPL.,M.L.,897,0.4
+658a31c8-66d0-43b3-b293-d3bbf4184ded,32 31 13.4,32,Obras Exteriores,Dado de Concreto Simple 60 x 30 x 30,PZA,2,F191026,CUNETA RECTAN. MAMPOSTERIA E= 25 A= 60 P= 30 EMP.,M.L.,904,0.4

@@ -1,0 +1,8 @@
+# PDF escaneado del libro de Suárez Salazar (43 MB, copyright) — no se versiona.
+# URL y SHA256 quedan registrados en la bitácora y en la tabla rendimiento_audit.
+suarez_salazar.pdf
+
+# Rastreo exploratorio CYPE (SPA): cientos de páginas HTML de navegación sin
+# coeficientes (incluye otras regionales, p.ej. Chile), reproducibles con
+# crawl_cype.py. Solo se versionan los cype_*.html de nivel raíz como evidencia.
+cype_units/
