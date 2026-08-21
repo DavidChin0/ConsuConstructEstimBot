@@ -1,6 +1,6 @@
 {
  "db_path": "D:\\EstimaStruct\\data\\estimacion.db",
- "generated_at": "2026-08-20T18:34:26",
+ "generated_at": "2026-08-20T18:31:47",
  "tool": "snapshot_precios.py goal-21170",
  "tables": {
   "alembic_version": {
