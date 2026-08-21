@@ -5,6 +5,26 @@
 
 # CHANGELOG - EstimaStruct
 
+## 2026-08-20 — EstimaStruct frontend v1.4 publicado (goal-21174): SQLite canónica v1.4 + auditoría de rendimientos conectada
+
+- [2026-08-20] [EstimaStruct agent]: Cierre de goal-21174 sobre el checkpoint de goal-21170 (auditoría online FHIS + CYPE_HN; Suárez Salazar retirado por no verificado). No se repitió scraping.
+- **Publicar SQLite versionada v1.4 (ADR-016):** la SQLite canónica `D:\EstimaStruct\data\estimacion.db` se marca `PRAGMA user_version = 14` y se publica copia inmutable versionada `estimacion.db.bak_20260820_audit_v14` (byte-idéntica a la canónica: mismo SHA de archivo). **Precios conservados exactamente:** tabla `recurso` = 367 filas, SHA256 de contenido idéntico antes/después (`8f3f6061…747e`), `MA-038 = 480`. Invariante re-corrido en esta sesión; el hash global cambia solo por crecimiento de `partida`/`presupuesto` (presupuestos nuevos), no por precios.
+- **Tabla `rendimiento_audit` (canónica):** 257 filas = 181 FHIS (Manual de Rendimientos 2003-11, Cred. BM 3443-HO) + 76 CYPE_HN; **0 Suárez Salazar** (retirado, NO_VERIFICADO). Solo rendimientos, sin precios. Cero duplicados por clave única `(partida_id, fuente, recurso_tipo, fuente_codigo, fecha_consulta)`.
+- **Conectar backend/frontend a v1.4:** modelo `RendimientoAudit` en `backend/models.py`; migración alembic `backend/alembic/versions/01af8510cf23_add_rendimiento_audit_table_v14.py`; selector de versión de template `v1.4` ("Auditoría FHIS/CYPE") en `frontend/js/app.js` + `core.js` y `backend/routers/presupuestos.py`; fichas `Template2_Updated/v1.4/` (`generate_fichas_v14.py`). `AUTO_CREATE_SCHEMA=true` crea la tabla en SQLite vía `Base.metadata.create_all` (idempotente; el smoke la valida).
+- **Build/tests/smoke UI (verde):** `pytest pipeline/tests` = 18 passed; `node --check frontend/js/app.js` y `core.js` = OK; `TestClient` arranca la API y `/health` → 200, `/presupuestos` → 200 (8 presupuestos). App v1.4 importa y conecta sin error.
+- **Entregable — lista de rendimientos auditados solo con fuentes:** `development/rendimientos_audit/pipeline/data/rendimientos_auditados.csv` (y `.md`), 257 filas, 10 columnas del contrato (`rendimientos_online_audit.md`), **sin precio/costo/moneda**. Bitácora de fuentes no encontradas en `pipeline/data/bitacora_fuentes_no_encontradas.md`.
+- **Pendiente (no bloquea):** `alembic upgrade head` sobre Postgres espejo queda gateado — la tabla ya existe en la SQLite canónica; el mirror Postgres se sincroniza por la vía documentada en ADR-016. Promover cualquier rendimiento a valor definitivo requiere OK explícito de David. Goal entregado `ready_for_director`; no autocerrado.
+- **Próximo paso**: recalcular presupuestos afectados solo si David promueve rendimientos (gate de riesgo).
+
+## 2026-08-20 — CompoundStructure fix (goal-20172): 3 tipos recreados desde cero con MIN_WIDTH_MM=1.0
+
+- [2026-08-20] [EstimaStruct agent]: Fix para los 3 assemblies que fallaban `CompoundStructure not valid` en el pipeline dibujar-desde-DB:
+  1. **STR-05**: "C - Repello y Pulido + Bloque de 4" (10cm) + Ceramica Baño 2.10m" — capa Finish2 (CC-Ceramica Pared) en 0.0mm
+  2. **STR-06**: "C - Repello y Pulido + Bloque de 6" (15cm) + Ceramica Baño 2.10m" — capa Finish2 (CC-Ceramica Pared) en 0.0mm
+  3. **ENC-01**: "F - Vigueta Bovedilla +Losa de Concreto de 8cm" — capa StructuralDeck (CC-Bovedilla) en 0.0mm
+- **Solución**: Nuevo script `FIX_COMPOUND_STRUCTURE_CODE` en `revit-mcp-stdio/revit_mcp/pipe/estimastruct_tools.py` + función `fix_compound_structure()` expuesta vía PipeClient (`POST /revit-mcp/pipe/fix_compound_structure`). Duplica los tipos base funcionales (versiones 1.50m / base ENC-01), aplica `MIN_WIDTH_MM=1.0` para capas no-Membrane, excluye material `CC-none` (placeholder de vacío), y crea NUEVOS tipos con sufijo "(Fixed)" sin modificar originales. Expone en frontend como "Fix CompoundStructure (goal-20172)" con transporte pipe (no requiere MCP HTTP levantado).
+- **Próximo paso**: Ejecutar con Revit abierto + `REVIT_MCP_PIPE=1` (o via pyRevit startup) para validar que los 3 nuevos tipos pasan validación `IsLayerValid` y `SetCompoundStructure`. Verificar en `docs/architecture.md` §9 limitaciones conocidas.
+
 ## 2026-08-15 — Split-brain SQLite v1.3 ↔ Postgres: verificado + migración de reconciliación DISEÑADA (ADR-015, goal-21070; ejecución gateada a OK David → goal-21071)
 
 - [2026-08-15] [Hooke / estimastruct]: Ejecutado goal-21070 (diseño, NO producción). **Parte 1 — split-brain confirmado con evidencia dura:** ambas `recurso` tienen las mismas **367 claves** (0 altas/bajas); divergen **40 precios** (29 `MA-*` + 11 `MO-*`), **no 16** — el "16" de goal-21062 fue solo el primer lote del 31-jul, el batch siguió hasta 40. Testigos: Postgres MA-038=195 (`ultima_actualizacion` abril-21, stale) vs SQLite v1.3 MA-038=480 (31-jul); Postgres nunca recibió el batch del 31-jul (su máx. update es 07-jul, solo altas MA-374..377). Divergencia **no monótona** (precios suben y bajan) → regla = "SQLite v1.3 sobreescribe Postgres", nunca "tomar el máximo".

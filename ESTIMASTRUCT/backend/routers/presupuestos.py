@@ -291,8 +291,8 @@ def crear_desde_template(data: FromTemplateIn, db: Session = Depends(get_db)):
 
     # Determinar qué template usar
 
-    # Si es v1.0/v1.1/v1.2, cargar desde Template 2 - Updated JSON
-    if template_version in ["v1.0", "v1.1", "v1.2"]:
+    # Si es v1.0/v1.1/v1.2/v1.3/v1.4, cargar desde Template 2 - Updated JSON
+    if template_version in ["v1.0", "v1.1", "v1.2", "v1.3", "v1.4"]:
         _create_from_template2_updated(nuevo, template_version, sobrecosto, db)
         db.commit()
         db.refresh(nuevo)

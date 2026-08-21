@@ -2,7 +2,7 @@ import uuid
 from datetime import date, datetime
 from sqlalchemy import (
     Column, String, Text, Numeric, SmallInteger, Boolean, Date,
-    DateTime, ForeignKey, CheckConstraint
+    DateTime, ForeignKey, CheckConstraint, Integer
 )
 from sqlalchemy.orm import relationship
 from backend.db import Base
@@ -484,6 +484,49 @@ class CronogramaOverride(Base):
     n_ay           = Column(SmallInteger, default=3)   # ayudantes en paralelo (>=1)
 
     updated_at     = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# RENDIMIENTO AUDIT — tabla comparativa de rendimientos auditados contra
+# fuentes oficiales (FHIS, CYPE_HN, SUAREZ_SALAZAR). ADITIVA — no toca
+# tablas de precios/partidas. create_all la crea sola. v1.4 canon.
+# ─────────────────────────────────────────────────────────────────────────────
+
+class RendimientoAudit(Base):
+    """Rendimientos auditados de fuentes externas para validación comparativa.
+    No afecta cálculos de presupuesto; solo sirve para auditoría y trazabilidad.
+    Clave de idempotencia: (partida_id, fuente, recurso_tipo, fuente_codigo, fecha_consulta)."""
+    __tablename__ = "rendimiento_audit"
+
+    id                       = Column(Integer, primary_key=True, autoincrement=True)
+    partida_id               = Column(String(36), ForeignKey("partida.id", ondelete="CASCADE"), index=True)
+    partida_clave_csi        = Column(Text, nullable=False)
+    partida_descripcion      = Column(Text, nullable=False)
+    partida_unidad           = Column(Text, nullable=False)
+    fuente                   = Column(Text, nullable=False)      # FHIS | CYPE_HN | SUAREZ_SALAZAR
+    fuente_edicion           = Column(Text, nullable=True)
+    fuente_codigo            = Column(Text, nullable=True)       # código FHIS / CYPE / ISBN
+    fuente_url               = Column(Text, nullable=False)      # URL online verificable
+    fuente_pagina            = Column(Text, nullable=True)       # página/ficha/tabla
+    fecha_consulta           = Column(Text, nullable=False)      # ISO date
+    recurso_tipo             = Column(Text, nullable=False)      # MANO_OBRA | MAQUINARIA | EQUIPO
+    recurso_descripcion      = Column(Text, nullable=False)
+    coeficiente_nativo       = Column(Numeric(14, 6), nullable=False)
+    unidad_nativa            = Column(Text, nullable=False)
+    coeficiente_normalizado  = Column(Numeric(14, 6), nullable=False)
+    formula_conversion       = Column(Text, nullable=True)
+    tipo_match               = Column(Text, nullable=False)      # exacto | semantico | manual
+    confianza                = Column(Numeric(4, 3), nullable=False)
+    evidencia                = Column(Text, nullable=True)
+    condiciones_alcance      = Column(Text, nullable=True)
+    hash_insumo              = Column(Text, nullable=True)
+    notas_discrepancia       = Column(Text, nullable=True)
+
+    __table_args__ = (
+        CheckConstraint("fuente IN ('FHIS', 'CYPE_HN', 'SUAREZ_SALAZAR')", name="ck_rendimiento_audit_fuente"),
+        CheckConstraint("recurso_tipo IN ('MANO_OBRA', 'MAQUINARIA', 'EQUIPO')", name="ck_rendimiento_audit_recurso"),
+        CheckConstraint("tipo_match IN ('exacto', 'semantico', 'manual')", name="ck_rendimiento_audit_match"),
+    )
 
 
 # ─────────────────────────────────────────────────────────────────────────────

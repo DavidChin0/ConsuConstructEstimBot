@@ -42,7 +42,7 @@ let state = {
   modo: localStorage.getItem("estimastruct.modo") || "cliente",
   templateVersion: (() => {
     const saved = localStorage.getItem("estimastruct.template-version");
-    return saved && ["v1.0", "v1.1", "v1.2"].includes(saved) ? saved : "v1.2";
+    return saved && ["v1.0", "v1.1", "v1.2", "v1.4"].includes(saved) ? saved : "v1.4";
   })(),
 };
 
@@ -50,6 +50,7 @@ let templateCatalog = {
   "v1.0": { fichas_total: null },
   "v1.1": { fichas_total: null },
   "v1.2": { fichas_total: null },
+  "v1.4": { fichas_total: null },
 };
 
 let loadObrasAttempts = 0;

@@ -1687,6 +1687,7 @@ function refreshTemplateOptionLabels() {
   const v10 = document.querySelector('#obra-template-version option[value="v1.0"]');
   const v11 = document.querySelector('#obra-template-version option[value="v1.1"]');
   const v12 = document.querySelector('#obra-template-version option[value="v1.2"]');
+  const v14 = document.querySelector('#obra-template-version option[value="v1.4"]');
   if (v10) {
     const total = templateCatalog["v1.0"]?.fichas_total;
     v10.textContent = total == null ? "V1.0 — Original" : `V1.0 — Original (${total} fichas)`;
@@ -1699,9 +1700,14 @@ function refreshTemplateOptionLabels() {
     const total = templateCatalog["v1.2"]?.fichas_total;
     v12.textContent = total == null ? "V1.2 — Vigente" : `V1.2 — Vigente (${total} fichas)`;
   }
+  if (v14) {
+    const total = templateCatalog["v1.4"]?.fichas_total;
+    v14.textContent = total == null ? "V1.4 — Auditoría FHIS/CYPE" : `V1.4 — Auditoría FHIS/CYPE (${total} fichas)`;
+  }
   const labelV10 = document.getElementById("label-v1-0");
   const labelV11 = document.getElementById("label-v1-1");
   const labelV12 = document.getElementById("label-v1-2");
+  const labelV14 = document.getElementById("label-v1-4");
   if (labelV10) {
     const total = templateCatalog["v1.0"]?.fichas_total;
     const desc = labelV10.querySelector("div div:last-child");
@@ -1716,6 +1722,11 @@ function refreshTemplateOptionLabels() {
     const total = templateCatalog["v1.2"]?.fichas_total;
     const desc = labelV12.querySelector("div div:last-child");
     if (desc) desc.textContent = total == null ? "Versión vigente" : `Versión vigente (${total} fichas)`;
+  }
+  if (labelV14) {
+    const total = templateCatalog["v1.4"]?.fichas_total;
+    const desc = labelV14.querySelector("div div:last-child");
+    if (desc) desc.textContent = total == null ? "Auditoría FHIS + CYPE Honduras" : `Auditoría FHIS + CYPE Honduras (${total} fichas)`;
   }
 }
 

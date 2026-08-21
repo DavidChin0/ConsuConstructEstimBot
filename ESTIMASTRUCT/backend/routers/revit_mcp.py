@@ -43,11 +43,12 @@ PYTHON        = r"D:\LLM\python\python.exe"
 _ESTIMASTRUCT_TOOLS_PATH = Path(r"D:\GitHub\revit-mcp-stdio\revit_mcp\pipe\estimastruct_tools.py")
 
 _IRONPYTHON_SCRIPTS = {
-    "dump":          (_ESTIMASTRUCT_TOOLS_PATH, "DUMP_AUDIT_CODE"),
-    "dump-full":     (_ESTIMASTRUCT_TOOLS_PATH, "DUMP_FULL_CODE"),
-    "marks_master":  (_ESTIMASTRUCT_TOOLS_PATH, "SET_MARKS_CODE"),
-    "keynote_path":  (_SCRIPTS_DIR / "revit_get_keynote_path.py", "CODE"),
-    "marks_legacy":  (_SCRIPTS_DIR / "revit_set_marks_snippet.py", "CODE"),
+    "dump":                  (_ESTIMASTRUCT_TOOLS_PATH, "DUMP_AUDIT_CODE"),
+    "dump-full":             (_ESTIMASTRUCT_TOOLS_PATH, "DUMP_FULL_CODE"),
+    "marks_master":          (_ESTIMASTRUCT_TOOLS_PATH, "SET_MARKS_CODE"),
+    "fix_compound_structure": (_ESTIMASTRUCT_TOOLS_PATH, "FIX_COMPOUND_STRUCTURE_CODE"),
+    "keynote_path":          (_SCRIPTS_DIR / "revit_get_keynote_path.py", "CODE"),
+    "marks_legacy":          (_SCRIPTS_DIR / "revit_set_marks_snippet.py", "CODE"),
 }
 
 # ──────────────────────────────────────────────
@@ -125,7 +126,7 @@ def _read_ironpython_code(path: Path, var_name: str = "CODE") -> str:
 _REVIT_MCP_STDIO_REPO = _ESTIMASTRUCT_TOOLS_PATH.parents[2]   # D:\GitHub\revit-mcp-stdio
 
 # keys que se sirven por PipeClient en vez de /inject (ver list_scripts / frontend)
-_PIPE_KEYS = {"dump", "dump-full", "marks_master"}
+_PIPE_KEYS = {"dump", "dump-full", "marks_master", "fix_compound_structure"}
 
 
 def _pipe_funcs() -> dict:
@@ -135,12 +136,13 @@ def _pipe_funcs() -> dict:
     if str(_REVIT_MCP_STDIO_REPO) not in sys.path:
         sys.path.insert(0, str(_REVIT_MCP_STDIO_REPO))
     from revit_mcp.pipe.estimastruct_tools import (
-        dump_audit_json, dump_full_json, set_marks_master,
+        dump_audit_json, dump_full_json, set_marks_master, fix_compound_structure,
     )
     return {
-        "dump":         dump_audit_json,
-        "dump-full":    dump_full_json,
-        "marks_master": set_marks_master,
+        "dump":                  dump_audit_json,
+        "dump-full":             dump_full_json,
+        "marks_master":          set_marks_master,
+        "fix_compound_structure": fix_compound_structure,
     }
 
 
@@ -267,25 +269,24 @@ def list_scripts():
     ironpy = [
         {"key": k, "file": v[0].name, "type": "ironpython",
          "label": {
-             "dump":         "Dump Modelo (audit)",
-             "dump-full":    "Full Dump (viewer)",
-             "marks_master": "Set Marks Master",
-             "keynote_path": "Obtener Ruta TXT",
-             "marks_legacy": "Set Marks (Legacy)",
+             "dump":                  "Dump Modelo (audit)",
+             "dump-full":             "Full Dump (viewer)",
+             "marks_master":          "Set Marks Master",
+             "fix_compound_structure": "Fix CompoundStructure (goal-20172)",
+             "keynote_path":          "Obtener Ruta TXT",
+             "marks_legacy":          "Set Marks (Legacy)",
          }.get(k, k),
          "desc": {
-             "dump":         "Vuelca keynotes, compuestos y schedules al JSON de auditoría (rápido). Vía PipeClient — no requiere Levantar MCP, solo Revit abierto.",
-             "dump-full":    "Dump completo: project_info, levels, grids, views, sheets, rooms, all_instances, materials_full + secciones del dump de auditoría. Fuente de verdad para el Viewer 3D. Vía PipeClient — no requiere Levantar MCP.",
-             "marks_master": "Asigna TypeMark/Mark a materiales, tipos, floors y doors/windows desde csi_to_codigo.json. Vía PipeClient — no requiere Levantar MCP.",
-             "keynote_path": "Retorna la ruta del archivo .txt de keynotes cargado en el proyecto activo.",
-             "marks_legacy": "⚠️ Deprecado — usa DB.Transaction. NO inyectar via execute_revit_code.",
+             "dump":                  "Vuelca keynotes, compuestos y schedules al JSON de auditoría (rápido). Vía PipeClient — no requiere Levantar MCP, solo Revit abierto.",
+             "dump-full":             "Dump completo: project_info, levels, grids, views, sheets, rooms, all_instances, materials_full + secciones del dump de auditoría. Fuente de verdad para el Viewer 3D. Vía PipeClient — no requiere Levantar MCP.",
+             "marks_master":          "Asigna TypeMark/Mark a materiales, tipos, floors y doors/windows desde csi_to_codigo.json. Vía PipeClient — no requiere Levantar MCP.",
+             "fix_compound_structure": "Recrea 3 tipos con CompoundStructure inválido (STR-05/06 Ceramica 2.10m, ENC-01 StructuralDeck) desde cero con MIN_WIDTH_MM=1.0. Crea nuevos tipos '(Fixed)'. Vía PipeClient.",
+             "keynote_path":          "Retorna la ruta del archivo .txt de keynotes cargado en el proyecto activo.",
+             "marks_legacy":          "⚠️ Deprecado — usa DB.Transaction. NO inyectar via execute_revit_code.",
          }.get(k, ""),
          "deprecated": k == "marks_legacy",
-         # goal-20188: dump/dump-full/marks_master se sirven por PipeClient (/pipe/{key},
-         # transporte verificado 2026-08-02) en vez de /inject (MCP HTTP :8001). El
-         # frontend usa este flag para rutear la card y NO exigir MCP online.
          "transport": "pipe" if k in _PIPE_KEYS else "mcp",
-        }
+         }
         for k, v in _IRONPYTHON_SCRIPTS.items()
     ]
     python = [

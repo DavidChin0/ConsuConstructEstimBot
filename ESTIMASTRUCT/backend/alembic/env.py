@@ -24,7 +24,9 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 # URL de la BD viva — misma logica que db.py.
-config.set_main_option("sqlalchemy.url", CONFIG.DATABASE_URL)
+# NO usar config.set_main_option (interpola % en passwords).
+# Pasamos la URL directo a context.configure() en cada función.
+DATABASE_URL = CONFIG.DATABASE_URL
 
 # add your model's MetaData object here
 # for 'autogenerate' support
@@ -64,9 +66,8 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = config.get_main_option("sqlalchemy.url")
     context.configure(
-        url=url,
+        url=DATABASE_URL,
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
@@ -86,7 +87,7 @@ def run_migrations_online() -> None:
 
     """
     connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
+        {"sqlalchemy.url": DATABASE_URL},
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
