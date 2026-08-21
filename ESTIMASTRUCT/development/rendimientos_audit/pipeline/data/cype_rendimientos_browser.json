@@ -1,0 +1,538 @@
+[
+  {
+    "cype_code": "CSZ010",
+    "titulo": "Zapata de cimentación de concreto reforzado",
+    "unidad_obra": "m³",
+    "url": "https://honduras.generadordeprecios.info/obra_nueva/Cimentaciones/Superficiales/Zapatas/CSZ010_Zapata_de_cimentacion_de_concreto_r.html",
+    "rendimientos": [
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Armador de hierro (estructurista)",
+        "codigo_recurso": "mo043",
+        "coeficiente": 0.180,
+        "unidad": "h/m³"
+      },
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Ayudante de armador de hierro",
+        "codigo_recurso": "mo090",
+        "coeficiente": 0.270,
+        "unidad": "h/m³"
+      },
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Peón de albañilería",
+        "codigo_recurso": "mo113",
+        "coeficiente": 1.179,
+        "unidad": "h/m³"
+      },
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Peón especializado de albañilería",
+        "codigo_recurso": "mo112",
+        "coeficiente": 1.236,
+        "unidad": "h/m³"
+      },
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Armador, en trabajos de colocación del concreto",
+        "codigo_recurso": "mo045",
+        "coeficiente": 0.056,
+        "unidad": "h/m³"
+      },
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Ayudante de armador, en trabajos de colocación del concreto",
+        "codigo_recurso": "mo092",
+        "coeficiente": 0.337,
+        "unidad": "h/m³"
+      },
+      {
+        "tipo": "maquinaria",
+        "descripcion": "Mezcladora de concreto eléctrica con capacidad de 160 l",
+        "codigo_recurso": "mq06hor010",
+        "coeficiente": 0.677,
+        "unidad": "h/m³"
+      }
+    ]
+  },
+  {
+    "cype_code": "CSZ015",
+    "titulo": "Zapata de cimentación de concreto simple",
+    "unidad_obra": "m³",
+    "url": "https://honduras.generadordeprecios.info/obra_nueva/Cimentaciones/Superficiales/Zapatas/CSZ015_Zapata_de_cimentacion_de_concreto_s.html",
+    "rendimientos": [
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Armador, en trabajos de colocación del concreto",
+        "codigo_recurso": "mo045",
+        "coeficiente": 0.056,
+        "unidad": "h/m³"
+      },
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Ayudante de armador, en trabajos de colocación del concreto",
+        "codigo_recurso": "mo092",
+        "coeficiente": 0.281,
+        "unidad": "h/m³"
+      },
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Peón de albañilería",
+        "codigo_recurso": "mo113",
+        "coeficiente": 1.179,
+        "unidad": "h/m³"
+      },
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Peón especializado de albañilería",
+        "codigo_recurso": "mo112",
+        "coeficiente": 1.236,
+        "unidad": "h/m³"
+      },
+      {
+        "tipo": "maquinaria",
+        "descripcion": "Mezcladora de concreto eléctrica con capacidad de 160 l",
+        "codigo_recurso": "mq06hor010",
+        "coeficiente": 0.677,
+        "unidad": "h/m³"
+      }
+    ]
+  },
+  {
+    "cype_code": "CSZ020",
+    "titulo": "Sistema de encofrado para zapata de cimentación",
+    "unidad_obra": "m²",
+    "url": "https://honduras.generadordeprecios.info/obra_nueva/Cimentaciones/Superficiales/Zapatas/CSZ020_Sistema_de_encofrado_para_zapata_de.html",
+    "rendimientos": [
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Armador de encofrados",
+        "codigo_recurso": "mo044",
+        "coeficiente": 0.393,
+        "unidad": "h/m²"
+      },
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Ayudante de armador de encofrados",
+        "codigo_recurso": "mo091",
+        "coeficiente": 0.393,
+        "unidad": "h/m²"
+      }
+    ]
+  },
+  {
+    "cype_code": "CSL010",
+    "titulo": "Placa de cimientos",
+    "unidad_obra": "m³",
+    "url": "https://honduras.generadordeprecios.info/obra_nueva/Cimentaciones/Superficiales/Losas/Placa_de_cimientos.html",
+    "rendimientos": [
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Armador de hierro",
+        "codigo_recurso": "mo043",
+        "coeficiente": 0.611,
+        "unidad": "h/m³"
+      },
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Ayudante de armador de hierro",
+        "codigo_recurso": "mo090",
+        "coeficiente": 0.917,
+        "unidad": "h/m³"
+      },
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Peón especializado de albañilería",
+        "codigo_recurso": "mo112",
+        "coeficiente": 1.236,
+        "unidad": "h/m³"
+      },
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Peón de albañilería",
+        "codigo_recurso": "mo113",
+        "coeficiente": 1.179,
+        "unidad": "h/m³"
+      },
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Armador, en trabajos de colocación del concreto",
+        "codigo_recurso": "mo045",
+        "coeficiente": 0.393,
+        "unidad": "h/m³"
+      },
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Ayudante de armador, en trabajos de colocación del concreto",
+        "codigo_recurso": "mo092",
+        "coeficiente": 0.472,
+        "unidad": "h/m³"
+      },
+      {
+        "tipo": "maquinaria",
+        "descripcion": "Regla vibrante de 3 m",
+        "codigo_recurso": "mq06vib020",
+        "coeficiente": 0.342,
+        "unidad": "h/m³"
+      },
+      {
+        "tipo": "maquinaria",
+        "descripcion": "Mezcladora de concreto eléctrica con capacidad de 160 l",
+        "codigo_recurso": "mq06hor010",
+        "coeficiente": 0.646,
+        "unidad": "h/m³"
+      }
+    ]
+  },
+  {
+    "cype_code": "CSL020",
+    "titulo": "Sistema de encofrado para placa de cimientos",
+    "unidad_obra": "m²",
+    "url": "https://honduras.generadordeprecios.info/obra_nueva/Cimentaciones/Superficiales/Losas/CSL020_Sistema_de_encofrado_para_placa_de_.html",
+    "rendimientos": [
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Armador de encofrados",
+        "codigo_recurso": "mo044",
+        "coeficiente": 0.505,
+        "unidad": "h/m²"
+      },
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Ayudante de armador de encofrados",
+        "codigo_recurso": "mo091",
+        "coeficiente": 0.562,
+        "unidad": "h/m²"
+      }
+    ]
+  },
+  {
+    "cype_code": "EHL010",
+    "titulo": "Losa maciza de concreto reforzado, horizontal, con altura libre de planta de hasta 3 m, canto 24 cm",
+    "unidad_obra": "m²",
+    "url": "https://honduras.generadordeprecios.info/obra_nueva/Estructuras/Concreto_reforzado/Losas_macizas/Losa_maciza.html",
+    "rendimientos": [
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Armador de encofrados",
+        "codigo_recurso": "mo044",
+        "coeficiente": 0.562,
+        "unidad": "h/m²"
+      },
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Ayudante de armador de encofrados",
+        "codigo_recurso": "mo091",
+        "coeficiente": 0.562,
+        "unidad": "h/m²"
+      },
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Armador de hierro",
+        "codigo_recurso": "mo043",
+        "coeficiente": 0.330,
+        "unidad": "h/m²"
+      },
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Ayudante de armador de hierro",
+        "codigo_recurso": "mo090",
+        "coeficiente": 0.307,
+        "unidad": "h/m²"
+      },
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Peón de albañilería",
+        "codigo_recurso": "mo113",
+        "coeficiente": 0.283,
+        "unidad": "h/m²"
+      },
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Peón especializado de albañilería",
+        "codigo_recurso": "mo112",
+        "coeficiente": 0.297,
+        "unidad": "h/m²"
+      },
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Armador, en trabajos de colocación del concreto",
+        "codigo_recurso": "mo045",
+        "coeficiente": 0.059,
+        "unidad": "h/m²"
+      },
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Ayudante de armador, en trabajos de colocación del concreto",
+        "codigo_recurso": "mo092",
+        "coeficiente": 0.243,
+        "unidad": "h/m²"
+      },
+      {
+        "tipo": "maquinaria",
+        "descripcion": "Mezcladora de concreto eléctrica con capacidad de 160 l",
+        "codigo_recurso": "mq06hor010",
+        "coeficiente": 0.155,
+        "unidad": "h/m²"
+      }
+    ]
+  },
+  {
+    "cype_code": "EHL020",
+    "titulo": "Losa maciza y columnas",
+    "unidad_obra": "m²",
+    "url": "https://honduras.generadordeprecios.info/obra_nueva/Estructuras/Concreto_reforzado/Losas_macizas/Losa_maciza_y_columnas.html",
+    "rendimientos": [
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Armador de encofrados",
+        "codigo_recurso": "mo044",
+        "coeficiente": 0.703,
+        "unidad": "h/m²"
+      },
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Ayudante de armador de encofrados",
+        "codigo_recurso": "mo091",
+        "coeficiente": 0.723,
+        "unidad": "h/m²"
+      },
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Armador de hierro",
+        "codigo_recurso": "mo043",
+        "coeficiente": 0.381,
+        "unidad": "h/m²"
+      },
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Ayudante de armador de hierro",
+        "codigo_recurso": "mo090",
+        "coeficiente": 0.363,
+        "unidad": "h/m²"
+      },
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Peón de albañilería",
+        "codigo_recurso": "mo113",
+        "coeficiente": 0.283,
+        "unidad": "h/m²"
+      },
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Peón especializado de albañilería",
+        "codigo_recurso": "mo112",
+        "coeficiente": 0.297,
+        "unidad": "h/m²"
+      },
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Armador, en trabajos de colocación del concreto",
+        "codigo_recurso": "mo045",
+        "coeficiente": 0.070,
+        "unidad": "h/m²"
+      },
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Ayudante de armador, en trabajos de colocación del concreto",
+        "codigo_recurso": "mo092",
+        "coeficiente": 0.287,
+        "unidad": "h/m²"
+      },
+      {
+        "tipo": "maquinaria",
+        "descripcion": "Mezcladora de concreto eléctrica con capacidad de 160 l",
+        "codigo_recurso": "mq06hor010",
+        "coeficiente": 0.172,
+        "unidad": "h/m²"
+      }
+    ]
+  },
+  {
+    "cype_code": "EHS010",
+    "titulo": "Columna rectangular o cuadrada de concreto reforzado",
+    "unidad_obra": "m³",
+    "url": "https://honduras.generadordeprecios.info/obra_nueva/Estructuras/Concreto_reforzado/Columnas/EHS010_Columna_rectangular_o_cuadrada_de_c.html",
+    "rendimientos": [
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Armador de encofrados",
+        "codigo_recurso": "mo044",
+        "coeficiente": 5.347,
+        "unidad": "h/m³"
+      },
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Ayudante de armador de encofrados",
+        "codigo_recurso": "mo091",
+        "coeficiente": 6.110,
+        "unidad": "h/m³"
+      },
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Armador de hierro",
+        "codigo_recurso": "mo043",
+        "coeficiente": 0.970,
+        "unidad": "h/m³"
+      },
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Ayudante de armador de hierro",
+        "codigo_recurso": "mo090",
+        "coeficiente": 1.078,
+        "unidad": "h/m³"
+      },
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Peón de albañilería",
+        "codigo_recurso": "mo113",
+        "coeficiente": 1.179,
+        "unidad": "h/m³"
+      },
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Peón especializado de albañilería",
+        "codigo_recurso": "mo112",
+        "coeficiente": 1.236,
+        "unidad": "h/m³"
+      },
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Armador, en trabajos de colocación del concreto",
+        "codigo_recurso": "mo045",
+        "coeficiente": 0.404,
+        "unidad": "h/m³"
+      },
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Ayudante de armador, en trabajos de colocación del concreto",
+        "codigo_recurso": "mo092",
+        "coeficiente": 1.629,
+        "unidad": "h/m³"
+      },
+      {
+        "tipo": "maquinaria",
+        "descripcion": "Mezcladora de concreto eléctrica con capacidad de 160 l",
+        "codigo_recurso": "mq06hor010",
+        "coeficiente": 0.646,
+        "unidad": "h/m³"
+      }
+    ]
+  },
+  {
+    "cype_code": "EHS012",
+    "titulo": "Sistema de encofrado reutilizable para columna rectangular o cuadrada",
+    "unidad_obra": "m²",
+    "url": "https://honduras.generadordeprecios.info/obra_nueva/Estructuras/Concreto_reforzado/Columnas/EHS012_Sistema_de_encofrado_reutilizable_p.html",
+    "rendimientos": [
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Armador de encofrados",
+        "codigo_recurso": "mo044",
+        "coeficiente": 0.401,
+        "unidad": "h/m²"
+      },
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Ayudante de armador de encofrados",
+        "codigo_recurso": "mo091",
+        "coeficiente": 0.458,
+        "unidad": "h/m²"
+      }
+    ]
+  },
+  {
+    "cype_code": "EHV010",
+    "titulo": "Viga de concreto reforzado",
+    "unidad_obra": "m³",
+    "url": "https://honduras.generadordeprecios.info/obra_nueva/Estructuras/Concreto_reforzado/Vigas/Viga_de_concreto_reforzado.html",
+    "rendimientos": [
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Armador de encofrados",
+        "codigo_recurso": "mo044",
+        "coeficiente": 2.340,
+        "unidad": "h/m³"
+      },
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Ayudante de armador de encofrados",
+        "codigo_recurso": "mo091",
+        "coeficiente": 2.340,
+        "unidad": "h/m³"
+      },
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Armador de hierro",
+        "codigo_recurso": "mo043",
+        "coeficiente": 1.617,
+        "unidad": "h/m³"
+      },
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Ayudante de armador de hierro",
+        "codigo_recurso": "mo090",
+        "coeficiente": 1.752,
+        "unidad": "h/m³"
+      },
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Peón de albañilería",
+        "codigo_recurso": "mo113",
+        "coeficiente": 1.179,
+        "unidad": "h/m³"
+      },
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Peón especializado de albañilería",
+        "codigo_recurso": "mo112",
+        "coeficiente": 1.236,
+        "unidad": "h/m³"
+      },
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Armador, en trabajos de colocación del concreto",
+        "codigo_recurso": "mo045",
+        "coeficiente": 0.382,
+        "unidad": "h/m³"
+      },
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Ayudante de armador, en trabajos de colocación del concreto",
+        "codigo_recurso": "mo092",
+        "coeficiente": 1.539,
+        "unidad": "h/m³"
+      },
+      {
+        "tipo": "maquinaria",
+        "descripcion": "Mezcladora de concreto eléctrica con capacidad de 160 l",
+        "codigo_recurso": "mq06hor010",
+        "coeficiente": 0.646,
+        "unidad": "h/m³"
+      }
+    ]
+  },
+  {
+    "cype_code": "EHV011",
+    "titulo": "Sistema de encofrado para viga",
+    "unidad_obra": "m²",
+    "url": "https://honduras.generadordeprecios.info/obra_nueva/Estructuras/Concreto_reforzado/Vigas/Sistema_de_encofrado_para_viga.html",
+    "rendimientos": [
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Armador de encofrados",
+        "codigo_recurso": "mo044",
+        "coeficiente": 0.562,
+        "unidad": "h/m²"
+      },
+      {
+        "tipo": "mano_obra",
+        "descripcion": "Ayudante de armador de encofrados",
+        "codigo_recurso": "mo091",
+        "coeficiente": 0.562,
+        "unidad": "h/m²"
+      }
+    ]
+  }
+]

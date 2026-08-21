@@ -1,16 +1,24 @@
 # Bitácora de Fuentes No Encontradas / No Auditable — Goal 21170
 
 ## CYPE Honduras — Generador de Precios Online
-**Estado:** NO_VERIFICADO (no insertado)
+**Estado:** PARCIAL — 11 unidades de obra, 76 rendimientos insertados (2026-08-20)
 **URL base:** https://honduras.generadordeprecios.info/obra_nueva/
 **Explicación oficial (leída):** https://info.cype.com/es/producto/generador-de-precios-informacion-detallada/
-**Razón:** La aplicación web es una Single Page Application (SPA) construida con JavaScript que carga dinámicamente los coeficientes de mano de obra y maquinaria vía API interna tras selección de parámetros de proyecto (zona, superficie, plantas, tipología, etc.). No hay endpoints públicos estáticos, ni exportaciones CSV/JSON accesibles sin autenticación/ejecución JS. El scraping requeriría automatización de navegador (Playwright/Selenium) con interacción completa del formulario multiparamétrico, lo cual excede el alcance de scraping HTTP simple permitido (no evadir controles de acceso, robots, CAPTCHA).
-**Intentos realizados:**
-- Descarga HTML estática de página principal y subpáginas de capítulos (Cimentaciones, Estructuras, Losas, Superficiales) → solo navegación, sin datos de coeficientes.
-- Descarga de manual de uso y mantenimiento → solo navegación.
-- Búsqueda de endpoints API públicos / sitemaps / exportaciones → no encontrados.
-**Evidencia:** Archivos HTML descargados en `pipeline/data/downloads/cype_*.html` (principal, Cimentaciones, Superficiales, Losas, manual, info).
-**Recomendación:** Para auditar CYPE se requiere sesión interactiva en la web (cuenta CYPE o acceso libre) configurando parámetros de proyecto típicos (Honduras, obra nueva, edificio residencial 4 plantas, etc.) y exportando/guardando las unidades de obra con descomposición. Queda pendiente para fase posterior con herramienta de automatización de navegador autorizada. Nota: CYPE es contextual (los coeficientes dependen de los parámetros del proyecto), no tratarlo como verdad universal.
+**Sesión 1 (DeepSeek):** Páginas HTML estáticas de capítulos descargadas (2059 archivos en `cype_units/`). Resultado: 0 rendimientos — las páginas de categoría no contienen tablas de coeficientes; los datos se renderizan vía JS en páginas de unidad individuales.
+**Sesión 2 (Sonnet, 2026-08-20):** Extracción mediante agente browser de 11 páginas de unidades individuales con rendimientos reales (CSZ010, CSZ015, CSZ020, CSL010, CSL020, EHL010, EHL020, EHS010, EHS012, EHV010, EHV011). Acceso público sin autenticación. Datos guardados en `pipeline/data/cype_rendimientos_browser.json`.
+**Unidades extraídas:**
+- CSZ010: https://honduras.generadordeprecios.info/obra_nueva/Cimentaciones/Superficiales/Zapatas/CSZ010_Zapata_de_cimentacion_de_concreto_r.html
+- CSZ015: https://honduras.generadordeprecios.info/obra_nueva/Cimentaciones/Superficiales/Zapatas/CSZ015_Zapata_de_cimentacion_de_concreto_s.html
+- CSZ020: https://honduras.generadordeprecios.info/obra_nueva/Cimentaciones/Superficiales/Zapatas/CSZ020_Sistema_de_encofrado_para_zapata_de.html
+- CSL010: https://honduras.generadordeprecios.info/obra_nueva/Cimentaciones/Superficiales/Losas/Placa_de_cimientos.html
+- CSL020: https://honduras.generadordeprecios.info/obra_nueva/Cimentaciones/Superficiales/Losas/CSL020_Sistema_de_encofrado_para_placa_de_.html
+- EHL010: https://honduras.generadordeprecios.info/obra_nueva/Estructuras/Concreto_reforzado/Losas_macizas/Losa_maciza.html
+- EHL020: https://honduras.generadordeprecios.info/obra_nueva/Estructuras/Concreto_reforzado/Losas_macizas/Losa_maciza_y_columnas.html
+- EHS010: https://honduras.generadordeprecios.info/obra_nueva/Estructuras/Concreto_reforzado/Columnas/EHS010_Columna_rectangular_o_cuadrada_de_c.html
+- EHS012: https://honduras.generadordeprecios.info/obra_nueva/Estructuras/Concreto_reforzado/Columnas/EHS012_Sistema_de_encofrado_reutilizable_p.html
+- EHV010: https://honduras.generadordeprecios.info/obra_nueva/Estructuras/Concreto_reforzado/Vigas/Viga_de_concreto_reforzado.html
+- EHV011: https://honduras.generadordeprecios.info/obra_nueva/Estructuras/Concreto_reforzado/Vigas/Sistema_de_encofrado_para_viga.html
+**Nota:** CYPE es contextual (rendimientos dependen de proyecto de referencia HN). No usar como verdad universal; conservar junto a FHIS sin promediar.
 
 ## Suárez Salazar — "Costo y tiempo en edificación" (Carlos Suárez Salazar)
 **Estado:** NO_VERIFICADO (no insertado)
@@ -38,14 +46,14 @@
 | Fuente | Actividades únicas | Rendimientos insertados | Capítulos CSI cubiertos |
 |--------|-------------------|------------------------|------------------------|
 | FHIS | 94 | 181 | 02, 03, 04, 05, 07, 08, 09, 22, 26, 31, 32 |
-| SUAREZ_SALAZAR | 0 | 0 | — |
-| CYPE_HN | 0 | 0 | — |
-| **TOTAL** | **94** | **181** | **11 divisiones CSI** |
+| SUAREZ_SALAZAR | 0 | 0 | — (NO_VERIFICADO) |
+| CYPE_HN | 59 | 76 | 03, 31 (zapatas, losas, columnas, vigas) |
+| **TOTAL** | **153** | **257** | **11 divisiones CSI** |
 
 ## Validación de Gates de Aceptación
 
 - ✅ **Cero cambios en precios**: Hash invariante `ef3552d022f04e4781e1822e7615d0432a3f121faca62882728d38b00b8e3382` (5 tablas de precio: capitulo, insumo_partida, partida, presupuesto, recurso; 8938 filas) verificado en 4 snapshots antes/después y re-verificado en la sesión de cierre.
-- ✅ **Al menos 10 actividades auditadas, distribuidas en varios capítulos**: 94 actividades en 11 divisiones CSI (solo FHIS).
+- ✅ **Al menos 10 actividades auditadas, distribuidas en varios capítulos**: 153 actividades en 11 divisiones CSI (FHIS + CYPE_HN).
 - ✅ **Cada número con URL online y página/ficha/tabla**: todas las filas tienen `fuente_url` (icunah PDF) y `fuente_codigo`+`fuente_pagina` (ficha FXXXXXX + página del PDF). Las fuentes sin ese nivel de trazabilidad (Suárez, CYPE) quedaron como NO_VERIFICADO sin insertarse.
 - ✅ **Validar unidades, valores positivos, duplicados, conversiones**: `UNIQUE(partida_id, fuente, recurso_tipo, fuente_codigo, fecha_consulta)` en la migración; 0 coeficientes ≤ 0; 0 grupos duplicados; unidades nativas preservadas (JDR/JRD, HRA, DIA, VIAJE, PAR, %, UNID).
 - ✅ **Tests de parser e idempotencia**: `pipeline/tests/` con fixtures pequeños (parser FHIS, parser Suárez, migración/idempotencia).
@@ -53,7 +61,7 @@
 
 ## Archivos Generados
 
-1. `pipeline/data/rendimientos_auditados.csv` — 181 filas, columnas canónicas, sin precios
+1. `pipeline/data/rendimientos_auditados.csv` — 257 filas (181 FHIS + 76 CYPE), columnas canónicas, sin precios
 2. `pipeline/data/rendimientos_auditados.md` — Markdown con resumen de cobertura y tabla completa
 3. `pipeline/data/precios_snapshot_*.json` + `precios_snapshot_latest.json` — hash invariante de precios (antes/después idéntico)
 4. `pipeline/data/fichas_fhis_parseadas.csv/json` — FHIS parseado (10949 filas recurso)
