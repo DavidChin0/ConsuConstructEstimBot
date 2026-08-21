@@ -1,0 +1,139 @@
+{
+  "schema": "ESTIMASTRUCT_GATES_JSON/1",
+  "goal": 21174,
+  "generated_at": "2026-08-21T11:26:03.662632+00:00",
+  "commit": "8282b4df9c564bae0fd5a33108f542507a9e0175",
+  "db_version": "v1.4",
+  "success": true,
+  "database_before": {
+    "path": "data\\v1.4\\estimacion.db",
+    "sha256": "22570cbeb1aff48118312582833150db28efbcf59711622f468da9133cce908c",
+    "quick_check": "ok",
+    "user_version": 14,
+    "audit": {
+      "total": 257,
+      "by_source": {
+        "CYPE_HN": 76,
+        "FHIS": 181
+      },
+      "missing_source": 0
+    },
+    "price_tables": {
+      "partida": {
+        "sha256": "1609d9281d95d34d0db5def10c8d2780bd9ce67857c2de00b3b670e96b4ce3e5",
+        "rows": 3299
+      },
+      "insumo_partida": {
+        "sha256": "09bb33ecad99c9d80741f253b28cc3d50a6e80ad423aafa5156fa1b3082405fd",
+        "rows": 21598
+      },
+      "recurso": {
+        "sha256": "8f3f606149ba2779957389b4361d3cd22e1df3dd383e885ac5b57e26aade747e",
+        "rows": 367
+      },
+      "capitulo": {
+        "sha256": "65a3eb95af225750be53334395e2a4de1d35b9abefb13b2028a89a8c49d94899",
+        "rows": 134
+      },
+      "presupuesto": {
+        "sha256": "ef80868919125f77ab6239be0836b255754fe730ef46849fc85b625666faff17",
+        "rows": 8
+      }
+    },
+    "price_hash": "635a3e8f7c666be2a9f33ea16048c72a42537d5752fb9dccb7b32736d0d8fe20"
+  },
+  "database_after": {
+    "path": "data\\v1.4\\estimacion.db",
+    "sha256": "22570cbeb1aff48118312582833150db28efbcf59711622f468da9133cce908c",
+    "quick_check": "ok",
+    "user_version": 14,
+    "audit": {
+      "total": 257,
+      "by_source": {
+        "CYPE_HN": 76,
+        "FHIS": 181
+      },
+      "missing_source": 0
+    },
+    "price_tables": {
+      "partida": {
+        "sha256": "1609d9281d95d34d0db5def10c8d2780bd9ce67857c2de00b3b670e96b4ce3e5",
+        "rows": 3299
+      },
+      "insumo_partida": {
+        "sha256": "09bb33ecad99c9d80741f253b28cc3d50a6e80ad423aafa5156fa1b3082405fd",
+        "rows": 21598
+      },
+      "recurso": {
+        "sha256": "8f3f606149ba2779957389b4361d3cd22e1df3dd383e885ac5b57e26aade747e",
+        "rows": 367
+      },
+      "capitulo": {
+        "sha256": "65a3eb95af225750be53334395e2a4de1d35b9abefb13b2028a89a8c49d94899",
+        "rows": 134
+      },
+      "presupuesto": {
+        "sha256": "ef80868919125f77ab6239be0836b255754fe730ef46849fc85b625666faff17",
+        "rows": 8
+      }
+    },
+    "price_hash": "635a3e8f7c666be2a9f33ea16048c72a42537d5752fb9dccb7b32736d0d8fe20"
+  },
+  "price_hash_before": "635a3e8f7c666be2a9f33ea16048c72a42537d5752fb9dccb7b32736d0d8fe20",
+  "price_hash_after": "635a3e8f7c666be2a9f33ea16048c72a42537d5752fb9dccb7b32736d0d8fe20",
+  "audited_rendimientos_export": {
+    "path": "development\\rendimientos_audit\\pipeline\\data\\rendimientos_auditados.csv",
+    "rows": 257,
+    "by_source": {
+      "CYPE_HN": 76,
+      "FHIS": 181
+    },
+    "missing_traceability": 0,
+    "forbidden_sources": 0
+  },
+  "suarez_salazar_policy": {
+    "log_path": "development\\rendimientos_audit\\pipeline\\data\\bitacora_fuentes_no_encontradas.md",
+    "legitimate_catalog_url": "https://books.google.com/books?id=f8G8UFFjd9sC",
+    "edition": "3a ed., Editorial Limusa, 1977, 451 paginas",
+    "isbn_10": "9681800672",
+    "isbn_13": "9789681800673",
+    "page_or_table": "NO_DISPONIBLE_EN_VISTA_LEGITIMA",
+    "status": "NO_VERIFICADO",
+    "sqlite_rows": 0,
+    "missing_log_fields": []
+  },
+  "gates": {
+    "build": {
+      "name": "build",
+      "command": "node --check frontend/js/app.js",
+      "started_at": "2026-08-21T11:25:55.039809+00:00",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "build_core": {
+      "name": "build_core",
+      "command": "node --check frontend/js/core.js",
+      "started_at": "2026-08-21T11:25:55.100060+00:00",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "tests": {
+      "name": "tests",
+      "command": "D:\\LLM\\python\\python.exe -m pytest pipeline/tests -q",
+      "started_at": "2026-08-21T11:25:55.166167+00:00",
+      "exit_code": 0,
+      "stdout": "..................                                                       [100%]\n18 passed in 0.21s",
+      "stderr": ""
+    },
+    "smoke": {
+      "name": "smoke",
+      "command": "D:\\LLM\\python\\python.exe release/smoke_v14.py",
+      "started_at": "2026-08-21T11:25:58.685138+00:00",
+      "exit_code": 0,
+      "stdout": "v1.4 runtime smoke: backend health/API + frontend shell/assets + versioned SQLite OK",
+      "stderr": "2026-08-21 05:26:02,945 - httpx - INFO - HTTP Request: GET http://testserver/health \"HTTP/1.1 200 OK\"\n2026-08-21 05:26:03,007 - httpx - INFO - HTTP Request: GET http://testserver/presupuestos \"HTTP/1.1 200 OK\""
+    }
+  }
+}

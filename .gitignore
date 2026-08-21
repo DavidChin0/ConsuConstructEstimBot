@@ -12,6 +12,7 @@ venv/
 *.db.bak*
 *.sqlite
 *.sqlite3
+!ESTIMASTRUCT/data/v1.4/estimacion.db
 
 # Logs
 **/logs/

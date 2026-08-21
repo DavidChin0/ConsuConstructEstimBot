@@ -7,13 +7,13 @@ en la tabla comparativa `rendimiento_audit` de la SQLite canónica
 
 Contrato completo: `docs/goals/rendimientos_online_audit.md`.
 
-## Estado (2026-08-21, cierre)
+## Estado (2026-08-21, checkpoint v1.4)
 
 | Fuente | Actividades | Rendimientos | Capítulos CSI |
 |--------|-------------|--------------|---------------|
 | FHIS (Manual de Rendimientos 2003-11) | 94 | 181 | 02, 03, 04, 05, 07, 08, 09, 22, 26, 31, 32 |
 | Suárez Salazar | 0 | 0 | NO_VERIFICADO |
-| CYPE Honduras | 0 | 0 | NO_VERIFICADO |
+| CYPE Honduras | 59 | 76 | 03, 31 |
 
 Precios intactos: invariante SHA256 `ef3552d0...3382` (5 tablas, 8938 filas)
 idéntico antes/después (ver `data/precios_snapshot_*.json`).

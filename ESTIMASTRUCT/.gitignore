@@ -4,6 +4,7 @@ __pycache__/
 *.db-wal
 *.db-shm
 *.db.bak*
+!data/v1.4/estimacion.db
 logs/
 backend/logs/
 ESTIMASTRUCT/logs/

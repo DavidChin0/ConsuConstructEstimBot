@@ -1,4 +1,5 @@
 import os
+import sqlite3
 
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
@@ -65,4 +66,15 @@ def root():
 
 @app.get("/health")
 def health():
-    return {"status": "healthy"}
+    db_user_version = None
+    if CONFIG.DB_IS_SQLITE and os.path.exists(CONFIG.DB_PATH):
+        with sqlite3.connect(f"file:{CONFIG.DB_PATH}?mode=ro", uri=True) as conn:
+            db_user_version = conn.execute("PRAGMA user_version").fetchone()[0]
+    return {
+        "status": "healthy",
+        "release": CONFIG.RELEASE_VERSION,
+        "database": {
+            "dialect": CONFIG.DATABASE_DIALECT,
+            "user_version": db_user_version,
+        },
+    }

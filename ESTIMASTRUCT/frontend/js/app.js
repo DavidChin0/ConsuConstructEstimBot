@@ -1749,7 +1749,7 @@ function initModalTemplateVersion() {
 
   function updateVersionDisplay() {
     const selected = document.querySelector('input[name="template-version"]:checked').value;
-    versionSelected.textContent = selected === "v1.0" ? "V1.0" : selected === "v1.1" ? "V1.1" : "V1.2";
+    versionSelected.textContent = selected.toUpperCase();
 
     // Update label styles
     labelV10.style.borderColor = selected === "v1.0" ? "var(--accent)" : "var(--border)";
@@ -1779,7 +1779,7 @@ function openModalTemplateVersionDialog() {
   const modal = document.getElementById("modal-template-version");
   document.querySelector(`input[value="${state.templateVersion}"]`).checked = true;
   const versionSelected = document.getElementById("version-selected");
-  versionSelected.textContent = state.templateVersion === "v1.0" ? "V1.0" : state.templateVersion === "v1.1" ? "V1.1" : "V1.2";
+  versionSelected.textContent = state.templateVersion.toUpperCase();
   modal.classList.remove("hidden");
 }
 

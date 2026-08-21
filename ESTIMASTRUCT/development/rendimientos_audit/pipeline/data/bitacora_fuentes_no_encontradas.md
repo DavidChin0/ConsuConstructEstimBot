@@ -22,15 +22,17 @@
 
 ## Suárez Salazar — "Costo y tiempo en edificación" (Carlos Suárez Salazar)
 **Estado:** NO_VERIFICADO (no insertado)
-**Verificación bibliográfica:** Autor Carlos Suárez Salazar; "Costo y Tiempo en Edificación"; 3a ed., Limusa. Catálogos consultados (fichas catalográficas, acceso legítimo no verificado):
+**Búsqueda legítima reanudada (2026-08-21):** la ficha autorizada de Google Libros confirma autor Carlos Suárez Salazar, _Costo y tiempo en edificación_, Editorial Limusa, 1977, 451 páginas, ISBN-10 `9681800672` / ISBN-13 `9789681800673`: https://books.google.com/books?id=f8G8UFFjd9sC. La vista previa expone metadatos, índice y páginas seleccionadas, pero no una tabla de rendimientos completa con valores y renglones auditables.
+**Página/tabla para rendimientos:** `NO_DISPONIBLE_EN_VISTA_LEGITIMA`; por ello no se atribuye ningún coeficiente a esta fuente y todas las candidatas permanecen `NO_VERIFICADO` fuera de SQLite.
+**Verificación bibliográfica adicional:** Autor Carlos Suárez Salazar; "Costo y Tiempo en Edificación"; 3a ed., Limusa. Catálogos consultados (fichas catalográficas legítimas; no ofrecen tabla de rendimientos consultable):
 - UNFV: https://biblioteca.unfv.edu.pe/cgi-bin/koha/opac-detail.pl?biblionumber=44721
 - UNIBE: https://opacbiblioteca.unibe.edu.do/bib/12111
 - UNPA: https://biblioteca.unpa.edu.mx/bib/2046
-- Colegio de Ingenieros Civiles del Municipio de Solidaridad: https://ingenierosciviles.com.mx/Biblioteca/items/show/5
+- Universidad Nacional de Loja: https://koha.unl.edu.ec/bib/3692 (3a ed., 1980, ISBN 9681800672)
 **URL PDF (candidato):** https://ingenierosciviles.com.mx/Biblioteca/files/original/750c670662e39713bff477f6d3ea9ce8.pdf
 **Razón:** El PDF descargado (43 MB, 255 páginas) es un escaneo de imagen sin capa de texto (OCR requerido). La institución que lo aloja no declara licencia/autorización de distribución del texto; conforme al contrato del goal, al no poder verificar el acceso legítimo el texto se usa **solo como pista bibliográfica**. Se intentó una fuente secundaria (`http://miguelgarcia.xyz/rendimientos/`, web personal que republica tablas del libro), pero esa vía fue **rechazada**: (a) republicación no autorizada de contenido con copyright (el goal prohíbe copias piratas), y (b) sin página/tabla del libro original (el contrato exige `página/ficha/tabla` o NO_VERIFICADO).
 **Corrección aplicada (2026-08-21):** Las 10 filas SUAREZ_SALAZAR insertadas en la sesión anterior (provenientes de miguelgarcia.xyz, `tipo_match=semantico/manual`, confianza 0.333–0.5) fueron **retiradas** de la tabla canónica `rendimiento_audit` por no cumplir el contrato de trazabilidad ni el requisito de fuente autorizada. Rollback disponible en `pipeline/data/suarez_rows_retiradas.json`. Material fuente conservado como evidencia del intento: `suarez_miguelgarcia_rows.json`, `suarez_miguelgarcia.html`, `suarez_salazar.pdf`.
-**Siguiente paso (fuera de alcance de este goal):** extracción OCR del PDF primario con verificación previa de autorización de la institución, o hallazgo de una fuente autorizada con página/tabla.
+**Siguiente paso:** consultar un ejemplar licenciado o hallar una vista autorizada que muestre la página/tabla completa; solo entonces podrán publicarse filas con URL, edición y página/tabla exactas.
 
 ## FHIS — Manual de Rendimientos 2003-11 (Crédito Banco Mundial 3443-HO)
 **Estado:** COMPLETO — fichas parseadas del PDF, insertado en SQLite canónica
@@ -54,7 +56,7 @@
 
 - ✅ **Cero cambios en precios**: Hash invariante `ef3552d022f04e4781e1822e7615d0432a3f121faca62882728d38b00b8e3382` (5 tablas de precio: capitulo, insumo_partida, partida, presupuesto, recurso; 8938 filas) verificado en 4 snapshots antes/después y re-verificado en la sesión de cierre.
 - ✅ **Al menos 10 actividades auditadas, distribuidas en varios capítulos**: 153 actividades en 11 divisiones CSI (FHIS + CYPE_HN).
-- ✅ **Cada número con URL online y página/ficha/tabla**: todas las filas tienen `fuente_url` (icunah PDF) y `fuente_codigo`+`fuente_pagina` (ficha FXXXXXX + página del PDF). Las fuentes sin ese nivel de trazabilidad (Suárez, CYPE) quedaron como NO_VERIFICADO sin insertarse.
+- ✅ **Cada número con URL online y página/ficha/tabla**: las 181 filas FHIS tienen URL, ficha y página; las 76 filas CYPE tienen URL y código de unidad. Suárez quedó `NO_VERIFICADO` y sin filas por no existir una tabla de rendimientos visible en una fuente autorizada.
 - ✅ **Validar unidades, valores positivos, duplicados, conversiones**: `UNIQUE(partida_id, fuente, recurso_tipo, fuente_codigo, fecha_consulta)` en la migración; 0 coeficientes ≤ 0; 0 grupos duplicados; unidades nativas preservadas (JDR/JRD, HRA, DIA, VIAJE, PAR, %, UNID).
 - ✅ **Tests de parser e idempotencia**: `pipeline/tests/` con fixtures pequeños (parser FHIS, parser Suárez, migración/idempotencia).
 - ✅ **Revisión Python y council**: pipeline ejecutado con `D:\LLM\python\python.exe`. La síntesis final y la promoción a valor definitivo quedan pendientes del gate de revisión (Sonnet/Codex), no bloquean la recolección.
