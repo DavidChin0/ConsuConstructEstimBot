@@ -15,7 +15,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session, joinedload
 
 from backend.db import get_db
-from backend.models import Presupuesto, Capitulo, CronogramaOverride
+from backend.models import Presupuesto, Capitulo, CronogramaOverride, CronogramaOrden
 from backend import cronograma as engine
 from backend.routers.export import safe_fname
 
@@ -72,11 +72,17 @@ def _partidas_obra(p: Presupuesto, overrides: dict):
     return crono_input
 
 
-def _calcular(p: Presupuesto, overrides: dict):
+def _orden_manual(db: Session, pid: str) -> dict:
+    """{partida_id: orden} si el usuario reordeno el Gantt; {} = orden automatico."""
+    rows = db.query(CronogramaOrden).filter(CronogramaOrden.presupuesto_id == pid).all()
+    return {r.partida_id: int(r.orden) for r in rows}
+
+
+def _calcular(p: Presupuesto, overrides: dict, orden_manual: dict | None = None):
     crono_input = _partidas_obra(p, overrides)
     if not crono_input:
         raise HTTPException(400, "La obra no tiene partidas con cantidad > 0")
-    filas = engine.construir_cronograma(crono_input)
+    filas = engine.construir_cronograma(crono_input, orden_manual=orden_manual)
     # fin (dia laboral) por actividad
     for f in filas:
         ini = date.fromisoformat(f["fecha_inicio"])
@@ -92,7 +98,7 @@ def get_cronograma(pid: str, db: Session = Depends(get_db)):
     if not p:
         raise HTTPException(404, "Presupuesto no encontrado")
 
-    filas = _calcular(p, _overrides(db, pid))
+    filas = _calcular(p, _overrides(db, pid), _orden_manual(db, pid))
     inicio = min(f["fecha_inicio"] for f in filas)
     fin = max(f["fecha_fin"] for f in filas)
     d0 = date.fromisoformat(inicio)
@@ -151,7 +157,44 @@ def get_cronograma(pid: str, db: Session = Depends(get_db)):
         "meses": round(dias_cal / 30.44, 1),
         "fases": fases_orden,
         "actividades": acts,
+        "orden_manual": bool(_orden_manual(db, pid)),
     }
+
+
+class MoverIn(BaseModel):
+    partida_id: str
+    nueva_posicion: int   # 0-based en la lista actual del Gantt
+
+
+@router.post("/presupuestos/{pid}/cronograma/mover")
+def mover_actividad(pid: str, body: MoverIn, db: Session = Depends(get_db)):
+    """Mueve una actividad a nueva_posicion; persiste el orden completo y
+    devuelve el cronograma recalculado (fechas en cadena segun el nuevo orden)."""
+    p = db.query(Presupuesto).options(
+        joinedload(Presupuesto.capitulos).joinedload(Capitulo.partidas)
+    ).filter(Presupuesto.id == pid).first()
+    if not p:
+        raise HTTPException(404, "Presupuesto no encontrado")
+    filas = _calcular(p, _overrides(db, pid), _orden_manual(db, pid))
+    ids = [f["partida_id"] for f in filas]
+    if body.partida_id not in ids:
+        raise HTTPException(404, "Partida no esta en el cronograma (cantidad > 0)")
+    ids.remove(body.partida_id)
+    pos = max(0, min(len(ids), int(body.nueva_posicion)))
+    ids.insert(pos, body.partida_id)
+    db.query(CronogramaOrden).filter(CronogramaOrden.presupuesto_id == pid).delete()
+    for i, part_id in enumerate(ids):
+        db.add(CronogramaOrden(presupuesto_id=pid, partida_id=part_id, orden=i))
+    db.commit()
+    return get_cronograma(pid, db)
+
+
+@router.post("/presupuestos/{pid}/cronograma/reset-orden")
+def reset_orden(pid: str, db: Session = Depends(get_db)):
+    """Vuelve al orden automatico por fase/CSI."""
+    n = db.query(CronogramaOrden).filter(CronogramaOrden.presupuesto_id == pid).delete()
+    db.commit()
+    return {"ok": True, "filas_borradas": n}
 
 
 class PersonalIn(BaseModel):
@@ -198,7 +241,7 @@ def export_cronograma(pid: str, db: Session = Depends(get_db)):
     if not p:
         raise HTTPException(404, "Presupuesto no encontrado")
 
-    filas = _calcular(p, _overrides(db, pid))
+    filas = _calcular(p, _overrides(db, pid), _orden_manual(db, pid))
     inicio = min(f["fecha_inicio"] for f in filas)
     fin = max(f["fecha_fin"] for f in filas)
     d0 = date.fromisoformat(inicio)

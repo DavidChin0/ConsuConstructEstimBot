@@ -321,6 +321,7 @@ function initExportMenu() {
       else if (kind === "pdf-banco") openExportPdfBanco();
       else if (kind === "publish-portal") publicarAPortal();
       else if (kind === "sync-precios") sincronizarPrecios();
+      else if (kind === "sync-media") sincronizarMedia();
     });
   });
 }
@@ -628,9 +629,9 @@ function renderGantt(data) {
     const angosta = w < GANTT_BAR_MIN_LABEL;
     const dLabel = `${a.duracion_dias}d`;
     const oculta = (q && !_ganttMatch(a, q)) ? " g-hide" : "";
-    return `<div class="g-row${a._critica ? " g-crit" : ""}${oculta}">
+    return `<div class="g-row${a._critica ? " g-crit" : ""}${oculta}" draggable="true" data-pid="${pid}" data-ord="${a.orden}">
       <div class="g-label" title="${tip}">
-        <span class="g-ord">${a.orden + 1}</span>
+        <span class="g-ord"><span class="g-move" title="Arrastrar arriba/abajo, o usar ▲▼ — recalcula fechas en cadena">⠿</span>${a.orden + 1}<span class="g-mv-btns"><button type="button" class="g-mv" data-dir="-1" data-pid="${pid}" title="Subir">▲</button><button type="button" class="g-mv" data-dir="1" data-pid="${pid}" title="Bajar">▼</button></span></span>
         <span class="g-dot" style="background:${a.fase_color}"></span>
         <span class="g-csi">${esc(a.csi)}</span>
         <span class="g-desc">${esc(a.descripcion)}</span>
@@ -726,6 +727,89 @@ function _wireGanttRowEvents() {
       const ay = document.querySelector(`#gantt-body .g-ay[data-pid="${pid}"]`);
       setPersonal(pid, parseInt(esp.value, 10) || 1, parseInt(ay.value, 10) || 1);
     }));
+  _wireGanttReorden();
+}
+
+// --- Reordenar actividades (slider arriba/abajo) — backend: POST .../cronograma/mover ---
+// La posicion en la lista ES la fecha de ejecucion: cada actividad arranca al
+// terminar la anterior (cadena global, salta domingos). Recalcula en el server.
+async function moverActividad(partidaId, nuevaPos) {
+  if (!partidaId || !_ganttData) return;
+  const n = _ganttData.actividades.length;
+  nuevaPos = Math.max(0, Math.min(n - 1, nuevaPos));
+  const body = document.getElementById("gantt-body");
+  const sx = body.scrollLeft, sy = body.scrollTop;
+  try {
+    const data = await api("POST", `/presupuestos/${state.activeId}/cronograma/mover`,
+      { partida_id: partidaId, nueva_posicion: nuevaPos });
+    _ganttData = data;
+    renderGantt(data);
+    body.scrollLeft = sx; body.scrollTop = sy;
+    const fila = body.querySelector(`.g-row[data-pid="${CSS.escape(partidaId)}"]`);
+    if (fila) { fila.classList.add("g-moved"); setTimeout(() => fila.classList.remove("g-moved"), 1200); }
+  } catch (err) {
+    alert("No se pudo mover la actividad: " + (err.message || err));
+  }
+}
+
+async function resetOrdenGantt() {
+  if (!state.activeId) return;
+  if (!confirm("¿Volver al orden automático por fase/CSI? Se pierde el orden manual.")) return;
+  try {
+    await api("POST", `/presupuestos/${state.activeId}/cronograma/reset-orden`);
+    cargarGantt(true);
+  } catch (err) {
+    alert("No se pudo resetear el orden: " + (err.message || err));
+  }
+}
+
+function _wireGanttReorden() {
+  const body = document.getElementById("gantt-body");
+  const reset = document.getElementById("btn-gantt-reset-orden");
+  if (reset) reset.classList.toggle("hidden", !(_ganttData && _ganttData.orden_manual));
+
+  body.querySelectorAll(".g-mv").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const row = btn.closest(".g-row");
+      moverActividad(btn.dataset.pid, parseInt(row.dataset.ord, 10) + parseInt(btn.dataset.dir, 10));
+    });
+  });
+
+  let dragPid = null;
+  body.querySelectorAll(".g-row[draggable='true']").forEach(row => {
+    row.addEventListener("dragstart", (e) => {
+      if (e.target.closest("input")) { e.preventDefault(); return; }
+      dragPid = row.dataset.pid;
+      row.classList.add("g-dragging");
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", dragPid);
+    });
+    row.addEventListener("dragend", () => {
+      row.classList.remove("g-dragging");
+      body.querySelectorAll(".g-drop-above,.g-drop-below").forEach(r => r.classList.remove("g-drop-above", "g-drop-below"));
+    });
+    row.addEventListener("dragover", (e) => {
+      if (!dragPid || row.dataset.pid === dragPid) return;
+      e.preventDefault();
+      const r = row.getBoundingClientRect();
+      const abajo = e.clientY > r.top + r.height / 2;
+      row.classList.toggle("g-drop-below", abajo);
+      row.classList.toggle("g-drop-above", !abajo);
+    });
+    row.addEventListener("dragleave", () => row.classList.remove("g-drop-above", "g-drop-below"));
+    row.addEventListener("drop", (e) => {
+      e.preventDefault();
+      if (!dragPid || row.dataset.pid === dragPid) return;
+      const abajo = row.classList.contains("g-drop-below");
+      row.classList.remove("g-drop-above", "g-drop-below");
+      const from = _ganttData.actividades.findIndex(a => a.partida_id === dragPid);
+      let to = parseInt(row.dataset.ord, 10) + (abajo ? 1 : 0);
+      if (from < to) to -= 1;   // el backend quita la actividad antes de insertarla
+      const pid = dragPid; dragPid = null;
+      if (to !== from) moverActividad(pid, to);
+    });
+  });
 }
 
 async function setPersonal(partidaId, nEsp, nAy) {
@@ -786,6 +870,8 @@ function initCronograma() {
     document.getElementById("modal-cronograma").classList.add("hidden"));
   const exp = document.getElementById("btn-gantt-export");
   if (exp) exp.addEventListener("click", exportarCronograma);
+  const rst = document.getElementById("btn-gantt-reset-orden");
+  if (rst) rst.addEventListener("click", resetOrdenGantt);
   const modal = document.getElementById("modal-cronograma");
   if (modal) modal.addEventListener("click", (e) => {
     if (e.target.id === "modal-cronograma") e.target.classList.add("hidden");
@@ -822,6 +908,22 @@ async function sincronizarPrecios() {
     showScriptOut("Portal — Error", err.message || String(err), "error");
   }
 }
+
+async function sincronizarMedia() {
+  if (!state.activeId) { alert("Abrí una obra primero."); return; }
+  const obra = state.obras?.find(o => o.id === state.activeId);
+  if (!confirm(`Sincronizar Fotos/Videos/Planos/Renders de "${obra?.nombre || "esta obra"}"?\n\nEl bucket de esta obra en Cloudflare lo sube projectmanager_bot — este botón solo confirma el bucket y notifica.`)) return;
+  showScriptOut("Bucket — Sync media", "Solicitando sync de media a projectmanager_bot...", "running");
+  try {
+    const res = await api("POST", `/presupuestos/${state.activeId}/sync-media-supabase`);
+    showScriptOut("Bucket — Sync media",
+      `✅ Solicitud registrada\n\nObra: ${res.nombre}\nBucket: ${res.bucket}\nSubcarpetas: ${res.subcarpetas.join(", ")}\n\n${res.mensaje}`,
+      "ok");
+  } catch (err) {
+    showScriptOut("Bucket — Error", err.message || String(err), "error");
+  }
+}
+
 
 // --- TABLE LAYOUT ---
 const TABLE_FONT_KEY = "estimastruct.table-font";
@@ -969,8 +1071,8 @@ function applyModoUI() {
   }
   const basesWrap = document.getElementById("bases-sidebar-toggle-wrap");
   if (basesWrap) {
-    if (isDev) basesWrap.classList.remove("hidden");
-    else basesWrap.classList.add("hidden");
+    // Bases de Datos siempre visible (no requiere modo desarrollador ni obra activa)
+    basesWrap.classList.remove("hidden");
   }
   // Menú visible en modo dev (no requiere obra activa — Bases de Datos es global)
   const devMenu = document.getElementById("dev-menu-wrap");
@@ -1660,7 +1762,7 @@ function updateTemplateDesc() {
     ? `Template V1.0 — Original${countLabel}`
     : selectedVersion === "v1.1"
       ? `Template V1.1 — Legacy${countLabel}`
-      : `Template V1.2 — Vigente${countLabel}`;
+      : `Template V1.2 — Legacy${countLabel}`;
   document.getElementById("template-desc").textContent = desc;
   refreshTemplateOptionLabels();
 }
@@ -1687,7 +1789,7 @@ function refreshTemplateOptionLabels() {
   const v10 = document.querySelector('#obra-template-version option[value="v1.0"]');
   const v11 = document.querySelector('#obra-template-version option[value="v1.1"]');
   const v12 = document.querySelector('#obra-template-version option[value="v1.2"]');
-  const v14 = document.querySelector('#obra-template-version option[value="v1.4"]');
+  const v13 = document.querySelector('#obra-template-version option[value="v1.3"]');
   if (v10) {
     const total = templateCatalog["v1.0"]?.fichas_total;
     v10.textContent = total == null ? "V1.0 — Original" : `V1.0 — Original (${total} fichas)`;
@@ -1698,16 +1800,16 @@ function refreshTemplateOptionLabels() {
   }
   if (v12) {
     const total = templateCatalog["v1.2"]?.fichas_total;
-    v12.textContent = total == null ? "V1.2 — Vigente" : `V1.2 — Vigente (${total} fichas)`;
+    v12.textContent = total == null ? "V1.2 — Legacy" : `V1.2 — Legacy (${total} fichas)`;
   }
-  if (v14) {
-    const total = templateCatalog["v1.4"]?.fichas_total;
-    v14.textContent = total == null ? "V1.4 — Auditoría FHIS/CYPE" : `V1.4 — Auditoría FHIS/CYPE (${total} fichas)`;
+  if (v13) {
+    const total = templateCatalog["v1.3"]?.fichas_total;
+    v13.textContent = total == null ? "V1.3 — Canon (Postgres)" : `V1.3 — Canon (Postgres) (${total} fichas)`;
   }
   const labelV10 = document.getElementById("label-v1-0");
   const labelV11 = document.getElementById("label-v1-1");
   const labelV12 = document.getElementById("label-v1-2");
-  const labelV14 = document.getElementById("label-v1-4");
+  const labelV13 = document.getElementById("label-v1-3");
   if (labelV10) {
     const total = templateCatalog["v1.0"]?.fichas_total;
     const desc = labelV10.querySelector("div div:last-child");
@@ -1721,12 +1823,12 @@ function refreshTemplateOptionLabels() {
   if (labelV12) {
     const total = templateCatalog["v1.2"]?.fichas_total;
     const desc = labelV12.querySelector("div div:last-child");
-    if (desc) desc.textContent = total == null ? "Versión vigente" : `Versión vigente (${total} fichas)`;
+    if (desc) desc.textContent = total == null ? "Versión legacy" : `Versión legacy (${total} fichas)`;
   }
-  if (labelV14) {
-    const total = templateCatalog["v1.4"]?.fichas_total;
-    const desc = labelV14.querySelector("div div:last-child");
-    if (desc) desc.textContent = total == null ? "Auditoría FHIS + CYPE Honduras" : `Auditoría FHIS + CYPE Honduras (${total} fichas)`;
+  if (labelV13) {
+    const total = templateCatalog["v1.3"]?.fichas_total;
+    const desc = labelV13.querySelector("div div:last-child");
+    if (desc) desc.textContent = total == null ? "Canon — Postgres" : `Canon — Postgres (${total} fichas)`;
   }
 }
 
@@ -1738,9 +1840,12 @@ function initModalTemplateVersion() {
   const labelV10 = document.getElementById("label-v1-0");
   const labelV11 = document.getElementById("label-v1-1");
   const labelV12 = document.getElementById("label-v1-2");
+  const labelV13 = document.getElementById("label-v1-3");
 
-  // Set initial value
-  document.querySelector(`input[value="${state.templateVersion}"]`).checked = true;
+  // Set initial value (v1.3 canon si el guardado ya no existe, p.ej. v1.4 borrado)
+  const _initRadio = document.querySelector(`input[name="template-version"][value="${state.templateVersion}"]`)
+    || document.querySelector('input[name="template-version"][value="v1.3"]');
+  if (_initRadio) _initRadio.checked = true;
   updateVersionDisplay();
 
   radioButtons.forEach(radio => {
@@ -1752,14 +1857,11 @@ function initModalTemplateVersion() {
     versionSelected.textContent = selected.toUpperCase();
 
     // Update label styles
-    labelV10.style.borderColor = selected === "v1.0" ? "var(--accent)" : "var(--border)";
-    labelV10.style.backgroundColor = selected === "v1.0" ? "var(--bg-dark)" : "transparent";
-    labelV11.style.borderColor = selected === "v1.1" ? "var(--accent)" : "var(--border)";
-    labelV11.style.backgroundColor = selected === "v1.1" ? "var(--bg-dark)" : "transparent";
-    if (labelV12) {
-      labelV12.style.borderColor = selected === "v1.2" ? "var(--accent)" : "var(--border)";
-      labelV12.style.backgroundColor = selected === "v1.2" ? "var(--bg-dark)" : "transparent";
-    }
+    [[labelV10, "v1.0"], [labelV11, "v1.1"], [labelV12, "v1.2"], [labelV13, "v1.3"]].forEach(([lbl, v]) => {
+      if (!lbl) return;
+      lbl.style.borderColor = selected === v ? "var(--accent)" : "var(--border)";
+      lbl.style.backgroundColor = selected === v ? "var(--bg-dark)" : "transparent";
+    });
   }
 
   document.getElementById("modal-tv-cancel").addEventListener("click", () => {
@@ -1777,7 +1879,8 @@ function initModalTemplateVersion() {
 
 function openModalTemplateVersionDialog() {
   const modal = document.getElementById("modal-template-version");
-  document.querySelector(`input[value="${state.templateVersion}"]`).checked = true;
+  const _r = document.querySelector(`input[name="template-version"][value="${state.templateVersion}"]`);
+  if (_r) _r.checked = true;
   const versionSelected = document.getElementById("version-selected");
   versionSelected.textContent = state.templateVersion.toUpperCase();
   modal.classList.remove("hidden");

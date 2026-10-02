@@ -16,8 +16,8 @@ _BACKEND = Path(__file__).resolve().parent
 class CONFIG:
     PROJECT_ROOT = _BACKEND.parent
     PROJECT_NAME = "EstimaStruct"
-    RELEASE_VERSION = "v1.4"
-    VERSIONED_DB_PATH = PROJECT_ROOT / "data" / "v1.4" / "estimacion.db"
+    RELEASE_VERSION = "v1.3"
+    VERSIONED_DB_PATH = PROJECT_ROOT / "data" / "v1.3" / "estimacion.db"  # legacy; canon = Postgres
     CANONICAL_ROOT = os.getenv("ESTIMASTRUCT_CANONICAL_ROOT", str(PROJECT_ROOT))
 
     # BD viva FUERA de OneDrive (FASE 0). Local NTFS => WAL seguro.

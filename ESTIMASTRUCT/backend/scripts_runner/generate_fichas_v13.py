@@ -28,13 +28,23 @@ _PG_DB   = "estimastruct"
 _PG_USER = "postgres"
 
 _SQL = """
+    -- [FIX 2026-10-02] Canon Postgres: solo partidas SANAS. Antes DISTINCT ON por
+    -- precio DESC elegia las partidas de 'Test v1.4*' (insumos con clave='' y
+    -- costo 0, costo_ma = PU con markup) -> fichas v1.3 con MO+MA mezclados.
     SELECT DISTINCT ON (p.clave_csi)
         p.id, p.clave_csi, p.descripcion, p.unidad,
         p.costo_mo, p.costo_ma, p.unitario_matriz,
         p.precio_unitario, p.color_tipo
     FROM partida p
+    JOIN capitulo c ON c.id = p.capitulo_id
+    JOIN presupuesto pr ON pr.id = c.presupuesto_id
     WHERE p.clave_csi IS NOT NULL AND p.clave_csi != ''
-    ORDER BY p.clave_csi, p.precio_unitario DESC NULLS LAST
+      AND pr.nombre NOT ILIKE 'test%'
+      AND NOT EXISTS (SELECT 1 FROM insumo_partida i
+                      WHERE i.partida_id = p.id AND COALESCE(i.clave, '') = '')
+    ORDER BY p.clave_csi,
+             EXISTS (SELECT 1 FROM insumo_partida i WHERE i.partida_id = p.id) DESC,
+             p.precio_unitario DESC NULLS LAST
 """
 
 _SQL_INSUMOS = """

@@ -337,6 +337,16 @@ def save_viewer_screenshot():
     return {'ok': True, 'path': path, 'file': fname}
 
 
+@app.route('/karla')
+def karla_budget_view():
+    """Vista experimental — Presupuesto Karla puro CSI (-15% sobre L 998,188.50)
+    Solo dev local. NO.commit a main.
+    """
+    return render_template('karla_budget.html',
+                           presupuesto_id="7ce4d8d9-bdf6-4487-9233-19278841954c",
+                           api_base="/__api__")
+
+
 @app.route('/matrices')
 def matrices_page():
     """Página - Listar matrices"""

@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from backend.db import engine
 from backend.config import CONFIG
 from backend.models import Base
-from backend.routers import presupuestos, partidas, recursos, calculos, export, insumos, scripts as scripts_router, bases, updater, diagnostics, memory, diseno_estructural, sismo, conexion_acero, miembro_acero, acero_diseno, portal_publish, cronograma as cronograma_router, export_pdf, preview_pdf, db_backup, revit_mcp as revit_mcp_router, auditoria_formulas, financiero, rag as rag_router
+from backend.routers import presupuestos, partidas, recursos, calculos, export, insumos, scripts as scripts_router, bases, updater, diagnostics, memory, diseno_estructural, sismo, conexion_acero, miembro_acero, acero_diseno, portal_publish, cronograma as cronograma_router, export_pdf, preview_pdf, db_backup, revit_mcp as revit_mcp_router, auditoria_formulas, financiero, rag as rag_router, worker_report, obra_media
 from backend.error_handler import register_exception_handlers
 from backend.silent_notifier import notifier, notify_file
 
@@ -58,6 +58,8 @@ app.include_router(revit_mcp_router.router)   # GET/POST /revit-mcp/* (Revit MCP
 app.include_router(auditoria_formulas.router)   # GET/POST /auditoria/* (Auditoría de Fórmulas — pricing + calculos narrados)
 app.include_router(financiero.router)   # GET/POST /financiero/* (cédula de indirectos auditable — imprevistos/seguros/fianzas/IVA)
 app.include_router(rag_router.router)   # GET /rag/search (busqueda semantica sobre rag.sqlite, FTS5+vec0)
+app.include_router(worker_report.router)   # GET /worker/* (reporte en vivo del hooke_worker desde Postgres brain.*)
+app.include_router(obra_media.router)   # GET/POST/DELETE /obra-media/* (evidencia foto/video/plano/render — metadata only, binario en Cloudflare R2)
 
 
 @app.get("/")

@@ -1522,7 +1522,18 @@ tfoot td { padding: 5px 6px; }
   font-size: 10.5px; color: var(--text); height: 30px;
   border-right: 1px solid var(--border);
 }
-.g-ord { text-align: right; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+.g-ord { text-align: right; color: var(--text-dim); font-variant-numeric: tabular-nums; white-space: nowrap; position: relative; }
+/* Reordenar actividades (slider arriba/abajo) */
+.g-row[draggable="true"] .g-label { cursor: grab; }
+.g-move { color: var(--text-dim); margin-right: 2px; cursor: grab; font-size: 10px; }
+.g-mv-btns { display: none; position: absolute; left: 0; top: -6px; flex-direction: column; z-index: 6; }
+.g-row:hover .g-mv-btns { display: flex; }
+.g-mv { font-size: 7px; line-height: 9px; height: 11px; width: 14px; padding: 0; border: 1px solid var(--border); background: var(--surface); color: var(--accent); cursor: pointer; }
+.g-mv:hover { background: var(--accent); color: var(--bg); }
+.g-row.g-dragging { opacity: .4; }
+.g-row.g-drop-above { box-shadow: inset 0 2px 0 var(--accent); }
+.g-row.g-drop-below { box-shadow: inset 0 -2px 0 var(--accent); }
+.g-row.g-moved .g-label { background: rgba(241, 196, 15, .18); transition: background .6s; }
 .g-dot { width: 9px; height: 9px; border-radius: 2px; }
 .g-csi { color: var(--text-dim); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .g-desc { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

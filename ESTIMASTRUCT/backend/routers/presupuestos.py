@@ -4,9 +4,11 @@ from sqlalchemy import func
 from pydantic import BaseModel
 from typing import Optional
 import sys, os, json
+from decimal import Decimal
+from types import SimpleNamespace
 from backend.db import get_db
-from backend.models import Presupuesto, ConfigPresupuesto, Capitulo, Partida, InsumoPartida, new_uuid, DIVISIONES_CSI
-from backend.services.pricing import recalcular_partida, calc_base, precio_unitario
+from backend.models import Presupuesto, ConfigPresupuesto, Capitulo, Partida, InsumoPartida, Recurso, new_uuid, DIVISIONES_CSI
+from backend.services.pricing import recalcular_partida, calc_base, precio_unitario, rebucket_insumos, quantize_money
 from backend.config import CONFIG
 
 router = APIRouter(prefix="/presupuestos", tags=["presupuestos"])
@@ -44,7 +46,7 @@ class FromTemplateIn(BaseModel):
     cliente: Optional[str] = None
     moneda: str = "HNL"
     config: Optional[ConfigIn] = None
-    template_version: str = "v1.2"  # v1.2 vigente; v1.1 legacy; v1.0 original
+    template_version: str = "v1.3"  # v1.3 CANON (Postgres); v1.2/v1.1/v1.0 legacy
 
 
 def _load_fichas_from_json(template_version: str) -> list:
@@ -83,12 +85,42 @@ def _tipo_from_clave(clave: str) -> str:
     return "MATERIAL"
 
 
+def _normalizar_insumo(insumo: dict, recursos: dict):
+    """Insumo de ficha (v1.2 codigo/precioUnitario o v1.3+ clave/costo_unit/tipo)
+    -> objeto con recurso_id/clave/tipo/costo_unit/total. Postgres `recurso` es canon:
+    si la clave existe ahi, manda su precio y tipo; si no, el valor de la ficha."""
+    clave = (insumo.get('clave') or insumo.get('codigo') or '').strip()
+    desc = (insumo.get('descripcion') or clave).replace('_x000D_', '').strip()
+    if not clave:
+        # fichas viejas guardan la clave dentro de la descripcion: "MO-006 Ayudante"
+        m = re.match(r'^([A-Z]{2,3}-\d+(?:\.\d+)?)\s', desc)
+        if m:
+            clave = m.group(1)
+    cant = float(insumo.get('cantidad') or 0)
+    rec = recursos.get(clave)
+    if rec is not None:
+        cu = float(rec.precio_unitario or 0)
+        tipo = rec.tipo
+        rid = rec.id
+        unidad = insumo.get('unidad') or rec.unidad
+    else:
+        cu = float(insumo.get('costo_unit', insumo.get('precioUnitario', 0)) or 0)
+        tipo = insumo.get('tipo') if clave == '' or insumo.get('tipo') not in (None, '', 'MATERIAL') else _tipo_from_clave(clave)
+        tipo = tipo or _tipo_from_clave(clave)
+        rid = None
+        unidad = insumo.get('unidad', 'global')
+    return SimpleNamespace(recurso_id=rid, clave=clave, descripcion=desc, unidad=unidad,
+                           tipo=tipo, cantidad=cant, costo_unit=cu,
+                           total=quantize_money(Decimal(str(cant)) * Decimal(str(cu))))
+
+
 def _create_from_template2_updated(nuevo: Presupuesto, template_version: str, sobrecosto: float, db: Session):
     """Crea capítulos y partidas a partir de Template 2 - Updated (v1.0/v1.1 legacy, v1.2 vigente)."""
     try:
         fichas = _load_fichas_from_json(template_version)
     except HTTPException:
         raise
+    recursos = {r.clave: r for r in db.query(Recurso).all()}
 
     # Ordenar fichas por división CSI (00→33) antes de procesar
     def _csi_div(f):
@@ -133,23 +165,22 @@ def _create_from_template2_updated(nuevo: Presupuesto, template_version: str, so
             descripcion = type_mark
 
         unidad = ficha.get('unidad', 'm2')
-        costo_total = float(ficha.get('costoTotal', ficha.get('precio_unitario', 0)))
 
-        costo_mo = 0.0
-        costo_ma = 0.0
-        for insumo in ficha.get('insumos', []):
-            cantidad = float(insumo.get('cantidad', 0))
-            precio = float(insumo.get('precioUnitario', 0))
-            total_ins = cantidad * precio
-            if insumo.get('codigo', '').startswith('MO-'):
-                costo_mo += total_ins
-            else:
-                costo_ma += total_ins
+        # [FIX 2026-10-02] Canon Postgres: los insumos se resuelven contra la
+        # tabla `recurso` (precio/tipo vigentes). Acepta formato v1.2
+        # (codigo/precioUnitario) y v1.3+ (clave/costo_unit/tipo). Antes solo
+        # leia 'codigo' -> en v1.3 todos los insumos quedaban clave='' tipo
+        # MATERIAL costo 0, y costo_ma = precio_unitario (MO+MA mezclados).
+        insumos_norm = [_normalizar_insumo(ins, recursos) for ins in ficha.get('insumos', [])]
+        costo_mo, costo_ma, otros = rebucket_insumos(insumos_norm)
 
-        if costo_mo == 0 and costo_ma == 0:
-            costo_ma = costo_total
+        if not insumos_norm:
+            # Ficha sin descomposicion: respetar el desglose declarado, nunca el PU con markup
+            costo_mo = float(ficha.get('costo_mo') or 0)
+            costo_ma = float(ficha.get('costo_ma') or 0)
+            otros = float(ficha.get('unitario_matriz') or 0)
 
-        base = calc_base(costo_mo, costo_ma, 0)
+        base = calc_base(costo_mo, costo_ma, otros)
         pu = precio_unitario(base, sobrecosto)
 
         partida = Partida(
@@ -164,7 +195,7 @@ def _create_from_template2_updated(nuevo: Presupuesto, template_version: str, so
             color_tipo=ficha.get('color_tipo', 'rosa'),
             costo_mo=costo_mo,
             costo_ma=costo_ma,
-            unitario_matriz=0,
+            unitario_matriz=otros,
             costo_base=base,
             precio_unitario=pu,
             total=0,
@@ -178,20 +209,17 @@ def _create_from_template2_updated(nuevo: Presupuesto, template_version: str, so
         db.add(partida)
         db.flush()
 
-        for idx, insumo in enumerate(ficha.get('insumos', [])):
-            clave_ins = insumo.get('codigo', '')
-            cant_ins  = float(insumo.get('cantidad', 0))
-            pu_ins    = float(insumo.get('precioUnitario', 0))
+        for idx, ins in enumerate(insumos_norm):
             db.add(InsumoPartida(
                 partida_id  = partida.id,
-                recurso_id  = None,
-                clave       = clave_ins,
-                descripcion = insumo.get('descripcion', clave_ins),
-                unidad      = insumo.get('unidad', 'global'),
-                tipo        = _tipo_from_clave(clave_ins),
-                cantidad    = cant_ins,
-                costo_unit  = pu_ins,
-                total       = round(cant_ins * pu_ins, 4),
+                recurso_id  = ins.recurso_id,
+                clave       = ins.clave,
+                descripcion = ins.descripcion,
+                unidad      = ins.unidad,
+                tipo        = ins.tipo,
+                cantidad    = ins.cantidad,
+                costo_unit  = ins.costo_unit,
+                total       = ins.total,
                 orden       = idx,
             ))
 
@@ -291,8 +319,8 @@ def crear_desde_template(data: FromTemplateIn, db: Session = Depends(get_db)):
 
     # Determinar qué template usar
 
-    # Si es v1.0/v1.1/v1.2/v1.3/v1.4, cargar desde Template 2 - Updated JSON
-    if template_version in ["v1.0", "v1.1", "v1.2", "v1.3", "v1.4"]:
+    # Si es v1.0/v1.1/v1.2/v1.3, cargar desde Template 2 - Updated JSON
+    if template_version in ["v1.0", "v1.1", "v1.2", "v1.3"]:
         _create_from_template2_updated(nuevo, template_version, sobrecosto, db)
         db.commit()
         db.refresh(nuevo)
