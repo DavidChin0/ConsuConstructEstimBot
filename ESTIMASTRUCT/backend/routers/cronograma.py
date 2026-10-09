@@ -3,7 +3,7 @@ Cronograma / Gantt de una obra.
   GET /presupuestos/{pid}/cronograma          -> JSON para el front (Gantt)
   GET /presupuestos/{pid}/export-cronograma   -> XLSX (tabla + grilla de semanas)
 
-Duraciones por tiempo unitario del catalogo V1.2 (cronograma.py).
+Duraciones por tiempo unitario del catalogo de fichas activo, v1.3 por defecto (cronograma.py).
 """
 import io
 import os
@@ -331,7 +331,7 @@ def export_cronograma(pid: str, db: Session = Depends(get_db)):
     ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=ncol_tbl + n_sem)
     sub = ws.cell(row=2, column=1, value=(
         f"Inicio {inicio}  |  Fin {fin}  |  {n_sem} semanas  |  "
-        f"{len(filas)} actividades  |  Duraciones por tiempo unitario catálogo V1.2"))
+        f"{len(filas)} actividades  |  Duraciones por tiempo unitario catálogo {engine.CATALOGO_VERSION}"))
     sub.font = Font(size=10, italic=True, color="666666")
     sub.alignment = Alignment(horizontal="center")
 

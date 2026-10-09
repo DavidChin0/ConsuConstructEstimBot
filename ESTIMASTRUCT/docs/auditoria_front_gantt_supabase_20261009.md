@@ -13,7 +13,9 @@ Nada de esto se probó en navegador ni contra Supabase real (sólo compilación 
 - Movimiento: filas arrastrables (`dragstart/dragover/drop`) → `POST /cronograma/mover` → recalcula cadena. Ya existía; sin prueba en navegador.
 - Redimensionado: antes sólo la columna izquierda (`#gantt-resizer`). Ahora el modal entero es redimensionable (`resize: both`, mín. 720×420, máx. 99vw×98vh).
 - **Nuevo** vista "Materiales / semana": `GET /presupuestos/{pid}/cronograma/materiales`. Cantidad de cada MATERIAL = rendimiento × cantidad de la partida, repartida uniformemente en los días L-S de la actividad y agrupada por semana (S1 = semana del inicio de obra, igual que la grilla del XLSX). Se refresca sola cuando cambian orden o cuadrillas (firma del cronograma). El "ajuste" de materiales por semana se hace moviendo actividades o cambiando cuadrillas Esp/Ay; no hay edición manual de celdas.
-- El motor de duraciones lee el catálogo **v1.2** (`CATALOGO_V12_PATH`), no el v1.3 canónico (ADR-018). Pendiente de decisión.
+- **Catálogo v1.3 (hecho):** el motor de duraciones ahora lee `fichas_v1.3.json` por defecto (`ESTIMA_CRONO_CATALOGO=v1.2` para volver al anterior). El loader acepta ambos esquemas (`codigo` en v1.2, `clave` en v1.3). v1.3 es superconjunto de v1.2 (318 vs 288 CSIs con mano de obra; 0 sólo en v1.2).
+  - **Impacto:** 61 de los 288 CSIs comunes cambian de jornadas por unidad (p.ej. `05 12 00` pasa de 6.5 a 13.0 jor esp.; `03 15 13` de 0.2 a 0.53). Las duraciones y fechas de las obras existentes cambian al recalcular; el Gantt y lo publicado a Supabase se mueven juntos.
+  - Las tablas `MANUAL_SPLIT`/`TIEMPOS_FIJOS` siguen teniendo prioridad sobre el catálogo. 22 de esos CSIs ya existen en v1.3 y podrían retirarse tras revisar uno a uno (no se tocó).
 
 ## 3. Export Excel
 - **Bug corregido** en `/export-insumos`, hoja `global`, sección "Cantidad de insumos": la columna calculaba `rendimiento_promedio × Total Agrupado` (rendimiento × *costo*), no una cantidad. Ahora es Σ(rendimiento × cantidad de la partida), redondeada hacia arriba, y es la misma fórmula que usa la hoja de materiales por semana.

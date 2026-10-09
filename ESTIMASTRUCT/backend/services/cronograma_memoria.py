@@ -14,7 +14,7 @@ línea de aritmética propia.
 LO QUE ESTABA CIEGO
 -------------------
 1. **Cascada de prioridad de fuente, 4 niveles, invisible.**
-       TIEMPOS_FIJOS  >  MANUAL_SPLIT  >  catálogo V1.2  >  SIN_TIEMPO (⇒ 1 día)
+       TIEMPOS_FIJOS  >  MANUAL_SPLIT  >  catálogo de fichas activo  >  SIN_TIEMPO (⇒ 1 día)
    El campo `fuente` ya viajaba en la respuesta del endpoint, pero nadie explica
    qué significa "MANUAL" ni por qué esa actividad no salió del catálogo. Una
    partida con fuente SIN_TIEMPO recibe **1 día** por defecto — puede ser una
@@ -47,18 +47,18 @@ from backend.cronograma import (
 FUENTE_DESC = {
     "FIJO": ("TIEMPOS_FIJOS — prioridad 1 (máxima)",
              "Actividad con duración FIJA por decisión explícita, independiente de la cantidad "
-             "de obra. Se usa cuando la ficha V1.2 tiene una unidad incompatible (p.ej. limpieza "
+             "de obra. Se usa cuando la ficha del catálogo activo tiene una unidad incompatible (p.ej. limpieza "
              "final viene por 'mes' con 24 jornadas). Se modela como carga de ayudante calibrada "
              "a la cuadrilla default para que a 3 ayudantes dé exactamente el valor fijo."),
     "MANUAL": ("MANUAL_SPLIT — prioridad 2",
-               "La actividad NO existe en el catálogo V1.2 (excavación, demolición, repello, "
+               "La actividad NO existe en el catálogo de fichas activo (excavación, demolición, repello, "
                "columnas, ventanas…). El rendimiento (jornadas-hombre por unidad, separado en "
                "especialista y ayudante) está tecleado a mano en cronograma.MANUAL_SPLIT. Es un "
                "juicio de obra, no un dato del catálogo."),
-    "V12": ("Catálogo V1.2 — prioridad 3",
-            "Rendimiento derivado de los insumos 'MO…jor' de la ficha V1.2 del catálogo. Es la "
+    "V12": ("Catálogo de fichas activo — prioridad 3",
+            "Rendimiento derivado de los insumos 'MO…jor' de la ficha del catálogo activo del catálogo. Es la "
             "vía normal y la única trazable a la base de datos de fichas."),
-    "V12_LUMP": ("Catálogo V1.2 (unidad global) — prioridad 3",
+    "V12_LUMP": ("Catálogo de fichas activo (unidad global) — prioridad 3",
                  "Ficha del catálogo cuya unidad es global/glb/mes/conexión: el coeficiente es el "
                  "TOTAL de la actividad, no un rendimiento por unidad de obra. La duración NO "
                  "escala con la cantidad."),
@@ -104,7 +104,7 @@ _CATALOGO_CACHE = None
 
 
 def _catalogo():
-    """Catálogo V1.2 cargado una vez por proceso (lectura de disco, sin BD)."""
+    """Catálogo de fichas activo cargado una vez por proceso (lectura de disco, sin BD)."""
     global _CATALOGO_CACHE
     if _CATALOGO_CACHE is None:
         try:
@@ -158,7 +158,7 @@ def memoria_cronograma(csi: str, cantidad: float, unidad: str = "",
     advertencias = []
     if fuente == "SIN_TIEMPO":
         advertencias.append(
-            f"CSI '{csi}' no está en TIEMPOS_FIJOS, ni en MANUAL_SPLIT, ni en el catálogo V1.2. "
+            f"CSI '{csi}' no está en TIEMPOS_FIJOS, ni en MANUAL_SPLIT, ni en el catálogo de fichas activo. "
             "El motor le asignó el MÍNIMO de 1 día. Si esta actividad realmente lleva más, el "
             "plazo del Gantt está subestimado y nadie lo ve: la fila se dibuja igual que "
             "cualquier otra.")
@@ -190,7 +190,7 @@ def memoria_cronograma(csi: str, cantidad: float, unidad: str = "",
 
     # ── CASCADA DE FUENTE ────────────────────────────────────────────────────
     P.append(_paso("Fuente del rendimiento", "fuente", "Nivel que ganó la cascada",
-        fuente, "", "TIEMPOS_FIJOS > MANUAL_SPLIT > catálogo V1.2 > SIN_TIEMPO",
+        fuente, "", "TIEMPOS_FIJOS > MANUAL_SPLIT > catálogo de fichas activo > SIN_TIEMPO",
         f"fuente('{csi}') = {fuente}  →  {fuente_titulo}",
         "cronograma.py::_jornadas",
         fuente_desc, "check" if fuente == "SIN_TIEMPO" else "resultado"))
@@ -199,13 +199,13 @@ def memoria_cronograma(csi: str, cantidad: float, unidad: str = "",
             round(esp_u, 6), f"jornada-hombre / {unidad or 'und'}",
             "dato del catálogo / MANUAL_SPLIT",
             f"r_esp = {_fmt(esp_u, 6)}",
-            "fichas_v1.2.json (insumos MO·jor)" if fuente.startswith("V12") else "cronograma.MANUAL_SPLIT",
+            "fichas del catálogo activo (insumos MO·jor)" if fuente.startswith("V12") else "cronograma.MANUAL_SPLIT",
             "Jornadas-hombre de albañil/armador/carpintero/soldador por unidad de obra.", "input"))
         P.append(_paso("Fuente del rendimiento", "r_ay", "Rendimiento de ayudante",
             round(ay_u, 6), f"jornada-hombre / {unidad or 'und'}",
             "dato del catálogo / MANUAL_SPLIT",
             f"r_ay = {_fmt(ay_u, 6)}",
-            "fichas_v1.2.json (insumos MO·jor)" if fuente.startswith("V12") else "cronograma.MANUAL_SPLIT",
+            "fichas del catálogo activo (insumos MO·jor)" if fuente.startswith("V12") else "cronograma.MANUAL_SPLIT",
             "Ídem para ayudante/peón. 0 = ese oficio no participa.", "input"))
     elif fuente == "FIJO":
         P.append(_paso("Fuente del rendimiento", "D_fijo", "Duración fija declarada",
@@ -327,7 +327,7 @@ def memoria_cronograma(csi: str, cantidad: float, unidad: str = "",
         "n_manual_split": len(MANUAL_SPLIT),
         "n_tiempos_fijos": len(TIEMPOS_FIJOS),
         "nota_norma": ("El cronograma no responde a norma: es un modelo de productividad "
-                       "(jornadas-hombre por unidad) calibrado con el catálogo V1.2 y "
+                       "(jornadas-hombre por unidad) calibrado con el catálogo de fichas activo y "
                        "completado a mano. Su punto débil no es la fórmula — es de dónde "
                        "sale el rendimiento y qué pasa cuando no sale de ningún lado."),
     }
