@@ -28,7 +28,7 @@ MAIN_HEADERS = [
 RESUMEN_HEADERS = ["CSI", "Descripción", "Unidad", "Cantidad", "PRECIO UNITARIO", "Total"]
 INSUMOS_DETAIL_HEADERS = ["Clave", "Descripción", "Unidad", "Rendimiento", "Costo Unit.", "Total"]
 INSUMOS_GLOBAL_HEADERS = ["Tipo", "Clave", "Descripción", "Unidad", "Rendimiento", "Total Agrupado"]
-INSUMOS_GLOBAL_FINAL_HEADERS = ["Tipo", "Clave", "Descripción", "Unidad", "Rendimiento", "Total Agrupado", "Rendimiento x Total Agrupado"]
+INSUMOS_GLOBAL_FINAL_HEADERS = ["Tipo", "Clave", "Descripción", "Unidad", "Rendimiento", "Total Agrupado", "Cantidad requerida (Σ rendimiento x cantidad actividad)"]
 
 COLOR_TIPO_FILL = {
     "amarillo": "FFF2C94C",
@@ -603,8 +603,9 @@ def exportar_insumos_necesarios(pid: str, db: Session = Depends(get_db)):
                 unit = _n(ins.costo_unit)
                 total = rendimiento * unit * actividad_qty
                 key = (ins.tipo, ins.clave or "", ins.descripcion or "", ins.unidad or "")
-                agg = global_agg.setdefault(key, {"tipo": ins.tipo, "rendimiento_sum": 0.0, "count": 0, "total": 0.0})
+                agg = global_agg.setdefault(key, {"tipo": ins.tipo, "rendimiento_sum": 0.0, "count": 0, "total": 0.0, "qty_sum": 0.0})
                 agg["rendimiento_sum"] += rendimiento
+                agg["qty_sum"] += rendimiento * actividad_qty   # cantidad real requerida del insumo
                 agg["count"] += 1
                 agg["total"] += total
                 if ins.tipo not in ("MATERIAL", "MANO_OBRA"):
@@ -802,7 +803,7 @@ def exportar_insumos_necesarios(pid: str, db: Session = Depends(get_db)):
         unidad = key[3]
         rendimiento = (_n(agg["rendimiento_sum"]) / agg["count"]) if agg["count"] else 0
         total_agrupado = _n(agg["total"])
-        base_resultado = rendimiento * total_agrupado
+        base_resultado = _n(agg["qty_sum"])   # antes: rendimiento x COSTO (unidades sin sentido)
         resultado = math.ceil(base_resultado) if tipo == "MATERIAL" else base_resultado
         values = [
             "Material" if tipo == "MATERIAL" else "Mano de obra" if tipo == "MANO_OBRA" else tipo,

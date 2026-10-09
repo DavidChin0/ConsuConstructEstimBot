@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 from backend.db import get_db
 from backend.models import Presupuesto, Capitulo, ConfigPresupuesto, CronogramaOverride, InsumoPartida
 from backend import cronograma as crono_engine
+from backend.routers.cronograma import _calcular as _crono_calcular, _orden_manual as _crono_orden
 
 router = APIRouter(prefix="/presupuestos", tags=["portal"])
 
@@ -99,9 +100,11 @@ def publish_supabase(pid: str, db: Session = Depends(get_db)):
     if not partidas:
         raise HTTPException(400, "La obra no tiene partidas con valor (total > 0)")
 
-    # Cronograma: duraciones por tiempo unitario del catalogo V1.2 x cantidad
+    # Cronograma: MISMA ruta de calculo que el Gantt del front (routers/cronograma._calcular):
+    # incluye orden manual, overrides n_esp/n_ay y fecha_fin. Antes se llamaba al motor sin
+    # orden_manual y el portal divergia del Gantt al reordenar.
     try:
-        crono_rows = crono_engine.construir_cronograma(crono_input)
+        crono_rows = _crono_calcular(p, overrides, _crono_orden(db, pid))
     except Exception as e:  # catalogo ausente / corrupto -> no abortar la publicacion
         crono_rows = []
         crono_err = str(e)
@@ -227,6 +230,7 @@ def sync_media_supabase(pid: str, db: Session = Depends(get_db)):
         "mensaje": "Solicitud registrada. projectmanager_bot sincroniza el bucket y notifica al terminar.",
     }
 
+@router.post("/{pid}/sync-precios-supabase")
 def sync_precios_supabase(pid: str, db: Session = Depends(get_db)):
     """Sincroniza SOLO precios al portal: costo_ma/costo_mo/total/cantidad por
     partida + sobrecosto y total de la obra. NO toca cronograma, avance,

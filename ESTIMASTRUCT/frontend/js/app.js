@@ -517,6 +517,7 @@ async function abrirCronograma() {
   _ganttFiltro = "";
   const buscar = document.getElementById("gantt-buscar");
   if (buscar) buscar.value = "";
+  _ganttSetVista("gantt");
   cargarGantt();
 }
 
@@ -708,6 +709,7 @@ function renderGantt(data) {
      <div class="g-rows">${rows}${lineaHoy}</div>`;
 
   _wireGanttRowEvents();
+  _ganttRefrescarMats();   // si la vista de materiales esta activa y el cronograma cambio
 }
 
 function _wireGanttRowEvents() {
@@ -823,7 +825,54 @@ async function setPersonal(partidaId, nEsp, nAy) {
   }
 }
 
+// --- Vista "Materiales / semana": cantidades de MATERIAL por semana, derivadas del mismo
+// cronograma (orden, cuadrillas) — backend: GET .../cronograma/materiales ---
+let _ganttVista = "gantt";
+let _ganttMatsSig = "";
+
+function _ganttSig() {
+  return _ganttData ? _ganttData.actividades.map(a => `${a.partida_id}:${a.fecha_inicio}:${a.duracion_dias}`).join("|") : "";
+}
+
+async function _ganttRefrescarMats(force = false) {
+  const box = document.getElementById("gantt-mats");
+  if (!box || _ganttVista !== "materiales" || !state.activeId) return;
+  const sig = _ganttSig();
+  if (!force && sig === _ganttMatsSig) return;   // el cronograma no cambio: no refetch
+  box.innerHTML = `<div class="gantt-loading">Calculando materiales por semana…</div>`;
+  try {
+    const d = await api("GET", `/presupuestos/${state.activeId}/cronograma/materiales`);
+    _ganttMatsSig = sig;
+    const fmtQ = (v) => v ? v.toLocaleString("es-HN", { maximumFractionDigits: 2 }) : "";
+    const ths = Array.from({ length: d.semanas }, (_, w) => `<th>S${w + 1}</th>`).join("");
+    const rows = d.materiales.map(m => {
+      const cells = m.semanas.map((v, w) => v
+        ? `<td class="gm-on" title="${esc(m.actividades[w].join(", "))}">${fmtQ(v)}</td>`
+        : `<td class="gm-off">·</td>`).join("");
+      return `<tr><td class="gm-txt gm-sticky">${esc(m.clave)}</td><td class="gm-txt gm-desc" title="${esc(m.descripcion)}">${esc(m.descripcion)}</td>` +
+             `<td class="gm-txt">${esc(m.unidad)}</td><td><b>${fmtQ(m.total)}</b></td>${cells}</tr>`;
+    }).join("");
+    box.innerHTML = d.materiales.length
+      ? `<table><thead><tr><th class="gm-txt">Clave</th><th class="gm-txt">Descripción</th><th class="gm-txt">Und</th><th>Total</th>${ths}</tr></thead><tbody>${rows}</tbody></table>`
+      : `<div class="gantt-loading">Sin materiales en las actividades del cronograma.</div>`;
+  } catch (err) {
+    box.innerHTML = `<div class="gantt-loading" style="color:var(--accent2)">Error: ${esc(err.message || err)}</div>`;
+  }
+}
+
+function _ganttSetVista(v) {
+  _ganttVista = v;
+  document.querySelectorAll("#gantt-vista .g-zoom-btn").forEach(b => b.classList.toggle("active", b.dataset.vista === v));
+  document.getElementById("gantt-body").classList.toggle("hidden", v !== "gantt");
+  document.getElementById("gantt-mats").classList.toggle("hidden", v !== "materiales");
+  document.getElementById("gantt-zoom").classList.toggle("hidden", v !== "gantt");
+  document.getElementById("gantt-buscar").closest(".gantt-search").classList.toggle("hidden", v !== "gantt");
+  if (v === "materiales") _ganttRefrescarMats(true);
+}
+
 function _initGanttToolbar() {
+  document.querySelectorAll("#gantt-vista .g-zoom-btn").forEach(btn =>
+    btn.addEventListener("click", () => _ganttSetVista(btn.dataset.vista)));
   document.querySelectorAll("#gantt-zoom .g-zoom-btn").forEach(btn => {
     btn.addEventListener("click", () => {
       if (btn.dataset.zoom === _ganttZoom || !_ganttData) return;

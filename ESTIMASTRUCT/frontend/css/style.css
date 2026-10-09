@@ -1421,7 +1421,9 @@ tfoot td { padding: 5px 6px; }
 .btn-cronograma.hidden { display: none; }
 
 .modal-gantt {
-  max-width: 96vw; width: 1400px; max-height: 92vh;
+  /* Ventana redimensionable (esquina inferior derecha) en ambos ejes */
+  resize: both; overflow: hidden; min-width: 720px; min-height: 420px;
+  max-width: 99vw; width: 1400px; max-height: 98vh; height: 86vh;
   display: flex; flex-direction: column; padding: 0;
   --g-label-w: 680px;      /* ancho de la tabla izquierda, redimensionable con #gantt-resizer */
 }
@@ -1784,3 +1786,15 @@ tfoot td { padding: 5px 6px; }
 }
 .rmcp-guide-title { font-size: 12px; font-weight: 700; color: var(--accent); margin-bottom: 5px; }
 .rmcp-guide-body { font-size: 12px; color: var(--text); line-height: 1.6; }
+
+/* --- Vista Materiales / semana del modal Gantt --- */
+.gantt-mats { padding: 0 8px 8px; }
+.gantt-mats table { border-collapse: collapse; font-size: 11px; font-variant-numeric: tabular-nums; }
+.gantt-mats th, .gantt-mats td { border: 1px solid var(--border); padding: 3px 6px; white-space: nowrap; text-align: right; }
+.gantt-mats th { background: var(--surface2); color: var(--accent); position: sticky; top: 0; z-index: 2; }
+.gantt-mats td.gm-txt, .gantt-mats th.gm-txt { text-align: left; }
+.gantt-mats td.gm-desc { max-width: 320px; overflow: hidden; text-overflow: ellipsis; }
+.gantt-mats td.gm-on { background: rgba(255, 215, 64, 0.12); color: var(--text); }
+.gantt-mats td.gm-off { color: var(--text-dim); opacity: 0.35; }
+.gantt-mats .gm-sticky { position: sticky; left: 0; background: var(--surface); z-index: 1; }
+.gantt-mats .hidden, .gantt-body.hidden { display: none; }
