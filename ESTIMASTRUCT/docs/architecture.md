@@ -457,6 +457,10 @@ START_POSTGRES_UNICA.ps1   (ÚNICO entry point válido — usa Postgres)
 | `ESTIMA_OPUS_XLSX` | `D:\OneDrive\Bots\Estimbot\MasterFiles\BaseDatosOpus2026.xlsx` | BaseDatosOpus |
 | `ESTIMA_UPDATER_DIR` | `D:\OneDrive\Bots\Estimbot\MasterFiles\Updater` | updater artefacts |
 | `ESTIMA_EXPORTS_DIR` | `D:\OneDrive\Bots\Estimbot\EXPORTS` | S1_keynotes / S5_schedules |
+| `ESTIMA_FULL_DUMP` | `<EXPORTS>/project_full_dump.json` | dump Revit que consume el visor |
+| `ESTIMA_VIEWER_PROJECTS` | `D:\OneDrive\Bots\Viewer\projects` | GLB/proyectos del visor (FastAPI) |
+| `ESTIMASTRUCT_VIEWER_ASSETS` | `D:\GitHub\3d Viewer assets` | texturas/GLB/HDRI (Flask `/static/viewer`) |
+| `ESTIMASTRUCT_VIEWER_SHOTS` | `…\00 Notes\viewer_shots` | screenshots del visor |
 | `SUPABASE_SECRET_KEY` | *(vacío)* | requerido solo para publish-supabase |
 
 ### 8.4 Migraciones
@@ -467,8 +471,9 @@ Alembic en `backend/alembic/`; `alembic upgrade head` requerido en Postgres (sch
 
 `GET /db/export-zip` produce dump portable (Postgres → SQLite `estimacion.db` snapshot dentro de ZIP); `POST /db/import-zip` restaura al destino primario. Config en `CONFIG.SQLITE_EXPORT_NAME`.
 
-**ADR-019: Visor 3D como módulo de primera clase de EstimaStruct (2026-10-09, propuesto).**
+**ADR-019: Visor 3D como módulo de primera clase de EstimaStruct (2026-10-09, puntos 1-2 implementados).**
 - Contexto: el visor (Babylon.js) existe como `templates/viewer.html` + rutas en `ESTIMASTRUCT/app.py`, pero la documentación apuntaba a `frontend/viewer/` y sus rutas/datos dependen de paths absolutos de OneDrive.
+- Implementado: `CONFIG.FULL_DUMP_PATH` (`ESTIMA_FULL_DUMP`) y `CONFIG.VIEWER_PROJECTS_DIR` (`ESTIMA_VIEWER_PROJECTS`); Flask ya no duplica `/full-dump` (lo sirve FastAPI vía `/__api__`); screenshots en `ESTIMASTRUCT_VIEWER_SHOTS`.
 - Decisión: (1) un solo proveedor de `project_full_dump.json` (FastAPI `routers/revit_mcp.py`, con ruta desde `CONFIG`/`ESTIMA_EXPORTS_DIR`; Flask sólo proxy); (2) `VIEWER_ASSETS_PATH`, directorio de screenshots y `VIEWER_ROOT` configurables por env; (3) separar `viewer.html` en JS/CSS bajo `frontend/js/viewer/` cuando se agreguen features; (4) recuperar un botón pyRevit para GLB/keynote map o exponerlo vía MCP; (5) Babylon queda pineado a 9.18.0.
 - Trade-offs: mover assets/paths exige coordinar con la máquina local; no afecta presupuestos ni BD.
 

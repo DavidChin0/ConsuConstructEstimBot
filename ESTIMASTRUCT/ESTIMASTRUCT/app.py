@@ -21,6 +21,10 @@ FRONTEND_PATH = os.path.join(os.path.dirname(ESTIMASTRUCT_PATH), "frontend")
 # permanente. Override por env si se mueven de lugar; el fallback es la ruta vieja
 # dentro del repo (frontend/viewer), que sigue funcionando si alguien los deja ahi.
 VIEWER_ASSETS_PATH = os.environ.get("ESTIMASTRUCT_VIEWER_ASSETS", r"D:\GitHub\3d Viewer assets")
+# Carpeta de screenshots del viewer (override por env).
+VIEWER_SHOTS_DIR = os.environ.get(
+    "ESTIMASTRUCT_VIEWER_SHOTS",
+    r"D:\OneDrive\Desktop\My Brain\ConsuConstruct\00 Notes\viewer_shots")
 if not os.path.isdir(VIEWER_ASSETS_PATH):
     VIEWER_ASSETS_PATH = os.path.join(FRONTEND_PATH, "viewer")
 
@@ -328,7 +332,7 @@ def save_viewer_screenshot():
         return {'ok': False, 'error': 'no image'}, 400
     if b64.startswith('data:image/png;base64,'):
         b64 = b64[len('data:image/png;base64,'):]
-    out_dir = r'D:\OneDrive\Desktop\My Brain\ConsuConstruct\00 Notes\viewer_shots'
+    out_dir = VIEWER_SHOTS_DIR
     os.makedirs(out_dir, exist_ok=True)
     fname = f"viewer_{int(_time.time())}.png"
     path = os.path.join(out_dir, fname)
@@ -359,37 +363,8 @@ def matriz_page(matriz_id):
 
 
 # ──────────────────────────────────────────────
-# FALLBACK: sirve full-dump JSON directo desde Flask cuando FastAPI :8002
-# no tiene el endpoint cargado (autoreload no lo tomó). Estas rutas
-# ESPECÍFICAS ganan sobre el catch-all `/__api__/<path:path>` de abajo.
-# Path canónico del dump generado por el snippet IronPython dump-full.
-# ──────────────────────────────────────────────
-_FULL_DUMP_LOCAL = r"D:\OneDrive\Bots\Estimbot\EXPORTS\project_full_dump.json"
-
-
-@app.route('/__api__/revit-mcp/full-dump', methods=['GET'])
-def serve_full_dump_direct():
-    """Fallback local: sirve project_full_dump.json sin pasar por FastAPI."""
-    if not os.path.exists(_FULL_DUMP_LOCAL):
-        return jsonify({
-            "error": "project_full_dump.json not found — ejecuta 'Full Dump (viewer)' desde el panel Revit MCP del dashboard."
-        }), 404
-    with open(_FULL_DUMP_LOCAL, "r", encoding="utf-8") as f:
-        data = json.load(f)
-    return jsonify(data)
-
-
-@app.route('/__api__/revit-mcp/full-dump/meta', methods=['GET'])
-def serve_full_dump_meta_direct():
-    """Metadatos ligeros del dump (existencia, tamaño, mtime)."""
-    if not os.path.exists(_FULL_DUMP_LOCAL):
-        return jsonify({"exists": False}), 200
-    st = os.stat(_FULL_DUMP_LOCAL)
-    return jsonify({
-        "exists": True,
-        "size_mb": round(st.st_size / 1_048_576, 2),
-        "mtime": st.st_mtime,
-    })
+# Dump del viewer: ya no hay ruta Flask propia (ADR-019).
+# (El dump lo sirve FastAPI: routers/revit_mcp.py -> /revit-mcp/full-dump; pasa por api_proxy.)
 
 
 @app.route('/__api__', defaults={'path': ''}, methods=['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'])

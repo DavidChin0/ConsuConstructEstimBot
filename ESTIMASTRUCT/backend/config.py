@@ -52,6 +52,10 @@ class CONFIG:
     SCHEDULES_DIR = os.getenv("ESTIMA_SCHEDULES_DIR", os.path.join(EXPORTS_DIR, "S5_schedules"))
     KEYNOTES_DIR  = os.getenv("ESTIMA_KEYNOTES_DIR",  os.path.join(EXPORTS_DIR, "S1_keynotes"))
 
+    # Visor 3D (ADR-019)
+    FULL_DUMP_PATH     = os.getenv("ESTIMA_FULL_DUMP", os.path.join(EXPORTS_DIR, "project_full_dump.json"))
+    VIEWER_PROJECTS_DIR = os.getenv("ESTIMA_VIEWER_PROJECTS", r"D:\OneDrive\Bots\Viewer\projects")
+
     # Locales al backend (file-relative, ya robustos)
     LOGS_DIR    = _BACKEND / "logs"
     MEMORY_DB   = _BACKEND / "technical_memory.db"
