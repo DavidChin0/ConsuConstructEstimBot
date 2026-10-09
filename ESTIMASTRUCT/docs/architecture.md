@@ -16,21 +16,26 @@ EstimaStruct es una app web local para elaborar presupuestos de construcción (H
 
 ### 1.1 Separación de canon EstimaStruct e infraestructura Brain
 
-- Canon de catálogo, fichas, recursos y precios EstimaStruct: SQLite versionada
-  `estimacion.db`. Todo cambio canónico nace ahí y queda auditable por Git.
-- Runtime derivado: PostgreSQL `estimastruct`, hidratado/sincronizado desde la
-  SQLite canónica cuando el backend concurrente o el RAG lo requieren.
-- Infraestructura Brain: VM Agent Memory supervisada por `brain.pid_manager`,
-  con PostgreSQL 16 + pgvector y forwarding exclusivo a `127.0.0.1:5432`.
+- Canon de catálogo, fichas, recursos y precios EstimaStruct (**ADR-018**):
+  PostgreSQL `estimastruct` (127.0.0.1:5432), template canónico **v1.3**
+  (`development/Template2_Updated/v1.3/fichas`). Las SQLite (`estimacion.db*`)
+  son backups históricos: nunca se reactivan ni se escriben.
+- Infraestructura Brain (goals, leases, memoria): VM Agent Memory supervisada
+  por `brain.pid_manager`, PostgreSQL 16 + pgvector, forwarding exclusivo a
+  `127.0.0.1:5432`. Es una capa distinta del canon de datos del producto.
 - Rollback: servicio PostgreSQL 16 nativo de Windows, detenido durante la
   operación normal. Nunca puede escuchar simultáneamente con la VM.
-- Estado durable: PostgreSQL conserva goals, leases y datos canónicos; Redis
-  conserva checkpoints recuperables y no sustituye la base.
+- Redis conserva checkpoints recuperables y nunca es canon.
 - Un cambio VM ↔ nativo es un corte controlado: backup, apagado limpio,
   verificación del puerto, arranque del destino y consultas de integridad.
-- Redis conserva checkpoints recuperables y nunca es canon.
-- No se permiten escrituras duales silenciosas: una sincronización hacia
-  PostgreSQL debe registrar origen SQLite, versión, diff y validación.
+- Sin escrituras duales silenciosas hacia SQLite.
+
+### 1.1b Árboles de trabajo (canon vs mirror)
+
+- **Canon (único donde se edita):** `D:\GitHub\EstimBot\ConsuConstructEstimBot` → `ESTIMASTRUCT/` + `pyrevit/`.
+- **Mirror viejo (NO usar):** `D:\GitHub\ConsuConstructEstimBot`. Ver `README_REPO_VIEJO_NO_USAR.md`.
+  Comparten `origin/main`; verificar con `git rev-parse --show-toplevel` antes de escribir.
+- Código pyRevit: `pyrevit/EstimBot.extension` (viva) y `pyrevit/scripts` (lógica); `pyrevit/_legacy` está archivado.
 
 ### 1.2 Orquestación agéntica EstimaStruct / Hooke
 
@@ -75,7 +80,7 @@ Patrón operativo para el caso Karla Franco / FGER-01 (goal-21223): primero prep
 
 ```
 Browser (Chromium)
-      │  HTML/JS (KaTeX, Babylon viewer)
+      │  HTML/JS (KaTeX, Babylon viewer en /viewer)
       ▼
 [Flask UI :5000]                        [FastAPI Backend :8002]
   ESTIMASTRUCT/app.py    ──proxy──►     backend/main.py
@@ -131,6 +136,24 @@ backend/
 │   └── memory.py / diagnostics.py / updater.py / scripts.py
 └── calculo_*.py          motores puros (sísmico CHOC-08, acero LRFD, conexiones §J)
 ```
+
+### 2.4 Módulo Visor 3D (EstimaStruct Viewer)
+
+```
+Revit ──(MCP inject dump-full)──► project_full_dump.json  (ESTIMA_EXPORTS_DIR)
+                                        │
+   Flask :5000 ── /viewer ── templates/viewer.html (Babylon.js 9.18.0, ~11.8k líneas)
+        │  ├─ GET /__api__/revit-mcp/full-dump[/meta]   (fallback Flask local; canónico en FastAPI routers/revit_mcp.py)
+        │  ├─ GET /__api__/presupuestos/{pid}, /partidas/by-csi/{keynote}  (proxy → FastAPI :8002: keynote → partida/precio)
+        │  ├─ GET /static/viewer/<path>  → VIEWER_ASSETS_PATH (GLB, texturas, furniture, HDRI; ~193 MB, FUERA del repo)
+        │  └─ POST /__save_shot          (screenshots PNG a OneDrive)
+        └─ Botón "🗺 Viewer 3D" (index.html #btn-viewer3d, visible al abrir un presupuesto)
+
+pyrevit/scripts/viewer_postprocess.py  OBJ → GLB + scene_index.json (offline, hoy manual)
+```
+
+- Assets: `ESTIMASTRUCT_VIEWER_ASSETS` (default `D:\GitHub\3d Viewer assets`); fallback `frontend/viewer`.
+- Pendiente de integración (ver ADR-019): rutas hardcodeadas a `D:\OneDrive\...` (`_FULL_DUMP_LOCAL`, `__save_shot`, `VIEWER_ROOT`), el endpoint de dump duplicado Flask/FastAPI, y el botón pyRevit "Export Keynote Map" retirado (el postproceso GLB no tiene botón vivo).
 
 ---
 
@@ -281,12 +304,12 @@ Ninguna. Backend escucha solo en `127.0.0.1:8002`, frontend Flask en `127.0.0.1:
 | Backend | Python 3.x, FastAPI 0.111, Uvicorn 0.29 (standard) |
 | ORM | SQLAlchemy 2.0.30, Alembic 1.18 (migraciones) |
 | Validación | Pydantic 2.7.1 |
-| DB canónica (fuente de verdad) | SQLite versionada `estimacion.db` — catálogo/precios/recursos v1.3 y futura v1.4 (ADR-016) |
-| DB PostgreSQL derivada | PostgreSQL 16 `estimastruct` (127.0.0.1:5432), driver `psycopg[binary]>=3.2` — runtime concurrente, mirror verificable y RAG; no origen canónico de precios |
-| DB legacy | SQLite `estimastruct.db` (dashboard UI viejo) |
+| DB canónica (fuente de verdad) | PostgreSQL 16 `estimastruct` (127.0.0.1:5432), template v1.3 (ADR-018) |
+| Driver PG | `psycopg[binary]>=3.2`; Alembic maneja el schema |
+| DB legacy | SQLite `estimastruct.db` (dashboard UI viejo) y `estimacion.db` (sólo backup/compat export-zip) |
 | Frontend UI | Flask 3.1.3 (Jinja2), JS vanilla modular (`core.js`, `app.js`, `tabla-render.js`, `bases-drawer.js`, `calculo-estructural.js`, `db-backup.js`) |
 | Fórmulas | KaTeX vendorizado en `frontend/vendor/` |
-| 3D Viewer | Babylon.js (`frontend/viewer/`) — GLB desde Revit |
+| 3D Viewer | Babylon.js 9.18.0 pineado (CDN) — `ESTIMASTRUCT/templates/viewer.html`, ruta Flask `/viewer`; datos `project_full_dump.json` desde Revit; assets 3D externos (ver §2.4) |
 | PDF | ReportLab 4.5.1 + Chromium headless (`export_pdf.py`, `preview_pdf.py`) |
 | XLSX | openpyxl 3.1.2, xlrd 2.0.1 (BaseDatosOpus2026.xlsx) |
 | Integraciones | Revit MCP HTTP :8100 (IronPython inject), ETABS CSV parse, Supabase REST |
@@ -302,7 +325,7 @@ Ninguna. Backend escucha solo en `127.0.0.1:8002`, frontend Flask en `127.0.0.1:
 - Camino canónico de datos (único): **Postgres → `generate_fichas_v13.py` → `fichas_v1.3(.live).json` → `POST /presupuestos/from-template` (template_version `v1.3`, default) → Postgres.** Al crear desde template, cada insumo se resuelve contra `recurso` de Postgres por clave (precio y tipo vigentes) y la partida se arma con `rebucket_insumos()` (MO / MA / otros→unitario_matriz). Nunca se usa el `precio_unitario` de la ficha (trae markup) como costo.
 - Bug que motivó el ADR (2026-10-01/02): `generate_fichas_v13.py` elegía por `DISTINCT ON clave_csi ORDER BY precio DESC` las partidas de `Test v1.4*` (insumos sin clave, costo 0, `costo_ma` = PU con markup) → 286/387 fichas v1.3 rotas; y `_create_from_template2_updated` solo leía el formato v1.2 (`codigo`/`precioUnitario`) → CC132 v1.3 (`1fca7285`) quedó con MO+MA mezclados en un solo insumo y +20% de markup doble. Fix: el SQL del generador excluye presupuestos `test%` y partidas con insumos sin clave; `_normalizar_insumo()` acepta ambos formatos y resuelve contra `recurso`; script `repair_insumos_from_fichas.py` repara obras ya creadas (dry-run por defecto, `--apply`).
 
-**ADR-001: Postgres primario, SQLite compat.** — ⚠ **SUPERADA por ADR-016.** Se conserva por trazabilidad; PostgreSQL sigue siendo runtime soportado, no canon de datos.
+**ADR-001: Postgres primario, SQLite compat.** — ✅ **RESTABLECIDA por ADR-018** (2026-10-02): Postgres es primario; SQLite sólo compat/backup.
 - Decisión: `postgresql+psycopg://postgres@127.0.0.1:5432/estimastruct` primario desde 2026-07-20; SQLite `C:\EstimaStruct\data\estimacion.db` queda como formato de export/import ZIP y para dashboard UI legacy.
 - Rationale: concurrencia real (Flask + FastAPI + MCP + scripts), integridad transaccional, migraciones Alembic, path a RDS en SaaS.
 - Trade-offs: sysreq extra (servicio pg local), setup credenciales (`D:\Secrets\postgres_credentials.txt`), doble código path (`DB_IS_SQLITE`).
@@ -352,7 +375,7 @@ Ninguna. Backend escucha solo en `127.0.0.1:8002`, frontend Flask en `127.0.0.1:
   - **Timeline realista**: cadena crítica del SaaS vendible (F0→F1→F2→F4) = 14-19 semanas; scope completo de las 9 fases = 7-9 meses para un operador. Los ítems nuevos (2) y (3) son features desde cero, no gaps a cerrar.
 - Correcciones al estado documentado, verificadas contra código 2026-07-27: `§5.1` dice "11 endpoints puente Revit MCP" — hay **17** rutas en `routers/revit_mcp.py`. El import ETABS no es "solo combos de concreto" — son **5 endpoints** (concreto, acero ×2, conexiones, sismo); el gap real es que todos son upload de archivo unidireccional, sin conexión viva ni escritura de vuelta.
 
-**ADR-013: Reversión de ADR-001 — la SQLite versionada en el repo es la BD canónica, no Postgres (2026-08-15).** — ✅ **RESTABLECIDA y precisada por ADR-016.** ADR-014 la revirtió temporalmente; la decisión vigente vuelve a SQLite canónica, manteniendo PostgreSQL como runtime derivado.
+**ADR-013: Reversión de ADR-001 — la SQLite versionada en el repo es la BD canónica, no Postgres (2026-08-15).** — ⚠ **SUPERADA por ADR-018** (2026-10-02). Registro histórico.
 - Decisión (David, 2026-08-15 07:22 CST): **Postgres NO es ni será la base de datos canónica de EstimaStruct.** La fuente de verdad de datos (catálogo de fichas, precios, recursos) es la **SQLite versionada en el repo** — v1.3 actual, próxima v1.4. Se consolida v1.3 como canónica. Esto **revierte ADR-001** (Postgres primario desde 2026-07-20) y el `source_of_truth_estimastruct_20260719` que lo declaraba "BD primaria verificada".
 - Contexto que forzó la reversión — split-brain real (ver `memory/estimastruct-split-brain-sqlite-postgres`): los updates de precios v1.3 (goal-21062, 16 recursos) se escribieron **solo** en la SQLite `estimacion.db`; la BD Postgres `estimastruct` quedó stale desde abril 2026. Con Postgres declarado "primario" pero SQLite recibiendo los cambios reales, la fuente que el backend servía dependía del launcher (`START_POSTGRES_UNICA.ps1` vs arranque directo), no de una decisión explícita — dos tablas `recurso` divergentes sin dueño claro. Versionar la SQLite en git le da lo mismo que ADR-005 ya da a las fichas JSON: auditable por git, diffeable entre versiones, reproducible.
 - Implicaciones:
@@ -363,7 +386,7 @@ Ninguna. Backend escucha solo en `127.0.0.1:8002`, frontend Flask en `127.0.0.1:
 - Trade-offs: la SQLite versionada no da concurrencia transaccional real; mientras el runtime siga en Postgres se mantiene el doble code-path `DB_IS_SQLITE`. La ganancia — datos canónicos auditables por git y fin del split-brain silencioso — pesa más para un producto de un solo operador con catálogo versionado por diseño.
 - **Gate operativo:** este ADR queda documentado ANTES de escribir la v1.4. Ninguna escritura de datos canónicos ocurre sin pasar primero por la SQLite versionada.
 
-**ADR-014: Reversión de ADR-013 — Postgres SÍ es la BD canónica de EstimaStruct v1.3+ (2026-08-15 08:42 CST, goal-21069).** — ⚠ **SUPERADA por ADR-016; registro histórico.**
+**ADR-014: Reversión de ADR-013 — Postgres SÍ es la BD canónica de EstimaStruct v1.3+ (2026-08-15 08:42 CST, goal-21069).** — ✅ **RESTABLECIDA por ADR-018** (2026-10-02).
 - Decisión final (David, 2026-08-15 08:42 CST): **ADR-013 (SQLite-canónica) queda sin efecto.** La base de datos canónica de EstimaStruct v1.3+ es **PostgreSQL `estimastruct` (127.0.0.1:5432)**. Se restaura ADR-001 como decisión vigente. El rationale de ADR-013 (auditar por git, evitar split-brain silencioso) se atiende de otra forma: versionando la SQLite como *export/snapshot* y migrando su contenido a Postgres, no invirtiendo la jerarquía de canon.
 - Por qué la reversión fue limpia: la migración de datos de ADR-013 **nunca corrió** — el director estaba apagado cuando se aprobó, así que no se movió ningún dato ni se escribió la v1.4 sobre SQLite. Lo único que quedó fue el texto del ADR en este doc (header §6, tabla §6, footer §9), corregido por este ADR-014. No hay estado de datos que deshacer.
 - Estado real de los datos (lo que este ADR NO resuelve): hoy la SQLite `estimacion.db` tiene los precios v1.3 reales (16 recursos promovidos 31-jul, goal-21062) y la Postgres `estimastruct` sigue **stale desde abril 2026** — el split-brain de goal-21062 sigue vivo. Declarar Postgres canónico **no lo sincroniza solo**.
@@ -372,7 +395,7 @@ Ninguna. Backend escucha solo en `127.0.0.1:8002`, frontend Flask en `127.0.0.1:
   - **Reconciliación de deployment:** decidir si el runtime sigue en Postgres (ya es el canon) o cómo se hidrata — hoy `START_POSTGRES_UNICA.ps1` ya levanta Postgres, que ahora sí es la fuente de verdad, no una copia.
 - Gate operativo vigente: **cualquier escritura canónica de precios, recursos o catálogo va primero a la SQLite versionada**. PostgreSQL sólo recibe una sincronización derivada, auditable y validada. No escribir en ambos lados de forma independiente.
 
-**ADR-016: SQLite versionada es canon de EstimaStruct; PostgreSQL es runtime derivado (2026-08-20, orden del Director).** — ✅ **VIGENTE.**
+**ADR-016: SQLite versionada es canon de EstimaStruct; PostgreSQL es runtime derivado (2026-08-20, orden del Director).** — ⚠ **SUPERADA por ADR-018** (2026-10-02). Registro histórico.
 - Alcance: catálogo, fichas, recursos, rendimientos y precios v1.3/v1.4.
 - La VM Agent Memory es canónica para Brain/goals/memoria, no convierte la BD
   PostgreSQL `estimastruct` en fuente de verdad del producto.
@@ -444,6 +467,11 @@ Alembic en `backend/alembic/`; `alembic upgrade head` requerido en Postgres (sch
 
 `GET /db/export-zip` produce dump portable (Postgres → SQLite `estimacion.db` snapshot dentro de ZIP); `POST /db/import-zip` restaura al destino primario. Config en `CONFIG.SQLITE_EXPORT_NAME`.
 
+**ADR-019: Visor 3D como módulo de primera clase de EstimaStruct (2026-10-09, propuesto).**
+- Contexto: el visor (Babylon.js) existe como `templates/viewer.html` + rutas en `ESTIMASTRUCT/app.py`, pero la documentación apuntaba a `frontend/viewer/` y sus rutas/datos dependen de paths absolutos de OneDrive.
+- Decisión: (1) un solo proveedor de `project_full_dump.json` (FastAPI `routers/revit_mcp.py`, con ruta desde `CONFIG`/`ESTIMA_EXPORTS_DIR`; Flask sólo proxy); (2) `VIEWER_ASSETS_PATH`, directorio de screenshots y `VIEWER_ROOT` configurables por env; (3) separar `viewer.html` en JS/CSS bajo `frontend/js/viewer/` cuando se agreguen features; (4) recuperar un botón pyRevit para GLB/keynote map o exponerlo vía MCP; (5) Babylon queda pineado a 9.18.0.
+- Trade-offs: mover assets/paths exige coordinar con la máquina local; no afecta presupuestos ni BD.
+
 **ADR-011: Output directory selector para export keynotes (2026-08-02).**
 - Decisión: `POST /presupuestos/{pid}/scripts/keynotes` acepta parámetro opcional `output_dir` (JSON body). Si no viene, usa default `CONFIG.KEYNOTES_DIR`. Filenaming automático: `RevitKeynotes_<obra>_<fecha>_v<contador>.txt` (timestamp + contador de versión para no pisar archivos anteriores).
 - Scope real: solo `generate_keynotes.py` afectado (204 líneas, script aislado). No toca `export_pdf.py`/`export.py` (ya son browser-side, no backend-side) ni `revit_full_dump_snippet.py` (IronPython hardcodeado, bloqueado, requiere MCP interface futura).
@@ -462,7 +490,7 @@ Alembic en `backend/alembic/`; `alembic upgrade head` requerido en Postgres (sch
 
 ## 9. Known Limitations & Future
 
-**ADR-017: Consolidación de la reversión del 2026-07-20 — SQLite versionada canónica vigente, PostgreSQL runtime derivado (goal-21067, registrado 2026-08-22).**
+**ADR-017: Consolidación de la reversión del 2026-07-20 — SQLite versionada canónica vigente, PostgreSQL runtime derivado (goal-21067, registrado 2026-08-22).** — ⚠ **SUPERADA por ADR-018** (2026-10-02). Registro histórico; el "gate operativo" de abajo ya NO aplica.
 - Contexto (cumple "Regla: ADR en §9 documentando la reversión" del goal-21067): la decisión del Director el 2026-08-15 07:22 CST de revertir el decreto del 2026-07-20 (Postgres como BD canónica de EstimaStruct) quedó **documentada en §7 como ADR-013** y atravesó un ciclo de re-reversión (ADR-014) hasta su forma final **ADR-016 (2026-08-20, orden del Director, vigente)**. Este ADR-017 se registra **explícitamente en §9** — no en §7 — para que el estado vigente sea inequívoco desde la sección que enumera limitaciones/deuda y no quede como cambio silencioso.
 - Decisión vigente, replicada aquí por visibilidad de §9 (idéntica a ADR-016 §7):
   - **SQLite versionada `D:\EstimaStruct\data\estimacion.db` es la fuente canónica de EstimaStruct** para catálogo, fichas, recursos, rendimientos y precios — v1.3 actual consolidada como canónica, v1.4 siguiente (`PRAGMA user_version=14`).
@@ -478,7 +506,7 @@ Alembic en `backend/alembic/`; `alembic upgrade head` requerido en Postgres (sch
 - CORS `allow_origins=["*"]` — aceptable local, no SaaS.
 - Respuestas no usan `response_model` Pydantic (dicts manuales) — sin contrato OpenAPI fuerte.
 - SQLite legacy `estimastruct.db` aún sirve dashboard UI viejo (distinta de `estimacion.db`, la SQLite v1.3 versionada); consolidarla/retirarla pendiente.
-- **Split-brain SQLite v1.3 ↔ Postgres — RESUELTO (re-verificado en vivo 2026-08-19, goal-21070; ADR-015/016):** PostgreSQL contiene los mismos 367 recursos y los 40 precios v1.3 de la SQLite canónica, con 0 divergencias y MA-038=480. Regla vigente: cambios canónicos nacen en SQLite; PostgreSQL es mirror/runtime derivado. **Deuda restante:** documentar la vía exacta de sincronización, hacerla reproducible y recalcular presupuestos afectados con el gate de riesgo correspondiente.
+- **Split-brain SQLite v1.3 ↔ Postgres — RESUELTO (2026-08-19, goal-21070; ADR-015) y cerrado por ADR-018 (Postgres único):** PostgreSQL contiene los mismos 367 recursos y los 40 precios v1.3 de la SQLite canónica, con 0 divergencias y MA-038=480. Regla vigente (ADR-018): los cambios canónicos nacen en Postgres; las SQLite son backups. **Deuda restante:** recalcular presupuestos afectados con el gate de riesgo correspondiente.
 - Fichas JSON no propagan cambios a presupuestos ya instanciados (by-copy).
 - Alembic history debe auditarse vs `Base.metadata` — riesgo drift si `AUTO_CREATE_SCHEMA=true` en Postgres.
 - **Cero tests automatizados en el repo** (ni unitarios ni de integración): no existe `tests/`, `pytest.ini` ni CI. Toda validación es manual o por auditoría de snapshots. Es el bloqueo F0 del roadmap CASE-SAAS-001 §scope v2.
@@ -503,4 +531,6 @@ Alembic en `backend/alembic/`; `alembic upgrade head` requerido en Postgres (sch
 
 ---
 
-*Última actualización: 2026-08-22 (orquestación EstimaStruct/Hooke): MiniMax M2.7 (`m27`) es el modelo ejecutor escogido; GPT-5.4 (`codex`) queda como fallback; review/fix por Sonnet 5 + GPT-5.5 sin Sol. Se mantiene ADR-016: SQLite versionada `estimacion.db` es la fuente canónica v1.3/v1.4 de EstimaStruct; PostgreSQL `estimastruct` es runtime derivado/mirror + RAG. La VM PostgreSQL sigue siendo canon operativo de Brain/goals, una capa distinta. El split-brain permanece resuelto según verificación del 2026-08-19: 367 claves, 0 divergencias, MA-038=480. Próxima revisión: hacer reproducible la sincronización SQLite → PostgreSQL, cerrar el recálculo gateado y estabilizar el protocolo MiniMax tool-calling para escrituras filesystem/Revit.*
+*Actualización 2026-10-09 (canon): se alineó todo el documento con ADR-018 (Postgres único, v1.3), se marcaron ADR-013/016/017 como superadas, se documentó el módulo Visor 3D (§2.4, ADR-019) y la separación canon/mirror (§1.1b).*
+
+*Última actualización previa: 2026-08-22 (orquestación EstimaStruct/Hooke): MiniMax M2.7 (`m27`) es el modelo ejecutor escogido; GPT-5.4 (`codex`) queda como fallback; review/fix por Sonnet 5 + GPT-5.5 sin Sol. Se mantiene ADR-016: SQLite versionada `estimacion.db` es la fuente canónica v1.3/v1.4 de EstimaStruct; PostgreSQL `estimastruct` es runtime derivado/mirror + RAG. La VM PostgreSQL sigue siendo canon operativo de Brain/goals, una capa distinta. El split-brain permanece resuelto según verificación del 2026-08-19: 367 claves, 0 divergencias, MA-038=480. Próxima revisión: hacer reproducible la sincronización SQLite → PostgreSQL, cerrar el recálculo gateado y estabilizar el protocolo MiniMax tool-calling para escrituras filesystem/Revit.*
