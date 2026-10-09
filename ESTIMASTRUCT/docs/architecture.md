@@ -1,6 +1,6 @@
 # Architecture — EstimaStruct
 
-> **Estado:** production local · **BD canónica de EstimaStruct = SQLite versionada `estimacion.db` (v1.3 actual, v1.4 siguiente); PostgreSQL `estimastruct` es runtime derivado/mirror + RAG, no canon de precios** · ver ADR-016 · split-brain SQLite v1.3 ↔ Postgres **RESUELTO** al 2026-08-19 (367 claves idénticas, 0 divergencias, MA-038=480). PostgreSQL de Brain sigue viviendo en la VM Agent Memory; esa decisión de infraestructura no cambia el canon de datos de EstimaStruct.
+> **Estado (2026-10-02, ADR-018 VIGENTE):** **PostgreSQL `estimastruct` (127.0.0.1:5432) es la ÚNICA fuente canónica de EstimaStruct; template canónico = v1.3.** v1.4 (auditoría FHIS/CYPE, SQLite `data/v1.4`, schema `v14`, `rendimiento_audit`) fue un experimento fallido y se BORRÓ. ADR-013/016/017 (SQLite canónica) quedan SUPERADAS. Las SQLite locales son solo backups históricos — nunca reactivar.
 > **Regla:** este archivo manda. CHANGELOG = historial temporal.
 
 > **Git operativo:** este repositorio y `brain-agentic` trabajan sobre una sola
@@ -31,6 +31,21 @@ EstimaStruct es una app web local para elaborar presupuestos de construcción (H
 - Redis conserva checkpoints recuperables y nunca es canon.
 - No se permiten escrituras duales silenciosas: una sincronización hacia
   PostgreSQL debe registrar origen SQLite, versión, diff y validación.
+
+### 1.2 Orquestación agéntica EstimaStruct / Hooke
+
+Decisión vigente del Director (2026-08-22): **MiniMax M2.7 es el modelo escogido para los workers/ejecutores de EstimaStruct**. El fallback aprobado es **GPT-5.4** sólo cuando MiniMax esté caído, en cooldown real o devuelva fallo verificable. La revisión/fix sigue separada: **Sonnet 5 + GPT-5.5** acuerdan el fix; no se usa `gpt-5.6-sol` como repair final para EstimaStruct. David revisa manualmente el resultado final.
+
+Reglas de arquitectura para el harness:
+
+- `scripts/agents/estimastruct_worker.py --goal-ids <ID>` es el carril ejecutor para trabajos aceptados. El modo on-demand del `pid_manager` sólo propone candidatos; no reclama ni ejecuta goals.
+- El goal debe llevar sus fuentes en `brain.goals.context` (`client_root`, `source_files_explicit_from_david`, `f01_transcript`, `brief_path`, reglas de aceptación). El worker debe inyectar ese JSON en el task; si sólo pasa `goal.goal`, el agente pierde rutas y repite memoria vieja.
+- MiniMax M2.7 NO es un CLI nativo con `Read`/`Write`/`Bash`. Cuando corre dentro de `brain/lg_agent.py` debe usar el protocolo JSON del grafo: `{"tool_call":{"name":"fs_read","args":{"path":"D:/..."}}}` y `fs_write` para escribir artefactos. Si emite pseudo-tools (`[TOOL_CALL]`, `<invoke>`, `Read`, `write_file`, etc.), el harness debe normalizarlo o rechazarlo; nunca contar eso como trabajo real.
+- Para expedientes filesystem-first (FGER-01, permisos, manifest, matrices, PDFs ordenados), backend/frontend apagados, ausencia de presupuesto en la BD y Revit cerrado son **gates de subfase**, no bloqueadores globales. El worker debe producir todo lo posible en la carpeta del cliente y marcar `PENDIENTE_REVIT` / `PENDIENTE_BACKEND` donde aplique.
+- Para escritura real en `.rvt`, sigue vigente el preflight Revit: abrir Revit/MCP, confirmar proyecto exacto, lease exclusivo, backup, validar guardado/rollback y screenshots. Un solo escritor puede tocar un `.rvt` vivo.
+- Entrega final de trabajos EstimaStruct: reporte por Telegram con evidencia verificable (screenshots de Revit, frontend EstimaStruct, carpeta/documentos creados y rutas/hashes de artefactos).
+
+Patrón operativo para el caso Karla Franco / FGER-01 (goal-21223): primero preparar expediente documental desde `D:/OneDrive/Clientes/1. Projects In Progress/Karla Franco` y `D:/OneDrive/Media/Edits/F-01/Fin_transcript.txt`; luego gatear Revit 3D para ajustar completamente el modelo a planos, ejes, niveles, dimensiones, cubierta e instalaciones.
 
 ---
 
@@ -164,6 +179,7 @@ conexion_acero (id, presupuesto_id FK, csi, tipo_conexion, perfil_viga/columna,
     └── conexion_caso → conexion_resultado (estado_gob, phi_rn_gob, DC, j8_json §J8)
 
 cronograma_override (id, presupuesto_id, partida_id UNIQUE, n_esp, n_ay)
+cronograma_orden (id, presupuesto_id, partida_id UNIQUE, orden)  -- posicion manual en Gantt (2026-10-02); con filas => cadena global secuencial por orden
 ```
 
 Cascades: borrar presupuesto → cascada a config/capitulo/contexto_sismico/diseno_elemento/conexion_acero/cronograma_override. Partidas eliminadas → `SET NULL` en `insumo_partida.recurso_id` y `resultado_diseno.partida_*_id`.
@@ -279,6 +295,12 @@ Ninguna. Backend escucha solo en `127.0.0.1:8002`, frontend Flask en `127.0.0.1:
 ---
 
 ## 7. ADRs
+
+**ADR-018: PostgreSQL es la ÚNICA fuente canónica; v1.3 es el template canónico; v1.4 eliminada (2026-10-02, orden de David).** — ✅ **VIGENTE. SUPERA ADR-013, ADR-016 y ADR-017.**
+- Decisión (David 2026-09-17 verbal, ratificada 2026-10-02): Postgres `estimastruct` es la única fuente de verdad para presupuestos, partidas, insumos, recursos y precios. Las SQLite locales (`D:\EstimaStruct\data\estimacion.db*`) son backups históricos (`.BACKUP_20260917_195830`), nunca se reactivan ni se escriben.
+- v1.4 ("Auditoría FHIS/CYPE") = experimento fallido, borrado: carpeta `development/Template2_Updated/v1.4`, `data/v1.4/estimacion.db`, `generate_fichas_v14.py`, `release/*v14*`, `development/rendimientos_audit|rendimientos_fuente`, router `/v14/audit` + página Flask `/v14`, modelo `RendimientoAudit`, alembic `01af8510cf23` (alembic_version vuelve a `7f3e9c1a2b4d`); en Postgres: `DROP SCHEMA v14 CASCADE`, `DROP TABLE public.rendimiento_audit`, borrados los presupuestos `Test v1.4` / `Test v1.4 Smoke`. Backup JSON previo: `backups/v14_erase_20261002.json`.
+- Camino canónico de datos (único): **Postgres → `generate_fichas_v13.py` → `fichas_v1.3(.live).json` → `POST /presupuestos/from-template` (template_version `v1.3`, default) → Postgres.** Al crear desde template, cada insumo se resuelve contra `recurso` de Postgres por clave (precio y tipo vigentes) y la partida se arma con `rebucket_insumos()` (MO / MA / otros→unitario_matriz). Nunca se usa el `precio_unitario` de la ficha (trae markup) como costo.
+- Bug que motivó el ADR (2026-10-01/02): `generate_fichas_v13.py` elegía por `DISTINCT ON clave_csi ORDER BY precio DESC` las partidas de `Test v1.4*` (insumos sin clave, costo 0, `costo_ma` = PU con markup) → 286/387 fichas v1.3 rotas; y `_create_from_template2_updated` solo leía el formato v1.2 (`codigo`/`precioUnitario`) → CC132 v1.3 (`1fca7285`) quedó con MO+MA mezclados en un solo insumo y +20% de markup doble. Fix: el SQL del generador excluye presupuestos `test%` y partidas con insumos sin clave; `_normalizar_insumo()` acepta ambos formatos y resuelve contra `recurso`; script `repair_insumos_from_fichas.py` repara obras ya creadas (dry-run por defecto, `--apply`).
 
 **ADR-001: Postgres primario, SQLite compat.** — ⚠ **SUPERADA por ADR-016.** Se conserva por trazabilidad; PostgreSQL sigue siendo runtime soportado, no canon de datos.
 - Decisión: `postgresql+psycopg://postgres@127.0.0.1:5432/estimastruct` primario desde 2026-07-20; SQLite `C:\EstimaStruct\data\estimacion.db` queda como formato de export/import ZIP y para dashboard UI legacy.
@@ -440,6 +462,17 @@ Alembic en `backend/alembic/`; `alembic upgrade head` requerido en Postgres (sch
 
 ## 9. Known Limitations & Future
 
+**ADR-017: Consolidación de la reversión del 2026-07-20 — SQLite versionada canónica vigente, PostgreSQL runtime derivado (goal-21067, registrado 2026-08-22).**
+- Contexto (cumple "Regla: ADR en §9 documentando la reversión" del goal-21067): la decisión del Director el 2026-08-15 07:22 CST de revertir el decreto del 2026-07-20 (Postgres como BD canónica de EstimaStruct) quedó **documentada en §7 como ADR-013** y atravesó un ciclo de re-reversión (ADR-014) hasta su forma final **ADR-016 (2026-08-20, orden del Director, vigente)**. Este ADR-017 se registra **explícitamente en §9** — no en §7 — para que el estado vigente sea inequívoco desde la sección que enumera limitaciones/deuda y no quede como cambio silencioso.
+- Decisión vigente, replicada aquí por visibilidad de §9 (idéntica a ADR-016 §7):
+  - **SQLite versionada `D:\EstimaStruct\data\estimacion.db` es la fuente canónica de EstimaStruct** para catálogo, fichas, recursos, rendimientos y precios — v1.3 actual consolidada como canónica, v1.4 siguiente (`PRAGMA user_version=14`).
+  - **PostgreSQL `estimastruct` (127.0.0.1:5432) NO es ni será la BD canónica de EstimaStruct.** Conserva funciones de runtime concurrente, mirror verificable y RAG. Su rol de infraestructura Brain (goals/leases/memoria de la VM `Agent Memory`) es **independiente** del canon de datos del producto y no se ve afectado por esta decisión.
+- Estado verificado en sesión 2026-08-22 (herramientas reales, no docs):
+  - `D:\EstimaStruct\data\estimacion.db`: `PRAGMA user_version=14`, `PRAGMA quick_check=ok`, 367 filas en `recurso`, `MA-038=480` (`ultima_actualizacion` 2026-07-31T05:31:52), archivo SHA256[:16]=`22570cbeb1aff481`.
+  - Split-brain SQLite v1.3 ↔ Postgres **RESUELTO** (re-verificado en vivo 2026-08-19, ADR-015 §7): 367 claves idénticas, 0 divergencias; Postgres contiene los mismos 40 precios v1.3 que la SQLite canónica.
+- **Gate operativo registrado en §9:** toda escritura de datos canónicos (precios, recursos, catálogo, rendimientos) ocurre **primero en la SQLite versionada** y se commitea a git; Postgres sólo recibe sincronizaciones derivadas, auditables y validadas. Sin excepciones; cualquier intento de escribir directo a Postgres como si fuera canon requiere ADR nuevo y OK explícito del Director.
+- Cross-referencias: la decisión canónica detallada vive en §7 — **ADR-013** (decisión original 07:22 CST), **ADR-014** (reversión temporal 08:42, SUPERADA por ADR-016), **ADR-016** (VIGENTE 2026-08-20). ADR-017 en §9 NO reemplaza §7; es la consolidación visible exigida por goal-21067 para que §9 — la sección que un tercero lee cuando busca "qué está pendiente / qué es la regla" — declare la regla sin tener que saltar a §7.
+
 **Incompleto / deuda técnica:**
 - Sin autenticación ni multi-tenant — solo `127.0.0.1`.
 - CORS `allow_origins=["*"]` — aceptable local, no SaaS.
@@ -470,4 +503,4 @@ Alembic en `backend/alembic/`; `alembic upgrade head` requerido en Postgres (sch
 
 ---
 
-*Última actualización: 2026-08-20 (ADR-016, orden del Director): SQLite versionada `estimacion.db` es la fuente canónica v1.3/v1.4 de EstimaStruct; PostgreSQL `estimastruct` es runtime derivado/mirror + RAG. La VM PostgreSQL sigue siendo canon operativo de Brain/goals, una capa distinta. El split-brain permanece resuelto según verificación del 2026-08-19: 367 claves, 0 divergencias, MA-038=480. Próxima revisión: al hacer reproducible la sincronización SQLite → PostgreSQL y cerrar el recálculo gateado.*
+*Última actualización: 2026-08-22 (orquestación EstimaStruct/Hooke): MiniMax M2.7 (`m27`) es el modelo ejecutor escogido; GPT-5.4 (`codex`) queda como fallback; review/fix por Sonnet 5 + GPT-5.5 sin Sol. Se mantiene ADR-016: SQLite versionada `estimacion.db` es la fuente canónica v1.3/v1.4 de EstimaStruct; PostgreSQL `estimastruct` es runtime derivado/mirror + RAG. La VM PostgreSQL sigue siendo canon operativo de Brain/goals, una capa distinta. El split-brain permanece resuelto según verificación del 2026-08-19: 367 claves, 0 divergencias, MA-038=480. Próxima revisión: hacer reproducible la sincronización SQLite → PostgreSQL, cerrar el recálculo gateado y estabilizar el protocolo MiniMax tool-calling para escrituras filesystem/Revit.*

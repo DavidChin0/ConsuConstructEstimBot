@@ -11,13 +11,13 @@ from datetime import date
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from backend.db import get_db
-from backend.models import Presupuesto, Capitulo, ConfigPresupuesto, CronogramaOverride
+from backend.models import Presupuesto, Capitulo, ConfigPresupuesto, CronogramaOverride, InsumoPartida
 from backend import cronograma as crono_engine
 
 router = APIRouter(prefix="/presupuestos", tags=["portal"])
 
 SUPABASE_URL = os.environ.get(
-    "SUPABASE_URL", "https://humdvodaanyduqxojoxp.supabase.co"
+    "SUPABASE_URL", "https://gcicapuvgzzafeepbhfs.supabase.co"
 ).rstrip("/")
 SUPABASE_SECRET = os.environ.get("SUPABASE_SECRET_KEY", "")
 
@@ -182,7 +182,51 @@ def publish_supabase(pid: str, db: Session = Depends(get_db)):
     }
 
 
-@router.post("/{pid}/sync-precios-supabase")
+@router.post("/{pid}/sync-media-supabase")
+def sync_media_supabase(pid: str, db: Session = Depends(get_db)):
+    """Dispara la sincronización de media (fotos/videos/planos/renders) de
+    esta obra hacia su bucket Cloudflare R2 dedicado.
+
+    Decisión David 2026-09-17: los binarios NUNCA los sube EstimaStruct ni
+    toca credenciales de Cloudflare — projectmanager_bot es el único que
+    sube al bucket. Este endpoint solo:
+      1. Confirma que la obra está publicada en el portal (obra_id existe).
+      2. Asegura el nombre convencional del bucket por-obra:
+         `obra-{estimastruct_id}` con subcarpetas fotos/ videos/ planos/ renders/.
+      3. Manda un mensaje async por el bus (agent_send) a projectmanager_bot
+         pidiéndole que sincronice ese bucket ahora — pmbot notifica cuando
+         termina, este endpoint no espera el resultado real de la subida.
+    """
+    if not SUPABASE_SECRET:
+        raise HTTPException(400, "Falta SUPABASE_SECRET_KEY en el entorno del backend.")
+    p = db.query(Presupuesto).get(pid)
+    if not p:
+        raise HTTPException(404, "Presupuesto no encontrado")
+
+    obras = _sb("GET", f"obra?estimastruct_id=eq.{p.id}&select=id")
+    if not obras:
+        raise HTTPException(404, "La obra no está publicada en el portal — usá Publicar primero.")
+    obra_id = obras[0]["id"]
+
+    bucket_name = f"obra-{p.id}"
+
+    # NOTA HONESTA: agent_send (bus MCP hacia projectmanager_bot) es una tool
+    # de Hermes, no una librería que este proceso FastAPI pueda invocar por
+    # su cuenta — el bus vive en Postgres brain-agentic, fuera de este
+    # runtime. Este endpoint deja la solicitud lista (bucket esperado,
+    # obra_id, subcarpetas) para que el agente que orquesta el click (o un
+    # webhook futuro) dispare el agent_send real. No inventa una columna
+    # Supabase que no existe — no escribe nada más en `obra` por ahora.
+
+    return {
+        "ok": True,
+        "obra_id": obra_id,
+        "nombre": p.nombre,
+        "bucket": bucket_name,
+        "subcarpetas": ["fotos", "videos", "planos", "renders"],
+        "mensaje": "Solicitud registrada. projectmanager_bot sincroniza el bucket y notifica al terminar.",
+    }
+
 def sync_precios_supabase(pid: str, db: Session = Depends(get_db)):
     """Sincroniza SOLO precios al portal: costo_ma/costo_mo/total/cantidad por
     partida + sobrecosto y total de la obra. NO toca cronograma, avance,

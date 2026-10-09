@@ -471,6 +471,20 @@ class ConexionResultado(Base):
 # el usuario haya ajustado; ausencia = 1 cuadrilla (default).
 # ─────────────────────────────────────────────────────────────────────────────
 
+class CronogramaOrden(Base):
+    """Posicion manual de una actividad en el Gantt (1 fila por partida movida).
+    Tabla NUEVA (create_all, sin ALTER). Ausencia de filas = orden automatico."""
+    __tablename__ = "cronograma_orden"
+
+    id             = Column(String(36), primary_key=True, default=new_uuid)
+    presupuesto_id = Column(String(36), ForeignKey("presupuesto.id", ondelete="CASCADE"),
+                            nullable=False, index=True)
+    partida_id     = Column(String(36), ForeignKey("partida.id", ondelete="CASCADE"),
+                            nullable=False, unique=True, index=True)
+    orden          = Column(Integer, nullable=False, default=0)
+    updated_at     = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
 class CronogramaOverride(Base):
     __tablename__ = "cronograma_override"
 
@@ -484,49 +498,6 @@ class CronogramaOverride(Base):
     n_ay           = Column(SmallInteger, default=3)   # ayudantes en paralelo (>=1)
 
     updated_at     = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# RENDIMIENTO AUDIT — tabla comparativa de rendimientos auditados contra
-# fuentes oficiales (FHIS, CYPE_HN, SUAREZ_SALAZAR). ADITIVA — no toca
-# tablas de precios/partidas. create_all la crea sola. v1.4 canon.
-# ─────────────────────────────────────────────────────────────────────────────
-
-class RendimientoAudit(Base):
-    """Rendimientos auditados de fuentes externas para validación comparativa.
-    No afecta cálculos de presupuesto; solo sirve para auditoría y trazabilidad.
-    Clave de idempotencia: (partida_id, fuente, recurso_tipo, fuente_codigo, fecha_consulta)."""
-    __tablename__ = "rendimiento_audit"
-
-    id                       = Column(Integer, primary_key=True, autoincrement=True)
-    partida_id               = Column(String(36), ForeignKey("partida.id", ondelete="CASCADE"), index=True)
-    partida_clave_csi        = Column(Text, nullable=False)
-    partida_descripcion      = Column(Text, nullable=False)
-    partida_unidad           = Column(Text, nullable=False)
-    fuente                   = Column(Text, nullable=False)      # FHIS | CYPE_HN | SUAREZ_SALAZAR
-    fuente_edicion           = Column(Text, nullable=True)
-    fuente_codigo            = Column(Text, nullable=True)       # código FHIS / CYPE / ISBN
-    fuente_url               = Column(Text, nullable=False)      # URL online verificable
-    fuente_pagina            = Column(Text, nullable=True)       # página/ficha/tabla
-    fecha_consulta           = Column(Text, nullable=False)      # ISO date
-    recurso_tipo             = Column(Text, nullable=False)      # MANO_OBRA | MAQUINARIA | EQUIPO
-    recurso_descripcion      = Column(Text, nullable=False)
-    coeficiente_nativo       = Column(Numeric(14, 6), nullable=False)
-    unidad_nativa            = Column(Text, nullable=False)
-    coeficiente_normalizado  = Column(Numeric(14, 6), nullable=False)
-    formula_conversion       = Column(Text, nullable=True)
-    tipo_match               = Column(Text, nullable=False)      # exacto | semantico | manual
-    confianza                = Column(Numeric(4, 3), nullable=False)
-    evidencia                = Column(Text, nullable=True)
-    condiciones_alcance      = Column(Text, nullable=True)
-    hash_insumo              = Column(Text, nullable=True)
-    notas_discrepancia       = Column(Text, nullable=True)
-
-    __table_args__ = (
-        CheckConstraint("fuente IN ('FHIS', 'CYPE_HN', 'SUAREZ_SALAZAR')", name="ck_rendimiento_audit_fuente"),
-        CheckConstraint("recurso_tipo IN ('MANO_OBRA', 'MAQUINARIA', 'EQUIPO')", name="ck_rendimiento_audit_recurso"),
-        CheckConstraint("tipo_match IN ('exacto', 'semantico', 'manual')", name="ck_rendimiento_audit_match"),
-    )
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -614,3 +585,66 @@ class FinancieroCalculo(Base):
     __table_args__ = ({"schema": _FIN_SCHEMA},)
 
     presupuesto         = relationship("Presupuesto", back_populates="financiero_calculos")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SCHEMA del MÓDULO OBRA_MEDIA — evidencia fotográfica/video/planos/renders de
+# una obra en construcción. Mismo criterio de aislamiento que `financiero`
+# (goal-21080): schema propio `obra_media`, NO en public, para que un
+# `alembic autogenerate` no lo confunda con el resto y para que este módulo
+# se pueda aplicar/migrar sin tocar presupuesto/partida/config_presupuesto.
+#
+# Decisión David 2026-09-17 (media a obra de Camilo Almendárez CC132):
+#   - Los ARCHIVOS BINARIOS viven en un bucket Cloudflare R2 nuevo que
+#     configura/administra projectmanager_bot — EstimaStruct NUNCA sube el
+#     binario ni guarda credenciales de Cloudflare.
+#   - Supabase/Postgres (este modelo) es SOLO metadata: URL del objeto en
+#     R2 + presupuesto_id + tipo + quién/cuándo. Ningún campo de precio,
+#     cantidad ni cálculo — este módulo es completamente independiente del
+#     freeze de precios de goal-21076 (92de239d.../1e472efb...): esos IDs
+#     solo se usan aquí como FK de scoping, nunca se leen/escriben campos
+#     de Partida/ConfigPresupuesto.
+#   - El menú de UI que consume esto vive SOLO en la página dedicada de la
+#     obra de Camilo (ver backend/routers/obra_media.py + frontend), nunca
+#     como botón global visible en otras obras.
+# ─────────────────────────────────────────────────────────────────────────────
+_OM_SCHEMA = None if CONFIG.DB_IS_SQLITE else "obra_media"
+
+TIPOS_OBRA_MEDIA = ("FOTO", "VIDEO", "PLANO", "RENDER", "OTRO")
+
+
+class ObraMediaItem(Base):
+    """Un archivo de evidencia de obra (foto/video/plano/render). El binario
+    vive en Cloudflare R2 (subido por projectmanager_bot) — esta fila es
+    solo la referencia + metadata, nunca el archivo en sí."""
+    __tablename__ = "obra_media_item"
+
+    id             = Column(String(36), primary_key=True, default=new_uuid)
+    presupuesto_id = Column(String(36), ForeignKey("presupuesto.id", ondelete="CASCADE"),
+                            nullable=False, index=True)
+
+    tipo           = Column(Text, nullable=False, default="FOTO")
+    nombre         = Column(Text, nullable=False)            # nombre visible/original del archivo
+    descripcion    = Column(Text, default="")
+
+    bucket         = Column(Text, nullable=False)             # nombre del bucket R2 (config de pmbot)
+    object_key     = Column(Text, nullable=False)              # key/path dentro del bucket
+    url_publica    = Column(Text, nullable=True)                # URL servida (CDN R2), si pmbot la expone
+
+    tamano_bytes   = Column(Integer, nullable=True)
+    mime_type      = Column(Text, nullable=True)
+    subido_por     = Column(Text, default="projectmanager_bot")   # quién lo subió (agente o usuario)
+
+    fecha_obra     = Column(Date, nullable=True)               # fecha real del avance capturado (no de subida)
+    etiqueta_zona  = Column(Text, default="")                  # ej. "Nivel 1", "Fachada Norte" — libre
+
+    activo         = Column(Boolean, default=True)             # soft delete — nunca DELETE duro (auditoría)
+    created_at     = Column(DateTime, default=datetime.utcnow)
+    updated_at     = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    __table_args__ = (
+        CheckConstraint(f"tipo IN {TIPOS_OBRA_MEDIA}", name="ck_obra_media_item_tipo"),
+        {"schema": _OM_SCHEMA},
+    )
+
+    presupuesto    = relationship("Presupuesto")

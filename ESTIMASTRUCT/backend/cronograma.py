@@ -216,7 +216,8 @@ def _suma_dias_laborales(inicio: date, dias_lab: int) -> date:
 
 # ── Secuenciacion ────────────────────────────────────────────────────────────
 def construir_cronograma(partidas: list[dict], catalogo: dict | None = None,
-                         fecha_arranque: date | None = None) -> list[dict]:
+                         fecha_arranque: date | None = None,
+                         orden_manual: dict | None = None) -> list[dict]:
     """
     partidas: dict(clave_csi, descripcion, unidad, cantidad, capitulo_clave, partida_id).
     Devuelve filas con duracion, fase, fecha_inicio, orden, fuente.
@@ -238,6 +239,26 @@ def construir_cronograma(partidas: list[dict], catalogo: dict | None = None,
         filas.append({**p, **dur, "fase": fase, "_offset": offset})
 
     filas.sort(key=lambda f: (f["_offset"], f.get("capitulo_clave", ""), f["clave_csi"]))
+
+    if orden_manual:
+        # Orden manual (arriba->abajo): UNA cadena global, cada actividad arranca
+        # al terminar la anterior de la lista. Sin entrada = va al final, orden auto.
+        base = len(filas)
+        filas = [f for _, f in sorted(
+            enumerate(filas),
+            key=lambda t: (orden_manual.get(t[1].get("partida_id"), 10**6 + t[0]), t[0]))]
+        cursor = 0
+        for i, f in enumerate(filas):
+            dur = max(1, int(f["dias"]))
+            f["orden"] = i
+            f["inicio_lab"] = cursor
+            f["fecha_inicio"] = _suma_dias_laborales(fecha_arranque, cursor).isoformat()
+            f["duracion_dias"] = dur
+            f["avance_pct"] = 0
+            cursor += dur
+            f.pop("_offset", None)
+        return filas
+
 
     cursor_lab: dict[str, int] = {}
     for i, f in enumerate(filas):
