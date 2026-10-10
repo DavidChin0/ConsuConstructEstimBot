@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 from backend.db import get_db
 from backend.models import Presupuesto, Capitulo, ConfigPresupuesto, CronogramaOverride, CronogramaOrden, InsumoPartida
 from backend import cronograma as crono_engine
+from backend.routers.cronograma import _calcular as _crono_calcular, _orden_manual as _crono_orden
 
 router = APIRouter(prefix="/presupuestos", tags=["portal"])
 
@@ -109,13 +110,10 @@ def publish_supabase(pid: str, db: Session = Depends(get_db)):
     if not partidas:
         raise HTTPException(400, "La obra no tiene partidas con valor (total > 0)")
 
-    # Cronograma: duraciones por tiempo unitario del catalogo V1.2 x cantidad.
-    # [2026-10-02] Respeta el orden VIGENTE del Gantt de EstimaStruct (orden manual
-    # si el usuario reordeno) — antes se publicaba siempre el orden automatico.
-    orden_manual = {r.partida_id: int(r.orden) for r in db.query(CronogramaOrden).filter(
-        CronogramaOrden.presupuesto_id == pid).all()}
+    # Cronograma: MISMA ruta de calculo que el Gantt del front (routers/cronograma._calcular):
+    # orden manual vigente, overrides n_esp/n_ay y fecha_fin. Catalogo activo (v1.3 por defecto).
     try:
-        crono_rows = crono_engine.construir_cronograma(crono_input, orden_manual=orden_manual or None)
+        crono_rows = _crono_calcular(p, overrides, _crono_orden(db, pid))
     except Exception as e:  # catalogo ausente / corrupto -> no abortar la publicacion
         crono_rows = []
         crono_err = str(e)

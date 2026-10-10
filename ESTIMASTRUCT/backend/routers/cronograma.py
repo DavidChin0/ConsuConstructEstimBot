@@ -5,7 +5,7 @@ Cronograma / Gantt de una obra.
   GET /presupuestos/{pid}/export-materiales-semanales -> XLSX materiales por semana
       (orden VIGENTE del Gantt: manual si lo hay, si no automatico)
 
-Duraciones por tiempo unitario del catalogo V1.2 (cronograma.py).
+Duraciones por tiempo unitario del catalogo de fichas activo, v1.3 por defecto (cronograma.py).
 """
 import io
 import os
@@ -170,6 +170,67 @@ def get_cronograma(pid: str, db: Session = Depends(get_db), sync: bool = True):
     }
 
 
+def _dias_actividad(f: dict) -> list:
+    """Dias laborales (L-S) que ocupa la actividad: inicio + duracion_dias-1 saltando domingos."""
+    ini = date.fromisoformat(f["fecha_inicio"])
+    dias = [ini]
+    for k in range(1, max(1, int(f["duracion_dias"]))):
+        dias.append(engine._suma_dias_laborales(ini, k))
+    return dias
+
+
+def _materiales_semana(p: Presupuesto, filas: list) -> dict:
+    """Cantidad de MATERIALES por semana, repartida uniforme en los dias de cada actividad.
+
+    Cantidad total de un insumo = rendimiento (insumo_partida.cantidad) x cantidad de la
+    partida — misma formula que /export-insumos ("Cantidad requerida"). Semana 0-based
+    desde el inicio de obra, igual que la grilla S1..Sn del XLSX de cronograma."""
+    d0 = date.fromisoformat(min(f["fecha_inicio"] for f in filas))
+    dfin = max(date.fromisoformat(f["fecha_fin"]) for f in filas)
+    n_sem = ((dfin - d0).days // 7) + 1
+    partidas = {pa.id: pa for cap in p.capitulos for pa in cap.partidas}
+    items: dict = {}
+    for f in filas:
+        pa = partidas.get(f.get("partida_id"))
+        if not pa:
+            continue
+        dias = _dias_actividad(f)
+        por_sem: dict = {}
+        for d in dias:
+            w = (d - d0).days // 7
+            por_sem[w] = por_sem.get(w, 0) + 1
+        for ins in pa.insumos:
+            if ins.tipo != "MATERIAL":
+                continue
+            total = float(ins.cantidad or 0) * float(pa.cantidad or 0)
+            if total <= 0:
+                continue
+            key = (ins.clave or "", ins.descripcion or "", ins.unidad or "")
+            it = items.setdefault(key, {"clave": key[0], "descripcion": key[1], "unidad": key[2],
+                                        "total": 0.0, "semanas": [0.0] * n_sem, "actividades": [[] for _ in range(n_sem)]})
+            it["total"] += total
+            for w, nd in por_sem.items():
+                it["semanas"][w] += total * nd / len(dias)
+                if f["clave_csi"] not in it["actividades"][w]:
+                    it["actividades"][w].append(f["clave_csi"])
+    lista = sorted(items.values(), key=lambda x: (x["clave"].lower(), x["descripcion"].lower()))
+    for it in lista:
+        it["total"] = round(it["total"], 4)
+        it["semanas"] = [round(v, 4) for v in it["semanas"]]
+    return {"fecha_inicio": d0.isoformat(), "semanas": n_sem, "materiales": lista}
+
+
+@router.get("/presupuestos/{pid}/cronograma/materiales")
+def get_materiales_semana(pid: str, db: Session = Depends(get_db)):
+    p = db.query(Presupuesto).options(
+        joinedload(Presupuesto.capitulos).joinedload(Capitulo.partidas).joinedload(Partida.insumos)
+    ).filter(Presupuesto.id == pid).first()
+    if not p:
+        raise HTTPException(404, "Presupuesto no encontrado")
+    filas = _calcular(p, _overrides(db, pid), _orden_manual(db, pid))
+    return _materiales_semana(p, filas)
+
+
 class MoverIn(BaseModel):
     partida_id: str
     nueva_posicion: int   # 0-based en la lista actual del Gantt
@@ -249,7 +310,7 @@ def export_cronograma(pid: str, db: Session = Depends(get_db)):
         raise HTTPException(500, "openpyxl no disponible")
 
     p = db.query(Presupuesto).options(
-        joinedload(Presupuesto.capitulos).joinedload(Capitulo.partidas)
+        joinedload(Presupuesto.capitulos).joinedload(Capitulo.partidas).joinedload(Partida.insumos)
     ).filter(Presupuesto.id == pid).first()
     if not p:
         raise HTTPException(404, "Presupuesto no encontrado")
@@ -283,7 +344,7 @@ def export_cronograma(pid: str, db: Session = Depends(get_db)):
     ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=ncol_tbl + n_sem)
     sub = ws.cell(row=2, column=1, value=(
         f"Inicio {inicio}  |  Fin {fin}  |  {n_sem} semanas  |  "
-        f"{len(filas)} actividades  |  Duraciones por tiempo unitario catálogo V1.2"))
+        f"{len(filas)} actividades  |  Duraciones por tiempo unitario catálogo {engine.CATALOGO_VERSION}"))
     sub.font = Font(size=10, italic=True, color="666666")
     sub.alignment = Alignment(horizontal="center")
 
@@ -345,6 +406,30 @@ def export_cronograma(pid: str, db: Session = Depends(get_db)):
     for w in range(n_sem):
         ws.column_dimensions[get_column_letter(ncol_tbl + 1 + w)].width = 3.2
     ws.freeze_panes = f"{get_column_letter(ncol_tbl + 1)}{hr + 1}"
+
+    # Hoja 2: materiales por semana (misma formula que /export-insumos)
+    mat = _materiales_semana(p, filas)
+    wm = wb.create_sheet("materiales_semana")
+    MH = ["Clave", "Descripción", "Unidad", "Total obra"]
+    for ci, txt in enumerate(MH + [f"S{w + 1}" for w in range(mat["semanas"])], 1):
+        c = wm.cell(row=1, column=ci, value=txt)
+        c.font = Font(bold=True, color=HDR_TEXT, size=10)
+        c.fill = PatternFill("solid", fgColor=HDR_FILL)
+        c.alignment = Alignment(horizontal="center", vertical="center")
+        c.border = border
+    for ri, it in enumerate(mat["materiales"], 2):
+        for ci, v in enumerate([it["clave"], it["descripcion"], it["unidad"], it["total"]] + it["semanas"], 1):
+            c = wm.cell(row=ri, column=ci, value=v)
+            c.border = border
+            c.font = Font(size=9)
+            if ci >= 4:
+                c.alignment = Alignment(horizontal="right")
+                c.number_format = '#,##0.00;;'
+    for ci, w in enumerate([16, 46, 9, 12], 1):
+        wm.column_dimensions[get_column_letter(ci)].width = w
+    for w in range(mat["semanas"]):
+        wm.column_dimensions[get_column_letter(len(MH) + 1 + w)].width = 8
+    wm.freeze_panes = "E2"
 
     buf = io.BytesIO()
     wb.save(buf)
