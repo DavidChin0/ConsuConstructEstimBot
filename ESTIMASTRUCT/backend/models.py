@@ -59,6 +59,11 @@ class ConfigPresupuesto(Base):
     iva              = Column(Numeric(5, 2), default=15)
     otros_factor     = Column(Numeric(5, 2), default=0)
     template_version = Column(String(10), default="v1.2")  # Template DB version: v1.2 vigente, v1.1 legacy, v1.0 original
+    # [2026-10-02 David] Reajuste de materiales por obra: % aplicado SOLO a insumos MATERIAL
+    # (ej. -25.7 → materiales al 74.3% del precio de mercado). MO/otros intactos.
+    # valor_objetivo = monto contrato (con sobrecosto) para el botón "Recalcular reajuste".
+    reajuste_materiales = Column(Numeric(9, 4), default=0)
+    valor_objetivo      = Column(Numeric(14, 2), nullable=True)
 
     presupuesto = relationship("Presupuesto", back_populates="config")
 

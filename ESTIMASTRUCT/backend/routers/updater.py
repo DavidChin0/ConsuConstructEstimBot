@@ -24,7 +24,7 @@ from backend.config import CONFIG
 from backend.models import Partida, Capitulo, ConfigPresupuesto, InsumoPartida, DIVISIONES_CSI, new_uuid
 import sys
 from backend.csi_utils import infer_csi
-from backend.services.pricing import calc_base, precio_unitario
+from backend.services.pricing import calc_base, precio_unitario, factor_materiales
 
 try:
     import openpyxl
@@ -310,6 +310,7 @@ def _sync_new_fichas_to_db(fichas: list, only_codigos: list, version: str, db: S
     for cfg in configs:
         pid = cfg.presupuesto_id
         sc  = float(cfg.sobrecosto or 20)
+        f_ma = factor_materiales(cfg)   # reajuste materiales por obra
 
         # Build chapter map for this presupuesto
         caps = {c.clave: c for c in db.query(Capitulo).filter(Capitulo.presupuesto_id == pid).all()}
@@ -356,6 +357,7 @@ def _sync_new_fichas_to_db(fichas: list, only_codigos: list, version: str, db: S
                     ma += tot
                 else:
                     matriz += tot
+            ma *= f_ma
             base = calc_base(mo, ma, matriz)
             pu_final = precio_unitario(base, sc)
 

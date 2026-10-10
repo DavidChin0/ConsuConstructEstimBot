@@ -5,7 +5,7 @@ from typing import Optional
 import sys, os
 from backend.db import get_db
 from backend.models import InsumoPartida, Partida, Recurso, Capitulo, ConfigPresupuesto
-from backend.services.pricing import recalcular_partida, rebucket_insumos
+from backend.services.pricing import recalcular_partida, rebucket_insumos, factor_materiales
 
 router = APIRouter(tags=["insumos"])
 
@@ -27,22 +27,27 @@ class InsumoUpdate(BaseModel):
     costo_unit: Optional[float] = None
 
 
-def _get_sobrecosto(partida: Partida, db: Session) -> float:
-    cfg = db.query(ConfigPresupuesto).filter(
+def _get_cfg(partida: Partida, db: Session):
+    return db.query(ConfigPresupuesto).filter(
         ConfigPresupuesto.presupuesto_id ==
         db.query(Capitulo).get(partida.capitulo_id).presupuesto_id
     ).first()
+
+
+def _get_sobrecosto(partida: Partida, db: Session) -> float:
+    cfg = _get_cfg(partida, db)
     return float(cfg.sobrecosto) if cfg and cfg.sobrecosto is not None else 20.0
 
 
 def _recalcular_partida(partida: Partida, db: Session):
     """Recalcula costo_mo, costo_ma, unitario_matriz, costo_base, PU, total desde insumos."""
     insumos = db.query(InsumoPartida).filter(InsumoPartida.partida_id == partida.id).all()
-    mo, ma, otros = rebucket_insumos(insumos)
+    cfg = _get_cfg(partida, db)
+    mo, ma, otros = rebucket_insumos(insumos, factor_materiales(cfg))
     partida.costo_mo = mo
     partida.costo_ma = ma
     partida.unitario_matriz = otros
-    sc = _get_sobrecosto(partida, db)
+    sc = float(cfg.sobrecosto) if cfg and cfg.sobrecosto is not None else 20.0
     recalcular_partida(partida, sc)
 
 

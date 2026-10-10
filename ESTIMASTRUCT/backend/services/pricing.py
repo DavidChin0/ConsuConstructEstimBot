@@ -53,15 +53,26 @@ def calc_base(costo_mo, costo_ma, unitario_matriz) -> float:
     return quantize_money(total)
 
 
-def rebucket_insumos(insumos) -> tuple:
+def factor_materiales(cfg) -> float:
+    """[2026-10-02 David] Reajuste de materiales por obra (config_presupuesto.reajuste_materiales,
+    en %). factor = 1 + pct/100. Solo afecta insumos tipo MATERIAL; MO y otros intactos.
+    Los insumos guardan el precio de MERCADO (recurso); el reajuste vive en la obra, así
+    /calcular no lo borra y queda auditable (precio mercado × factor = costo_ma)."""
+    pct = getattr(cfg, "reajuste_materiales", None) if cfg is not None else None
+    return 1.0 + float(pct or 0) / 100.0
+
+
+def rebucket_insumos(insumos, factor_ma: float = 1.0) -> tuple:
     """Bucketing canonico 3-vias desde insumos -> (mo, ma, otros).
     otros = SUBCONTRATO/FLETE/EQUIPO/etc (todo lo que no es MO ni MATERIAL) -> unitario_matriz.
+    factor_ma = reajuste de materiales de la obra (ver factor_materiales); 1.0 = sin reajuste.
     Fuente unica: cualquier ruta que recalcule costo_mo/costo_ma/unitario_matriz desde
     insumos debe usar esta funcion, no reimplementar el bucketing (bug historico: calculos.py
     tenia bucketing de 2 vias y dejaba unitario_matriz stale -> doble conteo en calc_base)."""
     mo = sum((Decimal(str(i.total or 0)) for i in insumos if i.tipo == "MANO_OBRA"), Decimal("0"))
     ma = sum((Decimal(str(i.total or 0)) for i in insumos if i.tipo == "MATERIAL"), Decimal("0"))
     otros = sum((Decimal(str(i.total or 0)) for i in insumos if i.tipo not in ("MANO_OBRA", "MATERIAL")), Decimal("0"))
+    ma = ma * Decimal(str(factor_ma if factor_ma is not None else 1.0))
     return quantize_money(mo), quantize_money(ma), quantize_money(otros)
 
 

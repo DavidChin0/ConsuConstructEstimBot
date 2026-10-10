@@ -12,7 +12,7 @@ from typing import Any, List
 from backend.db import get_db
 from backend.models import ConfigPresupuesto, Capitulo, Partida, InsumoPartida
 from backend.config import CONFIG
-from backend.services.pricing import calc_base, precio_unitario
+from backend.services.pricing import calc_base, precio_unitario, factor_materiales
 
 router = APIRouter(prefix="/bases", tags=["bases"])
 
@@ -417,6 +417,7 @@ def sync_version(version: str, payload: List[Any], db: Session = Depends(get_db)
     ).all()
 
     sobrecosto_map = {c.presupuesto_id: float(c.sobrecosto or 20) for c in configs}
+    fma_map = {c.presupuesto_id: factor_materiales(c) for c in configs}   # reajuste materiales por obra
     pres_ids = list(sobrecosto_map.keys())
 
     updated_partidas = 0
@@ -475,7 +476,7 @@ def sync_version(version: str, payload: List[Any], db: Session = Depends(get_db)
                 # (antes: ramas if/else identicas, 2-vias, sin tocar unitario_matriz -> stale
                 # -> doble conteo en /calcular, mismo bug historico documentado en pricing.py).
                 mo     = sum(float(i.total) for i in partida.insumos if i.tipo == "MANO_OBRA")
-                ma     = sum(float(i.total) for i in partida.insumos if i.tipo == "MATERIAL")
+                ma     = sum(float(i.total) for i in partida.insumos if i.tipo == "MATERIAL") * fma_map.get(pres_id, 1.0)
                 matriz = sum(float(i.total) for i in partida.insumos if i.tipo not in ("MANO_OBRA", "MATERIAL"))
                 base   = calc_base(mo, ma, matriz)
                 pu     = precio_unitario(base, sc)

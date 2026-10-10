@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, selectinload
 from sqlalchemy import func
 from pydantic import BaseModel
 from typing import Optional
@@ -388,6 +388,7 @@ def detalle(pid: str, db: Session = Depends(get_db)):
     p = db.query(Presupuesto).options(
         joinedload(Presupuesto.config),
         joinedload(Presupuesto.capitulos).joinedload(Capitulo.partidas)
+            .selectinload(Partida.insumos)   # 1 query extra: resumen de reajuste de materiales
     ).filter(Presupuesto.id == pid).first()
     if not p:
         raise HTTPException(404, "Presupuesto no encontrado")
@@ -413,7 +414,10 @@ def detalle(pid: str, db: Session = Depends(get_db)):
             "iva": float(cfg.iva) if cfg else 15,
             "otros_factor": float(cfg.otros_factor) if cfg else 0,
             "template_version": cfg.template_version if cfg else "v1.0",
+            "reajuste_materiales": float(cfg.reajuste_materiales or 0) if cfg else 0.0,
+            "valor_objetivo": float(cfg.valor_objetivo) if cfg and cfg.valor_objetivo is not None else None,
         },
+        "reajuste": _resumen_reajuste(p),
         "capitulos": [
             {
                 "id": cap.id,
@@ -456,6 +460,100 @@ class NombreIn(BaseModel):
 
 class SobrecostoIn(BaseModel):
     sobrecosto: float
+
+
+class ReajusteIn(BaseModel):
+    reajuste_materiales: Optional[float] = None   # % sobre insumos MATERIAL (ej. -25.7)
+    valor_objetivo: Optional[float] = None        # monto contrato con sobrecosto (para recalcular)
+
+
+def _resumen_reajuste(p: Presupuesto) -> dict:
+    """Σ MO / Σ materiales a precio de MERCADO / Σ materiales reajustados / Σ otros.
+    Sale de los insumos (precio mercado) — el reajuste solo vive en config."""
+    cfg = p.config
+    pct = float(cfg.reajuste_materiales or 0) if cfg else 0.0
+    mo = ma_mkt = ot = 0.0
+    for cap in p.capitulos:
+        for pa in cap.partidas:
+            q = float(pa.cantidad or 0)
+            if not q:
+                continue
+            if pa.insumos:
+                for i in pa.insumos:
+                    t = q * float(i.total or 0)
+                    if i.tipo == "MANO_OBRA": mo += t
+                    elif i.tipo == "MATERIAL": ma_mkt += t
+                    else: ot += t
+            else:   # partida sin insumos: costo_ma ya guardado (no reajustable)
+                mo += q * float(pa.costo_mo or 0); ot += q * float(pa.costo_ma or 0) + q * float(pa.unitario_matriz or 0)
+    return {"pct": pct, "mo": round(mo, 2), "materiales_mercado": round(ma_mkt, 2),
+            "materiales_reajustados": round(ma_mkt * (1 + pct / 100), 2),
+            "absorbido": round(ma_mkt * (-pct / 100), 2), "otros": round(ot, 2)}
+
+
+def _cargar_full(pid: str, db: Session) -> Presupuesto:
+    p = db.query(Presupuesto).options(
+        joinedload(Presupuesto.config),
+        joinedload(Presupuesto.capitulos).joinedload(Capitulo.partidas)
+            .joinedload(Partida.insumos).joinedload(InsumoPartida.recurso)
+    ).filter(Presupuesto.id == pid).first()
+    if not p:
+        raise HTTPException(404, "Presupuesto no encontrado")
+    if not p.config:
+        raise HTTPException(400, "Presupuesto sin config")
+    return p
+
+
+@router.patch("/{pid}/reajuste-materiales")
+def actualizar_reajuste(pid: str, data: ReajusteIn, db: Session = Depends(get_db)):
+    """Fija el % de reajuste de materiales (y/o el valor objetivo) y recalcula la obra."""
+    from backend.routers.calculos import _recalcular_todo
+    p = _cargar_full(pid, db)
+    if data.reajuste_materiales is not None:
+        pct = float(data.reajuste_materiales)
+        if pct <= -100 or pct > 500:
+            raise HTTPException(400, "Reajuste fuera de rango (-100, 500]")
+        p.config.reajuste_materiales = round(pct, 4)
+    if data.valor_objetivo is not None:
+        p.config.valor_objetivo = data.valor_objetivo if data.valor_objetivo > 0 else None
+    _recalcular_todo(p, db)
+    db.commit()
+    cd, total = _totales(p)
+    return {"reajuste_materiales": float(p.config.reajuste_materiales or 0),
+            "valor_objetivo": float(p.config.valor_objetivo) if p.config.valor_objetivo is not None else None,
+            "costo_directo": cd, "total_con_indirectos": total, "reajuste": _resumen_reajuste(p)}
+
+
+@router.post("/{pid}/reajuste-materiales/recalcular")
+def recalcular_reajuste(pid: str, data: ReajusteIn = None, db: Session = Depends(get_db)):
+    """Calcula el % exacto para que el total (con sobrecosto) = valor_objetivo,
+    moviendo SOLO materiales. MO y otros quedan intactos.
+      total = (MO + MA_mercado·f + otros)·(1+sc)  →  f = (obj/(1+sc) − MO − otros) / MA_mercado"""
+    from backend.routers.calculos import _recalcular_todo
+    p = _cargar_full(pid, db)
+    cfg = p.config
+    if data and data.valor_objetivo:
+        cfg.valor_objetivo = data.valor_objetivo
+    if cfg.valor_objetivo is None:
+        raise HTTPException(400, "Falta valor_objetivo (monto contrato)")
+    obj = float(cfg.valor_objetivo)
+    sc = float(cfg.sobrecosto if cfg.sobrecosto is not None else 20)
+    # Precios de insumos al día (mismo paso que /calcular) antes de resolver el factor
+    cfg.reajuste_materiales = 0
+    _recalcular_todo(p, db)
+    r = _resumen_reajuste(p)
+    if r["materiales_mercado"] <= 0:
+        raise HTTPException(400, "La obra no tiene materiales que reajustar")
+    f = (obj / (1 + sc / 100) - r["mo"] - r["otros"]) / r["materiales_mercado"]
+    if f <= 0:
+        raise HTTPException(400, f"Imposible: MO+otros ya exceden el objetivo (factor {f:.4f})")
+    cfg.reajuste_materiales = round((f - 1) * 100, 4)
+    _recalcular_todo(p, db)
+    db.commit()
+    cd, total = _totales(p)
+    return {"reajuste_materiales": float(cfg.reajuste_materiales), "factor": round(f, 6),
+            "valor_objetivo": obj, "costo_directo": cd, "total_con_indirectos": total,
+            "diferencia": round(total - obj, 2), "reajuste": _resumen_reajuste(p)}
 
 
 @router.patch("/{pid}/nombre")
@@ -596,6 +694,8 @@ def duplicar(pid: str, db: Session = Depends(get_db)):
             iva=p.config.iva,
             otros_factor=p.config.otros_factor,
             template_version=p.config.template_version,
+            reajuste_materiales=p.config.reajuste_materiales,
+            valor_objetivo=p.config.valor_objetivo,
         ))
         db.flush()
 

@@ -24,7 +24,7 @@ coinciden.
 from decimal import Decimal
 
 from backend.calculo_estructural import _fmt, _ascii_to_latex
-from backend.services.pricing import calc_base, rebucket_insumos, quantize_money
+from backend.services.pricing import calc_base, rebucket_insumos, quantize_money, factor_materiales
 from backend.routers.calculos import _factor_indirectos
 
 
@@ -87,7 +87,7 @@ def memoria_calculos_presupuesto(p) -> dict:
         for partida in cap.partidas:
             n_partidas += 1
             if partida.insumos:
-                mo, ma, otros = rebucket_insumos(partida.insumos)
+                mo, ma, otros = rebucket_insumos(partida.insumos, factor_materiales(cfg))
             else:
                 mo, ma, otros = float(partida.costo_mo or 0), float(partida.costo_ma or 0), float(partida.unitario_matriz or 0)
             base = calc_base(mo, ma, otros)

@@ -564,7 +564,7 @@
     "cantidad": 0,
     "precio_unitario": 0,
     "insumos": [],
-    "color_tipo": "verde",
+    "color_tipo": "rojo",
     "_stub": true,
     "_nota": "Ficha GAP creada del audit 2026-07-07 — FALTA precio/insumos/MO"
   },
@@ -1699,7 +1699,7 @@
         "total": 50
       }
     ],
-    "color_tipo": "verde"
+    "color_tipo": "rojo"
   },
   {
     "codigo": "R-3",
@@ -3802,7 +3802,7 @@
         "total": 30
       }
     ],
-    "color_tipo": "verde"
+    "color_tipo": "rojo"
   },
   {
     "codigo": "S-4",
@@ -5135,7 +5135,7 @@
         "total": 30
       }
     ],
-    "color_tipo": "verde"
+    "color_tipo": "rojo"
   },
   {
     "codigo": "CM-03",
@@ -5611,7 +5611,7 @@
     "cantidad": 0,
     "precio_unitario": 0,
     "insumos": [],
-    "color_tipo": "verde",
+    "color_tipo": "rojo",
     "_stub": true,
     "_nota": "Ficha GAP creada del audit 2026-07-07 — FALTA precio/insumos/MO"
   },
@@ -5640,7 +5640,7 @@
         "total": 0.5
       }
     ],
-    "color_tipo": "verde",
+    "color_tipo": "rojo",
     "_nota": "Costeada 2026-07-07 (aprobada A+B); precios REF cotizar: MA-375/376/377"
   },
   {
@@ -5699,7 +5699,7 @@
         "total": 3
       }
     ],
-    "color_tipo": "verde"
+    "color_tipo": "rojo"
   },
   {
     "codigo": "COA02",
@@ -6764,7 +6764,7 @@
         "total": 75
       }
     ],
-    "color_tipo": "verde",
+    "color_tipo": "rojo",
     "_nota_dependencia": "DEPENDIENTE: precio del perfil de acero resuelto por motor acero_ficha.py/perfiles_acero.py — puede quedar en 0 si el export no lo resuelve. Verificar contra recurso antes de usar. Amarillo=2026-07-08."
   },
   {
@@ -8424,7 +8424,7 @@
         "total": 75
       }
     ],
-    "color_tipo": "verde",
+    "color_tipo": "rojo",
     "_nota_dependencia": "DEPENDIENTE: precio del perfil de acero resuelto por motor acero_ficha.py/perfiles_acero.py — puede quedar en 0 si el export no lo resuelve. Verificar contra recurso antes de usar. Amarillo=2026-07-08."
   },
   {
@@ -8805,7 +8805,7 @@
         "total": 3
       }
     ],
-    "color_tipo": "verde",
+    "color_tipo": "rojo",
     "_nota_dependencia": "DEPENDIENTE: precio del perfil de acero resuelto por motor acero_ficha.py/perfiles_acero.py — puede quedar en 0 si el export no lo resuelve. Verificar contra recurso antes de usar. Amarillo=2026-07-08."
   },
   {
@@ -10338,7 +10338,7 @@
         "total": 85
       }
     ],
-    "color_tipo": "verde",
+    "color_tipo": "rojo",
     "_nota_dependencia": "DEPENDIENTE: precio del perfil de acero resuelto por motor acero_ficha.py/perfiles_acero.py — puede quedar en 0 si el export no lo resuelve. Verificar contra recurso antes de usar. Amarillo=2026-07-08."
   },
   {
@@ -10977,7 +10977,7 @@
         "total": 3
       }
     ],
-    "color_tipo": "verde"
+    "color_tipo": "rojo"
   },
   {
     "codigo": "COA9",
@@ -11283,7 +11283,7 @@
         "total": 4.5
       }
     ],
-    "color_tipo": "verde"
+    "color_tipo": "rojo"
   },
   {
     "codigo": "AT-04",
@@ -11458,7 +11458,7 @@
         "total": 0.75
       }
     ],
-    "color_tipo": "verde"
+    "color_tipo": "rojo"
   },
   {
     "codigo": "AT-07",
@@ -11575,7 +11575,7 @@
         "total": 30
       }
     ],
-    "color_tipo": "verde"
+    "color_tipo": "rojo"
   },
   {
     "codigo": "PM-1",
@@ -11935,7 +11935,7 @@
         "total": 0.5
       }
     ],
-    "color_tipo": "verde",
+    "color_tipo": "rojo",
     "_nota": "Costeada 2026-07-07 (aprobada A+B); precios REF cotizar: MA-375/376/377"
   },
   {
@@ -12722,7 +12722,7 @@
         "total": 0.5
       }
     ],
-    "color_tipo": "verde",
+    "color_tipo": "rojo",
     "_nota": "Costeada 2026-07-07 (aprobada A+B); precios REF cotizar: MA-375/376/377"
   },
   {
@@ -12798,7 +12798,7 @@
         "total": 0.56
       }
     ],
-    "color_tipo": "verde"
+    "color_tipo": "rojo"
   },
   {
     "codigo": "CER-02",
@@ -14257,7 +14257,7 @@
     "cantidad": 0,
     "precio_unitario": 0,
     "insumos": [],
-    "color_tipo": "verde",
+    "color_tipo": "rojo",
     "_stub": true,
     "_nota": "Ficha GAP creada del audit 2026-07-07 — FALTA precio/insumos/MO"
   },
@@ -15300,7 +15300,7 @@
     "cantidad": 0,
     "precio_unitario": 0,
     "insumos": [],
-    "color_tipo": "verde",
+    "color_tipo": "rojo",
     "_stub": true,
     "_nota": "Ficha GAP creada del audit 2026-07-07 — FALTA precio/insumos/MO"
   },
@@ -16354,7 +16354,7 @@
         "total": 0.5
       }
     ],
-    "color_tipo": "verde",
+    "color_tipo": "rojo",
     "_nota": "Costeada 2026-07-07 (aprobada A+B); precios REF cotizar: MA-375/376/377"
   },
   {
@@ -17129,7 +17129,7 @@
         "total": 67.5
       }
     ],
-    "color_tipo": "verde"
+    "color_tipo": "rojo"
   },
   {
     "codigo": "SN-17",
@@ -19317,7 +19317,7 @@
         "total": 0.5
       }
     ],
-    "color_tipo": "verde",
+    "color_tipo": "rojo",
     "_nota": "Costeada 2026-07-07 (aprobada A+B); precios REF cotizar: MA-375/376/377"
   },
   {
@@ -19447,7 +19447,7 @@
         "total": 10
       }
     ],
-    "color_tipo": "verde"
+    "color_tipo": "rojo"
   },
   {
     "codigo": "TOM02",
@@ -19912,7 +19912,7 @@
         "total": 28
       }
     ],
-    "color_tipo": "verde"
+    "color_tipo": "rojo"
   },
   {
     "codigo": "ILU08",
@@ -20600,7 +20600,7 @@
         "total": 275
       }
     ],
-    "color_tipo": "rojo"
+    "color_tipo": "verde"
   },
   {
     "codigo": "EXT-06",
@@ -21683,7 +21683,7 @@
     "cantidad": 0,
     "precio_unitario": 1332.0,
     "insumos": [],
-    "color_tipo": "verde",
+    "color_tipo": "rojo",
     "_stub": true,
     "_nota": "Agregado 2026-07-14 para cerrar audit template Valle de Angeles; ver REPORTE_fichas_GAP_costeo_20260707.md"
   },
@@ -21695,7 +21695,7 @@
     "cantidad": 0,
     "precio_unitario": 848.0,
     "insumos": [],
-    "color_tipo": "verde",
+    "color_tipo": "rojo",
     "_stub": true,
     "_nota": "Agregado 2026-07-14 para cerrar audit template Valle de Angeles; ver REPORTE_fichas_GAP_costeo_20260707.md"
   },
@@ -21707,7 +21707,7 @@
     "cantidad": 0,
     "precio_unitario": 0,
     "insumos": [],
-    "color_tipo": "verde",
+    "color_tipo": "rojo",
     "_stub": true,
     "_nota": "Agregado 2026-07-14 como match de tipo VA-1 aluminio en template Valle de Angeles"
   },
@@ -21719,7 +21719,7 @@
     "cantidad": 0,
     "precio_unitario": 0,
     "insumos": [],
-    "color_tipo": "verde",
+    "color_tipo": "rojo",
     "_stub": true,
     "_nota": "Agregado 2026-07-14 para clasificar Default Floor de contexto"
   },
@@ -21731,7 +21731,7 @@
     "cantidad": 0,
     "precio_unitario": 0,
     "insumos": [],
-    "color_tipo": "verde",
+    "color_tipo": "rojo",
     "_stub": true,
     "_nota": "Agregado 2026-07-14 para clasificar familias de referencia no facturables"
   }

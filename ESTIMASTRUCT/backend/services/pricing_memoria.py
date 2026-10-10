@@ -66,7 +66,7 @@ LATEX_BY_FORMULA_PRICING = {
 
 
 def memoria_pricing(costo_mo, costo_ma, unitario_matriz, sobrecosto_pct, cantidad,
-                     insumos=None, stored=None, meta_extra=None) -> dict:
+                     insumos=None, stored=None, meta_extra=None, factor_ma: float = 1.0) -> dict:
     """Narra el pipeline de costeo de UNA partida (`services/pricing.py`, ADR-003).
 
     Args:
@@ -99,7 +99,7 @@ def memoria_pricing(costo_mo, costo_ma, unitario_matriz, sobrecosto_pct, cantida
         n_mo = [i for i in insumos if i.tipo == "MANO_OBRA"]
         n_ma = [i for i in insumos if i.tipo == "MATERIAL"]
         n_ot = [i for i in insumos if i.tipo not in ("MANO_OBRA", "MATERIAL")]
-        mo, ma, otros = rebucket_insumos(insumos)   # ÚNICA fuente — pricing.rebucket_insumos
+        mo, ma, otros = rebucket_insumos(insumos, factor_ma)   # ÚNICA fuente — pricing.rebucket_insumos (× reajuste materiales)
 
         def _sum_terms(lst, cap=5):
             terms = [_fmt_money(float(i.total or 0)) for i in lst[:cap]]

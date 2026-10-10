@@ -4,7 +4,7 @@ import sys, os
 from backend.db import get_db
 from backend.models import Presupuesto, Capitulo, Partida, ConfigPresupuesto, InsumoPartida
 from decimal import Decimal
-from backend.services.pricing import recalcular_partida, rebucket_insumos, quantize_money, calc_base
+from backend.services.pricing import recalcular_partida, rebucket_insumos, quantize_money, calc_base, factor_materiales
 
 router = APIRouter(tags=["calculos"])
 
@@ -12,6 +12,7 @@ router = APIRouter(tags=["calculos"])
 def _recalcular_todo(p: Presupuesto, db: Session):
     cfg = p.config
     sobrecosto = float(cfg.sobrecosto) if cfg and cfg.sobrecosto is not None else 20.0
+    f_ma = factor_materiales(cfg)
 
     base_total = 0.0
     for cap in p.capitulos:
@@ -25,7 +26,7 @@ def _recalcular_todo(p: Presupuesto, db: Session):
                 if float(ins.total or 0) != nuevo:   # skip-unchanged: evita UPDATE inutil (6759 insumos)
                     ins.total = nuevo
             if partida.insumos:
-                mo_total, ma_total, otros_total = rebucket_insumos(partida.insumos)
+                mo_total, ma_total, otros_total = rebucket_insumos(partida.insumos, f_ma)
                 partida.costo_mo = mo_total
                 partida.costo_ma = ma_total
                 partida.unitario_matriz = otros_total

@@ -41,7 +41,7 @@ from backend.calculo_conexion_acero import calcular_conexion
 # Helpers compartidos (viven en diseno_estructural; import unidireccional sin ciclo).
 from backend.services.etabs_parse import _decode_bytes, _es_xlsx
 from backend.services.partidas_bridge import _get_o_crear_capitulo, _crear_o_actualizar_partida, _perfil_acero_valido, _correr_caso_acero, _marcar_gobierna_acero
-from backend.services.pricing import calc_base, precio_unitario
+from backend.services.pricing import calc_base, precio_unitario, factor_materiales
 
 router = APIRouter(prefix="/diseno", tags=["acero-diseno"])
 
@@ -531,7 +531,7 @@ def conexion_generar_partida(pid: str, body: ConexionPartidaBody,
     # Bucketing 3-vias (fuente unica: backend.services.pricing) para no dejar
     # unitario_matriz stale en el UPDATE -> doble conteo en /calcular (bug historico).
     costo_mo = round(sum(i["total"] for i in insumos if i["tipo"] == "MANO_OBRA"), 4)
-    costo_ma = round(sum(i["total"] for i in insumos if i["tipo"] == "MATERIAL"), 4)
+    costo_ma = round(sum(i["total"] for i in insumos if i["tipo"] == "MATERIAL") * factor_materiales(pres.config), 4)
     matriz = round(sum(i["total"] for i in insumos if i["tipo"] not in ("MANO_OBRA", "MATERIAL")), 4)
     base = calc_base(costo_mo, costo_ma, matriz)
     pu = precio_unitario(base, sobrecosto) if base > 0 else 0.0

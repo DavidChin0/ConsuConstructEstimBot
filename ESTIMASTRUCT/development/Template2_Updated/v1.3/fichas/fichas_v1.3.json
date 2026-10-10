@@ -24870,7 +24870,7 @@
     "unidad": "m",
     "precio_unitario": 850.9116,
     "costo_mo": 15.1417,
-    "costo_ma": 664.5356,
+    "costo_ma": 15.3192,
     "unitario_matriz": 1.052,
     "insumos": [
       {
@@ -24894,11 +24894,11 @@
       {
         "clave": "MA-254",
         "descripcion": "MA-254 Tubo de Conduit de PVC SC Gresp de 3/4\"",
-        "unidad": "m",
+        "unidad": "rollo",
         "tipo": "MATERIAL",
-        "cantidad": 1.472756,
+        "cantidad": 0.030053,
         "costo_unit": 450.0,
-        "total": 662.7402
+        "total": 13.5238
       },
       {
         "clave": "MA-255",
@@ -28203,5 +28203,152 @@
     "unitario_matriz": 0.0,
     "insumos": [],
     "color_tipo": "verde"
+  },
+  {
+    "csi": "26 05 33.16.3",
+    "codigo": "EL-16",
+    "descripcion": "Suministro e Instalación de Codo de Conduit de PVC de 3/4\"",
+    "unidad": "pza",
+    "precio_unitario": 24.839,
+    "costo_mo": 3.5,
+    "costo_ma": 16.8,
+    "unitario_matriz": 0.75,
+    "insumos": [
+      {
+        "clave": "MA-255",
+        "descripcion": "Curva de Conduit de PVC Gris de 3/4\"",
+        "unidad": "pza",
+        "tipo": "MATERIAL",
+        "cantidad": 1.05,
+        "costo_unit": 16.0,
+        "total": 16.8
+      },
+      {
+        "clave": "MO-014",
+        "descripcion": "Electricista",
+        "unidad": "jor",
+        "tipo": "MANO_OBRA",
+        "cantidad": 0.01,
+        "costo_unit": 100.0,
+        "total": 1.0
+      },
+      {
+        "clave": "MO-006",
+        "descripcion": "Ayudante",
+        "unidad": "jor",
+        "tipo": "MANO_OBRA",
+        "cantidad": 0.005,
+        "costo_unit": 500.0,
+        "total": 2.5
+      },
+      {
+        "clave": "HER-00",
+        "descripcion": "Herramienta Manual (Menor)",
+        "unidad": "(%)mo",
+        "tipo": "HERRAMIENTA",
+        "cantidad": 0.05,
+        "costo_unit": 15.0,
+        "total": 0.75
+      }
+    ],
+    "color_tipo": "rosa"
+  },
+  {
+    "csi": "26 05 33.16.4",
+    "codigo": "EL-17",
+    "descripcion": "Suministro e Instalación de Tee de Conduit de PVC de 3/4\"",
+    "unidad": "pza",
+    "precio_unitario": 38.35,
+    "costo_mo": 5.5,
+    "costo_ma": 26.25,
+    "unitario_matriz": 0.75,
+    "insumos": [
+      {
+        "clave": "MA-378",
+        "descripcion": "Tee de Conduit de PVC de 3/4\"",
+        "unidad": "pza",
+        "tipo": "MATERIAL",
+        "cantidad": 1.05,
+        "costo_unit": 25.0,
+        "total": 26.25
+      },
+      {
+        "clave": "MO-014",
+        "descripcion": "Electricista",
+        "unidad": "jor",
+        "tipo": "MANO_OBRA",
+        "cantidad": 0.015,
+        "costo_unit": 100.0,
+        "total": 1.5
+      },
+      {
+        "clave": "MO-006",
+        "descripcion": "Ayudante",
+        "unidad": "jor",
+        "tipo": "MANO_OBRA",
+        "cantidad": 0.008,
+        "costo_unit": 500.0,
+        "total": 4.0
+      },
+      {
+        "clave": "HER-00",
+        "descripcion": "Herramienta Manual (Menor)",
+        "unidad": "(%)mo",
+        "tipo": "HERRAMIENTA",
+        "cantidad": 0.05,
+        "costo_unit": 15.0,
+        "total": 0.75
+      }
+    ],
+    "color_tipo": "rosa"
+  },
+  {
+    "csi": "26 05 33.16.5",
+    "codigo": "EL-18",
+    "descripcion": "Suministro e Instalación de Tapadera Ciega para Caja Eléctrica",
+    "unidad": "pza",
+    "precio_unitario": 12.685,
+    "costo_mo": 2.0,
+    "costo_ma": 8.0,
+    "unitario_matriz": 0.75,
+    "insumos": [
+      {
+        "clave": "MA-379",
+        "descripcion": "Tapadera Ciega Metalica para Caja 2x4/Octagonal",
+        "unidad": "pza",
+        "tipo": "MATERIAL",
+        "cantidad": 1.0,
+        "costo_unit": 8.0,
+        "total": 8.0
+      },
+      {
+        "clave": "MO-014",
+        "descripcion": "Electricista",
+        "unidad": "jor",
+        "tipo": "MANO_OBRA",
+        "cantidad": 0.005,
+        "costo_unit": 100.0,
+        "total": 0.5
+      },
+      {
+        "clave": "MO-006",
+        "descripcion": "Ayudante",
+        "unidad": "jor",
+        "tipo": "MANO_OBRA",
+        "cantidad": 0.003,
+        "costo_unit": 500.0,
+        "total": 1.5
+      },
+      {
+        "clave": "HER-00",
+        "descripcion": "Herramienta Manual (Menor)",
+        "unidad": "(%)mo",
+        "tipo": "HERRAMIENTA",
+        "cantidad": 0.05,
+        "costo_unit": 15.0,
+        "total": 0.75
+      }
+    ],
+    "color_tipo": "rosa"
   }
 ]

@@ -20,6 +20,7 @@ from sqlalchemy.orm import Session, joinedload
 from backend.db import get_db
 from backend.models import Presupuesto, Capitulo, Partida
 from backend.services.pricing_memoria import memoria_pricing
+from backend.services.pricing import factor_materiales
 from backend.services.calculos_memoria import memoria_calculos_presupuesto
 from backend.services.mamposteria_memoria import memoria_mamposteria
 from backend.services.export_pdf_memoria import memoria_prorrateo_banco
@@ -195,7 +196,7 @@ def pricing_memoria_partida(partida_id: str, db: Session = Depends(get_db)):
     }
     memoria = memoria_pricing(
         partida.costo_mo, partida.costo_ma, partida.unitario_matriz, sobrecosto, partida.cantidad,
-        insumos=partida.insumos, stored=stored,
+        insumos=partida.insumos, stored=stored, factor_ma=factor_materiales(cfg),
         meta_extra={
             "partida_id": partida.id, "clave_csi": partida.clave_csi, "descripcion": partida.descripcion,
             "unidad": partida.unidad, "cantidad": float(partida.cantidad or 0),
