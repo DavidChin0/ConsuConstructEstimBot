@@ -17,21 +17,28 @@ from backend.routers.cronograma import _calcular as _crono_calcular, _orden_manu
 
 router = APIRouter(prefix="/presupuestos", tags=["portal"])
 
-SUPABASE_URL = os.environ.get(
-    "SUPABASE_URL", "https://gcicapuvgzzafeepbhfs.supabase.co"
-).rstrip("/")
-SUPABASE_SECRET = os.environ.get("SUPABASE_SECRET_KEY", "")
-if not SUPABASE_SECRET:
-    # [2026-10-04] Fuente unica de la key: D:\Secrets\Supabase Finance.txt (la misma que
-    # lee START_UNICA.ps1). Asi el backend la tiene aunque lo arranque un agente
-    # (estimastruct_backend_ensure) y rotar la key = editar 1 archivo + reiniciar.
+def _leer_proyecto_supabase() -> tuple[str, str]:
+    """[2026-10-10] Proyecto REAL = Supabase Finance (ConsuConstruct@gmail.com). URL y clave salen de
+    D:\Secrets\Supabase Finance.txt: la linea SUPABASE_URL y la ULTIMA SUPABASE_SECRET_KEY (la primera es
+    la del proyecto duplicado Consul2). SUPABASE_URL / SUPABASE_SECRET_KEY del entorno mandan sobre el archivo."""
+    import re as _re
+    url, key = os.environ.get("SUPABASE_URL", ""), os.environ.get("SUPABASE_SECRET_KEY", "")
+    if url and key:
+        return url.rstrip("/"), key
     try:
-        import re as _re
-        _f = os.environ.get("SUPABASE_SECRET_FILE", r"D:\Secrets\Supabase Finance.txt")
-        _m = _re.search(r"sb_secret_[A-Za-z0-9_\-]+", open(_f, encoding="utf-8").read())
-        SUPABASE_SECRET = _m.group(0) if _m else ""
+        txt = open(os.environ.get("SUPABASE_SECRET_FILE", r"D:\Secrets\Supabase Finance.txt"), encoding="utf-8").read()
     except OSError:
-        SUPABASE_SECRET = ""
+        return url.rstrip("/"), key
+    if not url:
+        m = _re.findall(r"^\s*SUPABASE_URL\s*[=:]?\s*['\"]?(https://[a-z0-9]{20}\.supabase\.co)", txt, _re.M)
+        url = m[-1] if m else ""
+    if not key:
+        m = _re.findall(r"^\s*SUPABASE_SECRET_KEY\s*[=:]?\s*['\"]?(sb_secret_[A-Za-z0-9_\-]+)", txt, _re.M)
+        key = m[-1] if m else ""
+    return url.rstrip("/"), key
+
+
+SUPABASE_URL, SUPABASE_SECRET = _leer_proyecto_supabase()
 
 def _sb(method: str, path: str, body=None, prefer: str | None = None):
     url = f"{SUPABASE_URL}/rest/v1/{path}"
