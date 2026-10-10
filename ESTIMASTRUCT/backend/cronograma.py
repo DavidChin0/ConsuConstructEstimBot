@@ -226,7 +226,8 @@ def _suma_dias_laborales(inicio: date, dias_lab: int) -> date:
 # ── Secuenciacion ────────────────────────────────────────────────────────────
 def construir_cronograma(partidas: list[dict], catalogo: dict | None = None,
                          fecha_arranque: date | None = None,
-                         orden_manual: dict | None = None) -> list[dict]:
+                         orden_manual: dict | None = None,
+                         serie: bool = False) -> list[dict]:
     """
     partidas: dict(clave_csi, descripcion, unidad, cantidad, capitulo_clave, partida_id).
     Devuelve filas con duracion, fase, fecha_inicio, orden, fuente.
@@ -248,6 +249,11 @@ def construir_cronograma(partidas: list[dict], catalogo: dict | None = None,
         filas.append({**p, **dur, "fase": fase, "_offset": offset})
 
     filas.sort(key=lambda f: (f["_offset"], f.get("capitulo_clave", ""), f["clave_csi"]))
+
+    if serie and not orden_manual:
+        # Modo serie: orden automatico (fase/CSI) pero UNA cadena fin->inicio (L-S) en vez de
+        # fases en paralelo. Reusa la rama de orden manual con el orden ya calculado.
+        orden_manual = {f.get("partida_id", i): i for i, f in enumerate(filas)}
 
     if orden_manual:
         # Orden manual (arriba->abajo): UNA cadena global, cada actividad arranca

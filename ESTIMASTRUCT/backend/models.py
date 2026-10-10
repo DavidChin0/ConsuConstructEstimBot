@@ -64,6 +64,9 @@ class ConfigPresupuesto(Base):
     # valor_objetivo = monto contrato (con sobrecosto) para el botón "Recalcular reajuste".
     reajuste_materiales = Column(Numeric(9, 4), default=0)
     valor_objetivo      = Column(Numeric(14, 2), nullable=True)
+    # [2026-10-10] Cronograma por obra: arranque propio y modo (paralelo=actual | serie=cadena fin->inicio L-S).
+    cronograma_fecha_arranque = Column(Date, nullable=True)
+    cronograma_modo           = Column(String(10), nullable=True, default="paralelo")
 
     presupuesto = relationship("Presupuesto", back_populates="config")
 

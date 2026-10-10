@@ -1,0 +1,58 @@
+orden	partida_id	clave_csi	descripcion	fase	fecha_inicio	fecha_fin	duracion_dias	jh_esp	jh_ay	n_esp	n_ay	fuente	debio_empezar_al_2026-10-10	debio_terminar
+1	2a489a02-673c-4084-b933-b304565558d9	31 11 00.1	Limpieza y Remoción de Capa Vegetal (Manual)	1. Sitio y movimiento de tierra	2026-10-05	2026-10-05	1	0.0	0.972	3	3	V12	SI	SI
+2	dc6b8d39-44a0-4d82-9f9a-335fccb53758	31 23 16.16.2	Excavación Estructural (Retroexcavadora) En Terreno Semi Duro- Tipo II	1. Sitio y movimiento de tierra	2026-10-06	2026-10-06	1	0.0	1.0	3	3	MANUAL	SI	SI
+3	1a00d852-8823-4ce0-98b4-881dc00eb606	31 23 23.13.2	Relleno Compactado de Material Selecto e = 0.10 m	1. Sitio y movimiento de tierra	2026-10-07	2026-10-09	3	0.0	7.111	3	3	V12	SI	SI
+4	9d77235c-9d54-4ead-adfa-50368953ccf0	01 51 36	Instalacion de Caja de registro y Contador de Agua	3. Preliminares	2026-10-10	2026-10-10	1	0.0	0.0	3	3	SIN_TIEMPO	SI	SI
+5	e1ca5ce3-acf5-4956-aab8-e5c18f140a4a	02 21 13	Suministro e Instalación de Niveletas de Madera para Trazado	2. Trazo y demolición	2026-10-12	2026-10-13	2	4.4	4.4	3	3	V12	NO	NO
+6	b7e80dab-2483-4258-b341-2c286868d094	02 21 13.1	Trazado y Marcado de Obra	2. Trazo y demolición	2026-10-14	2026-10-14	1	0.8	0.8	3	3	V12	NO	NO
+7	346cc11f-8a29-4ac3-bb1a-5f9dc635a237	02 41 13.13	Demolición de Edificaciones Existentes	2. Trazo y demolición	2026-10-15	2026-10-23	8	0.0	21.333	3	3	V12	NO	NO
+8	17d252f6-1bf8-4c4c-a85f-e02c98766168	03 22 00	Armado de Losa de Cimentación con Electromalla 6" x 6" 4/4	4. Cimentación y estructura	2026-10-24	2026-10-26	2	3.1	3.1	3	3	V12	NO	NO
+9	180209bd-7d07-4df9-a9d6-7a9ab67e47f5	03 31 00.1	Armado, Encofrado y Fundido de Castillo R1 15x15cm, Ref 4#3 + N2@5cm F032002	4. Cimentación y estructura	2026-10-27	2026-10-30	4	9.8	2.8	3	3	V12	NO	NO
+10	543eeb1f-13a5-4848-aa9c-4c75791e4314	03 31 00.10	Armado, Encofrado y Fundido de Solera S3 de 20x20cm,  4#3 Y #2 @0.20 CM (Cielo)	4. Cimentación y estructura	2026-10-31	2026-11-06	6	15.555	4.27	3	3	V12	NO	NO
+11	aa05f706-0a6e-49ce-8077-0bdd435b006d	03 31 00.28	Armado, Encofrado y Fundido de Columna R2A de 17.5x40cm	4. Cimentación y estructura	2026-11-07	2026-11-17	9	25.091	5.044	3	3	V12	NO	NO
+12	687fda49-23e1-45f8-954d-f2655c29438b	03 31 00.29	Armado, Encofrado y Fundido de Solera S5 de 15x15cm	4. Cimentación y estructura	2026-11-18	2026-11-18	1	1.495	0.315	3	3	V12	NO	NO
+13	03f72672-6103-4d0f-a7c2-3bff16aa1870	03 31 01.3	Armado y Fundicion de Zapata Corrida ZC de 90x30cm (acero longitudinal + estribo	4. Cimentación y estructura	2026-11-19	2026-11-25	6	16.874	0.0	3	3	V12	NO	NO
+14	3a813b63-f142-4d72-9e69-3aa614e4d42b	03 31 02.3	Armado, Encofrado y Fundido de Zapata Aislada Z3 de 180x120x45cm (parrilla de ac	4. Cimentación y estructura	2026-11-26	2026-11-27	2	4.0	2.5	3	3	V12	NO	NO
+15	442de3b8-25fb-4555-ac26-39aabee54c61	03 31 03.2	Fundido de Losa de Concreto sobre armado 3000 Psi e=8cm con jornaleros y mezclad	4. Cimentación y estructura	2026-11-28	2026-12-09	10	29.498	0.0	3	3	V12	NO	NO
+16	81facfde-10d7-464a-88c9-9c6a6fe7d467	03 31 03.3	Losa de Entrepiso Galvadeck (lamina Aluzinc Cal 26 + armado malla 6x6 + concreto	4. Cimentación y estructura	2026-12-10	2026-12-24	13	36.444	2.344	3	3	V12	NO	NO
+17	84d814eb-0670-4496-a3f5-c4c1b6ad5734	03 31 03.4	Piso de Concreto 3000 Psi e=15cm sobre relleno compactado	4. Cimentación y estructura	2026-12-25	2026-12-26	2	5.434	0.0	3	3	V12	NO	NO
+18	d5c1d627-2a2d-4c60-b78c-40986d794aa1	03 39 23	Curado de Losa de Concreto con Aditivo a base de Agua	4. Cimentación y estructura	2026-12-28	2026-12-28	1	0.0	1.55	3	3	V12	NO	NO
+19	69ec1d05-2bb1-4f5b-be57-75247d8dc8c9	22 11 13.10	Suministro e Instalación de Codo de CPVC de 1/2" a 90°	5. Plomería (rough-in)	2026-12-29	2026-12-29	1	0.18	0.0	3	3	V12	NO	NO
+20	8aa014e5-41ca-4835-b64c-21f80233aaf4	22 11 13.8	Suministro e Instalación de Tubería de CPVC de 1/2"	5. Plomería (rough-in)	2026-12-30	2026-12-30	1	1.32	1.32	3	3	V12	NO	NO
+21	47022951-52b5-4607-98ce-a03ce774c03a	22 12 19.3	Cisterna subterranea de 4m3 de Capacidad, Con Bomba	5. Plomería (rough-in)	2026-12-31	2027-01-02	3	7.0	7.0	3	3	MANUAL	NO	NO
+22	4da778b1-f5a1-4c52-80c9-6313822e2ca1	22 13 13.11	Suministro e Instalación de Tubería de PVC de 4" SDR 41	5. Plomería (rough-in)	2027-01-04	2027-01-04	1	2.394	2.394	3	3	V12	NO	NO
+23	ae1ffb5c-6426-4f64-b8b2-4e543ea16161	22 13 13.3	Suministro e Instalación de Codo de PVC de 2" a 90°	5. Plomería (rough-in)	2027-01-05	2027-01-05	1	0.32	0.0	3	3	V12	NO	NO
+24	6bf58e43-422c-4cdd-8499-160468dfa114	22 41 13.13	Suministro e Instalacion de Pila de 0.90x0.90m	5. Plomería (rough-in)	2027-01-06	2027-01-06	1	1.0	1.0	3	3	V12	NO	NO
+25	d8bfb47b-e829-4367-92e4-6574923e2635	22 41 13.13.1	Suministro e Instalación de Inodoro Incesa Standard Winner Elongado	5. Plomería (rough-in)	2027-01-07	2027-01-07	1	0.4	0.4	3	3	V12	NO	NO
+26	875f9cbe-e2c2-4dd1-a8e0-b7d47b30a57f	22 41 16 13.3	Suministro e Instalacion de Lavamanos Empotrado LAVABO STD. ECOLINE BLANCO PIEZA	5. Plomería (rough-in)	2027-01-08	2027-01-08	1	0.4	0.4	3	3	V12	NO	NO
+27	ec9bf0cc-965f-4a0c-9fb6-cb6e3c37da48	22 41 16.16	Suministro e Instalación de Lavatrasta Empotrado (Dos Fosas)	5. Plomería (rough-in)	2027-01-09	2027-01-09	1	0.875	0.625	3	3	V12	NO	NO
+28	ffefb1aa-52f5-4bf9-9d44-4e26694ba1bc	22 41 23.2	Suministro e Instalación de Maxi Ducha Lorenzetti - Basica	5. Plomería (rough-in)	2027-01-11	2027-01-11	1	0.5	0.333	3	3	V12	NO	NO
+29	262bc769-7542-4f2e-98fd-8c0b9a751c03	04 05 13.1	Suministro e instalación Repello 1:4 (Cemento-Arena) e=1.5cm.	6. Mampostería, repello y pulido	2027-01-12	2027-01-20	8	23.04	23.04	3	3	V12	NO	NO
+30	6262330b-80d7-46f0-91ef-5f492400395d	04 05 13.2	Pulido con Cemento Bijao 2.5mm	6. Mampostería, repello y pulido	2027-01-21	2027-01-29	8	22.92	22.92	3	3	V12	NO	NO
+31	24d0893b-ff8d-497b-9403-efc56bee8171	04 26 00.1	Pared de Bloque de Concreto de Partición de 4" 1#3@2Hil	6. Mampostería, repello y pulido	2027-01-30	2027-02-05	6	17.4	11.6	3	3	V12	NO	NO
+32	1e58c5c0-3bb4-412a-91a1-f2322c664382	04 26 00.2	Pared de Bloque de Concreto Reforzada de 6" REF 1#3 @0.6+ 1#3@2Hil F042005	6. Mampostería, repello y pulido	2027-02-06	2027-02-08	2	5.2	3.0	3	3	V12	NO	NO
+33	34dc8bea-aed4-423b-bfee-b745d5c2b639	26 05 13 19.5	Cable Eléctrico #6 (Tomas Especiales)	5. Eléctrico (rough-in)	2027-02-09	2027-02-09	1	0.1	0.1	3	3	V12	NO	NO
+34	d4580a80-8e43-4105-b1d6-d0899d0ad2d0	26 05 13.19.1	Cable Eléctrico No. 12 THHN-AWG (Tomacorrientes)	5. Eléctrico (rough-in)	2027-02-10	2027-02-11	2	4.128	4.128	3	3	V12	NO	NO
+35	51dbff85-9f99-4483-8f3d-eca1537766b7	26 05 13.19.2	Cable Eléctrico No. 14 THHN-AWG (Iluminación)	5. Eléctrico (rough-in)	2027-02-12	2027-02-13	2	3.36	2.016	3	3	V12	NO	NO
+36	cc922a9f-b980-4f56-a47b-68752e16f9a7	26 05 33.13.1	Tubería de Poliducto de 3/4"	5. Eléctrico (rough-in)	2027-02-15	2027-02-15	1	0.695	0.435	3	3	V12	NO	NO
+37	5630e3c6-a6f8-49f6-a776-8da941363b57	26 05 33.16.2	Caja Octagonal de 3/4"	5. Eléctrico (rough-in)	2027-02-16	2027-02-16	1	0.472	0.472	3	3	V12	NO	NO
+38	73cfd631-cea7-435c-90e3-b01753a48dab	26 05 33.16.3	Suministro e Instalación de Codo de Conduit de PVC de 3/4"	5. Eléctrico (rough-in)	2027-02-17	2027-02-17	1	0.11	0.055	3	3	V12	NO	NO
+39	86bd4a2d-1122-412e-a628-320662ac955c	26 05 33.16.4	Suministro e Instalación de Tee de Conduit de PVC de 3/4"	5. Eléctrico (rough-in)	2027-02-18	2027-02-18	1	0.195	0.104	3	3	V12	NO	NO
+40	4ba6f08c-63a1-4aa1-92ac-0f20beaa9ef8	26 09 23.1	ENERLITES Interruptor Sencilo	5. Eléctrico (rough-in)	2027-02-19	2027-02-19	1	0.07	0.07	3	3	V12	NO	NO
+41	7bddaf5f-663e-49ae-b29f-a1314ab8959c	26 24 16.1	Centro de Carga de 16 Espacios NEMA 1, Empotrado en Pared, 16 polos, 125amp	5. Eléctrico (rough-in)	2027-02-20	2027-02-20	1	0.333	0.333	3	3	V12	NO	NO
+42	0a4877ad-de9d-4ecb-8933-81caaeab8052	26 27 19.1	Tomacorriente Doble ENERLITES 15A 120-277v Listado UL (Importado)	5. Eléctrico (rough-in)	2027-02-22	2027-02-22	1	0.14	0.14	3	3	V12	NO	NO
+43	5a37d6b2-10be-4e3e-8397-127b7b31e1d0	26 27 19.2	Tomacorriente ESPECIAL 50A 250v Sencillo (Calentador, Estufa, Secadora, Porton)	5. Eléctrico (rough-in)	2027-02-23	2027-02-23	1	0.061	0.02	3	3	V12	NO	NO
+44	06365fd8-93d3-475c-99de-57ea1911b3ef	26 51 13.2	Lámpara de techo empotrada LED de 6" delgada regulable 12 W (equivalente a 100 W	5. Eléctrico (rough-in)	2027-02-24	2027-02-24	1	0.175	0.175	3	3	V12	NO	NO
+45	4c836379-6f9d-4418-873d-262bc18ebc03	05 31 13.1	Suministro e instalación de Estructura con E-2 Canaleta Galvanizada 2"x6" GHT G7	7. Cubierta	2027-02-25	2027-03-02	5	12.2	12.2	3	3	V12	NO	NO
+46	b43f23b3-5f1e-40e5-a8c8-b57906b1d045	07 61 13.1	Suministro e Instalación de Cubierta de Lamina Galvanizada de Aluzinc Estructura	7. Cubierta	2027-03-03	2027-03-11	8	22.475	0.0	3	3	V12	NO	NO
+47	da32a27b-7158-44f9-bb62-100292a24b65	08 14 23	Puerta Termoformada Sencilla 0.90 m x 2.10 m	8. Puertas y ventanas	2027-03-12	2027-03-12	1	0.0	0.0	3	3	SIN_TIEMPO	NO	NO
+48	704a5a61-4e66-461b-ae73-40279b8385cf	08 16 73	Puerta Principal de Aluminio Con Sidelight de 1.30 x 2.10m	8. Puertas y ventanas	2027-03-13	2027-03-13	1	0.0	0.0	3	3	SIN_TIEMPO	NO	NO
+49	8e74c99e-e62c-406e-8705-1a18c9bab28b	08 51 13	Ventana Corrediza 1.60 m x 1.30 m Aluminio Mate	8. Puertas y ventanas	2027-03-15	2027-03-15	1	0.0	0.0	3	3	SIN_TIEMPO	NO	NO
+50	4120ac36-562e-4c81-ac0c-7c0f8292968e	08 51 13.2	Ventana Proyectable de 0.6m x 0.6 m (Baños) Aluminio Mate	8. Puertas y ventanas	2027-03-16	2027-03-16	1	1.0	1.0	3	3	MANUAL	NO	NO
+51	872b33ac-e10c-4b45-b6c8-3f57725cb105	09 22 13	Canal Furring de Metal para Soporte de Cielo Falso	9. Acabados	2027-03-17	2027-03-18	2	5.4	4.2	3	3	V12	NO	NO
+52	29d2d170-b5d2-4ce9-8459-e60349484d9d	09 29 00.4	Instalación de Cerramiento Cielo Falso de Plafón de 45x45cm (Polaris)	9. Acabados	2027-03-19	2027-03-22	3	7.2	1.5	3	3	V12	NO	NO
+53	6fc48aed-6e9b-4ec8-82cc-238adcedf92a	09 30 13.2	Porcelanato Color Gris  60 cm x 60 cm (Centro de Ceramicas)	9. Acabados	2027-03-23	2027-03-27	5	14.49	13.8	3	3	V12	NO	NO
+54	fd978df2-b354-4dd2-a242-f28613d20df9	09 30 13.7	Cerámica de Pared de Baño "Optima Ivory" 25x75	9. Acabados	2027-03-29	2027-03-29	1	2.496	2.496	3	3	V12	NO	NO
+55	e186962e-0c78-49d4-8b2c-1031c89f3b09	09 91 13.1	Pintura Base - Sellador Primer Latex Peninsular Sherwin Williams	9. Acabados	2027-03-30	2027-04-01	3	7.64	7.64	3	3	V12	NO	NO
+56	ca47b0f5-56c3-4677-a55e-2eac15bd1042	09 91 23.2	Pintura Mate Exterior/Interior Sherwin Williams	9. Acabados	2027-04-02	2027-04-06	4	8.186	9.55	3	3	V12	NO	NO
+57	e0a9231c-95f8-421f-87ff-b6a686b5cd2b	11 33 00	Lavadora + secadora eléctrica	9. Acabados	2027-04-07	2027-04-07	1	1.0	0.0	3	3	V12_LUMP	NO	NO

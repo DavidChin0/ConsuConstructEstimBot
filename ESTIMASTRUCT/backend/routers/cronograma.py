@@ -82,11 +82,21 @@ def _orden_manual(db: Session, pid: str) -> dict:
     return {r.partida_id: int(r.orden) for r in rows}
 
 
+def _cfg_cronograma(p: Presupuesto):
+    """(fecha_arranque, serie) por obra desde config_presupuesto. None/False = comportamiento actual."""
+    c = getattr(p, "config", None)
+    fa = getattr(c, "cronograma_fecha_arranque", None) if c else None
+    modo = (getattr(c, "cronograma_modo", None) or "paralelo") if c else "paralelo"
+    return fa, modo == "serie"
+
+
 def _calcular(p: Presupuesto, overrides: dict, orden_manual: dict | None = None):
     crono_input = _partidas_obra(p, overrides)
     if not crono_input:
         raise HTTPException(400, "La obra no tiene partidas con cantidad > 0")
-    filas = engine.construir_cronograma(crono_input, orden_manual=orden_manual)
+    fa, serie = _cfg_cronograma(p)
+    filas = engine.construir_cronograma(crono_input, orden_manual=orden_manual,
+                                        fecha_arranque=fa, serie=serie)
     # fin (dia laboral) por actividad
     for f in filas:
         ini = date.fromisoformat(f["fecha_inicio"])
