@@ -207,7 +207,7 @@ function hideBasesDrawer() {
 }
 
 function toggleBasesDrawer() {
-  if (!state.modo || state.modo !== "desarrollador") return;
+  // Bases de Datos accesible en cualquier modo (lectura de BD es global)
   if (basesState.visible) hideBasesDrawer();
   else showBasesDrawer();
 }

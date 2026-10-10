@@ -108,11 +108,18 @@ def export_current_database_to_sqlite(dest_path: str) -> None:
         sqlite_backup_file(CONFIG.DB_PATH, dest_path)
         return
 
-    sqlite_engine = create_engine(sqlite_url_for(dest_path))
+    # SQLite no tiene schemas (p.ej. 'financiero'): mapear todo schema a None.
+    sqlite_engine = create_engine(sqlite_url_for(dest_path)).execution_options(
+        schema_translate_map={t.schema: None for t in Base.metadata.sorted_tables if t.schema}
+    )
     try:
         Base.metadata.create_all(bind=sqlite_engine)
         with engine.connect() as src, sqlite_engine.begin() as dst:
+            from sqlalchemy import inspect as _sa_inspect
+            _insp = _sa_inspect(src)
             for table in Base.metadata.sorted_tables:
+                if not _insp.has_table(table.name, schema=table.schema):
+                    continue  # modelo define tabla aun no migrada en la BD primaria
                 rows = src.execute(select(table)).mappings().all()
                 if rows:
                     dst.execute(table.insert(), [dict(r) for r in rows])

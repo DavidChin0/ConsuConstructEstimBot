@@ -46,10 +46,41 @@ def _normalize_csi_key(key: str) -> str:
     return " ".join(parts[:3]) + "." + ".".join(parts[3:])
 
 
+def _raw_kind(raw: str) -> str:
+    """Unidad que Revit escribe junto al valor: '4.40 m'->mL, '62 m²'->m2, '1'->pza."""
+    r = raw.strip().lower()
+    if re.search(r"m\s*[²2]\s*$", r):
+        return "m2"
+    if re.search(r"m\s*[³3]\s*$", r):
+        return "m3"
+    if re.search(r"\d\s*m\s*$", r):
+        return "mL"
+    return "pza"
+
+
+def _unit_kind(unidad: str):
+    """Unidad de la partida -> mismo vocabulario que _raw_kind; None si no es comparable."""
+    u = (unidad or "").strip().lower().replace("²", "2").replace("³", "3")
+    return {"m2": "m2", "m3": "m3", "ml": "mL", "m": "mL",
+            "pza": "pza", "und": "pza", "unidad": "pza"}.get(u)
+
+
+def _pick_qty(by_kind: dict, unidad: str):
+    """Devuelve (cantidad, None) o (None, motivo). Sin coincidencia de unidad NO se importa."""
+    want = _unit_kind(unidad)
+    if want in by_kind:
+        return by_kind[want], None
+    if want is None and len(by_kind) == 1:  # unidad no comparable (lance, kg...) y Revit da una sola
+        return next(iter(by_kind.values())), None
+    return None, f"partida en '{unidad}' pero Revit trae {sorted(by_kind)}"
+
+
 def _parse_schedules_csv(csv_path: str) -> dict:
-    totals = defaultdict(float)
+    """{keynote: {unidad_revit: suma}} -- lee TODAS las columnas de cantidad."""
+    totals = defaultdict(lambda: defaultdict(float))
     headers = []
-    keynote_col = qty_col = None
+    keynote_col = None
+    qty_cols = []
     in_schedule = False
     saw_valid_schedule = False
     current_schedule = None
@@ -61,7 +92,8 @@ def _parse_schedules_csv(csv_path: str) -> dict:
             first = (row[0] or "").strip()
             if first.startswith("###"):
                 headers = []
-                keynote_col = qty_col = None
+                keynote_col = None
+                qty_cols = []
                 in_schedule = True
                 current_schedule = first.strip("# ").strip()
                 continue
@@ -79,7 +111,7 @@ def _parse_schedules_csv(csv_path: str) -> dict:
                         "csi/" in hl
                     ):
                         keynote_col = i
-                    if qty_col is None and (
+                    if (
                         "count" in hl or
                         "length" in hl or
                         "area" in hl or
@@ -90,31 +122,33 @@ def _parse_schedules_csv(csv_path: str) -> dict:
                         "quantity" in hl or
                         "qty" in hl
                     ):
-                        qty_col = i
-                if keynote_col is None or qty_col is None:
+                        qty_cols.append(i)
+                if keynote_col is None or not qty_cols:
                     headers = []
-                    keynote_col = qty_col = None
+                    keynote_col = None
+                    qty_cols = []
                     in_schedule = False
                     continue
                 saw_valid_schedule = True
                 continue
-            if keynote_col is None or qty_col is None:
+            if keynote_col is None or not qty_cols:
                 continue
             keynote = row[keynote_col].strip() if keynote_col < len(row) else ""
             if not keynote:
                 continue
-            qty_raw = row[qty_col].strip() if qty_col is not None and qty_col < len(row) else ""
-            qty_clean = re.sub(r"[^\d\.\,]", "", qty_raw).replace(",", ".")
-            if not qty_clean:
-                continue
-            try:
-                qty = float(qty_clean)
-            except ValueError:
-                continue
-            totals[_normalize_csi_key(keynote)] += qty
+            for qc in qty_cols:
+                qty_raw = row[qc].strip() if qc < len(row) else ""
+                qty_clean = re.sub(r"[^\d\.\,]", "", qty_raw).replace(",", ".")
+                if not qty_clean:
+                    continue
+                try:
+                    qty = float(qty_clean)
+                except ValueError:
+                    continue
+                totals[_normalize_csi_key(keynote)][_raw_kind(qty_raw)] += qty
     if not saw_valid_schedule:
         return {}
-    return dict(totals)
+    return {k: dict(v) for k, v in totals.items()}
 
 
 def _build_import_report(obra_id: str, csv_path: str) -> dict:
@@ -138,15 +172,24 @@ def _build_import_report(obra_id: str, csv_path: str) -> dict:
         rows = []
         matched_csv = 0
         matched_rows = 0
+        unit_mismatch = []
         for csv_key in sorted(totals.keys()):
             candidates = partidas_by_key.get(csv_key, [])
             matched = bool(candidates)
             if matched:
                 matched_csv += 1
                 matched_rows += len(candidates)
+            qty = None
+            for p in candidates:
+                q, why = _pick_qty(totals[csv_key], p.unidad)
+                if why:
+                    unit_mismatch.append({"csi": csv_key, "unidad_partida": p.unidad, "motivo": why})
+                elif qty is None:
+                    qty = q
             rows.append({
                 "csv_key": csv_key,
-                "csv_qty": math.ceil(totals[csv_key]),
+                "csv_qty": math.ceil(qty) if qty is not None else None,
+                "csv_units": {k: round(v, 2) for k, v in totals[csv_key].items()},
                 "matched": matched,
                 "matched_count": len(candidates),
                 "db_keys": [p.clave_csi for p in candidates[:5]],
@@ -164,6 +207,7 @@ def _build_import_report(obra_id: str, csv_path: str) -> dict:
             "unmatched_csv": unmatched_csv[:30],
             "unmatched_count": len(unmatched_csv),
             "unmatched_db_count": len(unmatched_db),
+            "unit_mismatch": unit_mismatch,
             "rows": rows,
         }
     finally:
@@ -203,13 +247,18 @@ def import_quantities(obra_id: str, csv_path: str) -> dict:
             partidas_by_key[key].append(p)
 
         matched_keys = set()
-        for key, qty_value in totals.items():
+        unit_mismatch = []
+        for key, by_kind in totals.items():
             candidates = partidas_by_key.get(key, [])
             if not candidates:
                 continue
-            qty = math.ceil(float(qty_value or 0))
-            matched_keys.add(key)
+            matched_keys.add(key)  # tiene contraparte: no se pone en cero aunque la unidad no coincida
             for p in candidates:
+                value, why = _pick_qty(by_kind, p.unidad)
+                if why:  # unidad Revit != unidad partida: NO se escribe, se deja el valor anterior
+                    unit_mismatch.append(f"{p.clave_csi}: {why}")
+                    continue
+                qty = math.ceil(float(value or 0))
                 p.revit_q = qty
                 p.cantidad = qty  # sync para cálculo de total
                 matched += 1
@@ -236,7 +285,9 @@ def import_quantities(obra_id: str, csv_path: str) -> dict:
             "zeroed": zeroed,
             "unmatched_csv": unmatched_csv[:30],
             "unmatched_count": len(unmatched_csv),
-            "message": f"✓ Cantidades importadas: {matched} actualizadas, {zeroed} en cero, {len(unmatched_csv)} keynotes del CSV sin contraparte en la obra",
+            "unit_mismatch": unit_mismatch,
+            "message": f"✓ Cantidades importadas: {matched} actualizadas, {zeroed} en cero, {len(unmatched_csv)} keynotes del CSV sin contraparte en la obra"
+                       + (f", {len(unit_mismatch)} OMITIDAS por unidad distinta: " + "; ".join(unit_mismatch[:8]) if unit_mismatch else ""),
         }
     finally:
         db.close()
@@ -247,5 +298,8 @@ if __name__ == "__main__":
         print("Uso: python import_quantities.py <obra_id> <csv_path>")
         sys.exit(1)
     res = import_quantities(sys.argv[1], sys.argv[2])
-    print(res.get("message") or res.get("error"))
+    # cp1252 no soporta ✓ (U+2713) — usar ASCII
+    msg = res.get("message") or res.get("error") or ""
+    msg = msg.replace("\u2713", "[OK]").replace("\u2717", "[ERR]")
+    print(msg)
     sys.exit(0 if res.get("ok") else 1)

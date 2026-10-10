@@ -29,7 +29,7 @@ app = Flask(__name__,
             static_folder=FRONTEND_PATH)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 DB_PATH = os.environ.get("ESTIMASTRUCT_UI_DB", r"C:\EstimaStruct\data\estimastruct.db")  # Compat legacy: SQLite solo para dashboard UI viejo.
-API_BASE = os.environ.get("ESTIMASTRUCT_API_BASE", "http://localhost:8002")
+API_BASE = os.environ.get("ESTIMASTRUCT_API_BASE", "http://127.0.0.1:8002")
 INDEX_TEMPLATE_PATH = os.path.join(ESTIMASTRUCT_PATH, "templates", "index.html")
 
 
@@ -392,6 +392,8 @@ def serve_full_dump_meta_direct():
     })
 
 
+_SESSION = requests.Session()
+
 @app.route('/__api__', defaults={'path': ''}, methods=['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'])
 @app.route('/__api__/<path:path>', methods=['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'])
 def api_proxy(path):
@@ -405,7 +407,8 @@ def api_proxy(path):
         if k.lower() not in {"host", "content-length"}
     }
 
-    upstream = requests.request(
+    _SESSION.cookies.clear()
+    upstream = _SESSION.request(
         method=request.method,
         url=target,
         params=request.args,

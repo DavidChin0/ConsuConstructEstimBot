@@ -13,6 +13,28 @@ from sqlalchemy.engine import make_url
 
 _BACKEND = Path(__file__).resolve().parent
 
+
+def _default_database_url() -> str:
+    """Canon ADR-018 (2026-10-04, backend unico): Postgres `estimastruct` es la
+    UNICA fuente. Si ESTIMASTRUCT_DATABASE_URL no viene del launcher
+    (START_POSTGRES_UNICA.ps1) — p.ej. uvicorn lanzado por estimastruct_backend_ensure
+    o a mano — se arma desde D:\\Secrets\\postgres_credentials.txt en vez de caer
+    en silencio a la SQLite legacy vacia. SQLite solo con ESTIMASTRUCT_ALLOW_SQLITE=1."""
+    if os.getenv("ESTIMASTRUCT_ALLOW_SQLITE", "").strip() == "1":
+        return "sqlite:///" + os.getenv("ESTIMA_DB_PATH", r"D:\EstimaStruct\data\estimacion.db").replace("\\", "/")
+    from urllib.parse import quote_plus
+    secret = Path(os.getenv("ESTIMASTRUCT_PG_SECRET_FILE", r"D:\Secrets\postgres_credentials.txt"))
+    kv = {}
+    for line in secret.read_text(encoding="utf-8", errors="replace").splitlines():
+        if "=" in line:
+            k, v = line.split("=", 1)
+            kv[k.strip()] = v.strip()
+    if not kv.get("password"):
+        raise RuntimeError(f"EstimaStruct: sin password en {secret}; canon = Postgres estimastruct")
+    role = kv.get("role") or "postgres"
+    return f"postgresql+psycopg://{role}:{quote_plus(kv['password'])}@127.0.0.1:5432/estimastruct"
+
+
 class CONFIG:
     PROJECT_ROOT = _BACKEND.parent
     PROJECT_NAME = "EstimaStruct"
@@ -24,10 +46,7 @@ class CONFIG:
     # FASE 0b (2026-08-17): movida de C:\EstimaStruct a D:\EstimaStruct para
     # sobrevivir la reinstalacion minimalista de Windows (C: se wipea, D: no).
     DB_PATH     = os.getenv("ESTIMA_DB_PATH",     r"D:\EstimaStruct\data\estimacion.db")
-    DATABASE_URL = os.getenv(
-        "ESTIMASTRUCT_DATABASE_URL",
-        "sqlite:///" + DB_PATH.replace("\\", "/"),
-    )
+    DATABASE_URL = os.getenv("ESTIMASTRUCT_DATABASE_URL") or _default_database_url()
     DATABASE_DIALECT = make_url(DATABASE_URL).get_backend_name()
     DB_IS_SQLITE = DATABASE_DIALECT == "sqlite"
     AUTO_CREATE_SCHEMA = os.getenv(
