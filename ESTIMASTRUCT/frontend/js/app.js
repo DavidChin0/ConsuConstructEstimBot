@@ -35,6 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initPanelTabs();
   initVinetas();
   initSobrecostoPill();
+  initReajustePill();
   initDisenoView();
   initEtabsView();
   initAceroView();
@@ -189,6 +190,7 @@ async function loadObra(id) {
   document.getElementById("sobrecosto-input").value = sc;
   if (state.modo === "desarrollador") pill.classList.remove("hidden");
   else pill.classList.add("hidden");
+  renderReajustePill(data);
 }
 
 // Sumas globales en la barra de recursos: Σ Mano de Obra, Σ Insumos, Σ Total.
@@ -215,9 +217,25 @@ function renderRecursosSums(data) {
     `<span class="sum-tot">Total:<b>${m} ${fmt(total)}</b></span>`;
 }
 
+// La barra izquierda lee state.presupuestos (cacheado en loadObras). Cada vez que
+// llega el detalle fresco del backend, se copian sus totales al item de la lista
+// y se repinta el .obra-total — así la barra = Total del header = valor real.
+function _syncSidebarTotal(data) {
+  if (!data || !data.id) return;
+  const item = state.presupuestos.find(p => p.id === data.id);
+  if (item) {
+    item.costo_directo = data.costo_directo;
+    item.total_con_indirectos = data.total_con_indirectos;
+    item.nombre = data.nombre;
+  }
+  const el = document.querySelector(`#obras-list .obra-item[data-id="${data.id}"] .obra-total`);
+  if (el) el.textContent = `${data.moneda} ${fmt(data.total_con_indirectos ?? data.costo_directo ?? 0)}`;
+}
+
 function updateTotalesHeader(data) {
   document.querySelector(".obra-titulo").textContent = data.nombre;
   renderRecursosSums(data);
+  _syncSidebarTotal(data);
   const isDev = state.modo === "desarrollador";
   // Costo Directo del front = Total general de la hoja global de insumos:
   // Materiales + Mano de obra, sin sobrecosto.
@@ -257,6 +275,7 @@ async function refreshTotals() {
   state.activeData = data;
   updateTotalesHeader(data);
   renderSidebar();
+  renderReajustePill(data);
 }
 
 function clearMain() {
@@ -274,6 +293,7 @@ function clearMain() {
   const _selM = document.getElementById("sel-modulo");
   if (_selM) { _selM.classList.add("hidden"); _selM.value = ""; }
   document.getElementById("sobrecosto-pill").classList.add("hidden");
+  document.getElementById("reajuste-pill")?.classList.add("hidden");
   document.getElementById("bases-drawer").classList.add("hidden");
   document.getElementById("content-wrapper").classList.remove("hidden");
   updateBasesToggleLabel(false);
@@ -509,6 +529,11 @@ function exportarCronograma() {
   if (!state.activeId) return;
   window.open(`${API}/presupuestos/${state.activeId}/export-cronograma`, "_blank");
 }
+// Materiales por semana segun el orden VIGENTE del Gantt (manual o automatico).
+function exportarMaterialesSemanales() {
+  if (!state.activeId) return;
+  window.open(`${API}/presupuestos/${state.activeId}/export-materiales-semanales`, "_blank");
+}
 
 async function abrirCronograma() {
   if (!state.activeId) { alert("Abrí una obra primero."); return; }
@@ -530,6 +555,7 @@ async function cargarGantt(keepScroll = false) {
     _ganttData = data;
     renderGantt(data);
     body.scrollLeft = sx; body.scrollTop = sy;
+    cargarGastoSemanal();
   } catch (err) {
     body.innerHTML = `<div class="gantt-loading" style="color:var(--accent2)">Error: ${esc(err.message || err)}</div>`;
   }
@@ -745,6 +771,7 @@ async function moverActividad(partidaId, nuevaPos) {
     _ganttData = data;
     renderGantt(data);
     body.scrollLeft = sx; body.scrollTop = sy;
+    cargarGastoSemanal();   // lista de materiales + MO por semana sigue al slider
     const fila = body.querySelector(`.g-row[data-pid="${CSS.escape(partidaId)}"]`);
     if (fila) { fila.classList.add("g-moved"); setTimeout(() => fila.classList.remove("g-moved"), 1200); }
   } catch (err) {
@@ -823,7 +850,88 @@ async function setPersonal(partidaId, nEsp, nAy) {
   }
 }
 
+// --- [2026-10-04] Gasto por semana: materiales + mano de obra (backend: GET .../gasto-semanal) ---
+// Se re-pide cada vez que el Gantt cambia (mover, personal, reset, sync con portal).
+let _gsData = null;
+let _gsSel = null;   // semana_inicio seleccionada
+
+async function cargarGastoSemanal() {
+  if (!state.activeId) return;
+  const sync = document.getElementById("g-sem-sync");
+  const ps = (_ganttData && _ganttData.portal_sync) || {};
+  if (sync) {
+    const txt = { push: "↑ portal actualizado", pull: "↓ cambios del portal aplicados", igual: "✓ igual al portal",
+                  no_publicada: "obra no publicada en portal", error: "⚠ portal: " + (ps.error || "") }[ps.accion] || "";
+    sync.textContent = txt;
+    sync.classList.toggle("err", ps.accion === "error");
+  }
+  try {
+    _gsData = await api("GET", `/presupuestos/${state.activeId}/gasto-semanal`);
+    renderGastoSemanal();
+  } catch (err) {
+    document.getElementById("g-sem-weeks").innerHTML =
+      `<div class="gantt-loading" style="color:var(--accent2)">Error: ${esc(err.message || err)}</div>`;
+  }
+}
+
+function renderGastoSemanal() {
+  const d = _gsData;
+  if (!d) return;
+  const mon = d.moneda || "HNL";
+  document.getElementById("g-sem-tot").innerHTML =
+    `Materiales <i>${mon} ${fmt(d.total_materiales)}</i> · Mano de obra <i>${mon} ${fmt(d.total_mano_obra)}</i> · ` +
+    `<span class="g-sem-legend"><span><i style="background:#378ADD"></i>MA</span><span><i style="background:#1D9E75"></i>MO</span></span>`;
+  const max = Math.max(1, ...d.semanas.map(s => s.total));
+  const hoy = new Date().toISOString().slice(0, 10);
+  if (!d.semanas.some(s => s.semana_inicio === _gsSel)) {
+    const actual = d.semanas.find(s => s.semana_inicio <= hoy && hoy <= s.semana_fin);
+    _gsSel = (actual || d.semanas[0] || {}).semana_inicio || null;
+  }
+  const H = 150;
+  document.getElementById("g-sem-weeks").innerHTML = d.semanas.map(s => {
+    const hma = Math.round(s.materiales_costo / max * H), hmo = Math.round(s.mano_obra_costo / max * H);
+    const cls = (s.semana_inicio === _gsSel ? " sel" : "") + (s.semana_inicio <= hoy && hoy <= s.semana_fin ? " hoy" : "");
+    return `<div class="g-sem-col${cls}" data-sem="${s.semana_inicio}" title="S${s.semana} ${s.semana_inicio} · MA ${mon} ${fmt(s.materiales_costo)} · MO ${mon} ${fmt(s.mano_obra_costo)}">
+      <div class="g-sem-bar"><div class="mo" style="height:${hmo}px"></div><div class="ma" style="height:${hma}px"></div></div>
+      <small>S${s.semana}</small></div>`;
+  }).join("");
+  document.querySelectorAll("#g-sem-weeks .g-sem-col").forEach(c => c.addEventListener("click", () => {
+    _gsSel = c.dataset.sem; renderGastoSemanal();
+  }));
+  const s = d.semanas.find(x => x.semana_inicio === _gsSel);
+  const det = document.getElementById("g-sem-detail");
+  if (!s) { det.innerHTML = ""; return; }
+  det.innerHTML = `<h4>Semana ${s.semana}: ${_fmtFechaCorta(s.semana_inicio)} – ${_fmtFechaCorta(s.semana_fin)}</h4>
+    <div class="kp"><span>Materiales <b>${mon} ${fmt(s.materiales_costo)}</b></span>
+      <span>Mano de obra <b>${mon} ${fmt(s.mano_obra_costo)}</b></span>
+      <span>Jornadas <b>${s.jornadas_esp}</b> esp + <b>${s.jornadas_ay}</b> ay</span></div>
+    <div class="kp"><span title="Actividades en esta semana (orden del Gantt)">${esc(s.actividades.join(", "))}</span></div>
+    <table>${s.materiales.map(m => `<tr><td>${esc(m.material)}</td><td class="n">${fmt(m.cantidad)} ${esc(m.unidad)}</td><td class="n">${fmt(m.costo)}</td></tr>`).join("")
+      || `<tr><td style="color:var(--text-dim)">Sin materiales esta semana</td></tr>`}</table>`;
+}
+
+// Re-sync con el portal sin parpadeo: solo re-renderiza si algo cambió.
+async function _ganttSyncSilencioso() {
+  try {
+    const data = await api("GET", `/presupuestos/${state.activeId}/cronograma`);
+    const firma = x => JSON.stringify((x.actividades || []).map(a => [a.partida_id, a.fecha_inicio, a.duracion_dias, a.n_esp, a.n_ay]));
+    const cambio = !_ganttData || firma(data) !== firma(_ganttData);
+    _ganttData = data;
+    if (cambio) { _ganttRerenderConScroll(); cargarGastoSemanal(); }
+    else {
+      const sync = document.getElementById("g-sem-sync");
+      if (sync && data.portal_sync && data.portal_sync.accion === "error") { sync.textContent = "⚠ portal: " + (data.portal_sync.error || ""); sync.classList.add("err"); }
+    }
+  } catch (_) { /* silencioso */ }
+}
+
 function _initGanttToolbar() {
+  const tg = document.getElementById("g-sem-toggle");
+  if (tg) tg.addEventListener("click", () => {
+    const box = document.getElementById("gantt-semanal");
+    box.classList.toggle("collapsed");
+    tg.textContent = box.classList.contains("collapsed") ? "▸" : "▾";
+  });
   document.querySelectorAll("#gantt-zoom .g-zoom-btn").forEach(btn => {
     btn.addEventListener("click", () => {
       if (btn.dataset.zoom === _ganttZoom || !_ganttData) return;
@@ -868,8 +976,19 @@ function initCronograma() {
   const close = document.getElementById("modal-cronograma-close");
   if (close) close.addEventListener("click", () =>
     document.getElementById("modal-cronograma").classList.add("hidden"));
+  // [2026-10-04] Espejo portal: con el Gantt abierto, re-sincroniza cada 20 s para
+  // reflejar movimientos hechos en el Gantt del portal (Supabase). Solo si no hay
+  // un drag en curso y la pestaña está visible.
+  setInterval(() => {
+    const m = document.getElementById("modal-cronograma");
+    if (!m || m.classList.contains("hidden") || document.hidden || !state.activeId) return;
+    if (document.querySelector("#gantt-body .g-dragging")) return;
+    _ganttSyncSilencioso();
+  }, 20000);
   const exp = document.getElementById("btn-gantt-export");
   if (exp) exp.addEventListener("click", exportarCronograma);
+  const mat = document.getElementById("btn-gantt-materiales");
+  if (mat) mat.addEventListener("click", exportarMaterialesSemanales);
   const rst = document.getElementById("btn-gantt-reset-orden");
   if (rst) rst.addEventListener("click", resetOrdenGantt);
   const modal = document.getElementById("modal-cronograma");
@@ -1087,6 +1206,8 @@ function applyModoUI() {
     else recBar.classList.add("hidden");
   }
   const pill = document.getElementById("sobrecosto-pill");
+  const rpill = document.getElementById("reajuste-pill");
+  if (rpill) rpill.classList.toggle("hidden", !(isDev && state.activeId));
   if (pill) {
     if (isDev && state.activeId) pill.classList.remove("hidden");
     else pill.classList.add("hidden");
@@ -2008,6 +2129,85 @@ function initSobrecostoPill() {
   document.addEventListener("click", (e) => {
     if (!pill.contains(e.target)) popover.classList.add("hidden");
   });
+}
+
+// --- REAJUSTE DE MATERIALES (por obra) ---
+// % aplicado SOLO a insumos MATERIAL de la obra activa; MO y otros intactos.
+// Backend: PATCH /presupuestos/{pid}/reajuste-materiales  y
+//          POST  /presupuestos/{pid}/reajuste-materiales/recalcular (resuelve el % para total = objetivo)
+function renderReajustePill(data) {
+  const pill = document.getElementById("reajuste-pill");
+  if (!pill || !data) return;
+  const pct = Number(data.config?.reajuste_materiales || 0);
+  const obj = data.config?.valor_objetivo;
+  document.getElementById("reajuste-val").textContent = (pct > 0 ? "+" : "") + fmt(pct, 2) + "%";
+  pill.classList.toggle("reaj-on", Math.abs(pct) > 0.0001);
+  const inp = document.getElementById("reajuste-input");
+  if (document.activeElement !== inp) inp.value = pct;
+  const objInp = document.getElementById("reajuste-objetivo");
+  if (document.activeElement !== objInp) objInp.value = obj ?? "";
+  const r = data.reajuste || {};
+  const m = data.moneda || "";
+  const total = data.total_con_indirectos ?? 0;
+  const dif = obj != null ? total - obj : null;
+  document.getElementById("reajuste-resumen").innerHTML = `
+    Mano de obra: <b>${m} ${fmt(r.mo || 0)}</b> <span style="opacity:.7">(sin cambio)</span><br>
+    Materiales mercado: <b>${m} ${fmt(r.materiales_mercado || 0)}</b><br>
+    Materiales reajustados: <b>${m} ${fmt(r.materiales_reajustados || 0)}</b><br>
+    Absorbido por la obra: <b class="${(r.absorbido || 0) > 0 ? "neg" : ""}">${m} ${fmt(r.absorbido || 0)}</b><br>
+    Otros (flete/herr./sub.): <b>${m} ${fmt(r.otros || 0)}</b><br>
+    Total obra: <b>${m} ${fmt(total)}</b>${dif != null ? ` <span class="${Math.abs(dif) > 1 ? "neg" : ""}">(vs objetivo ${dif >= 0 ? "+" : ""}${fmt(dif)})</span>` : ""}`;
+  if (state.modo === "desarrollador") pill.classList.remove("hidden");
+  else pill.classList.add("hidden");
+}
+
+function initReajustePill() {
+  const pill = document.getElementById("reajuste-pill");
+  const pop = document.getElementById("reajuste-popover");
+  if (!pill) return;
+  pill.addEventListener("click", (e) => {
+    if (e.target.closest("#reajuste-popover")) return;
+    pop.classList.toggle("hidden");
+    if (!pop.classList.contains("hidden")) document.getElementById("reajuste-input").select();
+  });
+  document.getElementById("btn-reaj-cancel").addEventListener("click", (e) => {
+    e.stopPropagation(); pop.classList.add("hidden");
+  });
+  const objVal = () => {
+    const v = parseFloat(document.getElementById("reajuste-objetivo").value);
+    return isNaN(v) || v <= 0 ? null : v;
+  };
+  const run = async (btn, fn) => {
+    if (!state.activeId) return;
+    const txt = btn.textContent;
+    btn.disabled = true; btn.textContent = "...";
+    try { await fn(); await loadObra(state.activeId); }
+    catch (err) { alert("Error: " + (err.message || err)); }
+    finally { btn.disabled = false; btn.textContent = txt; }
+  };
+  document.getElementById("btn-reaj-ok").addEventListener("click", (e) => {
+    e.stopPropagation();
+    const pct = parseFloat(document.getElementById("reajuste-input").value);
+    if (isNaN(pct) || pct <= -100) { alert("Porcentaje inválido"); return; }
+    run(e.currentTarget, () => api("PATCH", `/presupuestos/${state.activeId}/reajuste-materiales`,
+      { reajuste_materiales: pct, valor_objetivo: objVal() }));
+  });
+  document.getElementById("btn-reaj-recalc").addEventListener("click", (e) => {
+    e.stopPropagation();
+    const obj = objVal();
+    if (obj == null && state.activeData?.config?.valor_objetivo == null) {
+      alert("Pon el valor objetivo (monto del contrato, con sobrecosto) para recalcular el %.");
+      return;
+    }
+    run(e.currentTarget, () => api("POST", `/presupuestos/${state.activeId}/reajuste-materiales/recalcular`,
+      obj != null ? { valor_objetivo: obj } : {}));
+  });
+  ["reajuste-input", "reajuste-objetivo"].forEach(id =>
+    document.getElementById(id).addEventListener("keydown", (e) => {
+      if (e.key === "Enter") document.getElementById("btn-reaj-ok").click();
+      if (e.key === "Escape") pop.classList.add("hidden");
+    }));
+  document.addEventListener("click", (e) => { if (!pill.contains(e.target)) pop.classList.add("hidden"); });
 }
 
 // --- MATRIZ DE INSUMOS ---

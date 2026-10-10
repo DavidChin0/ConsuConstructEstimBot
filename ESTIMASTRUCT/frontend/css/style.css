@@ -747,6 +747,13 @@ tfoot td { padding: 5px 6px; }
 }
 .sobrecosto-popover input:focus { outline: 1px solid var(--accent2); border-color: var(--accent2); }
 .sc-actions { display: flex; gap: 6px; justify-content: flex-end; }
+/* Reajuste de materiales (por obra) */
+.reajuste-pill.reaj-on { border-color: #e0a800; color: #e0a800; }
+.reajuste-popover { width: 300px; }
+.reajuste-popover label { margin-top: 6px; }
+.reajuste-resumen { font-size: 11px; line-height: 1.6; margin: 6px 0 10px; color: var(--text-dim); font-variant-numeric: tabular-nums; text-transform: none; }
+.reajuste-resumen b { color: var(--text); font-weight: 600; }
+.reajuste-resumen .neg { color: #e0a800; }
 .sc-actions button { padding: 4px 12px; font-size: 11px; }
 
 /* ---- Rename button in sidebar ---- */
@@ -1462,6 +1469,36 @@ tfoot td { padding: 5px 6px; }
 .gantt-body-wrap { position: relative; flex: 1; min-height: 0; display: flex; }
 .gantt-body { overflow: auto; flex: 1; position: relative; }
 .gantt-loading { padding: 40px; text-align: center; color: var(--text-dim); }
+
+/* --- [2026-10-04] Gasto por semana (materiales + MO), sigue al Gantt --- */
+.g-sem { border-top: 1px solid var(--border); display: flex; flex-direction: column; flex: 0 0 auto; }
+.g-sem-head { display: flex; align-items: center; gap: 10px; padding: 6px 14px; font-size: 12px; }
+.g-sem-head b { color: var(--accent); }
+.g-sem-toggle { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 12px; padding: 0 2px; }
+.g-sem-tot { color: var(--text-dim); font-size: 11px; font-variant-numeric: tabular-nums; }
+.g-sem-tot i { font-style: normal; color: var(--accent2); }
+.g-sem-sync { margin-left: auto; font-size: 10px; color: var(--text-dim); }
+.g-sem-sync.err { color: #e74c3c; }
+.g-sem-body { display: flex; height: 210px; min-height: 0; border-top: 1px solid #3a3a3a; }
+.g-sem.collapsed .g-sem-body { display: none; }
+.g-sem-weeks { flex: 1 1 60%; overflow-x: auto; overflow-y: hidden; display: flex; align-items: flex-end; gap: 3px; padding: 8px 10px 4px; }
+.g-sem-col { flex: 0 0 34px; display: flex; flex-direction: column; align-items: center; cursor: pointer; height: 100%; justify-content: flex-end; }
+.g-sem-bar { width: 22px; display: flex; flex-direction: column-reverse; border-radius: 2px 2px 0 0; overflow: hidden; min-height: 2px; }
+.g-sem-bar .ma { background: #378ADD; }
+.g-sem-bar .mo { background: #1D9E75; }
+.g-sem-col small { font-size: 9px; color: var(--text-dim); margin-top: 3px; }
+.g-sem-col.sel small { color: var(--accent2); font-weight: 700; }
+.g-sem-col.sel .g-sem-bar { outline: 2px solid var(--accent2); }
+.g-sem-col.hoy small::after { content: "•"; color: var(--accent2); }
+.g-sem-detail { flex: 1 1 40%; overflow: auto; border-left: 1px solid #3a3a3a; padding: 6px 10px; font-size: 11px; }
+.g-sem-detail h4 { margin: 0 0 4px; font-size: 12px; color: var(--accent); }
+.g-sem-detail .kp { display: flex; gap: 12px; margin-bottom: 6px; color: var(--text-dim); flex-wrap: wrap; }
+.g-sem-detail .kp b { color: var(--text); font-variant-numeric: tabular-nums; }
+.g-sem-detail table { width: 100%; border-collapse: collapse; }
+.g-sem-detail td { padding: 2px 4px; border-bottom: 1px solid #333; }
+.g-sem-detail td.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.g-sem-legend { display: inline-flex; gap: 8px; font-size: 10px; color: var(--text-dim); }
+.g-sem-legend i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 3px; vertical-align: middle; }
 .g-resizer {
   position: absolute; top: 0; bottom: 0; left: var(--g-label-w, 680px);
   width: 7px; margin-left: -3px; cursor: col-resize; z-index: 20;

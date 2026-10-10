@@ -66,6 +66,21 @@
       </div>
     </div>
   </div>
+  <div id="reajuste-pill" class="sobrecosto-pill reajuste-pill hidden" title="Reajuste de materiales: % aplicado SOLO a insumos MATERIAL de esta obra (MO intacta)">
+    <span data-es="Reaj. Mat: " data-en="Mat. adj: ">Reaj. Mat: </span><span id="reajuste-val">0%</span>
+    <div id="reajuste-popover" class="sobrecosto-popover reajuste-popover hidden">
+      <label data-es="Reajuste de materiales %" data-en="Materials adjustment %">Reajuste de materiales %</label>
+      <input type="number" id="reajuste-input" min="-99" max="500" step="0.01" />
+      <label data-es="Valor objetivo (contrato, con sobrecosto)" data-en="Target value (contract, incl. overhead)">Valor objetivo (contrato, con sobrecosto)</label>
+      <input type="number" id="reajuste-objetivo" min="0" step="0.01" placeholder="ej. 1097110.30" />
+      <div id="reajuste-resumen" class="reajuste-resumen"></div>
+      <div class="sc-actions">
+        <button id="btn-reaj-cancel" class="btn-cancel" data-es="Cancelar" data-en="Cancel">Cancelar</button>
+        <button id="btn-reaj-recalc" class="btn-secondary" title="Calcula el % exacto para que el total = valor objetivo, moviendo solo materiales" data-es="⟳ Recalcular" data-en="⟳ Recalculate">⟳ Recalcular</button>
+        <button id="btn-reaj-ok" class="btn-primary" data-es="Aplicar" data-en="Apply">Aplicar</button>
+      </div>
+    </div>
+  </div>
   <button id="btn-actualizar" class="btn-actualizar hidden" data-es="⟳ Actualizar" data-en="⟳ Update">⟳ Actualizar</button>
   <button id="btn-modo" class="btn-modo hidden" title="Cambiar modo Cliente/Desarrollador" data-es="👤 Cliente" data-en="👤 Client">👤 Cliente</button>
   <div id="dev-menu-wrap" class="dev-menu-wrap hidden">
@@ -659,12 +674,26 @@
           <button type="button" class="g-zoom-btn" data-zoom="mes" data-es="Mes" data-en="Month">Mes</button>
         </div>
         <button id="btn-gantt-reset-orden" class="btn-secondary hidden" title="Quitar el orden manual y volver al orden automático por fase/CSI">↺ Orden automático</button>
+        <button id="btn-gantt-materiales" class="btn-secondary" title="Materiales a comprar por semana, en el orden vigente del Gantt (XLSX)" data-es="⬇ Materiales x semana" data-en="⬇ Materials per week">⬇ Materiales x semana</button>
         <button id="btn-gantt-export" class="btn-primary" data-es="⬇ Exportar XLSX" data-en="⬇ Export XLSX">⬇ Exportar XLSX</button>
       </div>
     </div>
     <div class="gantt-body-wrap">
       <div id="gantt-resizer" class="g-resizer" title="Arrastrar para redimensionar columnas"></div>
       <div id="gantt-body" class="gantt-body"></div>
+    </div>
+    <!-- [2026-10-04] Gasto por semana (materiales + mano de obra) — sigue al Gantt en vivo -->
+    <div id="gantt-semanal" class="g-sem">
+      <div class="g-sem-head">
+        <button type="button" id="g-sem-toggle" class="g-sem-toggle" title="Mostrar/ocultar">▾</button>
+        <b data-es="Gasto por semana" data-en="Weekly spend">Gasto por semana</b>
+        <span id="g-sem-tot" class="g-sem-tot"></span>
+        <span id="g-sem-sync" class="g-sem-sync"></span>
+      </div>
+      <div class="g-sem-body">
+        <div id="g-sem-weeks" class="g-sem-weeks"></div>
+        <div id="g-sem-detail" class="g-sem-detail"></div>
+      </div>
     </div>
   </div>
 </div>

@@ -18,6 +18,9 @@ async def lifespan(app: FastAPI):
         Base.metadata.create_all(bind=engine)
     notifier.subscribe(notify_file(os.path.join(os.path.dirname(__file__), "notifications.log")))
     notifier.start_monitoring()
+    # [2026-10-04] Espejo Gantt portal -> Postgres (cambios hechos en el portal)
+    from backend.services import gantt_sync
+    gantt_sync.start_poller()
     yield
     notifier.stop_monitoring()
 

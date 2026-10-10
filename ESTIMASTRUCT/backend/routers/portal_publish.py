@@ -11,7 +11,7 @@ from datetime import date
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from backend.db import get_db
-from backend.models import Presupuesto, Capitulo, ConfigPresupuesto, CronogramaOverride, InsumoPartida
+from backend.models import Presupuesto, Capitulo, ConfigPresupuesto, CronogramaOverride, CronogramaOrden, InsumoPartida
 from backend import cronograma as crono_engine
 
 router = APIRouter(prefix="/presupuestos", tags=["portal"])
@@ -20,7 +20,17 @@ SUPABASE_URL = os.environ.get(
     "SUPABASE_URL", "https://gcicapuvgzzafeepbhfs.supabase.co"
 ).rstrip("/")
 SUPABASE_SECRET = os.environ.get("SUPABASE_SECRET_KEY", "")
-
+if not SUPABASE_SECRET:
+    # [2026-10-04] Fuente unica de la key: D:\Secrets\Supabase Finance.txt (la misma que
+    # lee START_UNICA.ps1). Asi el backend la tiene aunque lo arranque un agente
+    # (estimastruct_backend_ensure) y rotar la key = editar 1 archivo + reiniciar.
+    try:
+        import re as _re
+        _f = os.environ.get("SUPABASE_SECRET_FILE", r"D:\Secrets\Supabase Finance.txt")
+        _m = _re.search(r"sb_secret_[A-Za-z0-9_\-]+", open(_f, encoding="utf-8").read())
+        SUPABASE_SECRET = _m.group(0) if _m else ""
+    except OSError:
+        SUPABASE_SECRET = ""
 
 def _sb(method: str, path: str, body=None, prefer: str | None = None):
     url = f"{SUPABASE_URL}/rest/v1/{path}"
@@ -99,9 +109,13 @@ def publish_supabase(pid: str, db: Session = Depends(get_db)):
     if not partidas:
         raise HTTPException(400, "La obra no tiene partidas con valor (total > 0)")
 
-    # Cronograma: duraciones por tiempo unitario del catalogo V1.2 x cantidad
+    # Cronograma: duraciones por tiempo unitario del catalogo V1.2 x cantidad.
+    # [2026-10-02] Respeta el orden VIGENTE del Gantt de EstimaStruct (orden manual
+    # si el usuario reordeno) — antes se publicaba siempre el orden automatico.
+    orden_manual = {r.partida_id: int(r.orden) for r in db.query(CronogramaOrden).filter(
+        CronogramaOrden.presupuesto_id == pid).all()}
     try:
-        crono_rows = crono_engine.construir_cronograma(crono_input)
+        crono_rows = crono_engine.construir_cronograma(crono_input, orden_manual=orden_manual or None)
     except Exception as e:  # catalogo ausente / corrupto -> no abortar la publicacion
         crono_rows = []
         crono_err = str(e)
@@ -170,12 +184,56 @@ def publish_supabase(pid: str, db: Session = Depends(get_db)):
             _sb("POST", "cronograma", crows[i:i + 200], prefer="return=minimal")
         crono_pub = len(crows)
 
+    # [2026-10-02] Materiales por partida (para "Materiales semanales" del portal):
+    # insumos MATERIAL con costo_unit YA reajustado (reajuste_materiales de la obra),
+    # asi el portal y EstimaStruct dan los mismos montos. Tolerante: si la tabla
+    # obra_material aun no existe en Supabase (005 sin aplicar) no aborta el publish.
+    from backend.services.pricing import factor_materiales
+    f_ma = factor_materiales(cfg)
+    mat_rows, mat_err = [], None
+    for cap in caps:
+        for pa in cap.partidas:
+            if pa.id not in id_por_epid:
+                continue
+            for ins in pa.insumos:
+                if ins.tipo != "MATERIAL" or float(ins.cantidad or 0) <= 0:
+                    continue
+                mat_rows.append({
+                    "obra_id": obra_id, "estimastruct_partida_id": pa.id,
+                    "clave": ins.clave or f"SIN-{ins.id[:8]}", "descripcion": ins.descripcion or "",
+                    "unidad": ins.unidad or "", "cantidad_unit": round(float(ins.cantidad or 0), 6),
+                    "costo_unit": round(float(ins.costo_unit or 0) * f_ma, 4),
+                })
+    # dedupe (obra, partida, clave) — unique en obra_material
+    _seen = {}
+    for m in mat_rows:
+        k = (m["estimastruct_partida_id"], m["clave"])
+        if k in _seen:
+            _seen[k]["cantidad_unit"] = round(_seen[k]["cantidad_unit"] + m["cantidad_unit"], 6)
+        else:
+            _seen[k] = m
+    mat_rows = list(_seen.values())
+    try:
+        _sb("DELETE", f"obra_material?obra_id=eq.{obra_id}", None)
+        for i in range(0, len(mat_rows), 500):
+            _sb("POST", "obra_material", mat_rows[i:i + 500], prefer="return=minimal")
+    except HTTPException as e:
+        mat_err = str(e.detail)[:200]
+        mat_rows = []
+
+    # [2026-10-04] Espejo Gantt: dejar el snapshot de sync = lo recien publicado
+    from backend.services import gantt_sync
+    gsync = gantt_sync.safe_sync(db, pid, origin="estimastruct")
+
     return {
         "ok": True,
         "obra_id": obra_id,
         "nombre": p.nombre,
         "partidas": len(rows),
         "cronograma": crono_pub,
+        "gantt_sync": gsync.get("accion"),
+        "materiales": len(mat_rows),
+        "materiales_error": mat_err,
         "fecha_inicio": fecha_inicio_obra,
         "cronograma_error": crono_err,
         "total": round(total, 2),
@@ -227,6 +285,7 @@ def sync_media_supabase(pid: str, db: Session = Depends(get_db)):
         "mensaje": "Solicitud registrada. projectmanager_bot sincroniza el bucket y notifica al terminar.",
     }
 
+@router.post("/{pid}/sync-precios-supabase")
 def sync_precios_supabase(pid: str, db: Session = Depends(get_db)):
     """Sincroniza SOLO precios al portal: costo_ma/costo_mo/total/cantidad por
     partida + sobrecosto y total de la obra. NO toca cronograma, avance,

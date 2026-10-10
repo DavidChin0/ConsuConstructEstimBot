@@ -2,6 +2,8 @@
 Cronograma / Gantt de una obra.
   GET /presupuestos/{pid}/cronograma          -> JSON para el front (Gantt)
   GET /presupuestos/{pid}/export-cronograma   -> XLSX (tabla + grilla de semanas)
+  GET /presupuestos/{pid}/export-materiales-semanales -> XLSX materiales por semana
+      (orden VIGENTE del Gantt: manual si lo hay, si no automatico)
 
 Duraciones por tiempo unitario del catalogo V1.2 (cronograma.py).
 """
@@ -15,9 +17,11 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session, joinedload
 
 from backend.db import get_db
-from backend.models import Presupuesto, Capitulo, CronogramaOverride, CronogramaOrden
+from backend.models import Presupuesto, Capitulo, Partida, CronogramaOverride, CronogramaOrden
 from backend import cronograma as engine
 from backend.routers.export import safe_fname
+from backend.services.pricing import factor_materiales
+from backend.services import gantt_sync
 
 router = APIRouter(tags=["cronograma"])
 
@@ -91,7 +95,11 @@ def _calcular(p: Presupuesto, overrides: dict, orden_manual: dict | None = None)
 
 
 @router.get("/presupuestos/{pid}/cronograma")
-def get_cronograma(pid: str, db: Session = Depends(get_db)):
+def get_cronograma(pid: str, db: Session = Depends(get_db), sync: bool = True):
+    # [2026-10-04] Espejo portal: al abrir/refrescar el Gantt, traer primero los cambios
+    # que se hayan hecho en el Gantt del portal (Supabase). Tolerante: si el portal no
+    # responde, el Gantt local se sirve igual y se reporta en "portal_sync".
+    psync = gantt_sync.safe_sync(db, pid) if sync else {"accion": "omitido"}
     p = db.query(Presupuesto).options(
         joinedload(Presupuesto.capitulos).joinedload(Capitulo.partidas)
     ).filter(Presupuesto.id == pid).first()
@@ -158,6 +166,7 @@ def get_cronograma(pid: str, db: Session = Depends(get_db)):
         "fases": fases_orden,
         "actividades": acts,
         "orden_manual": bool(_orden_manual(db, pid)),
+        "portal_sync": {k: psync.get(k) for k in ("accion", "error") if psync.get(k)},
     }
 
 
@@ -186,7 +195,8 @@ def mover_actividad(pid: str, body: MoverIn, db: Session = Depends(get_db)):
     for i, part_id in enumerate(ids):
         db.add(CronogramaOrden(presupuesto_id=pid, partida_id=part_id, orden=i))
     db.commit()
-    return get_cronograma(pid, db)
+    gantt_sync.safe_sync(db, pid, origin="estimastruct")   # espejo -> portal
+    return get_cronograma(pid, db, sync=False)
 
 
 @router.post("/presupuestos/{pid}/cronograma/reset-orden")
@@ -194,7 +204,8 @@ def reset_orden(pid: str, db: Session = Depends(get_db)):
     """Vuelve al orden automatico por fase/CSI."""
     n = db.query(CronogramaOrden).filter(CronogramaOrden.presupuesto_id == pid).delete()
     db.commit()
-    return {"ok": True, "filas_borradas": n}
+    ps = gantt_sync.safe_sync(db, pid, origin="estimastruct")   # espejo -> portal
+    return {"ok": True, "filas_borradas": n, "portal_sync": ps.get("accion")}
 
 
 class PersonalIn(BaseModel):
@@ -223,7 +234,9 @@ def set_personal(pid: str, body: PersonalIn, db: Session = Depends(get_db)):
         db.add(CronogramaOverride(presupuesto_id=pid, partida_id=body.partida_id,
                                   n_esp=ne, n_ay=na))
     db.commit()
-    return {"ok": True, "partida_id": body.partida_id, "n_esp": ne, "n_ay": na}
+    ps = gantt_sync.safe_sync(db, pid, origin="estimastruct")   # espejo -> portal
+    return {"ok": True, "partida_id": body.partida_id, "n_esp": ne, "n_ay": na,
+            "portal_sync": ps.get("accion")}
 
 
 @router.get("/presupuestos/{pid}/export-cronograma")
@@ -341,4 +354,254 @@ def export_cronograma(pid: str, db: Session = Depends(get_db)):
         buf,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         headers={"Content-Disposition": f'attachment; filename="Estimastruct_Cronograma_{nombre}.xlsx"'},
+    )
+
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# MATERIALES POR SEMANA — segun el orden VIGENTE del Gantt
+# ─────────────────────────────────────────────────────────────────────────────
+def _dias_laborales_actividad(fecha_inicio: str, duracion: int) -> list:
+    """Los N dias laborables (lun-sab) de la actividad, igual que el motor."""
+    d = date.fromisoformat(fecha_inicio)
+    out = []
+    while len(out) < max(1, int(duracion)):
+        if d.weekday() != 6:
+            out.append(d)
+        d += timedelta(days=1)
+    return out
+
+
+def materiales_semanales(p: Presupuesto, filas: list, tipos=("MATERIAL",)) -> list:
+    """Una fila por (semana, actividad, insumo). Reparto proporcional a los
+    dias laborables de la actividad que caen en cada semana (lunes-domingo).
+    cantidad = insumo.cantidad x partida.cantidad x dias_semana / duracion.
+    costo    = cantidad x costo_unit (mercado) x reajuste_materiales (solo MATERIAL).
+    tipos: ("MATERIAL",) por default; ("MANO_OBRA",) para gasto de mano de obra."""
+    f_ma = factor_materiales(p.config)
+    partidas = {pa.id: pa for cap in p.capitulos for pa in cap.partidas}
+    out = []
+    for f in filas:   # filas ya vienen en el orden vigente del Gantt
+        pa = partidas.get(f.get("partida_id"))
+        if not pa:
+            continue
+        mats = [i for i in (pa.insumos or []) if i.tipo in tipos and float(i.cantidad or 0) > 0]
+        if not mats:
+            continue
+        dur = max(1, int(f["duracion_dias"]))
+        semanas = {}
+        for d in _dias_laborales_actividad(f["fecha_inicio"], dur):
+            lunes = d - timedelta(days=d.weekday())
+            semanas[lunes] = semanas.get(lunes, 0) + 1
+        cant_pa = float(pa.cantidad or 0)
+        for lunes in sorted(semanas):
+            frac = semanas[lunes] / dur
+            for i in sorted(mats, key=lambda x: x.orden or 0):
+                q = float(i.cantidad or 0) * cant_pa * frac
+                cu = float(i.costo_unit or 0) * (f_ma if i.tipo == "MATERIAL" else 1.0)
+                out.append({
+                    "semana_inicio": lunes, "semana_fin": lunes + timedelta(days=6),
+                    "orden": f["orden"], "csi": f["clave_csi"], "actividad": f["descripcion"],
+                    "fase": f["fase"], "act_inicio": f["fecha_inicio"], "act_fin": f["fecha_fin"],
+                    "dias_semana": semanas[lunes], "duracion": dur, "tipo": i.tipo,
+                    "clave": i.clave or "", "material": i.descripcion or "", "unidad": i.unidad or "",
+                    "cantidad": round(q, 4), "costo_unit": round(cu, 4), "costo": round(q * cu, 2),
+                })
+    out.sort(key=lambda r: (r["semana_inicio"], r["orden"]))
+    return out
+
+
+def _cargar_con_insumos(pid: str, db: Session) -> Presupuesto:
+    p = db.query(Presupuesto).options(
+        joinedload(Presupuesto.config),
+        joinedload(Presupuesto.capitulos).joinedload(Capitulo.partidas).selectinload(Partida.insumos)
+    ).filter(Presupuesto.id == pid).first()
+    if not p:
+        raise HTTPException(404, "Presupuesto no encontrado")
+    return p
+
+
+@router.get("/presupuestos/{pid}/materiales-semanales")
+def get_materiales_semanales(pid: str, db: Session = Depends(get_db)):
+    p = _cargar_con_insumos(pid, db)
+    filas = _calcular(p, _overrides(db, pid), _orden_manual(db, pid))
+    rows = materiales_semanales(p, filas)
+    for r in rows:
+        r["semana_inicio"] = r["semana_inicio"].isoformat(); r["semana_fin"] = r["semana_fin"].isoformat()
+    return {"obra_id": p.id, "orden_manual": bool(_orden_manual(db, pid)),
+            "reajuste_materiales": float(p.config.reajuste_materiales or 0) if p.config else 0.0,
+            "filas": rows, "costo_total": round(sum(r["costo"] for r in rows), 2)}
+
+
+@router.get("/presupuestos/{pid}/gasto-semanal")
+def get_gasto_semanal(pid: str, db: Session = Depends(get_db)):
+    """[2026-10-04] Panel del Gantt: por semana, gasto de MATERIALES + MANO DE OBRA y la
+    lista consolidada de materiales, en el orden VIGENTE del Gantt. Se re-pide en cada
+    movimiento del slider, asi la lista y los montos siguen al Gantt en vivo.
+    Costos = costo directo (sin sobrecosto); materiales con reajuste de la obra.
+    Mismo reparto que el portal (v_materiales_semanales 006): dias laborables lun-sab."""
+    p = _cargar_con_insumos(pid, db)
+    filas = _calcular(p, _overrides(db, pid), _orden_manual(db, pid))
+    rows = materiales_semanales(p, filas, tipos=("MATERIAL", "MANO_OBRA"))
+    # jornadas por semana (de la cuadrilla del Gantt): n_esp/n_ay x dias en la semana
+    jorn = {}
+    for f in filas:
+        dur = max(1, int(f["duracion_dias"]))
+        for d in _dias_laborales_actividad(f["fecha_inicio"], dur):
+            lunes = d - timedelta(days=d.weekday())
+            j = jorn.setdefault(lunes, [0, 0])
+            j[0] += int(f.get("n_esp", engine.DEF_ESP)); j[1] += int(f.get("n_ay", engine.DEF_AY))
+    semanas = sorted(set(jorn) | {r["semana_inicio"] for r in rows})
+    d0 = semanas[0] if semanas else None
+    out = []
+    for lunes in semanas:
+        sr = [r for r in rows if r["semana_inicio"] == lunes]
+        mats, acts = {}, []
+        for r in sr:
+            tag = f"#{r['orden'] + 1} {r['csi']}"
+            if tag not in acts:
+                acts.append(tag)
+            if r["tipo"] != "MATERIAL":
+                continue
+            k = (r["clave"], r["unidad"])
+            m = mats.setdefault(k, {"clave": r["clave"], "material": r["material"], "unidad": r["unidad"],
+                                    "cantidad": 0.0, "costo": 0.0})
+            m["cantidad"] += r["cantidad"]; m["costo"] += r["costo"]
+        ma = sum(r["costo"] for r in sr if r["tipo"] == "MATERIAL")
+        mo = sum(r["costo"] for r in sr if r["tipo"] == "MANO_OBRA")
+        out.append({
+            "semana": (lunes - d0).days // 7 + 1,
+            "semana_inicio": lunes.isoformat(), "semana_fin": (lunes + timedelta(days=6)).isoformat(),
+            "materiales_costo": round(ma, 2), "mano_obra_costo": round(mo, 2), "total": round(ma + mo, 2),
+            "jornadas_esp": jorn.get(lunes, [0, 0])[0], "jornadas_ay": jorn.get(lunes, [0, 0])[1],
+            "actividades": acts,
+            "materiales": sorted(({**m, "cantidad": round(m["cantidad"], 4), "costo": round(m["costo"], 2)}
+                                  for m in mats.values()), key=lambda m: -m["costo"]),
+        })
+    return {
+        "obra_id": p.id, "moneda": p.moneda or "HNL", "orden_manual": bool(_orden_manual(db, pid)),
+        "reajuste_materiales": float(p.config.reajuste_materiales or 0) if p.config else 0.0,
+        "semanas": out,
+        "total_materiales": round(sum(s["materiales_costo"] for s in out), 2),
+        "total_mano_obra": round(sum(s["mano_obra_costo"] for s in out), 2),
+    }
+
+
+@router.get("/presupuestos/{pid}/export-materiales-semanales")
+def export_materiales_semanales(pid: str, db: Session = Depends(get_db)):
+    """XLSX: hoja 'Por semana' (materiales consolidados por semana, para comprar),
+    hoja 'Por actividad' (detalle semana > actividad en orden del Gantt > material)."""
+    try:
+        from openpyxl import Workbook
+        from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+        from openpyxl.utils import get_column_letter
+    except ImportError:
+        raise HTTPException(500, "openpyxl no disponible")
+
+    p = _cargar_con_insumos(pid, db)
+    om = _orden_manual(db, pid)
+    filas = _calcular(p, _overrides(db, pid), om)
+    rows = materiales_semanales(p, filas)
+    if not rows:
+        raise HTTPException(400, "La obra no tiene insumos MATERIAL en partidas con cantidad")
+    moneda = p.moneda or "HNL"
+    reaj = float(p.config.reajuste_materiales or 0) if p.config else 0.0
+
+    thin = Side(style="thin", color="CCCCCC")
+    border = Border(left=thin, right=thin, top=thin, bottom=thin)
+    hdr_font = Font(bold=True, color=HDR_TEXT, size=10)
+    hdr_fill = PatternFill("solid", fgColor=HDR_FILL)
+    sem_fill = PatternFill("solid", fgColor=DIV_FILL)
+
+    semanas = []
+    for r in rows:
+        if not semanas or semanas[-1] != r["semana_inicio"]:
+            if r["semana_inicio"] not in semanas:
+                semanas.append(r["semana_inicio"])
+    d0 = semanas[0]
+
+    def titulo(ws, txt, ncol):
+        ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=ncol)
+        c = ws.cell(row=1, column=1, value=txt)
+        c.font = Font(bold=True, size=13, color=HDR_TEXT); c.fill = hdr_fill
+        c.alignment = Alignment(horizontal="center")
+        ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=ncol)
+        s = ws.cell(row=2, column=1, value=(
+            f"Orden del Gantt: {'MANUAL' if om else 'automático (fase/CSI)'}  |  {len(semanas)} semanas  |  "
+            f"Reparto proporcional a días laborables (lun-sáb)  |  Reajuste materiales {reaj:+.2f}%  |  "
+            f"Costo total {moneda} {sum(r['costo'] for r in rows):,.2f}"))
+        s.font = Font(size=9, italic=True, color="666666"); s.alignment = Alignment(horizontal="center")
+
+    def header(ws, row, cols):
+        for ci, t in enumerate(cols, 1):
+            c = ws.cell(row=row, column=ci, value=t)
+            c.font = hdr_font; c.fill = hdr_fill; c.border = border
+            c.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+
+    def semana_bar(ws, row, ncol, lunes, extra):
+        ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=ncol)
+        n = (lunes - d0).days // 7 + 1
+        c = ws.cell(row=row, column=1, value=(
+            f"Semana {n}:  {lunes.strftime('%d/%m/%Y')} – {(lunes + timedelta(days=6)).strftime('%d/%m/%Y')}   {extra}"))
+        c.font = Font(bold=True, color=DIV_TEXT, size=11); c.fill = sem_fill
+        c.alignment = Alignment(horizontal="left", indent=1)
+
+    wb = Workbook()
+    # Hoja 1: Por semana (consolidado para compras)
+    ws = wb.active; ws.title = "Por semana"
+    cols = ["Clave", "Material", "Unidad", "Cantidad", f"Costo unit. ({moneda})", f"Costo ({moneda})", "Actividades (orden Gantt)"]
+    titulo(ws, f"{p.nombre} — Materiales por semana", len(cols))
+    header(ws, 4, cols)
+    r_ = 5
+    for lunes in semanas:
+        sem_rows = [x for x in rows if x["semana_inicio"] == lunes]
+        cons = {}
+        for x in sem_rows:   # conserva el orden de primera aparicion (orden del Gantt)
+            k = (x["clave"], x["unidad"])
+            c = cons.setdefault(k, {"material": x["material"], "cant": 0.0, "costo": 0.0, "cu": x["costo_unit"], "acts": []})
+            c["cant"] += x["cantidad"]; c["costo"] += x["costo"]
+            tag = f"#{x['orden'] + 1} {x['csi']}"
+            if tag not in c["acts"]:
+                c["acts"].append(tag)
+        semana_bar(ws, r_, len(cols), lunes,
+                   f"{len(cons)} materiales  ·  {moneda} {sum(c['costo'] for c in cons.values()):,.2f}")
+        r_ += 1
+        for (clave, uni), c in cons.items():
+            vals = [clave, c["material"], uni, round(c["cant"], 4), c["cu"], round(c["costo"], 2), ", ".join(c["acts"])]
+            for ci, v in enumerate(vals, 1):
+                cell = ws.cell(row=r_, column=ci, value=v); cell.border = border; cell.font = Font(size=9)
+                if ci in (4, 5, 6):
+                    cell.number_format = '#,##0.00'; cell.alignment = Alignment(horizontal="right")
+            r_ += 1
+    for ci, w in enumerate([11, 46, 8, 12, 13, 14, 40], 1):
+        ws.column_dimensions[get_column_letter(ci)].width = w
+    ws.freeze_panes = "A5"
+
+    # Hoja 2: Por actividad (detalle)
+    ws2 = wb.create_sheet("Por actividad")
+    cols2 = ["#", "CSI", "Actividad", "Inicio", "Fin", "Días en sem.", "Clave", "Material", "Unidad", "Cantidad", f"Costo ({moneda})"]
+    titulo(ws2, f"{p.nombre} — Materiales por semana y actividad (orden del Gantt)", len(cols2))
+    header(ws2, 4, cols2)
+    r_ = 5
+    for lunes in semanas:
+        sem_rows = [x for x in rows if x["semana_inicio"] == lunes]
+        semana_bar(ws2, r_, len(cols2), lunes, f"{moneda} {sum(x['costo'] for x in sem_rows):,.2f}")
+        r_ += 1
+        for x in sem_rows:
+            vals = [x["orden"] + 1, x["csi"], x["actividad"], x["act_inicio"], x["act_fin"],
+                    f"{x['dias_semana']}/{x['duracion']}", x["clave"], x["material"], x["unidad"], x["cantidad"], x["costo"]]
+            for ci, v in enumerate(vals, 1):
+                cell = ws2.cell(row=r_, column=ci, value=v); cell.border = border; cell.font = Font(size=9)
+                if ci in (10, 11):
+                    cell.number_format = '#,##0.00'; cell.alignment = Alignment(horizontal="right")
+            r_ += 1
+    for ci, w in enumerate([5, 12, 40, 11, 11, 9, 10, 40, 8, 12, 13], 1):
+        ws2.column_dimensions[get_column_letter(ci)].width = w
+    ws2.freeze_panes = "A5"
+
+    buf = io.BytesIO(); wb.save(buf); buf.seek(0)
+    return StreamingResponse(
+        buf,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f'attachment; filename="Estimastruct_Materiales_Semanales_{safe_fname(p.nombre)}.xlsx"'},
     )
