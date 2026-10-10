@@ -123,6 +123,10 @@ def _normalize_system_label(system_label):
         return "Sanitary"
     if _is_vent_label(label):
         return "Vent"
+    if _is_supply_hydronic_label(label):
+        return "Hydronic Supply"
+    if _is_return_hydronic_label(label):
+        return "Hydronic Return"
     return system_label
 
 
@@ -143,6 +147,21 @@ def _is_sanitary_label(label):
 
 def _is_vent_label(label):
     return _clean(label) == "vent"
+
+
+def _is_supply_hydronic_label(label):
+    label = _clean(label)
+    return label in ("supplyhydronic", "hydronic supply", "hydronic supply water", "chilled water supply", "hot water supply (hydronic)")
+
+
+def _is_return_hydronic_label(label):
+    label = _clean(label)
+    return label in ("returnhydronic", "hydronic return", "hydronic return water", "chilled water return", "hot water return (hydronic)")
+
+
+def _is_hydronic_label(label):
+    label = _clean(label)
+    return _is_supply_hydronic_label(label) or _is_return_hydronic_label(label) or label in ("hydronic", "otherpipe", "other pipe")
 
 
 def _pipe_type_rules(system_label, classification_name):
@@ -169,6 +188,16 @@ def _pipe_type_rules(system_label, classification_name):
             "preferred": ["vent", "pvc", "default"],
             "forbidden": ["chilled", "hydronic", "hot water", "dhw", "cold water", "dcw", "potable", "sanitary", "dwv", "waste", "drain", "sewer", "soil"],
         }
+    if classification == "supplyhydronic":
+        return {
+            "preferred": ["hydronic supply", "chilled water supply", "chw supply", "hot water supply", "hhw supply", "hydronic", "chilled", "steel", "copper", "default"],
+            "forbidden": ["sanitary", "dwv", "waste", "drain", "sewer", "soil", "vent", "domestic", "dcw", "dhw", "potable", "return"],
+        }
+    if classification == "returnhydronic":
+        return {
+            "preferred": ["hydronic return", "chilled water return", "chw return", "hot water return", "hhw return", "hydronic", "chilled", "steel", "copper", "default"],
+            "forbidden": ["sanitary", "dwv", "waste", "drain", "sewer", "soil", "vent", "domestic", "dcw", "dhw", "potable", "supply"],
+        }
     if _is_cold_water_label(label):
         return _pipe_type_rules(system_label, "DomesticColdWater")
     if _is_hot_water_label(label):
@@ -177,6 +206,10 @@ def _pipe_type_rules(system_label, classification_name):
         return _pipe_type_rules(system_label, "Sanitary")
     if _is_vent_label(label):
         return _pipe_type_rules(system_label, "Vent")
+    if _is_supply_hydronic_label(label):
+        return _pipe_type_rules(system_label, "SupplyHydronic")
+    if _is_return_hydronic_label(label):
+        return _pipe_type_rules(system_label, "ReturnHydronic")
     return {
         "preferred": [label, "default", "pvc", "cpvc", "copper"],
         "forbidden": ["chilled", "hydronic"],
@@ -191,6 +224,8 @@ def _next_standard_size(value_mm):
 
 
 def calculate_pipe_diameter_mm(system_label, fixture_units, flow):
+    if _is_hydronic_label(system_label):
+        return _next_standard_size(_lookup_diameter_from_flow(system_label, flow))
     d_fu = _lookup_diameter_from_fixture_units(system_label, fixture_units)
     d_flow = _lookup_diameter_from_flow(system_label, flow)
     return _next_standard_size(max(d_fu, d_flow))
@@ -278,6 +313,24 @@ def _lookup_diameter_from_flow(system_label, total_flow):
             (4.00, 125),
             (8.00, 150),
         ]
+    elif _is_hydronic_label(label):
+        # Hydronic (chiller/boiler/AHU) loops run continuous higher flow than
+        # domestic fixture branches -- no fixture-units concept applies, size
+        # by flow alone against a wider range topping out at the largest
+        # standard size available (300mm) for big chiller/boiler mains.
+        table = [
+            (0.50, 25),
+            (1.00, 32),
+            (2.00, 40),
+            (4.00, 50),
+            (8.00, 65),
+            (15.00, 80),
+            (25.00, 100),
+            (40.00, 125),
+            (65.00, 150),
+            (100.00, 200),
+            (160.00, 250),
+        ]
     else:
         table = [
             (0.10, 15),
@@ -311,9 +364,13 @@ def infer_system_labels(connectors):
             labels.add("Sanitary")
         if "vent" in kind or "vent" in category or "vent" in family:
             labels.add("Vent")
+        if "supplyhydronic" in kind.replace(" ", "") or "hydronic supply" in kind or "chilled water supply" in kind or "hot water supply (hydronic)" in kind:
+            labels.add("Hydronic Supply")
+        if "returnhydronic" in kind.replace(" ", "") or "hydronic return" in kind or "chilled water return" in kind or "hot water return (hydronic)" in kind:
+            labels.add("Hydronic Return")
 
     ordered = []
-    for label in ("Domestic Cold Water", "Domestic Hot Water", "Sanitary", "Vent"):
+    for label in ("Domestic Cold Water", "Domestic Hot Water", "Sanitary", "Vent", "Hydronic Supply", "Hydronic Return"):
         if label in labels:
             ordered.append(label)
     return ordered
@@ -329,6 +386,10 @@ def resolve_piping_system_classification(system_label, connectors):
         return "DomesticHotWater"
     if _is_cold_water_label(label):
         return "DomesticColdWater"
+    if _is_supply_hydronic_label(label):
+        return "SupplyHydronic"
+    if _is_return_hydronic_label(label):
+        return "ReturnHydronic"
 
     for connector in connectors:
         kind = _clean(connector.system_kind)
@@ -336,6 +397,10 @@ def resolve_piping_system_classification(system_label, connectors):
             return "DomesticHotWater"
         if "dcw" in kind or "cold water" in kind or "domestic cold water" in kind:
             return "DomesticColdWater"
+        if "supplyhydronic" in kind.replace(" ", "") or "hydronic supply" in kind:
+            return "SupplyHydronic"
+        if "returnhydronic" in kind.replace(" ", "") or "hydronic return" in kind:
+            return "ReturnHydronic"
 
     return "DomesticColdWater"
 

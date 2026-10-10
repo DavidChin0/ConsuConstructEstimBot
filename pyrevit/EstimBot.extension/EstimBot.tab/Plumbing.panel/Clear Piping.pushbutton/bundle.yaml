@@ -1,0 +1,5 @@
+title: Clear Piping
+tooltip: Borra tuberias/fittings/accesorios de plomeria seleccionados (para iterar Generate Layout). Si no hay seleccion, permite pickear.
+author: EstimBot
+engine:
+  clean: true

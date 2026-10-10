@@ -1,0 +1,5 @@
+title: Generate HVAC Layout
+tooltip: Genera layouts de ductos HVAC (Supply/Return/Exhaust Air) usando alturas reales de cielo raso del proyecto.
+author: EstimBot
+engine:
+  clean: true

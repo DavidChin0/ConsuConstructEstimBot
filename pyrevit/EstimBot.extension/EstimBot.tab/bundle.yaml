@@ -1,0 +1,7 @@
+layout:
+  - Electrical
+  - EstimaStruct
+  - Export
+  - HVAC
+  - Plumbing
+  - Utilities

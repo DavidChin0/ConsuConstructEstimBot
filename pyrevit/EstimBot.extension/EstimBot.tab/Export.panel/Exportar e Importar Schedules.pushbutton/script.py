@@ -248,6 +248,7 @@ def api_length_blocks():
     targets = [
         ("18Cable Schedule", DB.BuiltInCategory.OST_Wire),
         ("19Conduit Schedule", DB.BuiltInCategory.OST_Conduit),
+        ("20Wall Foundation Schedule", DB.BuiltInCategory.OST_StructuralFoundation),
     ]
     for title, bic in targets:
         try:
@@ -262,6 +263,14 @@ def api_length_blocks():
             if not key:
                 continue
             lp = e.get_Parameter(DB.BuiltInParameter.CURVE_ELEM_LENGTH)
+            if bic == DB.BuiltInCategory.OST_StructuralFoundation and e.GetType().Name != "WallFoundation":
+                continue  # zapatas aisladas/losas: su 'Length' es una dimension, no metros lineales
+            if (lp is None or not lp.HasValue) and bic == DB.BuiltInCategory.OST_StructuralFoundation:
+                # Wall Foundation (zapata corrida) no expone CURVE_ELEM_LENGTH: usar 'Length' de instancia.
+                # Otras fundaciones (aisladas, losas) no tienen longitud lineal -> se omiten.
+                lp = e.LookupParameter("Length") or e.LookupParameter("Longitud")
+                if lp is None or not lp.HasValue:
+                    continue
             length = lp.AsDouble() if lp else 0.0
             tname = safe_name(etype)
             agg[key][0] += _to_meters(length)
@@ -270,7 +279,8 @@ def api_length_blocks():
             continue
         rows = [["Keynote", "Type", "Length"]]
         for key in sorted(agg.keys()):
-            rows.append([key, agg[key][1], round(agg[key][0], 2)])
+            # El sufijo ' m' es lo que el importador usa para reconocer mL (sin el, se lee como pza).
+            rows.append([key, agg[key][1], "{0:.2f} m".format(agg[key][0])])
         out.append((title, rows))
     return out
 

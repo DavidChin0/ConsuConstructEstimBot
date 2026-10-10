@@ -53,6 +53,8 @@ ALLOWED_SYSTEM_LABELS = [
     "Domestic Hot Water",
     "Sanitary",
     "Vent",
+    "Hydronic Supply",
+    "Hydronic Return",
 ]
 ENABLE_TEE_ROUTE = True
 AUTOMATION_FLAG = "ESTIMBOT_GL_AUTOMATION"
@@ -498,6 +500,16 @@ def _system_text_matches(system_label, text):
         )
     if target == "vent":
         return "vent" in value or "vent" in compact_value
+    if target in ("hydronic supply", "supplyhydronic", "chilled water supply", "hot water supply (hydronic)"):
+        return any(
+            keyword in value or compact_text(keyword) in compact_value
+            for keyword in ("hydronic supply", "supplyhydronic", "chilled water supply", "hot water supply (hydronic)", "chw supply", "hhw supply")
+        )
+    if target in ("hydronic return", "returnhydronic", "chilled water return", "hot water return (hydronic)"):
+        return any(
+            keyword in value or compact_text(keyword) in compact_value
+            for keyword in ("hydronic return", "returnhydronic", "chilled water return", "hot water return (hydronic)", "chw return", "hhw return")
+        )
     return target == value or compact_target == compact_value
 
 
