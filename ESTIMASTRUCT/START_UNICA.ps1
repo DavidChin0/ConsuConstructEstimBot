@@ -7,13 +7,21 @@ $Host.UI.RawUI.WindowTitle = 'EstimaStruct'
 
 $PY       = 'D:\LLM\python\python.exe'
 $PROJECT  = $PSScriptRoot   # portable: el lanzador vive en la raiz del repo
-$API      = 'http://localhost:8002'
+$API      = 'http://127.0.0.1:8002'
 $DB_URL   = $env:ESTIMASTRUCT_DATABASE_URL
 $AUTO_CREATE = $env:ESTIMASTRUCT_AUTO_CREATE_SCHEMA
 
 # Para el boton "Publicar a Portal": pega aca tu Supabase secret key (sb_secret_...).
 # NO subir a git. Dejalo vacio si no vas a publicar.
 $SUPABASE_SECRET_KEY = $env:SUPABASE_SECRET_KEY
+# Fallback 2026-09-05: si la env no esta, leerla de D:\Secrets\Supabase Finance.txt
+if (-not $SUPABASE_SECRET_KEY) {
+  $credFile = 'D:\Secrets\Supabase Finance.txt'
+  if (Test-Path $credFile) {
+    $SUPABASE_SECRET_KEY = (Select-String -Path $credFile -Pattern 'sb_secret_[A-Za-z0-9_\-]+').Matches[0].Value
+    Write-Host "[START_UNICA] SUPABASE_SECRET_KEY leida de $credFile"
+  }
+}
 # $SUPABASE_SECRET_KEY = 'sb_secret_xxxxxxxxxxxx'
 
 function Kill-Tree([int]$rootPid) {
@@ -38,10 +46,11 @@ function Kill-Port([int]$p) {
   }
 
   # Round 3: kill orphaned multiprocessing workers whose parent was a uvicorn on this port
-  # (parent already dead, children hold the socket)
+  # (parent already dead, children hold the socket).
+  # [2026-10-04] Acotado a EstimaStruct: antes mataba TODO uvicorn de la maquina (HUD :8300 incluido).
   Get-WmiObject Win32_Process | Where-Object {
-    $_.CommandLine -like '*multiprocessing.spawn*' -or
-    $_.CommandLine -like '*uvicorn*'
+    $_.CommandLine -like '*backend.main:app*' -or
+    ($_.CommandLine -like '*multiprocessing.spawn*' -and $_.ExecutablePath -eq $PY)
   } | ForEach-Object { Kill-Tree ([int]$_.ProcessId) }
 
   # Wait until port actually frees (max 3 s)

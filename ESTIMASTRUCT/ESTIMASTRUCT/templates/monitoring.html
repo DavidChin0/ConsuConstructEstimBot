@@ -61,6 +61,12 @@
         </div>
 
         <div class="panel">
+            <h2>🤖 EstimaStruct Worker (hooke_worker — Postgres brain.*)</h2>
+            <div id="worker">Cargando...</div>
+            <button onclick="refreshWorker()">Actualizar</button>
+        </div>
+
+        <div class="panel">
             <h2>Errores Recientes (últimos 60 min)</h2>
             <div id="errors">Cargando...</div>
         </div>
@@ -140,15 +146,63 @@
             }
         }
 
+        async function refreshWorker() {
+            try {
+                const res = await fetch('/__api__/worker/report?limit=8');
+                const data = await res.json();
+                const el = document.getElementById('worker');
+                if (!data.ok) {
+                    el.innerHTML = `<div class="error">Postgres brain no alcanzable: ${data.error || 'desconocido'}</div>`;
+                    return;
+                }
+                let html = `<div class="success">✓ Postgres brain conectado — ${data.counts.open_goals} goals abiertos, ${data.counts.sessions} sesiones recientes, ${data.counts.attempts} intentos</div>`;
+
+                html += '<h3 style="color:#569cd6;margin-top:12px;">Goals abiertos</h3>';
+                if (!data.open_goals.length) html += '<div>Sin goals abiertos.</div>';
+                data.open_goals.forEach(g => {
+                    html += `<div class="error" style="border-left-color:#569cd6;background:#1f2a3a;">
+                        <strong>#${g.id}</strong> [${g.status}] prio=${g.priority} intentos=${g.attempt_no}<br>
+                        ${g.goal}<br>
+                        <span class="code">upd: ${g.updated_at ? new Date(g.updated_at).toLocaleString() : '-'}</span>
+                    </div>`;
+                });
+
+                html += '<h3 style="color:#569cd6;margin-top:12px;">Últimas sesiones del worker</h3>';
+                if (!data.recent_sessions.length) html += '<div>Sin sesiones registradas aún.</div>';
+                data.recent_sessions.forEach(s => {
+                    const okCls = s.outcome === 'completed' ? 'success' : 'error';
+                    html += `<div class="${okCls}">
+                        <strong>goal-${s.goal_id}</strong> → ${s.outcome} | modelo: ${s.effective_model || '?'}<br>
+                        tools: ${(s.tools_used || []).join(', ') || 'ninguna'}<br>
+                        <span class="code">tokens ${s.tokens_in||0}/${s.tokens_out||0} · $${s.cost_estimate_usd||0} · ${s.latency_s||0}s · ${s.ended_at ? new Date(s.ended_at).toLocaleString() : '-'}</span><br>
+                        <span class="code">${(s.summary||'').replace(/</g,'&lt;').slice(0,220)}</span>
+                    </div>`;
+                });
+
+                html += '<h3 style="color:#569cd6;margin-top:12px;">Últimos intentos (memoria)</h3>';
+                data.recent_attempts.slice(0,6).forEach(a => {
+                    const okCls = a.outcome === 'succeeded' ? 'success' : 'error';
+                    html += `<div class="${okCls}">goal-${a.goal_id} intento ${a.attempt_no} → ${a.outcome}${a.failure_class ? ' ('+a.failure_class+')' : ''} <span class="code">${a.completed_at ? new Date(a.completed_at).toLocaleString() : ''}</span></div>`;
+                });
+
+                el.innerHTML = html;
+            } catch (e) {
+                document.getElementById('worker').innerHTML =
+                    `<div class="error">Error de conexión worker: ${e.message}</div>`;
+            }
+        }
+
         setInterval(() => {
             refreshStatus();
             refreshErrors();
             refreshSummary();
+            refreshWorker();
         }, 5000);
 
         refreshStatus();
         refreshErrors();
         refreshSummary();
+        refreshWorker();
     </script>
 </body>
 </html>
