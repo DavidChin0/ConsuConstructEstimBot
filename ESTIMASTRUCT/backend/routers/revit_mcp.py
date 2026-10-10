@@ -442,8 +442,8 @@ async def call_mcp_tool(body: ToolCallRequest):
 # ──────────────────────────────────────────────
 # FULL DUMP — viewer data source
 # ──────────────────────────────────────────────
-_FULL_DUMP_PATH = Path(r"D:\OneDrive\Bots\Estimbot\EXPORTS\project_full_dump.json")
-_VIEWER_ROOT    = Path(r"D:\OneDrive\Bots\Viewer\projects")
+_FULL_DUMP_PATH = Path(CONFIG.FULL_DUMP_PATH)
+_VIEWER_ROOT    = Path(CONFIG.VIEWER_PROJECTS_DIR)
 
 
 @router.get("/full-dump")

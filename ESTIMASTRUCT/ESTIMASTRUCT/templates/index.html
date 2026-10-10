@@ -658,6 +658,10 @@
           <button type="button" class="g-zoom-btn active" data-zoom="semana" data-es="Semana" data-en="Week">Semana</button>
           <button type="button" class="g-zoom-btn" data-zoom="mes" data-es="Mes" data-en="Month">Mes</button>
         </div>
+        <div class="gantt-zoom" id="gantt-vista" role="group" aria-label="Vista">
+          <button type="button" class="g-zoom-btn active" data-vista="gantt" data-es="Gantt" data-en="Gantt">Gantt</button>
+          <button type="button" class="g-zoom-btn" data-vista="materiales" data-es="Materiales / semana" data-en="Materials / week">Materiales / semana</button>
+        </div>
         <button id="btn-gantt-reset-orden" class="btn-secondary hidden" title="Quitar el orden manual y volver al orden automático por fase/CSI">↺ Orden automático</button>
         <button id="btn-gantt-export" class="btn-primary" data-es="⬇ Exportar XLSX" data-en="⬇ Export XLSX">⬇ Exportar XLSX</button>
       </div>
@@ -665,6 +669,7 @@
     <div class="gantt-body-wrap">
       <div id="gantt-resizer" class="g-resizer" title="Arrastrar para redimensionar columnas"></div>
       <div id="gantt-body" class="gantt-body"></div>
+      <div id="gantt-mats" class="gantt-body gantt-mats hidden"></div>
     </div>
   </div>
 </div>

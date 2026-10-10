@@ -35,10 +35,19 @@ UNID_POR_UNIDAD = {"m2", "m3", "m", "ml", "kg", "ton", "pza", "und", "unidad",
 # unidades 'bulto' (el coef es total de la actividad, no por unidad de obra)
 UNID_LUMP = {"global", "glb", "gbl", "mes", "conexion"}
 
-# Path al catalogo V1.2
+# Path al catalogo de fichas. Canon = v1.3 (ADR-018); v1.2 queda como opcion de
+# comparacion/rollback con ESTIMA_CRONO_CATALOGO=v1.2.
 _THIS = os.path.dirname(os.path.abspath(__file__))
-CATALOGO_V12_PATH = os.path.normpath(os.path.join(
-    _THIS, "..", "development", "Template2_Updated", "v1.2", "fichas", "fichas_v1.2.json"))
+
+
+def _catalogo_path(version: str) -> str:
+    return os.path.normpath(os.path.join(
+        _THIS, "..", "development", "Template2_Updated", version, "fichas", f"fichas_{version}.json"))
+
+
+CATALOGO_VERSION = os.environ.get("ESTIMA_CRONO_CATALOGO", "v1.3")
+CATALOGO_V12_PATH = _catalogo_path("v1.2")   # nombre historico, se conserva por compatibilidad
+CATALOGO_PATH = _catalogo_path(CATALOGO_VERSION)
 
 
 # ── Modelo de personal (despiece esp + ay) ───────────────────────────────────
@@ -107,7 +116,7 @@ def cargar_catalogo(path: str | None = None) -> dict:
       fuente : 'V12' | 'V12_LUMP'
     Se mezcla luego con TIEMPOS_MANUALES / TIEMPOS_FIJOS en duracion_actividad().
     """
-    path = path or CATALOGO_V12_PATH
+    path = path or CATALOGO_PATH
     with open(path, encoding="utf-8") as fh:
         fichas = json.load(fh)
 
@@ -120,7 +129,7 @@ def cargar_catalogo(path: str | None = None) -> dict:
         esp_u = ay_u = 0.0          # jornadas-hombre por unidad (especialista / ayudante)
         tiene_mo = False
         for m in f.get("insumos", []):
-            cod = str(m.get("codigo") or "")
+            cod = str(m.get("codigo") or m.get("clave") or "")   # v1.2: codigo · v1.3: clave
             if cod.startswith("MO") and m.get("unidad") == "jor":
                 tiene_mo = True
                 coef = float(m.get("cantidad") or 0)
