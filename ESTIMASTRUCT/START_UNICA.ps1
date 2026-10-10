@@ -18,7 +18,7 @@ $SUPABASE_SECRET_KEY = $env:SUPABASE_SECRET_KEY
 if (-not $SUPABASE_SECRET_KEY) {
   $credFile = 'D:\Secrets\Supabase Finance.txt'
   if (Test-Path $credFile) {
-    $SUPABASE_SECRET_KEY = (Select-String -Path $credFile -Pattern 'sb_secret_[A-Za-z0-9_\-]+').Matches[0].Value
+    $SUPABASE_SECRET_KEY = (Select-String -Path $credFile -Pattern 'sb_secret_[A-Za-z0-9_\-]+' | Select-Object -Last 1).Matches[0].Value  # 2026-10-10: la ULTIMA es la de Finance (la primera es del duplicado Consul2)
     Write-Host "[START_UNICA] SUPABASE_SECRET_KEY leida de $credFile"
   }
 }

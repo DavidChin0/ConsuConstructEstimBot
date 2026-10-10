@@ -25,16 +25,16 @@ def _leer_proyecto_supabase() -> tuple[str, str]:
     url, key = os.environ.get("SUPABASE_URL", ""), os.environ.get("SUPABASE_SECRET_KEY", "")
     if url and key:
         return url.rstrip("/"), key
+    # Una sola de las dos en el entorno NO sirve: START_UNICA exporta la PRIMERA clave del archivo (Consul2) y mezclada
+    # con la URL de Finance da 401. Si no vienen las dos, se ignoran y se toma el PAR del archivo.
     try:
         txt = open(os.environ.get("SUPABASE_SECRET_FILE", r"D:\Secrets\Supabase Finance.txt"), encoding="utf-8").read()
     except OSError:
         return url.rstrip("/"), key
-    if not url:
-        m = _re.findall(r"^\s*SUPABASE_URL\s*[=:]?\s*['\"]?(https://[a-z0-9]{20}\.supabase\.co)", txt, _re.M)
-        url = m[-1] if m else ""
-    if not key:
-        m = _re.findall(r"^\s*SUPABASE_SECRET_KEY\s*[=:]?\s*['\"]?(sb_secret_[A-Za-z0-9_\-]+)", txt, _re.M)
-        key = m[-1] if m else ""
+    m = _re.findall(r"^\s*SUPABASE_URL\s*[=:]?\s*['\"]?(https://[a-z0-9]{20}\.supabase\.co)", txt, _re.M)
+    url = m[-1] if m else ""
+    m = _re.findall(r"^\s*SUPABASE_SECRET_KEY\s*[=:]?\s*['\"]?(sb_secret_[A-Za-z0-9_\-]+)", txt, _re.M)
+    key = m[-1] if m else ""
     return url.rstrip("/"), key
 
 
